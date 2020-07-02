@@ -1,0 +1,1164 @@
+{
+  "toc": {
+    "frontMatter": [
+      {
+        "title": "About this MEAP",
+        "link": "/book/vertx-in-action/about-this-meap/v-10",
+        "id": 42561,
+        "shortName": "about-this-meap",
+        "isFree": false
+      },
+      {
+        "title": "Welcome",
+        "link": "/book/vertx-in-action/welcome/v-10",
+        "id": 42562,
+        "shortName": "welcome",
+        "isFree": false
+      },
+      {
+        "title": "MEAP VERSION 10",
+        "link": "/book/vertx-in-action/meap-version-10/v-10",
+        "id": 42576,
+        "shortName": "meap-version-10",
+        "isFree": false
+      }
+    ],
+    "parts": [
+      {
+        "title": "Chapters",
+        "link": "",
+        "isCurrentPart": true,
+        "chapters": [
+          {
+            "title": "1 Vertx, asynchronous programming and reactive systems",
+            "link": "/book/vertx-in-action/chapter-1/v-10",
+            "id": 42563,
+            "shortName": "chapter-1",
+            "isFree": true,
+            "sections": [
+              {
+                "title": "1.1  Being distributed and networked is the norm",
+                "link": "/book/vertx-in-action/chapter-1/v-10/11",
+                "subsections": null
+              },
+              {
+                "title": "1.2  Not living on an isolated island",
+                "link": "/book/vertx-in-action/chapter-1/v-10/14",
+                "subsections": null
+              },
+              {
+                "title": "1.3  There is no free lunch on the network",
+                "link": "/book/vertx-in-action/chapter-1/v-10/26",
+                "subsections": null
+              },
+              {
+                "title": "1.4  The simplicity of blocking APIs",
+                "link": "/book/vertx-in-action/chapter-1/v-10/32",
+                "subsections": null
+              },
+              {
+                "title": "1.5  Blocking APIs waste resources, increase costs",
+                "link": "/book/vertx-in-action/chapter-1/v-10/42",
+                "subsections": null
+              },
+              {
+                "title": "1.6  Asynchronous programming with non-blocking I/O",
+                "link": "/book/vertx-in-action/chapter-1/v-10/52",
+                "subsections": null
+              },
+              {
+                "title": "1.7  Multiplexing event-driven processing: the case of the event loop",
+                "link": "/book/vertx-in-action/chapter-1/v-10/68",
+                "subsections": null
+              },
+              {
+                "title": "1.8  What is a reactive system?",
+                "link": "/book/vertx-in-action/chapter-1/v-10/80",
+                "subsections": null
+              },
+              {
+                "title": "1.9  What else does reactive mean?",
+                "link": "/book/vertx-in-action/chapter-1/v-10/97",
+                "subsections": null
+              },
+              {
+                "title": "1.10  What is Vert.x?",
+                "link": "/book/vertx-in-action/chapter-1/v-10/100",
+                "subsections": null
+              },
+              {
+                "title": "1.11  Your first Vert.x application",
+                "link": "/book/vertx-in-action/chapter-1/v-10/111",
+                "subsections": [
+                  {
+                    "title": "1.11.1  Preparing the project",
+                    "link": "/book/vertx-in-action/chapter-1/v-10/116"
+                  },
+                  {
+                    "title": "1.11.2  The VertxEcho class",
+                    "link": "/book/vertx-in-action/chapter-1/v-10/125"
+                  },
+                  {
+                    "title": "1.11.3  The role of callbacks",
+                    "link": "/book/vertx-in-action/chapter-1/v-10/131"
+                  },
+                  {
+                    "title": "1.11.4  So is this a reactive application?",
+                    "link": "/book/vertx-in-action/chapter-1/v-10/137"
+                  }
+                ]
+              },
+              {
+                "title": "1.12  What are the alternatives to Vert.x?",
+                "link": "/book/vertx-in-action/chapter-1/v-10/148",
+                "subsections": null
+              },
+              {
+                "title": "1.13  Summary",
+                "link": "/book/vertx-in-action/chapter-1/v-10/157",
+                "subsections": null
+              },
+              {
+                "title": "1.14  References",
+                "link": "/book/vertx-in-action/chapter-1/v-10/163",
+                "subsections": null
+              }
+            ]
+          },
+          {
+            "title": "2 Verticles: the basic processing units of Vert.x",
+            "link": "/book/vertx-in-action/chapter-2/v-10",
+            "id": 42564,
+            "shortName": "chapter-2",
+            "isFree": false,
+            "sections": [
+              {
+                "title": "2.1  Writing a verticle",
+                "link": "/book/vertx-in-action/chapter-2/v-10/9",
+                "subsections": [
+                  {
+                    "title": "2.1.1  Preparing the project",
+                    "link": "/book/vertx-in-action/chapter-2/v-10/11"
+                  },
+                  {
+                    "title": "2.1.2  The verticle class",
+                    "link": "/book/vertx-in-action/chapter-2/v-10/18"
+                  },
+                  {
+                    "title": "2.1.3  Running and first observations",
+                    "link": "/book/vertx-in-action/chapter-2/v-10/28"
+                  }
+                ]
+              },
+              {
+                "title": "2.2  More on verticles",
+                "link": "/book/vertx-in-action/chapter-2/v-10/42",
+                "subsections": [
+                  {
+                    "title": "2.2.1  Blocking and the event-loop",
+                    "link": "/book/vertx-in-action/chapter-2/v-10/49"
+                  },
+                  {
+                    "title": "2.2.2  Asynchronous notification of life-cycle events",
+                    "link": "/book/vertx-in-action/chapter-2/v-10/62"
+                  },
+                  {
+                    "title": "2.2.3  Deploying verticles",
+                    "link": "/book/vertx-in-action/chapter-2/v-10/75"
+                  },
+                  {
+                    "title": "2.2.4  Passing configuration data",
+                    "link": "/book/vertx-in-action/chapter-2/v-10/95"
+                  }
+                ]
+              },
+              {
+                "title": "2.3  When code needs to block",
+                "link": "/book/vertx-in-action/chapter-2/v-10/103",
+                "subsections": [
+                  {
+                    "title": "2.3.1  Worker verticles",
+                    "link": "/book/vertx-in-action/chapter-2/v-10/106"
+                  },
+                  {
+                    "title": "2.3.2  The executeBlocking operation",
+                    "link": "/book/vertx-in-action/chapter-2/v-10/117"
+                  }
+                ]
+              },
+              {
+                "title": "2.4  So what is really in a verticle?",
+                "link": "/book/vertx-in-action/chapter-2/v-10/128",
+                "subsections": [
+                  {
+                    "title": "2.4.1  Verticles and their environment",
+                    "link": "/book/vertx-in-action/chapter-2/v-10/131"
+                  },
+                  {
+                    "title": "2.4.2  More on contexts",
+                    "link": "/book/vertx-in-action/chapter-2/v-10/142"
+                  },
+                  {
+                    "title": "2.4.3  Bridging Vert.x and non-Vert.x threading models",
+                    "link": "/book/vertx-in-action/chapter-2/v-10/157"
+                  }
+                ]
+              },
+              {
+                "title": "2.5  Summary",
+                "link": "/book/vertx-in-action/chapter-2/v-10/166",
+                "subsections": null
+              },
+              {
+                "title": "2.6  References",
+                "link": "/book/vertx-in-action/chapter-2/v-10/171",
+                "subsections": null
+              }
+            ]
+          },
+          {
+            "title": "3 Event-bus: the backbone of a Vert.x application",
+            "link": "/book/vertx-in-action/chapter-3/v-10",
+            "id": 42565,
+            "shortName": "chapter-3",
+            "isFree": false,
+            "sections": [
+              {
+                "title": "3.1  What is the event-bus?",
+                "link": "/book/vertx-in-action/chapter-3/v-10/8",
+                "subsections": [
+                  {
+                    "title": "3.1.1  So is the event-bus just another message broker?",
+                    "link": "/book/vertx-in-action/chapter-3/v-10/17"
+                  },
+                  {
+                    "title": "3.1.2  Point-to-point messaging",
+                    "link": "/book/vertx-in-action/chapter-3/v-10/30"
+                  },
+                  {
+                    "title": "3.1.3  Request-reply messaging",
+                    "link": "/book/vertx-in-action/chapter-3/v-10/35"
+                  },
+                  {
+                    "title": "3.1.4  Publish / subscribe messaging",
+                    "link": "/book/vertx-in-action/chapter-3/v-10/40"
+                  }
+                ]
+              },
+              {
+                "title": "3.2  The event-bus through an example",
+                "link": "/book/vertx-in-action/chapter-3/v-10/44",
+                "subsections": [
+                  {
+                    "title": "3.2.1  Heat sensor verticle",
+                    "link": "/book/vertx-in-action/chapter-3/v-10/56"
+                  },
+                  {
+                    "title": "3.2.2   Listener verticle",
+                    "link": "/book/vertx-in-action/chapter-3/v-10/61"
+                  },
+                  {
+                    "title": "3.2.3  Sensor data verticle",
+                    "link": "/book/vertx-in-action/chapter-3/v-10/66"
+                  },
+                  {
+                    "title": "3.2.4  HTTP server verticle",
+                    "link": "/book/vertx-in-action/chapter-3/v-10/70"
+                  },
+                  {
+                    "title": "3.2.5  Bootstrapping the application",
+                    "link": "/book/vertx-in-action/chapter-3/v-10/101"
+                  }
+                ]
+              },
+              {
+                "title": "3.3  Clustering and the distributed event-bus",
+                "link": "/book/vertx-in-action/chapter-3/v-10/106",
+                "subsections": [
+                  {
+                    "title": "3.3.1  Clustering in Vert.x",
+                    "link": "/book/vertx-in-action/chapter-3/v-10/109"
+                  },
+                  {
+                    "title": "3.3.2  From event-bus to distributed event-bus",
+                    "link": "/book/vertx-in-action/chapter-3/v-10/123"
+                  }
+                ]
+              },
+              {
+                "title": "3.4  Summary",
+                "link": "/book/vertx-in-action/chapter-3/v-10/145",
+                "subsections": null
+              },
+              {
+                "title": "3.5  References",
+                "link": "/book/vertx-in-action/chapter-3/v-10/150",
+                "subsections": null
+              }
+            ]
+          },
+          {
+            "title": "4 Asynchronous data and event streams",
+            "link": "/book/vertx-in-action/chapter-4/v-10",
+            "id": 42566,
+            "shortName": "chapter-4",
+            "isFree": false,
+            "sections": [
+              {
+                "title": "4.1  Unified stream model",
+                "link": "/book/vertx-in-action/chapter-4/v-10/5",
+                "subsections": null
+              },
+              {
+                "title": "4.2  What is back-pressure?",
+                "link": "/book/vertx-in-action/chapter-4/v-10/29",
+                "subsections": null
+              },
+              {
+                "title": "4.3  Making a music streaming jukebox",
+                "link": "/book/vertx-in-action/chapter-4/v-10/65",
+                "subsections": [
+                  {
+                    "title": "4.3.1  Features and usage",
+                    "link": "/book/vertx-in-action/chapter-4/v-10/70"
+                  },
+                  {
+                    "title": "4.3.2  HTTP processing: the big picture",
+                    "link": "/book/vertx-in-action/chapter-4/v-10/87"
+                  },
+                  {
+                    "title": "4.3.3  Jukebox verticle basics",
+                    "link": "/book/vertx-in-action/chapter-4/v-10/94"
+                  },
+                  {
+                    "title": "4.3.4  Incoming HTTP connections",
+                    "link": "/book/vertx-in-action/chapter-4/v-10/105"
+                  },
+                  {
+                    "title": "4.3.5  Downloading as efficiently as possible",
+                    "link": "/book/vertx-in-action/chapter-4/v-10/113"
+                  },
+                  {
+                    "title": "4.3.6  Reading MP3 files, but not too fast",
+                    "link": "/book/vertx-in-action/chapter-4/v-10/122"
+                  }
+                ]
+              },
+              {
+                "title": "4.4  Parsing simple streams",
+                "link": "/book/vertx-in-action/chapter-4/v-10/149",
+                "subsections": null
+              },
+              {
+                "title": "4.5  Parsing complex streams",
+                "link": "/book/vertx-in-action/chapter-4/v-10/174",
+                "subsections": null
+              },
+              {
+                "title": "4.6  A quick note on the stream fetch mode",
+                "link": "/book/vertx-in-action/chapter-4/v-10/201",
+                "subsections": null
+              },
+              {
+                "title": "4.7  Summary",
+                "link": "/book/vertx-in-action/chapter-4/v-10/215",
+                "subsections": null
+              }
+            ]
+          },
+          {
+            "title": "5 Beyond callbacks",
+            "link": "/book/vertx-in-action/chapter-5/v-10",
+            "id": 42567,
+            "shortName": "chapter-5",
+            "isFree": false,
+            "sections": [
+              {
+                "title": "5.1  Composing asynchronous operations: the edge service example",
+                "link": "/book/vertx-in-action/chapter-5/v-10/7",
+                "subsections": [
+                  {
+                    "title": "5.1.1  Scenario",
+                    "link": "/book/vertx-in-action/chapter-5/v-10/9"
+                  },
+                  {
+                    "title": "5.1.2  Heat sensor verticles",
+                    "link": "/book/vertx-in-action/chapter-5/v-10/18"
+                  },
+                  {
+                    "title": "5.1.3  Snapshot service verticle",
+                    "link": "/book/vertx-in-action/chapter-5/v-10/25"
+                  }
+                ]
+              },
+              {
+                "title": "5.2  Callbacks",
+                "link": "/book/vertx-in-action/chapter-5/v-10/30",
+                "subsections": [
+                  {
+                    "title": "5.2.1  Implementation",
+                    "link": "/book/vertx-in-action/chapter-5/v-10/34"
+                  },
+                  {
+                    "title": "5.2.2  Running",
+                    "link": "/book/vertx-in-action/chapter-5/v-10/45"
+                  },
+                  {
+                    "title": "5.2.3  The \"callback-hell\" is not the problem",
+                    "link": "/book/vertx-in-action/chapter-5/v-10/52"
+                  }
+                ]
+              },
+              {
+                "title": "5.3  Future and promises",
+                "link": "/book/vertx-in-action/chapter-5/v-10/60",
+                "subsections": [
+                  {
+                    "title": "5.3.1  Future and promises in Vert.x",
+                    "link": "/book/vertx-in-action/chapter-5/v-10/65"
+                  },
+                  {
+                    "title": "5.3.2  Future-based APIs in Vert.x 4",
+                    "link": "/book/vertx-in-action/chapter-5/v-10/77"
+                  },
+                  {
+                    "title": "5.3.3  Inter-operability with CompletionStage APIs",
+                    "link": "/book/vertx-in-action/chapter-5/v-10/84"
+                  },
+                  {
+                    "title": "5.3.4  Collector service with Vert.x futures",
+                    "link": "/book/vertx-in-action/chapter-5/v-10/95"
+                  }
+                ]
+              },
+              {
+                "title": "5.4  Reactive extensions",
+                "link": "/book/vertx-in-action/chapter-5/v-10/107",
+                "subsections": [
+                  {
+                    "title": "5.4.1  RxJava in a nutshell",
+                    "link": "/book/vertx-in-action/chapter-5/v-10/115"
+                  },
+                  {
+                    "title": "5.4.2  RxJava and Vert.x",
+                    "link": "/book/vertx-in-action/chapter-5/v-10/144"
+                  },
+                  {
+                    "title": "5.4.3  Collector service in RxJava",
+                    "link": "/book/vertx-in-action/chapter-5/v-10/156"
+                  }
+                ]
+              },
+              {
+                "title": "5.5  Kotlin coroutines",
+                "link": "/book/vertx-in-action/chapter-5/v-10/181",
+                "subsections": [
+                  {
+                    "title": "5.5.1  What is a coroutine?",
+                    "link": "/book/vertx-in-action/chapter-5/v-10/184"
+                  },
+                  {
+                    "title": "5.5.2  Vert.x and Kotlin coroutines",
+                    "link": "/book/vertx-in-action/chapter-5/v-10/194"
+                  },
+                  {
+                    "title": "5.5.3  Edge service with coroutines",
+                    "link": "/book/vertx-in-action/chapter-5/v-10/205"
+                  }
+                ]
+              },
+              {
+                "title": "5.6  So, which model should I use?",
+                "link": "/book/vertx-in-action/chapter-5/v-10/219",
+                "subsections": null
+              },
+              {
+                "title": "5.7  Summary",
+                "link": "/book/vertx-in-action/chapter-5/v-10/226",
+                "subsections": null
+              },
+              {
+                "title": "5.8  References",
+                "link": "/book/vertx-in-action/chapter-5/v-10/233",
+                "subsections": null
+              }
+            ]
+          },
+          {
+            "title": "6 Beyond the event-bus",
+            "link": "/book/vertx-in-action/chapter-6/v-10",
+            "id": 42568,
+            "shortName": "chapter-6",
+            "isFree": false,
+            "sections": [
+              {
+                "title": "6.1  Revisiting heat sensors with a service API",
+                "link": "/book/vertx-in-action/chapter-6/v-10/6",
+                "subsections": null
+              },
+              {
+                "title": "6.2  Return of the RPCs",
+                "link": "/book/vertx-in-action/chapter-6/v-10/14",
+                "subsections": null
+              },
+              {
+                "title": "6.3  Defining a service interface",
+                "link": "/book/vertx-in-action/chapter-6/v-10/25",
+                "subsections": null
+              },
+              {
+                "title": "6.4  Service implementation",
+                "link": "/book/vertx-in-action/chapter-6/v-10/36",
+                "subsections": null
+              },
+              {
+                "title": "6.5  Enabling proxy code generation",
+                "link": "/book/vertx-in-action/chapter-6/v-10/42",
+                "subsections": null
+              },
+              {
+                "title": "6.6   Deploying event-bus services",
+                "link": "/book/vertx-in-action/chapter-6/v-10/48",
+                "subsections": null
+              },
+              {
+                "title": "6.7  Service proxies beyond callbacks",
+                "link": "/book/vertx-in-action/chapter-6/v-10/56",
+                "subsections": null
+              },
+              {
+                "title": "6.8  Testing and Vert.x",
+                "link": "/book/vertx-in-action/chapter-6/v-10/70",
+                "subsections": [
+                  {
+                    "title": "6.8.1  Using JUnit 5 with Vert.x",
+                    "link": "/book/vertx-in-action/chapter-6/v-10/78"
+                  },
+                  {
+                    "title": "6.8.2  Testing DataVerticle",
+                    "link": "/book/vertx-in-action/chapter-6/v-10/83"
+                  },
+                  {
+                    "title": "6.8.3  Running the tests",
+                    "link": "/book/vertx-in-action/chapter-6/v-10/109"
+                  }
+                ]
+              },
+              {
+                "title": "6.9  Summary",
+                "link": "/book/vertx-in-action/chapter-6/v-10/115",
+                "subsections": null
+              },
+              {
+                "title": "6.10  References",
+                "link": "/book/vertx-in-action/chapter-6/v-10/119",
+                "subsections": null
+              }
+            ]
+          },
+          {
+            "title": "7 Designing a reactive application",
+            "link": "/book/vertx-in-action/chapter-7/v-10",
+            "id": 42569,
+            "shortName": "chapter-7",
+            "isFree": false,
+            "sections": [
+              {
+                "title": "7.1  What makes an application reactive",
+                "link": "/book/vertx-in-action/chapter-7/v-10/6",
+                "subsections": null
+              },
+              {
+                "title": "7.2  The 10k steps challenge scenario",
+                "link": "/book/vertx-in-action/chapter-7/v-10/16",
+                "subsections": null
+              },
+              {
+                "title": "7.3  One application, many services",
+                "link": "/book/vertx-in-action/chapter-7/v-10/33",
+                "subsections": null
+              },
+              {
+                "title": "7.4  Service specifications",
+                "link": "/book/vertx-in-action/chapter-7/v-10/47",
+                "subsections": [
+                  {
+                    "title": "7.4.1  User profile service",
+                    "link": "/book/vertx-in-action/chapter-7/v-10/53"
+                  },
+                  {
+                    "title": "7.4.2  Ingestion service",
+                    "link": "/book/vertx-in-action/chapter-7/v-10/68"
+                  },
+                  {
+                    "title": "7.4.3  Activity service",
+                    "link": "/book/vertx-in-action/chapter-7/v-10/82"
+                  },
+                  {
+                    "title": "7.4.4  Public API",
+                    "link": "/book/vertx-in-action/chapter-7/v-10/99"
+                  },
+                  {
+                    "title": "7.4.5  User web application",
+                    "link": "/book/vertx-in-action/chapter-7/v-10/107"
+                  },
+                  {
+                    "title": "7.4.6  Event stats service",
+                    "link": "/book/vertx-in-action/chapter-7/v-10/113"
+                  },
+                  {
+                    "title": "7.4.7  Congrats service",
+                    "link": "/book/vertx-in-action/chapter-7/v-10/122"
+                  },
+                  {
+                    "title": "7.4.8  Dashboard web application",
+                    "link": "/book/vertx-in-action/chapter-7/v-10/128"
+                  }
+                ]
+              },
+              {
+                "title": "7.5  Running the application",
+                "link": "/book/vertx-in-action/chapter-7/v-10/137",
+                "subsections": null
+              },
+              {
+                "title": "7.6  Summary",
+                "link": "/book/vertx-in-action/chapter-7/v-10/159",
+                "subsections": null
+              },
+              {
+                "title": "7.7  References",
+                "link": "/book/vertx-in-action/chapter-7/v-10/163",
+                "subsections": null
+              }
+            ]
+          },
+          {
+            "title": "8 The web stack",
+            "link": "/book/vertx-in-action/chapter-8/v-10",
+            "id": 42570,
+            "shortName": "chapter-8",
+            "isFree": false,
+            "sections": [
+              {
+                "title": "8.1  Exposing a public API",
+                "link": "/book/vertx-in-action/chapter-8/v-10/10",
+                "subsections": [
+                  {
+                    "title": "8.1.1  Routing HTTP requests",
+                    "link": "/book/vertx-in-action/chapter-8/v-10/20"
+                  },
+                  {
+                    "title": "8.1.2  Making HTTP requests",
+                    "link": "/book/vertx-in-action/chapter-8/v-10/34"
+                  }
+                ]
+              },
+              {
+                "title": "8.2  Access control with JWT tokens",
+                "link": "/book/vertx-in-action/chapter-8/v-10/46",
+                "subsections": [
+                  {
+                    "title": "8.2.1  Using JWT tokens",
+                    "link": "/book/vertx-in-action/chapter-8/v-10/51"
+                  },
+                  {
+                    "title": "8.2.2  What is in a JWT token?",
+                    "link": "/book/vertx-in-action/chapter-8/v-10/58"
+                  },
+                  {
+                    "title": "8.2.3  Handling JWT tokens with Vert.x",
+                    "link": "/book/vertx-in-action/chapter-8/v-10/71"
+                  },
+                  {
+                    "title": "8.2.4  Issuing JWT tokens with Vert.x",
+                    "link": "/book/vertx-in-action/chapter-8/v-10/88"
+                  }
+                ]
+              },
+              {
+                "title": "8.3  Cross-origin resource sharing (CORS)",
+                "link": "/book/vertx-in-action/chapter-8/v-10/97",
+                "subsections": [
+                  {
+                    "title": "8.3.1  What is the problem?",
+                    "link": "/book/vertx-in-action/chapter-8/v-10/99"
+                  },
+                  {
+                    "title": "8.3.2  Supporting CORS with Vert.x",
+                    "link": "/book/vertx-in-action/chapter-8/v-10/109"
+                  }
+                ]
+              },
+              {
+                "title": "8.4  A modern web frontend",
+                "link": "/book/vertx-in-action/chapter-8/v-10/120",
+                "subsections": [
+                  {
+                    "title": "8.4.1  Vue.js",
+                    "link": "/book/vertx-in-action/chapter-8/v-10/124"
+                  },
+                  {
+                    "title": "8.4.2  Vue.js application structure and build integration",
+                    "link": "/book/vertx-in-action/chapter-8/v-10/132"
+                  },
+                  {
+                    "title": "8.4.3  Backend integration illustrated",
+                    "link": "/book/vertx-in-action/chapter-8/v-10/146"
+                  },
+                  {
+                    "title": "8.4.4  Static content serving with Vert.x",
+                    "link": "/book/vertx-in-action/chapter-8/v-10/158"
+                  }
+                ]
+              },
+              {
+                "title": "8.5  Writing integration tests",
+                "link": "/book/vertx-in-action/chapter-8/v-10/163",
+                "subsections": null
+              },
+              {
+                "title": "8.6  Summary",
+                "link": "/book/vertx-in-action/chapter-8/v-10/197",
+                "subsections": null
+              },
+              {
+                "title": "8.7  References",
+                "link": "/book/vertx-in-action/chapter-8/v-10/202",
+                "subsections": null
+              }
+            ]
+          },
+          {
+            "title": "9 Messaging and event streaming with Vert.x",
+            "link": "/book/vertx-in-action/chapter-9/v-10",
+            "id": 42571,
+            "shortName": "chapter-9",
+            "isFree": false,
+            "sections": [
+              {
+                "title": "9.1  Event-driven services beyond HTTP with Vert.x",
+                "link": "/book/vertx-in-action/chapter-9/v-10/8",
+                "subsections": [
+                  {
+                    "title": "9.1.1  What Vert.x provides",
+                    "link": "/book/vertx-in-action/chapter-9/v-10/10"
+                  },
+                  {
+                    "title": "9.1.2  The middleware and services that we\u2019ll use",
+                    "link": "/book/vertx-in-action/chapter-9/v-10/25"
+                  },
+                  {
+                    "title": "9.1.3  What is AMQP? (and a message broker)",
+                    "link": "/book/vertx-in-action/chapter-9/v-10/35"
+                  },
+                  {
+                    "title": "9.1.4  What is Kafka?",
+                    "link": "/book/vertx-in-action/chapter-9/v-10/43"
+                  }
+                ]
+              },
+              {
+                "title": "9.2  Reliably ingesting messages over HTTP and AMQP",
+                "link": "/book/vertx-in-action/chapter-9/v-10/54",
+                "subsections": [
+                  {
+                    "title": "9.2.1  Ingesting from AMQP",
+                    "link": "/book/vertx-in-action/chapter-9/v-10/60"
+                  },
+                  {
+                    "title": "9.2.2  Translating AMQP messages to Kafka records",
+                    "link": "/book/vertx-in-action/chapter-9/v-10/76"
+                  },
+                  {
+                    "title": "9.2.3  Ingesting from HTTP",
+                    "link": "/book/vertx-in-action/chapter-9/v-10/92"
+                  }
+                ]
+              },
+              {
+                "title": "9.3  Sending congratulation emails",
+                "link": "/book/vertx-in-action/chapter-9/v-10/99",
+                "subsections": [
+                  {
+                    "title": "9.3.1  Listening for daily step update events",
+                    "link": "/book/vertx-in-action/chapter-9/v-10/101"
+                  },
+                  {
+                    "title": "9.3.2  Sending emails",
+                    "link": "/book/vertx-in-action/chapter-9/v-10/119"
+                  }
+                ]
+              },
+              {
+                "title": "9.4  Integration tests",
+                "link": "/book/vertx-in-action/chapter-9/v-10/138",
+                "subsections": [
+                  {
+                    "title": "9.4.1  Ingestion testing",
+                    "link": "/book/vertx-in-action/chapter-9/v-10/140"
+                  },
+                  {
+                    "title": "9.4.2  Congratulation email testing",
+                    "link": "/book/vertx-in-action/chapter-9/v-10/153"
+                  }
+                ]
+              },
+              {
+                "title": "9.5  Summary",
+                "link": "/book/vertx-in-action/chapter-9/v-10/169",
+                "subsections": null
+              },
+              {
+                "title": "9.6  References",
+                "link": "/book/vertx-in-action/chapter-9/v-10/175",
+                "subsections": null
+              }
+            ]
+          },
+          {
+            "title": "10 Persistent state management with databases",
+            "link": "/book/vertx-in-action/chapter-10/v-10",
+            "id": 42572,
+            "shortName": "chapter-10",
+            "isFree": false,
+            "sections": [
+              {
+                "title": "10.1  Databases and Vert.x",
+                "link": "/book/vertx-in-action/chapter-10/v-10/7",
+                "subsections": [
+                  {
+                    "title": "10.1.1  What the Eclipse Vert.x stack provides",
+                    "link": "/book/vertx-in-action/chapter-10/v-10/9"
+                  },
+                  {
+                    "title": "10.1.2  A note on data / object mapping, and why you may not always need it",
+                    "link": "/book/vertx-in-action/chapter-10/v-10/17"
+                  }
+                ]
+              },
+              {
+                "title": "10.2  User profile service with MongoDB",
+                "link": "/book/vertx-in-action/chapter-10/v-10/28",
+                "subsections": [
+                  {
+                    "title": "10.2.1  Data model",
+                    "link": "/book/vertx-in-action/chapter-10/v-10/34"
+                  },
+                  {
+                    "title": "10.2.2  User profile API verticle and initialization",
+                    "link": "/book/vertx-in-action/chapter-10/v-10/49"
+                  },
+                  {
+                    "title": "10.2.3  Validating user input",
+                    "link": "/book/vertx-in-action/chapter-10/v-10/60"
+                  },
+                  {
+                    "title": "10.2.4  Adding users in MongoDB",
+                    "link": "/book/vertx-in-action/chapter-10/v-10/70"
+                  },
+                  {
+                    "title": "10.2.5  Authenticating a user",
+                    "link": "/book/vertx-in-action/chapter-10/v-10/91"
+                  },
+                  {
+                    "title": "10.2.6  Fetching a user data",
+                    "link": "/book/vertx-in-action/chapter-10/v-10/96"
+                  },
+                  {
+                    "title": "10.2.7  Updating a user data",
+                    "link": "/book/vertx-in-action/chapter-10/v-10/107"
+                  }
+                ]
+              },
+              {
+                "title": "10.3  Activity service with PostgreSQL",
+                "link": "/book/vertx-in-action/chapter-10/v-10/112",
+                "subsections": [
+                  {
+                    "title": "10.3.1  Data model",
+                    "link": "/book/vertx-in-action/chapter-10/v-10/119"
+                  },
+                  {
+                    "title": "10.3.2  Opening a connection pool",
+                    "link": "/book/vertx-in-action/chapter-10/v-10/125"
+                  },
+                  {
+                    "title": "10.3.3  Life of a device update event",
+                    "link": "/book/vertx-in-action/chapter-10/v-10/130"
+                  },
+                  {
+                    "title": "10.3.4  Inserting a new record",
+                    "link": "/book/vertx-in-action/chapter-10/v-10/140"
+                  },
+                  {
+                    "title": "10.3.5  Generating a device daily activity update",
+                    "link": "/book/vertx-in-action/chapter-10/v-10/152"
+                  },
+                  {
+                    "title": "10.3.6  Activity API queries",
+                    "link": "/book/vertx-in-action/chapter-10/v-10/159"
+                  }
+                ]
+              },
+              {
+                "title": "10.4  Integration tests",
+                "link": "/book/vertx-in-action/chapter-10/v-10/166",
+                "subsections": [
+                  {
+                    "title": "10.4.1  Testing the user profile service",
+                    "link": "/book/vertx-in-action/chapter-10/v-10/168"
+                  },
+                  {
+                    "title": "10.4.2  Testing the activity service API",
+                    "link": "/book/vertx-in-action/chapter-10/v-10/180"
+                  },
+                  {
+                    "title": "10.4.3  Testing the activity service event handling",
+                    "link": "/book/vertx-in-action/chapter-10/v-10/190"
+                  }
+                ]
+              },
+              {
+                "title": "10.5  Summary",
+                "link": "/book/vertx-in-action/chapter-10/v-10/203",
+                "subsections": null
+              },
+              {
+                "title": "10.6  References",
+                "link": "/book/vertx-in-action/chapter-10/v-10/209",
+                "subsections": null
+              }
+            ]
+          },
+          {
+            "title": "11 End-to-end real-time reactive event processing",
+            "link": "/book/vertx-in-action/chapter-11/v-10",
+            "id": 42573,
+            "shortName": "chapter-11",
+            "isFree": false,
+            "sections": [
+              {
+                "title": "11.1  Advanced stream data processing with Kafka and RxJava",
+                "link": "/book/vertx-in-action/chapter-11/v-10/8",
+                "subsections": [
+                  {
+                    "title": "11.1.1  Enriching daily device updates to generate user updates",
+                    "link": "/book/vertx-in-action/chapter-11/v-10/14"
+                  },
+                  {
+                    "title": "11.1.2  Computing the device update ingestion throughput using time window aggregates",
+                    "link": "/book/vertx-in-action/chapter-11/v-10/35"
+                  },
+                  {
+                    "title": "11.1.3  Computing per-city trends using aggregation discriminants and time windows",
+                    "link": "/book/vertx-in-action/chapter-11/v-10/45"
+                  }
+                ]
+              },
+              {
+                "title": "11.2  Real-time reactive web applications",
+                "link": "/book/vertx-in-action/chapter-11/v-10/57",
+                "subsections": [
+                  {
+                    "title": "11.2.1  Forwarding Kafka records to the Vert.x event-bus",
+                    "link": "/book/vertx-in-action/chapter-11/v-10/69"
+                  },
+                  {
+                    "title": "11.2.2  Bridging the event-bus and web applications",
+                    "link": "/book/vertx-in-action/chapter-11/v-10/76"
+                  },
+                  {
+                    "title": "11.2.3  From Kafka to live web application updates",
+                    "link": "/book/vertx-in-action/chapter-11/v-10/87"
+                  }
+                ]
+              },
+              {
+                "title": "11.3  Streams and state",
+                "link": "/book/vertx-in-action/chapter-11/v-10/100",
+                "subsections": [
+                  {
+                    "title": "11.3.1  A stream of updates",
+                    "link": "/book/vertx-in-action/chapter-11/v-10/102"
+                  },
+                  {
+                    "title": "11.3.2  Hydrating the ranking state",
+                    "link": "/book/vertx-in-action/chapter-11/v-10/106"
+                  },
+                  {
+                    "title": "11.3.3  Periodically updating rankings from the updates stream",
+                    "link": "/book/vertx-in-action/chapter-11/v-10/117"
+                  }
+                ]
+              },
+              {
+                "title": "11.4  Summary",
+                "link": "/book/vertx-in-action/chapter-11/v-10/139",
+                "subsections": null
+              },
+              {
+                "title": "11.5  References",
+                "link": "/book/vertx-in-action/chapter-11/v-10/145",
+                "subsections": null
+              }
+            ]
+          },
+          {
+            "title": "12 Towards responsiveness with load and chaos testing",
+            "link": "/book/vertx-in-action/chapter-12/v-10",
+            "id": 42574,
+            "shortName": "chapter-12",
+            "isFree": false,
+            "sections": [
+              {
+                "title": "12.1  Initial experiments: is the performance any good?",
+                "link": "/book/vertx-in-action/chapter-12/v-10/9",
+                "subsections": [
+                  {
+                    "title": "12.1.1  Some considerations before load testing",
+                    "link": "/book/vertx-in-action/chapter-12/v-10/17"
+                  },
+                  {
+                    "title": "12.1.2  Simulating users with Locust",
+                    "link": "/book/vertx-in-action/chapter-12/v-10/26"
+                  },
+                  {
+                    "title": "12.1.3  Load testing the API with Hey",
+                    "link": "/book/vertx-in-action/chapter-12/v-10/56"
+                  }
+                ]
+              },
+              {
+                "title": "12.2  Let\u2019s do some chaos engineering",
+                "link": "/book/vertx-in-action/chapter-12/v-10/89",
+                "subsections": [
+                  {
+                    "title": "12.2.1  Test plan",
+                    "link": "/book/vertx-in-action/chapter-12/v-10/92"
+                  },
+                  {
+                    "title": "12.2.2  Chaos testing with Pumba",
+                    "link": "/book/vertx-in-action/chapter-12/v-10/103"
+                  },
+                  {
+                    "title": "12.2.3  We are not resilient (yet)",
+                    "link": "/book/vertx-in-action/chapter-12/v-10/122"
+                  }
+                ]
+              },
+              {
+                "title": "12.3  From \"scalable\" to \"scalable and resilient\"",
+                "link": "/book/vertx-in-action/chapter-12/v-10/132",
+                "subsections": [
+                  {
+                    "title": "12.3.1  Enforcing timeouts",
+                    "link": "/book/vertx-in-action/chapter-12/v-10/134"
+                  },
+                  {
+                    "title": "12.3.2  Using a circuit breaker",
+                    "link": "/book/vertx-in-action/chapter-12/v-10/147"
+                  },
+                  {
+                    "title": "12.3.4  Resiliency and fallback strategies",
+                    "link": "/book/vertx-in-action/chapter-12/v-10/169"
+                  }
+                ]
+              },
+              {
+                "title": "12.4  Summary",
+                "link": "/book/vertx-in-action/chapter-12/v-10/194",
+                "subsections": null
+              },
+              {
+                "title": "12.5  References",
+                "link": "/book/vertx-in-action/chapter-12/v-10/199",
+                "subsections": null
+              }
+            ]
+          },
+          {
+            "title": "13 Final notes: container-native Vert.x",
+            "link": "/book/vertx-in-action/chapter-13/v-10",
+            "id": 42575,
+            "shortName": "chapter-13",
+            "isFree": false,
+            "sections": [
+              {
+                "title": "13.1  Heat sensors in a cloud",
+                "link": "/book/vertx-in-action/chapter-13/v-10/10",
+                "subsections": [
+                  {
+                    "title": "13.1.1  Heat sensor service",
+                    "link": "/book/vertx-in-action/chapter-13/v-10/21"
+                  },
+                  {
+                    "title": "13.1.2  Sensor gateway",
+                    "link": "/book/vertx-in-action/chapter-13/v-10/30"
+                  },
+                  {
+                    "title": "13.1.3  Heat API",
+                    "link": "/book/vertx-in-action/chapter-13/v-10/37"
+                  },
+                  {
+                    "title": "13.1.4  Deploying to a local cluster",
+                    "link": "/book/vertx-in-action/chapter-13/v-10/52"
+                  }
+                ]
+              },
+              {
+                "title": "13.2  Making the services work in Kubernetes",
+                "link": "/book/vertx-in-action/chapter-13/v-10/86",
+                "subsections": [
+                  {
+                    "title": "13.2.1  Building container images",
+                    "link": "/book/vertx-in-action/chapter-13/v-10/92"
+                  },
+                  {
+                    "title": "13.2.2  Clustering and Kubernetes",
+                    "link": "/book/vertx-in-action/chapter-13/v-10/109"
+                  },
+                  {
+                    "title": "13.2.3  Kubernetes deployment and service resources",
+                    "link": "/book/vertx-in-action/chapter-13/v-10/124"
+                  }
+                ]
+              },
+              {
+                "title": "13.3  First-class Kubernetes citizens",
+                "link": "/book/vertx-in-action/chapter-13/v-10/148",
+                "subsections": [
+                  {
+                    "title": "13.3.1  Health checks",
+                    "link": "/book/vertx-in-action/chapter-13/v-10/153"
+                  },
+                  {
+                    "title": "13.3.2  Metrics",
+                    "link": "/book/vertx-in-action/chapter-13/v-10/184"
+                  }
+                ]
+              },
+              {
+                "title": "13.4  The end of the beginning",
+                "link": "/book/vertx-in-action/chapter-13/v-10/201",
+                "subsections": null
+              },
+              {
+                "title": "13.5  Summary",
+                "link": "/book/vertx-in-action/chapter-13/v-10/206",
+                "subsections": null
+              },
+              {
+                "title": "13.6  References",
+                "link": "/book/vertx-in-action/chapter-13/v-10/211",
+                "subsections": null
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "backMatter": null
+  },
+  "index": []
+}
