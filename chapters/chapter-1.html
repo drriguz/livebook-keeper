@@ -1,0 +1,947 @@
+<div class="readable-text" refid="1" id="1" data-hash="61a5a556e70f2cd315fff9c8dc7afcba">
+ <h1 class="chaptertitle" id="heading_id_22">1 <a class="pcalibre pcalibre1" id="vertx-asynchronous-programming-and-reactive-systems" shape="rect"></a>Vertx, asynchronous programming and reactive systems</h1>
+</div> 
+<div class=" introduction-summary"> 
+ <h3 class="intro-header">This chapter covers:</h3> 
+ <ul>
+  <li class=" readable-text" refid="2" id="2" data-hash="5ae4c026d47206ff26f1c128acc4d81c"> what is Vert.x,<br /> </li> 
+  <li class=" readable-text" refid="3" id="3" data-hash="25fc657cf8292dc8d6a54d1b9a0d12c4"> why distributed systems cannot be avoided,<br /> </li> 
+  <li class=" readable-text" refid="4" id="4" data-hash="e2ff2b1a4f806c4b949bf928f89ea5d5"> what are the challenges in programming resource-efficient networked applications,<br /> </li> 
+  <li class=" readable-text" refid="5" id="5" data-hash="c422381b8492a1989eb91bcdc8e4fc85"> what is asynchronous and non-blocking programming,<br /> </li> 
+  <li class=" readable-text" refid="6" id="6" data-hash="f71f84ee34dfbaea6d8f78eb69de378f"> what is a reactive application and why asynchronous programming is not enough,<br /> </li> 
+  <li class=" readable-text" refid="7" id="7" data-hash="38dcedf84a4eb6b7fb984a17897c458a"> what are the alternatives to Vert.x.<br /> </li>
+ </ul> 
+</div>  
+<div class="readable-text" refid="8" id="8" data-hash="811f80ab22c0346e8832b94e0c350caf">
+ <p>We developers live in a industry of buzzwords, technologies and practices hype cycles. I have long taught to university students elements for designing, programming, integrating and deploying applications, and I have witnessed first-hand how complicated it can be for newcomers to navigate in the wild ocean of current technologies.</p>
+</div> 
+<div class="readable-text" refid="9" id="9" data-hash="66eb6013cdc59ee52e25b0f996a44a37">
+ <p><em class="calibre10">Asynchronous</em> and <em class="calibre10">reactive</em> are important topics in modern applications and my goal with this book is to help a large audience of developers understand the core concepts behind these terms, gain practical experience, and recognize <em class="calibre10">when</em> there are benefits in these approaches. We will use <em class="calibre10">Eclipse Vert.x</em>, a toolkit for writing asynchronous applications that has the added benefit of providing solutions for the different definitions of what <em class="calibre10">&quot;reactive&quot;</em> means.</p>
+</div> 
+<div class="readable-text" refid="10" id="10" data-hash="40feecc2977f94e7d56380199ae1ab5f">
+ <p>Ensuring that readers understand the concepts is a fundamental priority for me with this book. While I want to give you a solid understanding of writing Vert.x applications, I also want to make sure that you can translate skills to other similar and possibly competing technologies, now or 5 years down the road.</p>
+</div> 
+<div class="readable-text" refid="11" id="11" data-hash="dacced2acf196c1a3940665483dceae7">
+ <h2 class="calibre17" id="heading_id_3"><a class="pcalibre pcalibre1" id="being-distributed-and-networked-is-the-norm" shape="rect"></a>1.1 &nbsp;Being distributed and networked is the norm</h2>
+</div> 
+<div class="readable-text" refid="12" id="12" data-hash="cc0cd9253344897cb7e3bdb349914561">
+ <p>It was common 20+ years ago to deploy business applications that could perform all operations while running isolated on a single machine. Such applications typically exhibited a graphical user interface, and they had local databases or custom file management for storing data. This is of course a gross exaggeration as networking was already there, so business applications could already take advantage of database servers over the network, networked file storage, and various remote code operations.</p>
+</div> 
+<div class="readable-text" refid="13" id="13" data-hash="e8c4d141c257b7146d19f29db7b1fa98">
+ <p>Today, an application is more naturally exposed to end-users using web and mobile interfaces. This naturally brings the network into play, hence distributed systems. Also, <em class="calibre10">service-oriented architectures</em> allow re-using some functionality by issuing requests to other services, possibly controlled by a third-party provider. Examples would be delegating authentication in a consumer application to popular account providers like <em class="calibre10">Google</em>, <em class="calibre10">Facebook</em> or <em class="calibre10">Twitter</em>, or delegating payment processing to <em class="calibre10">Stripe</em> or <em class="calibre10">PayPal</em>.</p>
+</div> 
+<div class="readable-text" refid="14" id="14" data-hash="88e8c88ca7eee4b061e05d517d0d9621">
+ <h2 class="calibre17" id="heading_id_4"><a class="pcalibre pcalibre1" id="not-living-on-an-isolated-island" shape="rect"></a>1.2 &nbsp;Not living on an isolated island</h2>
+</div> 
+<div class="browsable-container figure-container" refid="15" id="15" data-hash="ed227d0a0a0ccc143a4eb0a69b740425">
+ <h5 id="networked-service">Figure&nbsp;1.1.&nbsp;A networked application / service</h5>    
+ <img alt="chapter1 networked service" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/chapter1-networked-service.png" width="1108" loading="lazy" height="792" onerror="fallbackToImageSrcPlaceholder(this)" />
+</div> 
+<div class="readable-text" refid="16" id="16" data-hash="dc784a5a18b667d078c7868fc589ec4f">
+ <p>Figure <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/networked-service" shape="rect" title="Figure 1.1. A networked application / service">1.1</a> is a fictional depiction of what a modern application is: a set of networked services interacting with each other. Here are some of these networked services:</p>
+</div> 
+<ul class="itemizedlist"> 
+ <li class="listitem readable-text" refid="17" id="17" data-hash="bb1ce9225cec87f0ab425dff1b54ae50"> a database like <em class="calibre9">PostgresSQL</em> or <em class="calibre9">MongoDB</em> stores data,<br /> </li> 
+ <li class="listitem readable-text" refid="18" id="18" data-hash="739a4e1efc8389ff991fd8ae95b417a0"> a search engine like <em class="calibre9">Elastic Search</em> allows finding information that was previously indexed such as products in a catalog,<br /> </li> 
+ <li class="listitem readable-text" refid="19" id="19" data-hash="542928ed1d8ca8aad59a70cff8afcd33"> a durable storage service like <em class="calibre9">Amazon S3</em> provides persistent and replicated data storage of documents,<br /> </li> 
+ <li class="listitem readable-text" refid="20" id="20" data-hash="500d40f9528e85ac2e8d3c3f9df024d7"> 
+  <div class="readable-text" refid="21" id="21" data-hash="adf67c59bf06cdc0771e6499cca5e910">
+   <p>a messaging service can be:</p>
+  </div> 
+  <div class="itemizedlist1"> 
+   <ul class="itemizedlist2"> 
+    <li class="listitem"> a <em class="calibre9">SMTP</em> server to programmatically send emails,<br /> </li> 
+    <li class="listitem"> a bot for interacting with users over messaging platforms such as <em class="calibre9">Slack</em>, <em class="calibre9">Telegram</em> or <em class="calibre9">Facebook Messenger</em>,<br /> </li> 
+    <li class="listitem"> an integration messaging protocol for application-to-application integration like AMQP,<br /> </li> 
+   </ul> 
+  </div> </li> 
+ <li class="listitem readable-text" refid="22" id="22" data-hash="895bb765ae064982e48b098c37f94aa7"> an identity management service like <em class="calibre9">Keycloak</em> provides authentication and role management for user and service interactions,<br /> </li> 
+ <li class="listitem readable-text" refid="23" id="23" data-hash="9617a732a2ab3b560ef61502fdf5b0ac"> monitoring with libraries like <em class="calibre9">Micrometer</em> expose health statuses, metrics and logs so that external orchestration tools can maintain proper quality of service, possibly by starting new service instances or killing existing ones when they fail.<br /> </li> 
+</ul> 
+<div class="readable-text" refid="24" id="24" data-hash="76894262f45f83304813f392bc68daa1">
+ <p>We will see later in this book examples of typical services such as API endpoints, stream processors and edge services.<a class="pcalibre footnote" href="/book/vertx-in-action/chapter-1/v-10/ftn.d5e79" id="d5e79" shape="rect"><sup class="footnote1">[1]</sup></a> The above list is not exhaustive of course, but the key point is that services rarely live in isolation as they need to talk to other services over the network to function.</p>
+</div>  
+<div class="footnote2" id="ftn.d5e79"> 
+ <div class="readable-text" refid="25" id="25" data-hash="0bceabb4ff7b5c6e4c11e71ecfdc36cd">
+  <p><a class="pcalibre para2" href="/book/vertx-in-action/chapter-1/v-10/d5e79" shape="rect"><sup class="para3">[1]</sup></a> For readers already familiar with micro-service patterns, &quot;Edge service&quot; is in my opinion a better term to &quot;API gateway&quot;.</p>
+ </div> 
+</div> 
+<div class="readable-text" refid="26" id="26" data-hash="a4b6ff970ec4abfbdac2fdeda6036e31">
+ <h2 class="calibre17" id="heading_id_5"><a class="pcalibre pcalibre1" id="there-is-no-free-lunch-on-the-network" shape="rect"></a>1.3 &nbsp;There is no free lunch on the network</h2>
+</div> 
+<div class="readable-text" refid="27" id="27" data-hash="d79de6aa9b62179158b64e1f07039d7c">
+ <p>The network is exactly where a number of things may go wrong in computing.</p>
+</div> 
+<ol class="orderedlist"> 
+ <li class="listitem readable-text" refid="28" id="28" data-hash="37deb1160850e91d319c36fd00e548eb"> The bandwidth can fluctuate a lot, so data-intensive interactions between services may suffer. Not all services can enjoy fast bandwidth inside the same data-center and even so, it remains slower than communications between processes on the same machine.<br /> </li> 
+ <li class="listitem readable-text" refid="29" id="29" data-hash="40d5bc93d66b2792b3470d4b1c570366"> The latency also fluctuates a lot, and because services need to talk to services that talk to additional services to process a given request, all network-induced latency add up to the overall request processing times.<br /> </li> 
+ <li class="listitem readable-text" refid="30" id="30" data-hash="0bd02a98cf3feae465dd9a2523338936"> Availability should not be taken for granted: networks fail. Routers fail. Proxies fail. Sometimes someone runs into a network cable and disconnects it. When the network fails a service that sends a request to another service may not be able to know if it is the other service or the network that is down.<br /> </li> 
+</ol> 
+<div class="readable-text" refid="31" id="31" data-hash="23701d4b79d760a84a9c0ca67f51771d">
+ <p>In essence modern applications are made of distributed and networked services. They are accessed over networks that introduce some problems on their own, and each service needs to maintain several incoming and outgoing connections.</p>
+</div> 
+<div class="readable-text" refid="32" id="32" data-hash="40e7b14ed8b97a2767fa7cdb0b771c02">
+ <h2 class="calibre17" id="heading_id_6"><a class="pcalibre pcalibre1" id="the-simplicity-of-blocking-apis" shape="rect"></a>1.4 &nbsp;The simplicity of blocking APIs</h2>
+</div> 
+<div class="readable-text" refid="33" id="33" data-hash="8a1d459a312b895a3e886ef1488441e7">
+ <p>Services need to manage connections to other services and requesters. The traditional and widespread model for managing concurrent network connections is to allocate a thread for each connection. This is the model in many technologies such as <em class="calibre10">Servlets</em> in <em class="calibre10">Jakarta EE</em> (before additions in version 3), <em class="calibre10">Spring Framework</em> (before additions in version 5), <em class="calibre10">Ruby on Rails</em>, <em class="calibre10">Python Flask</em> and many more.</p>
+</div> 
+<div class="readable-text" refid="34" id="34" data-hash="a5eedfa01e05fba6ea7c85ee432d8a36">
+ <p>This model has the advantage of simplicity as it is <em class="calibre10">synchronous</em>. Let us take an example in listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/sync-tcp-protocol" shape="rect" title="Example 1.3. Synchronous &quot;echo&quot; TCP protocol">1.3</a> where a TCP server echoes input text back to the client until it sees a <code class="code">/quit</code> terminal input.</p>
+</div> 
+<div class="readable-text" refid="35" id="35" data-hash="2deb035de59c8a66a24e265be9dbdbc9">
+ <p>The server can be run using the Gradle <code class="code">run</code> task from the full example project (<code class="code">gradle run</code> in a terminal). By using the <code class="code">netcat</code> command-line tool, we can send and receive text:</p>
+</div>   
+<div class=" browsable-container listing-container" refid="36" id="36" data-hash="eb3e318b7b6219d25c4ef6e0adae95f3">
+ <h5>Listing&nbsp;1.1.&nbsp;Client-side output of a netcat session.</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">$ netcat localhost 3000
+Hello, Vert.x!  #1
+Hello, Vert.x!  #2
+Great
+Great
+/quit
+/quit
+$</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgVGhpcyBsaW5lIGlzIHRoZSB1c2VyIGlucHV0IG9uIHRoZSBjb21tYW5kIGxpbmUuCiMyIFRoaXMgbGluZSBpcyBzZW50IGJ5IHRoZSBUQ1Agc2VydmVyLg=="></div> 
+ </div>
+</div>  
+<div class="readable-text" refid="37" id="37" data-hash="81deeeaad6f87eb4f497eaa9a1b3d4a6">
+ <p>On the server side, we can see the following trace:</p>
+</div>   
+<div class=" browsable-container listing-container" refid="38" id="38" data-hash="1d7c927a73c134a7bd867d1a4c903fff">
+ <h5>Listing&nbsp;1.2.&nbsp;Server-side trace</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">$ ./gradlew run
+(...)
+~ Hello, Vert.x!
+~ Great
+~ /quit</pre> 
+  <div class="code-annotations-overlay-container" data-annotations=""></div> 
+ </div>
+</div> 
+<div class="readable-text" refid="39" id="39" data-hash="722d041450f36060763b93747fe857dc">
+ <p>The code in listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/sync-tcp-protocol" shape="rect" title="Example 1.3. Synchronous &quot;echo&quot; TCP protocol">1.3</a> provides the TCP server implementation. It is a very classical usage of the <code class="code">java.io</code> package that provides synchronous I/O APIs.</p>
+</div>   
+<div class=" browsable-container listing-container" refid="40" id="40" data-hash="f675f7c88ba5d599f151a188f60bfa15">
+ <h5>Listing&nbsp;1.3.&nbsp;Synchronous &quot;echo&quot; TCP protocol</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">public class SynchronousEcho {
+  public static void main(String[] args) throws Throwable {
+    ServerSocket server = new ServerSocket();
+    server.bind(new InetSocketAddress(3000));
+    while (true) {   #1
+      Socket socket = server.accept();
+      new Thread(clientHandler(socket)).start();
+    }
+  }
+
+  private static Runnable clientHandler(Socket socket) {
+    return () -&gt; {
+      try (
+        BufferedReader reader = new BufferedReader(
+          new InputStreamReader(socket.getInputStream()));
+        PrintWriter writer = new PrintWriter(
+          new OutputStreamWriter(socket.getOutputStream()))) {
+        String line = &quot;&quot;;
+        while (!&quot;/quit&quot;.equals(line)) {
+          line = reader.readLine();      #2
+          System.out.println(&quot;~ &quot; + line);
+          writer.write(line + &quot;\n&quot;);  #3
+          writer.flush();
+        }
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    };
+  }
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIG1haW4gYXBwbGljYXRpb24gdGhyZWFkIHBsYXlzIHRoZSByb2xlIG9mIGFuIGFjY2VwdGluZyB0aHJlYWQgYXMgaXQgcmVjZWl2ZXMgc29ja2V0IG9iamVjdHMgZm9yIGFsbCBuZXcgY29ubmVjdGlvbnMuIFRoZSBvcGVyYXRpb24gYmxvY2tzIHdoZW4gbm8gY29ubmVjdGlvbiBpcyBwZW5kaW5nLiBBIG5ldyB0aHJlYWQgaXMgYmVpbmcgYWxsb2NhdGVkIGZvciBlYWNoIGNvbm5lY3Rpb24uCiMyIFJlYWRpbmcgZnJvbSBhIHNvY2tldCBtYXkgYmxvY2sgdGhlIHRocmVhZCBhbGxvY2F0ZWQgdG8gdGhlIGNvbm5lY3Rpb24sIGZvciBleGFtcGxlIHdoZW4gdGhlcmUgaXMgbm90IGVub3VnaCBkYXRhIGJlaW5nIHJlYWQuCiMzIFdyaXRpbmcgdG8gYSBzb2NrZXQgbWF5IGFsc28gYmxvY2ssIGZvciBleGFtcGxlIHVudGlsIHRoZSB1bmRlcmx5aW5nIFRDUCBidWZmZXIgZGF0YSBoYXMgYmVlbiBzZW50IG92ZXIgdGhlIG5ldHdvcmsu"></div> 
+ </div>
+</div>  
+<div class="readable-text" refid="41" id="41" data-hash="20f2bf69730a8ebc4d44026b9c7d3817">
+ <p>The server uses the main thread for accepting connections, and each connection is being allocated a new thread for processing I/O. The I/O operations are synchronous, so threads may block on I/O operations.</p>
+</div> 
+<div class="readable-text" refid="42" id="42" data-hash="3ac63f513fa9e88a35240bb3c44eb2b2">
+ <h2 class="calibre17" id="heading_id_7"><a class="pcalibre pcalibre1" id="blocking-apis-waste-resources-increase-costs" shape="rect"></a>1.5 &nbsp;Blocking APIs waste resources, increase costs</h2>
+</div> 
+<div class="readable-text" refid="43" id="43" data-hash="c32e37bdcd8a1e2e9fac73fd085817a6">
+ <p>The main problem with the code in listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/sync-tcp-protocol" shape="rect" title="Example 1.3. Synchronous &quot;echo&quot; TCP protocol">1.3</a> is that it allocates a new thread for each incoming connection, and threads are anything but cheap resources. A thread needs memory, and also the more threads we have, the more we put pressure on the operating system kernel scheduler as it needs to give CPU time to the threads. We could improve the code in listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/sync-tcp-protocol" shape="rect" title="Example 1.3. Synchronous &quot;echo&quot; TCP protocol">1.3</a> by using a thread pool for reusing threads after a connection has been closed, but we still need <em class="calibre10">n</em> threads for <em class="calibre10">n</em> connections at any given point in time.</p>
+</div> 
+<div class="browsable-container figure-container" refid="44" id="44" data-hash="3439c569c860a17b5aef740cc32bfd72">
+ <h5 id="blocking-threads">Figure&nbsp;1.2.&nbsp;Threads and blocking I/O operations</h5>    
+ <img alt="chapter1 blocking threads" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/chapter1-blocking-threads.png" width="860" loading="lazy" height="616" onerror="fallbackToImageSrcPlaceholder(this)" />
+</div> 
+<div class="readable-text" refid="45" id="45" data-hash="53421bd5d249040f911d8ab899b0b848">
+ <p>This is illustrated in figure <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/blocking-threads" shape="rect" title="Figure 1.2. Threads and blocking I/O operations">1.2</a> where we show the CPU usage over time of 3 threads for 3 concurrent network connections. Input / output operations such as <code class="code">readLine</code> and <code class="code">write</code> may <em class="calibre10">block</em> the thread, meaning that it is being parked by the operating system. This happens for 2 reasons:</p>
+</div> 
+<ol class="orderedlist"> 
+ <li class="listitem readable-text" refid="46" id="46" data-hash="0a10adafc01c0078723fea7e59fbad4f"> a read operation may be waiting for data to arrive from the network, and<br /> </li> 
+ <li class="listitem readable-text" refid="47" id="47" data-hash="cf2b07ee6b6fe083fe3976a9f68c8c31"> a write operation may have to wait for buffers to be drained when they are full from previous write operation.<br /> </li> 
+</ol> 
+<div class="readable-text" refid="48" id="48" data-hash="dca2832a58553abb5bc2986990c2eb67">
+ <p>A modern operating system can properly deal with a few thousand concurrent threads. While not every networked service is going to face loads with as many concurrent requests, this model still quickly shows its limits when we are talking about ten thousands of concurrent connections.</p>
+</div> 
+<div class="browsable-container figure-container" refid="49" id="49" data-hash="7f13812b840edebb4f65fdc86136d2cf">
+ <h5 id="gateway">Figure&nbsp;1.3.&nbsp;Request processing in a edge service</h5>    
+ <img alt="chapter1 gateway" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/chapter1-gateway.png" width="1093" loading="lazy" height="599" onerror="fallbackToImageSrcPlaceholder(this)" />
+</div> 
+<div class="readable-text" refid="50" id="50" data-hash="e2f067cd6510bc7fff657dba6b5dd437">
+ <p>It is also important to recall that we often need more threads than incoming network connections. To take a concrete example, suppose that we are exposing a HTTP service that offers the best price for a given product reference, and to do that that service needs to request prices to 4 other HTTP services, as illustrated in figure <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/gateway" shape="rect" title="Figure 1.3. Request processing in a edge service">1.3</a>. Note that this type of service is often called a <em class="calibre10">edge service</em> or an <em class="calibre10">API gateway</em>. Requesting each service in sequence and then selecting the lowest price would render our service very slow, as each request adds to our own service latency. The efficient way is to start 4 concurrent requests from our service, and then wait and gather their responses. This translates to starting 4 threads, hence for 1000 concurrent network requests we may be using up to 5000 threads in the worst naive case where all requests need to be processed at the same time and we donât use thread pooling or maintain persistent connections from the edge service to the requested services.</p>
+</div> 
+<div class="readable-text" refid="51" id="51" data-hash="2bbf2fadbebc1750d7fefd7b8c70cbe3">
+ <p>Last but not least, applications are often deployed to containerized and/or virtualized environments. This means that applications may not see all the available CPU cores, and their allocated CPU time may be limited. Available memory for processes may also be restricted, so having too many threads also eats the memory budget. Such applications have to share CPU resources with other applications, so if all applications use blocking I/O APIs then there are quickly too many threads to manage and schedule, which requires starting more server / container instances as traffic ramps up. This translates directly to increased operating costs.</p>
+</div> 
+<div class="readable-text" refid="52" id="52" data-hash="c3651d905b1627c374a648cf8f5662d9">
+ <h2 class="calibre17" id="heading_id_8"><a class="pcalibre pcalibre1" id="asynchronous-programming-with-non-blocking-io" shape="rect"></a>1.6 &nbsp;Asynchronous programming with non-blocking I/O</h2>
+</div> 
+<div class="readable-text" refid="53" id="53" data-hash="ca2a0a0049eccc6dac8646ba1532c48c">
+ <p>Instead of waiting for I/O operations to complete, we can shift to <em class="calibre10">non-blocking</em> I/O. You may have already sampled this with the <code class="code">select</code> function in C.</p>
+</div> 
+<div class="readable-text" refid="54" id="54" data-hash="797a88030c0f5ad02fc8da6493c50ad8">
+ <p>The idea behind non-blocking I/O is to request a (blocking) operation, and move on to doing other tasks until the operation is ready. For example a non-blocking read may ask for up to 256 bytes over a network socket, and the execution thread does other things (like dealing with another connection) until data has been put into buffers, ready for consumption in memory. In this model, many concurrent connections can be multiplexed on a single thread as network latency typically exceeds the CPU time it takes to read incoming bytes.</p>
+</div> 
+<div class="readable-text" refid="55" id="55" data-hash="32df9deb834767731c66ce1ef390ddf6">
+ <p>Java has long had the <code class="code">java.nio</code> (<em class="calibre10">Java NIO</em>) package that offers non-blocking I/O APIs over files and networks. Back to our previous example of a TCP service that echoes incoming data, here is a possible implementation with Java non-blocking I/O in listings <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/nio-tcp-protocol-1" shape="rect" title="Example 1.4. Asynchronous variant of the &quot;echo&quot; service: main loop">1.4</a>, <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/nio-tcp-protocol-2" shape="rect" title="Example 1.5. Asynchronous variant of the &quot;echo&quot; service: accepting connections">1.5</a>, <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/nio-tcp-protocol-3" shape="rect" title="Example 1.6. Asynchronous variant of the &quot;echo&quot; service: echoing data">1.6</a> and <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/nio-tcp-protocol-4" shape="rect" title="Example 1.7. Asynchronous variant of the &quot;echo&quot; service: continuing and closing">1.7</a>.</p>
+</div>   
+<div class=" browsable-container listing-container" refid="56" id="56" data-hash="9fc369860ff01784668316eeaa8587ec">
+ <h5>Listing&nbsp;1.4.&nbsp;Asynchronous variant of the &quot;echo&quot; service: main loop</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">public class AsynchronousEcho {
+  public static void main(String[] args) throws IOException {
+    Selector selector = Selector.open();
+
+    ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
+    serverSocketChannel.bind(new InetSocketAddress(3000));
+    serverSocketChannel.configureBlocking(false);   <a class="pcalibre pcalibre1" id="CO3-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);   <a class="pcalibre pcalibre1" id="CO3-2" shape="rect"></a><span class="pcalibre1">#2</span>
+
+    while (true) {
+      selector.select();    <a class="pcalibre pcalibre1" id="CO3-3" shape="rect"></a><span class="pcalibre1">#3</span>
+      Iterator&lt;SelectionKey&gt; it = selector.selectedKeys().iterator();
+      while (it.hasNext()) {
+        SelectionKey key = it.next();
+        if (key.isAcceptable()) {   <a class="pcalibre pcalibre1" id="CO3-4" shape="rect"></a><span class="pcalibre1">#4</span>
+          newConnection(selector, key);
+        } else if (key.isReadable()) {    <a class="pcalibre pcalibre1" id="CO3-5" shape="rect"></a><span class="pcalibre1">#5</span>
+          echo(key);
+        } else if (key.isWritable()) {    <a class="pcalibre pcalibre1" id="CO3-6" shape="rect"></a><span class="pcalibre1">#6</span>
+          continueEcho(selector, key);
+        }
+        it.remove();    <a class="pcalibre pcalibre1" id="CO3-7" shape="rect"></a><span class="pcalibre1">#7</span>
+      }
+    }
+  }
+  // (...)</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgV2UgbmVlZCB0byBwdXQgdGhlIGNoYW5uZWwgdG8gbm9uLWJsb2NraW5nIG1vZGUuCiMyIFRoZSBzZWxlY3RvciB3aWxsIG5vdGlmeSBvZiBpbmNvbWluZyBjb25uZWN0aW9ucy4KIzMgVGhpcyBjb2xsZWN0cyBhbGwgbm9uLWJsb2NraW5nIEkvTyBub3RpZmljYXRpb25zLgojNCBXZSBoYXZlIGEgbmV3IGNvbm5lY3Rpb24uCiM1IEEgc29ja2V0IGhhcyByZWNlaXZlZCBkYXRhLgojNiBBIHNvY2tldCBpcyByZWFkeSBmb3Igd3JpdGluZyBhZ2Fpbi4KIzcgU2VsZWN0aW9uIGtleXMgbmVlZCB0byBiZSBtYW51YWxseSByZW1vdmVkLCBlbHNlIHRoZXkgYXJlIGF2YWlsYWJsZSBhZ2FpbiBpbiB0aGUgbmV4dCBsb29wIGl0ZXJhdGlvbi4="></div> 
+ </div>
+</div>  
+<div class="readable-text" refid="57" id="57" data-hash="db2386fa544a3d640e15596ad0ff307a">
+ <p>Listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/nio-tcp-protocol-1" shape="rect" title="Example 1.4. Asynchronous variant of the &quot;echo&quot; service: main loop">1.4</a> gives the server socket channel preparation code. It opens the server socket channel and makes it non-blocking, then registers a NIO key selector for processing events. The main loop iterates over the selector keys that have events ready for processing, and dispatches to specialized methods depending on the event type (new connections, data has arrived or data can be sent again).</p>
+</div>   
+<div class=" browsable-container listing-container" refid="58" id="58" data-hash="bda497bff94c5752a41df50ac9521080">
+ <h5>Listing&nbsp;1.5.&nbsp;Asynchronous variant of the &quot;echo&quot; service: accepting connections</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private static class Context {  <a class="pcalibre pcalibre1" id="CO4-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    private final ByteBuffer nioBuffer = ByteBuffer.allocate(512);
+    private String currentLine = &quot;&quot;;
+    private boolean terminating = false;
+  }
+
+  private static final HashMap&lt;SocketChannel, Context&gt; contexts = new HashMap&lt;&gt;();
+
+  private static void newConnection(Selector selector, SelectionKey key) throws IOException {
+    ServerSocketChannel serverSocketChannel = (ServerSocketChannel) key.channel();
+    SocketChannel socketChannel = serverSocketChannel.accept();
+    socketChannel
+      .configureBlocking(false)
+      .register(selector, SelectionKey.OP_READ);  <a class="pcalibre pcalibre1" id="CO4-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    contexts.put(socketChannel, new Context());   <a class="pcalibre pcalibre1" id="CO4-3" shape="rect"></a><span class="pcalibre1">#3</span>
+  }</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIENvbnRleHQgY2xhc3Mga2VlcHMgc3RhdGUgcmVsYXRlZCB0byB0aGUgaGFuZGxpbmcgb2YgYSBUQ1AgY29ubmVjdGlvbi4KIzIgV2Ugc2V0IHRoZSBjaGFubmVsIHRvIG5vbi1ibG9ja2luZywgYW5kIGRlY2xhcmUgaW50ZXJlc3QgaW4gcmVhZCBvcGVyYXRpb25zLgojMyBXZSBrZWVwIGFsbCBjb25uZWN0aW9uIHN0YXRlcyBpbiBhIGhhc2ggbWFwLg=="></div> 
+ </div>
+</div>  
+<div class="readable-text" refid="59" id="59" data-hash="939b08acc26e5b8aa395a3a990577ee8">
+ <p>Listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/nio-tcp-protocol-2" shape="rect" title="Example 1.5. Asynchronous variant of the &quot;echo&quot; service: accepting connections">1.5</a> shows how new TCP connections are being dealt with. The socket channel that corresponds to the new connection is configured as non-blocking, then tracked for further reference in a hash map where it is being associated to some <em class="calibre10">context object</em>. The context depends on the application and protocol, and in our case we track the current line, wether the connection is closing, and we maintain a connection-specific NIO buffer for reading and writing data.</p>
+</div>   
+<div class=" browsable-container listing-container" refid="60" id="60" data-hash="1db7223f2a4371ae37a7cada410fb7ff">
+ <h5>Listing&nbsp;1.6.&nbsp;Asynchronous variant of the &quot;echo&quot; service: echoing data</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private static final Pattern QUIT = Pattern.compile(&quot;(\\r)?(\\n)?/quit$&quot;);
+
+  private static void echo(SelectionKey key) throws IOException {
+    SocketChannel socketChannel = (SocketChannel) key.channel();
+    Context context = contexts.get(socketChannel);
+    try {
+      socketChannel.read(context.nioBuffer);
+      context.nioBuffer.flip();
+      context.currentLine = context.currentLine + Charset.defaultCharset().decode(context.nioBuffer);
+      if (QUIT.matcher(context.currentLine).find()) {
+        context.terminating = true;   <a class="pcalibre pcalibre1" id="CO5-1" shape="rect"></a><span class="pcalibre1">#1</span>
+      } else if (context.currentLine.length() &gt; 16) {
+        context.currentLine = context.currentLine.substring(8);
+      }
+      context.nioBuffer.flip();   <a class="pcalibre pcalibre1" id="CO5-2" shape="rect"></a><span class="pcalibre1">#2</span>
+      int count = socketChannel.write(context.nioBuffer);
+      if (count &lt; context.nioBuffer.limit()) {   <a class="pcalibre pcalibre1" id="CO5-3" shape="rect"></a><span class="pcalibre1">#3</span>
+        key.cancel();
+        socketChannel.register(key.selector(), SelectionKey.OP_WRITE);
+      } else {
+        context.nioBuffer.clear();
+        if (context.terminating) {
+          cleanup(socketChannel);
+        }
+      }
+    } catch (IOException err) {
+      err.printStackTrace();
+      cleanup(socketChannel);
+    }
+  }</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgSWYgd2UgZmluZCBhIGxpbmUgZW5kaW5nIHdpdGggL3F1aXQsIHRoZW4gd2UgYXJlIHRlcm1pbmF0aW5nIHRoZSBjb25uZWN0aW9uLgojMiBKYXZhIE5JTyBidWZmZXJzIG5lZWQgcG9zaXRpb25hbCBtYW5pcHVsYXRpb25zOiB0aGUgYnVmZmVyIGhhcyByZWFkIGRhdGEsIHNvIHRvIHdyaXRlIGl0IGJhY2sgdG8gdGhlIGNsaWVudCB3ZSBuZWVkIHRvIGZsaXAgYW5kIHJldHVybiB0byB0aGUgc3RhcnQgcG9zaXRpb24uCiMzIEl0IG1heSBoYXBwZW4gdGhhdCBub3QgYWxsIGRhdGEgY2FuIGJlIHdyaXR0ZW4sIHNvIHdlIHN0b3AgbG9va2luZyBmb3IgcmVhZCBvcGVyYXRpb25zIGFuZCBkZWNsYXJlIGludGVyZXN0IGluIGEgbm90aWZpY2F0aW9uIHdoZW4gdGhlIGNoYW5uZWwgY2FuIGJlIHdyaXR0ZW4gYWdhaW4u"></div> 
+ </div>
+</div>  
+<div class="readable-text" refid="61" id="61" data-hash="bd497e28caaeb48e4c7e6b1442954378">
+ <p>Listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/nio-tcp-protocol-3" shape="rect" title="Example 1.6. Asynchronous variant of the &quot;echo&quot; service: echoing data">1.6</a> has the code for the <code class="code">echo</code> method. The processing is very simple: we read data from the client socket, then attempt to write it back. If the write operation was only partial, we stop further reads, declare interest in knowing when the socket channel is writable again, then ensure all data is being written.</p>
+</div>   
+<div class=" browsable-container listing-container" refid="62" id="62" data-hash="b1c227fcd2a0246396fda54ff7abe596">
+ <h5>Listing&nbsp;1.7.&nbsp;Asynchronous variant of the &quot;echo&quot; service: continuing and closing</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private static void cleanup(SocketChannel socketChannel) throws IOException {
+    socketChannel.close();
+    contexts.remove(socketChannel);
+  }
+
+  private static void continueEcho(Selector selector, SelectionKey key) throws IOException {
+    SocketChannel socketChannel = (SocketChannel) key.channel();
+    Context context = contexts.get(socketChannel);
+    try {
+      int remainingBytes = context.nioBuffer.limit() - context.nioBuffer.position();
+      int count = socketChannel.write(context.nioBuffer);
+      if (count == remainingBytes) {    #1
+        context.nioBuffer.clear();
+        key.cancel();
+        if (context.terminating) {
+          cleanup(socketChannel);
+        } else {
+          socketChannel.register(selector, SelectionKey.OP_READ);
+        }
+      }
+    } catch (IOException err) {
+      err.printStackTrace();
+      cleanup(socketChannel);
+    }
+  }
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgV2UgcmVtYWluIGluIHRoYXQgc3RhdGUgdW50aWwgYWxsIGRhdGEgaGFzIGJlZW4gd3JpdHRlbiBiYWNrLCBkcm9wIHdyaXRlIGludGVyZXN0IHRoZW4gZGVjbGFyZSByZWFkIGludGVyZXN0Lg=="></div> 
+ </div>
+</div>  
+<div class="readable-text" refid="63" id="63" data-hash="7ca4322d8359d90f2a18d928f206bfde">
+ <p>Finally <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/nio-tcp-protocol-4" shape="rect" title="Example 1.7. Asynchronous variant of the &quot;echo&quot; service: continuing and closing">1.7</a> has the method for closing the TCP connection, and the method for finishing writing a buffer. When all data has been written in <code class="code">continueEcho</code>, then we register interest again in reading data.</p>
+</div> 
+<div class="readable-text" refid="64" id="64" data-hash="08ea1bc641b43a406170cc4aaf80fc15">
+ <p>As this example shows, using non-blocking I/O is doable yet it significantly increases the code complexity compared to the initial version that was using blocking APIs. The echo protocol needs 2 states for reading and writing back data: reading, or finishing writing. For more elaborate TCP protocols you can easily anticipate the need for more complicated state machines.</p>
+</div> 
+<div class="readable-text" refid="65" id="65" data-hash="2a65537e8b89c5e15fb869191710875d">
+ <p>It is also important to note that like most JDK APIs, <code class="code">java.nio</code> focuses solely on what it does (here, I/O APIs). It does not provide higher-level protocol-specific helpers like for writing HTTP clients and servers. Also, <code class="code">java.nio</code> does not prescribe a threading model, which is still important to properly utilize CPU cores, handle asynchronous I/O events, and articulate with the application processing logic.</p>
+</div>  
+<div class="tip"> 
+ <div class=" callout-container caution-container">
+  <div class="readable-text" refid="66" id="66" data-hash="f35a087d0dc71beb3a7204d91c1c49e4">
+   <h5>Note</h5>
+  </div>
+  <div class="readable-text" refid="67" id="67" data-hash="8b8f05e86fd70a79ec8c1b857ba5e8d6">
+   <p>This is why in practice developers rarely deal with Java NIO. Networking libraries like <em class="calibre9">Netty</em> and <em class="calibre9">Apache Mina</em> solve the shortcomings of Java NIO, and many toolkits and frameworks are built on top of them. As we will soon discover, Eclipse Vert.x is one of them.</p>
+  </div>
+ </div> 
+</div> 
+<div class="readable-text" refid="68" id="68" data-hash="caf39397d25e64c099c6243e3c5c5f1c">
+ <h2 class="calibre17" id="heading_id_9"><a class="pcalibre pcalibre1" id="multiplexing-event-driven-processing-the-case-of-the-event-loop" shape="rect"></a>1.7 &nbsp;Multiplexing event-driven processing: the case of the event loop</h2>
+</div> 
+<div class="readable-text" refid="69" id="69" data-hash="79319ec9a33f78a34be5736615825d95">
+ <p>A popular threading model for processing asynchronous events is that of the event-loop. Instead of polling for events that may have arrived as we did in the Java NIO example above, events are being pushed to an <em class="calibre10">event-loop</em>.</p>
+</div> 
+<div class="browsable-container figure-container" refid="70" id="70" data-hash="797d620db6bb09b3a1fa6a04ddbe0218">
+ <h5 id="async-event-loop">Figure&nbsp;1.4.&nbsp;Processing events using an event-loop</h5>    
+ <img alt="chapter1 async event loop" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/chapter1-async-event-loop.png" width="1104" loading="lazy" height="463" onerror="fallbackToImageSrcPlaceholder(this)" />
+</div> 
+<div class="readable-text" refid="71" id="71" data-hash="281cb611a4df34c45b2d915e7d231613">
+ <p>As we can see in figure <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/async-event-loop" shape="rect" title="Figure 1.4. Processing events using an event-loop">1.4</a>, events are being queued as they arrive. They can be I/O events, such as data being ready for consumption, or a buffer having been fully written to a socket. They can also be any <em class="calibre10">other</em> event, such as a timer firing. A single thread is being assigned to an event-loop, and processing events shall not perform any blocking or long-running operation. Otherwise the thread blocks, defeating the purpose of using an event-loop. Event-loops are quite popular: JavaScript code running in web browsers runs on top of an event-loop. Many graphical interface toolkits such as <em class="calibre10">Java Swing</em> also have an event-loop.</p>
+</div> 
+<div class="readable-text" refid="72" id="72" data-hash="04b321046d732e9b38338bfbfd792606">
+ <p>Implementing an event-loop is easy.</p>
+</div>   
+<div class=" browsable-container listing-container" refid="73" id="73" data-hash="53a2b0c6dbd6782c33153142ff2fb3ec">
+ <h5>Listing&nbsp;1.8.&nbsp;A simple event-loop usage</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">public static void main(String[] args) {
+  EventLoop eventLoop = new EventLoop();
+  new Thread(() -&gt; {   <a class="pcalibre pcalibre1" id="CO7-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    for (int n = 0; n &lt; 6; n++) {
+      delay(1000);
+      eventLoop.dispatch(new EventLoop.Event(&quot;tick&quot;, n));
+    }
+    eventLoop.dispatch(new EventLoop.Event(&quot;stop&quot;, null));
+  }).start();
+  new Thread(() -&gt; {  <a class="pcalibre pcalibre1" id="CO7-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    delay(2500);
+    eventLoop.dispatch(new EventLoop.Event(&quot;hello&quot;, &quot;beautiful world&quot;));
+    delay(800);
+    eventLoop.dispatch(new EventLoop.Event(&quot;hello&quot;, &quot;beautiful universe&quot;));
+  }).start();
+  eventLoop.dispatch(new EventLoop.Event(&quot;hello&quot;, &quot;world!&quot;));   <a class="pcalibre pcalibre1" id="CO7-3" shape="rect"></a><span class="pcalibre1">#3</span>
+  eventLoop.dispatch(new EventLoop.Event(&quot;foo&quot;, &quot;bar&quot;));
+  eventLoop
+    .on(&quot;hello&quot;, s -&gt; System.out.println(&quot;hello &quot; + s))   <a class="pcalibre pcalibre1" id="CO7-4" shape="rect"></a><span class="pcalibre1">#4</span>
+    .on(&quot;tick&quot;, n -&gt; System.out.println(&quot;tick #&quot; + n))
+    .on(&quot;stop&quot;, v -&gt; eventLoop.stop())
+    .run();
+  System.out.println(&quot;Bye!&quot;);
+}
+
+private static void delay(long millis) {  <a class="pcalibre pcalibre1" id="CO7-5" shape="rect"></a><span class="pcalibre1">#5</span>
+  try {
+    Thread.sleep(millis);
+  } catch (InterruptedException e) {
+    throw new RuntimeException(e);
+  }
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgQSBmaXJzdCB0aHJlYWQgdGhhdCBkaXNwYXRjaGVzIGV2ZW50cyBldmVyeSBzZWNvbmQgdG8gdGhlIGV2ZW50LWxvb3AuCiMyIEEgc2Vjb25kIHRocmVhZCB0aGF0IGRpc3BhdGNoZXMgMiBldmVudHMgYXQgMjUwMG1zIGFuZCAzMzAwbXMuCiMzIEV2ZW50cyBkaXNwYXRjaGVkIGZyb20gdGhlIG1haW4gdGhyZWFkLgojNCBFdmVudCBoYW5kbGVycyBkZWZpbmVkIGFzIEphdmEgbGFtYmRhIGZ1bmN0aW9ucy4KIzUgVGhpcyBtZXRob2Qgd3JhcHMgYSBwb3NzaWJseSBjaGVja2VkIGV4Y2VwdGlvbiBpbnRvIGFuIHVuY2hlY2tlZCBleGNlcHRpb24gdG8gYXZvaWQgcG9sbHV0aW5nIHRoZSBtYWluIG1ldGhvZCBjb2RlIHdpdGggZXhjZXB0aW9uIGhhbmRsaW5nIGxvZ2ljLg=="></div> 
+ </div>
+</div>  
+<div class="readable-text" refid="74" id="74" data-hash="8ed7ff2be02a5724cf06419b845494f3">
+ <p>The code in listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/basic-event-loop" shape="rect" title="Example 1.8. A simple event-loop usage">1.8</a> shows a usage of an event-loop API whose execution gives the following console output:</p>
+</div>   
+<div class=" browsable-container listing-container" refid="75" id="75" data-hash="46c33c3308d6d7106f81d139d235c4e6">
+ <h5>Listing&nbsp;1.9.&nbsp;Event-loop example console output</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">hello world!
+No handler for key foo
+tick #0
+tick #1
+hello beautiful world
+tick #2
+hello beautiful universe
+tick #3
+tick #4
+tick #5
+Bye!</pre> 
+  <div class="code-annotations-overlay-container" data-annotations=""></div> 
+ </div>
+</div>   
+<div class=" browsable-container listing-container" refid="76" id="76" data-hash="d7f069ab036652adee185ba8c2eff55b">
+ <h5>Listing&nbsp;1.10.&nbsp;A simple event-loop implementation</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">public final class EventLoop {
+  private final ConcurrentLinkedDeque&lt;Event&gt; events = new ConcurrentLinkedDeque&lt;&gt;();
+  private final ConcurrentHashMap&lt;String, Consumer&lt;Object&gt;&gt; handlers = new ConcurrentHashMap&lt;&gt;();
+
+  public EventLoop on(String key, Consumer&lt;Object&gt; handler) {   <a class="pcalibre pcalibre1" id="CO8-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    handlers.put(key, handler);
+    return this;
+  }
+
+  public void dispatch(Event event) { events.add(event); } <a class="pcalibre pcalibre1" id="CO8-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  public void stop() { Thread.currentThread().interrupt(); }
+
+  public void run() {
+    while (!(events.isEmpty() &amp;&amp; Thread.interrupted())) {   <a class="pcalibre pcalibre1" id="CO8-3" shape="rect"></a><span class="pcalibre1">#3</span>
+      if (!events.isEmpty()) {
+        Event event = events.pop();
+        if (handlers.containsKey(event.key)) {
+          handlers.get(event.key).accept(event.data);
+        } else {
+          System.err.println(&quot;No handler for key &quot; + event.key);
+        }
+      }
+    }
+  }
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgSGFuZGxlciBhcmUgc3RvcmVkIGluIGEgbWFwIHdoZXJlIGVhY2gga2V5IGhhcyBhIGhhbmRsZXIuCiMyIERpc3BhdGNoaW5nIGlzIHB1c2hpbmcgZXZlbnRzIHRvIGEgcXVldWUuCiMzIFRoZSBldmVudCBsb29wIGxvb2tzIGZvciBldmVudHMsIGFuZCBmaW5kcyBhIGhhbmRsZXIgYmFzZWQgb24gZXZlbnQga2V5cy4="></div> 
+ </div>
+</div>  
+<div class="readable-text" refid="77" id="77" data-hash="1f519349453084016be5bbb7ea0da675">
+ <p>More sophisticated event-loop implementations are possible, but the one in listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/basic-event-loop-usage" shape="rect" title="Example 1.10. A simple event-loop implementation">1.10</a> relies on a queue of events and a map of handlers. The event-loop runs on the thread that calls the <code class="code">run</code> method, and events can be safely sent from other threads using the <code class="code">dispatch</code> method.</p>
+</div>   
+<div class=" browsable-container listing-container" refid="78" id="78" data-hash="4321be5752c4c36845a138f37811c9a4">
+ <h5>Listing&nbsp;1.11.&nbsp;A simple event-loop implementation</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">public static final class Event {
+  private final String key;
+  private final Object data;
+
+  public Event(String key, Object data) {
+    this.key = key;
+    this.data = data;
+  }
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations=""></div> 
+ </div>
+</div> 
+<div class="readable-text" refid="79" id="79" data-hash="f73d0b998ae16047c7c29e47365def85">
+ <p>Last but not least, an event is simply a pair of a key and data, as given in listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/basic-event-loop-usage-event" shape="rect" title="Example 1.11. A simple event-loop implementation">1.11</a> which is a static inner class of <code class="code">EventLoop</code>.</p>
+</div> 
+<div class="readable-text" refid="80" id="80" data-hash="da89bbd84d5aa218ff6de0e3ac49d68c">
+ <h2 class="calibre17" id="heading_id_10"><a class="pcalibre pcalibre1" id="what-is-a-reactive-system" shape="rect"></a>1.8 &nbsp;What is a reactive system?</h2>
+</div> 
+<div class="readable-text" refid="81" id="81" data-hash="43ae7b402a5539fc9d6b007111d1b424">
+ <p>So far we have been discussing how to:</p>
+</div> 
+<ol class="orderedlist"> 
+ <li class="listitem readable-text" refid="82" id="82" data-hash="5b0b06c38dc2316e2a31559e01813cc4"> leverage asynchronous programming and non-blocking I/O to handle more concurrent connections and use less threads, and<br /> </li> 
+ <li class="listitem readable-text" refid="83" id="83" data-hash="481952679f8ae9c1d8a3331611983f95"> use one threading model for asynchronous event processing (the event loop).<br /> </li> 
+</ol> 
+<div class="readable-text" refid="84" id="84" data-hash="f5883f8d70ad3e7c9462c703d23a003d">
+ <p>By combining these two techniques, we can build scalable and resource-efficient applications. Let us now discuss what is a <em class="calibre10">reactive system</em>, and how it goes beyond <em class="calibre10">&quot;just&quot;</em> asynchronous programming.</p>
+</div> 
+<div class="readable-text" refid="85" id="85" data-hash="9f3b1c5c36ce2f81985e94995390fe3a">
+ <p>The 4 properties of <em class="calibre10">reactive systems</em> are exposed in <em class="calibre10">The Reactive Manifesto</em> <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/ReactiveManifesto" shape="rect">[ReactiveManifesto]</a>: responsive, resilient, elastic and message-driven. We are not going to paraphrase the manifesto in this book, so here is a synthetic take on what these properties are about.</p>
+</div>  
+<div class="readable-text" refid="86" id="86" data-hash="e00113f16a670a69941adac4811be42a">
+ <p definition-title="true">Elastic</p>
+</div>  
+<div class="readable-text" refid="87" id="87" data-hash="23a6fa41d31052460fadcc82deafef7e">
+ <p definition-content="true">Elasticity is the ability for the application to work with a variable number of instances. This is useful as elasticity allows responding to traffic spikes by starting new instances, and load-balancing traffic across instances. This has an interesting impact on the code design as shared state across instances needs to be well identified and limited (e.g., server-side web sessions). It is useful when instances report <em class="calibre10">metrics</em>, so that an orchestrator can decide when to start or when to stop instances depending on both the network traffic and reported metrics.</p>
+</div>  
+<div class="readable-text" refid="88" id="88" data-hash="a8faa01d3387ac3f7184a1fb8d09a31a">
+ <p definition-title="true">Resilient</p>
+</div>  
+<div class="readable-text" refid="89" id="89" data-hash="69d6950179386d5848cf2c56676e49c8">
+ <p definition-content="true">Resiliency is partially the flip side of the coin of elasticity. When one instance crashes in a group of elastic instances, then resiliency is naturally achieved as traffic can be redirected to other instances, and also a new instance can be started if necessary. That being said there is more to resiliency. When an instance cannot fulfill a request due to some conditions, it tries to still answer in <em class="calibre10">degraded mode</em>. Depending on the application domain it may be possible to respond with older cached values, or even respond with empty / default data. It may also be possible to forward a request to some other, non-error instance. In the worst case an instance responds with an error, but in a timely fashion.</p>
+</div>  
+<div class="readable-text" refid="90" id="90" data-hash="eef5a6aafa80aaaf67db23f56433eab1">
+ <p definition-title="true">Responsive</p>
+</div>  
+<div class="readable-text" refid="91" id="91" data-hash="496489cebe55ce7cb2e7f8a593f23296">
+ <p definition-content="true">Responsivity is the result of combining elasticity and resiliency. Consistent response times provide strong service-level agreement guarantees. This is achieved both thanks to the ability to start new instances if need be (to keep response times acceptable), and also because instances still respond quickly when errors arise. It is important to note that responsivity is not possible if one component relies on a non-scalable resource, like a single central database. Indeed starting more instances do not solve the problem that they all issue request to one resource that is quickly going to be overloaded.</p>
+</div>  
+<div class="readable-text" refid="92" id="92" data-hash="813ca2603ba4b8d17aebc4da2ac173fc">
+ <p definition-title="true">Message-driven</p>
+</div>  
+<div class="readable-text" refid="93" id="93" data-hash="94752545f5fd384920adea819d356813">
+ <p definition-content="true">Using asynchronous message passing rather than blocking paradigms like remote-procedure calls is the key enabler to elasticity, resiliency, which lead to responsivity. This also enables dispatching messages to more instances (making the system elastic), and control the flow between message producers and message consumers (this is <em class="calibre10">back-pressure</em>, and we will explore it later in this book).</p>
+</div>   
+<div class="readable-text" refid="94" id="94" data-hash="c5ae2ba4b4e9eee8f092b0b08251e836">
+ <p>A reactive system exhibits these 4 properties, which make for <strong class="calibre27">dependable</strong> and <strong class="calibre27">resource-efficient</strong> systems.</p>
+</div>  
+<div class="tip"> 
+ <div class=" callout-container caution-container">
+  <div class="readable-text" refid="95" id="95" data-hash="d781fef288fe4ca814eca1f938ad97cd">
+   <h5>Does asynchronous imply reactive?</h5>
+  </div>
+  <div class="readable-text" refid="96" id="96" data-hash="18509d9c1019a2a12c6156536a5be316">
+   <p>This is an important question, as being asynchronous is often presented as being a magic cure to software woes. Clearly, reactive implies asynchronous, but the converse is not necessarily true. As a (not so) fictitious example consider a shopping web application where users can put items in a shopping cart. This is classically done by storing items in a server-side web session. When sessions are being stored in memory or in local files then the system is not reactive, even if it internally uses non-blocking I/O and asynchronous programming. Indeed, an instance of the application cannot take over another one since sessions are application state, and in this case that state is not being replicated and shared across nodes. A reactive variant of this example would use a memory grid service (e.g., Hazelcast, Redis or Infinispan) to store the web sessions, so that incoming requests can be routed to any instance.</p>
+  </div>
+ </div> 
+</div> 
+<div class="readable-text" refid="97" id="97" data-hash="d84a75c834256b26a8ff120c91dbf822">
+ <h2 class="calibre17" id="heading_id_11"><a class="pcalibre pcalibre1" id="what-else-does-reactive-mean" shape="rect"></a>1.9 &nbsp;What else does reactive mean?</h2>
+</div> 
+<div class="readable-text" refid="98" id="98" data-hash="60473daa54b5dd6c044540840bd7d944">
+ <p>As <em class="calibre10">reactive</em> is a trendy term, it is being used for very different purposes. We just saw what a <em class="calibre10">reactive system</em> is, but there are two other popular reactive definitions as summarized in <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/table-01-01" shape="rect" title="Table 1.1. All the reactive things">Table 1.1</a>.</p>
+</div>   
+<div class=" browsable-container" refid="99" id="99" data-hash="a6fdeb068d6945597f7f10f96d89f958">
+ <h5>Table&nbsp;1.1.&nbsp;All the reactive things</h5>
+ <table border="1" class="contenttable" summary="All the reactive things" width="100%"> 
+  <colgroup class="calibre28" span="1"> 
+   <col class="col_" span="1" width="20%" /> 
+   <col class="col_" span="1" width="80%" /> 
+  </colgroup> 
+  <tbody>
+   <tr class="calibre20"> 
+    <td class="contenttable1" colspan="1" rowspan="1">Reactive?</td> 
+    <td class="contenttable1" colspan="1" rowspan="1">Description</td> 
+   </tr> 
+   <tr class="calibre20"> 
+    <td class="contenttable2" colspan="1" rowspan="1"> <p>Systems</p> </td> 
+    <td class="contenttable2" colspan="1" rowspan="1"> <p>Dependable applications that are message-driven, resilient, elastic and responsive.</p> </td> 
+   </tr> 
+   <tr class="calibre20"> 
+    <td class="contenttable2" colspan="1" rowspan="1"> <p>Programming</p> </td> 
+    <td class="contenttable2" colspan="1" rowspan="1"> <p>Means for reacting to changes and events. Spreadsheet programs are a great example of reactive programming: when cell data changes, then cells having formula depending on affected cells get recomputed automatically. We will see later in this book RxJava, a popular <em class="calibre9">reactive extensions</em> API for Java that greatly helps coordinating asynchronous event and data processing. There also exists <em class="calibre9">functional reactive programming</em>, a style of programming that we wonât cover in this book but for which <a class="pcalibre para2" href="/book/vertx-in-action/chapter-1/v-10/FunctionalReactiveProg" shape="rect">[FunctionalReactiveProg]</a> is a fantastic resource.</p> </td> 
+   </tr> 
+   <tr class="calibre20"> 
+    <td class="contenttable2" colspan="1" rowspan="1"> <p>Streams</p> </td> 
+    <td class="contenttable2" colspan="1" rowspan="1"> <p>When systems exchange continuous streams of data then the classical producer / consumer problems arise. Especially it is important to provide <em class="calibre9">back-pressure</em> mechanisms so that a consumer can notify a producer when it is emitting too fast. With reactive streams the main goal is to reach the best throughput between systems.</p> </td> 
+   </tr> 
+  </tbody>
+ </table>
+</div> 
+<div class="readable-text" refid="100" id="100" data-hash="bdf5c228f518d9cd5899a2c9fdebf43d">
+ <h2 class="calibre17" id="heading_id_12"><a class="pcalibre pcalibre1" id="what-is-vert-x" shape="rect"></a>1.10 &nbsp;What is Vert.x?</h2>
+</div> 
+<div class="readable-text" refid="101" id="101" data-hash="18c43b1e80287592e9de7123587d697f">
+ <p>According to the website at <a class="pcalibre2 pcalibre" href="https://vertx.io/" shape="rect">vertx.io/</a>, <em class="calibre10">&quot;Eclipse Vert.x is a toolkit for building reactive applications on the JVM&quot;</em>.</p>
+</div> 
+<div class="readable-text" refid="102" id="102" data-hash="3b9d3c1e1f50c0ba9842fc3d88a212f3">
+ <p>Initiated by Tim Fox in 2012, Vert.x is a project now fostered at the vendor-neutral Eclipse Foundation. While the first project iterations started with a strong influence of being a &quot;Node.js for the JVM&quot;, it has since significantly deviated to providing an asynchronous programming foundation especially tailored for the specifics of the JVM.</p>
+</div>  
+<div class="tip"> 
+ <div class=" callout-container caution-container">
+  <div class="readable-text" refid="103" id="103" data-hash="f031785dd8ae6219faac02b41a846d9a">
+   <h5>The essence of Vert.x</h5>
+  </div>
+  <div class="readable-text" refid="104" id="104" data-hash="0719b9e9d40ed4a6a29880914da43e30">
+   <p>As you may have guessed by the previous sections of this chapter, the essence of Vert.x is to process asynchronous events, mostly coming from non-blocking I/O, and the threading model is to process events in an event-loop.</p>
+  </div>
+ </div> 
+</div> 
+<div class="readable-text" refid="105" id="105" data-hash="097d4f7b12ff4ef63cea7f58ff1759e8">
+ <p>It is very important to understand that Vert.x is a <em class="calibre10">toolkit</em> and not a <em class="calibre10">framework</em>: it does not provide a pre-defined foundation for your application so you are free to use Vert.x as a library inside a larger code base. Vert.x is largely unopinionated on the build tools that you should be using, how you want to structure your code, how you intend to package and deploy it, etc. A Vert.x application is an assembly of modules providing exactly what you need, and nothing more. If you donât need to access a database then your project does not need to depend on database-related APIs.</p>
+</div> 
+<div class="readable-text" refid="106" id="106" data-hash="a7d11ab1d0a02f6684b13fcce20cf395">
+ <p>The Vert.x project is structured as follows:</p>
+</div> 
+<ol class="orderedlist"> 
+ <li class="listitem readable-text" refid="107" id="107" data-hash="e5cfac14b48d933a13490bf55ef66722"> a core project, called <code class="code">vertx-core</code>, provides the APIs for asynchronous programming, non-blocking I/O, streaming, and convenient access to networked protocols such as TCP, UDP, DNS, HTTP or WebSockets,<br /> </li> 
+ <li class="listitem readable-text" refid="108" id="108" data-hash="95f2d73e642e99c28a3f1b4cb70151db"> a set of modules that are part of the community-supported Vert.x stack, such as a better web API (<code class="code">vertx-web</code>) or databases (<code class="code">vertx-redis</code>, <code class="code">vertx-mongo</code>, etc),<br /> </li> 
+ <li class="listitem readable-text" refid="109" id="109" data-hash="6d42879b0983b840777ed31c13a7c22f"> a wider ecosystem of projects that provide even more functionality, such as connecting with Apache Cassandra, non-blocking I/O to communicate between system processes, etc.<br /> </li> 
+</ol> 
+<div class="readable-text" refid="110" id="110" data-hash="af8ae6998438b35472ca3eb96da22f7b">
+ <p>Vert.x is <em class="calibre10">polyglot</em> as it supports most of the popular JVM languages: JavaScript, Ruby, Kotlin, Scala, Groovy and more. Interestingly, the support of these languages is not just through interoperability of these languages with Java. Idiomatic bindings are being generated, so that you can write Vert.x code in these languages that still feels natural. For example the Scala bindings use the Scala future APIs, and the Kotlin bindings leverage custom DSLs and functions with named parameters to simplify some code constructs. And of course, you can mix and match different supported languages within the same Vert.x application.</p>
+</div> 
+<div class="readable-text" refid="111" id="111" data-hash="1d326402d11d2b0f94c66ceed410190b">
+ <h2 class="calibre17" id="heading_id_13"><a class="pcalibre pcalibre1" id="your-first-vert-x-application" shape="rect"></a>1.11 &nbsp;Your first Vert.x application</h2>
+</div> 
+<div class="readable-text" refid="112" id="112" data-hash="dfd27036bbda815ede899ec8755535b4">
+ <p>It is finally time for us to write a Vert.x application!</p>
+</div> 
+<div class="readable-text" refid="113" id="113" data-hash="6c8750ef7152d2b808e2a3291d63c38b">
+ <p>Let us continue with the echo TCP protocol that we have been using in various forms since the beginning of this chapter. It will still expose a TCP server on port 3000 where any data is being sent back to the client. We will add 2 other features:</p>
+</div> 
+<ol class="orderedlist"> 
+ <li class="listitem readable-text" refid="114" id="114" data-hash="4b0c36c4e8f0ef2df452d469a62b76c7"> the number of open connections will be displayed every 5 seconds, and<br /> </li> 
+ <li class="listitem readable-text" refid="115" id="115" data-hash="8d2e37727d2844faddc0bf7570e19daa"> a HTTP server on port 8080 will respond with a string giving the current number of open connections.<br /> </li> 
+</ol> 
+<div class="readable-text" refid="116" id="116" data-hash="128fe8cd9f4bd255fa4ce955e3c14b49">
+ <h3 class="calibre29" id="heading_id_14"><a class="pcalibre pcalibre1" id="preparing-the-project" shape="rect"></a>1.11.1 &nbsp;Preparing the project</h3>
+</div> 
+<div class="readable-text" refid="117" id="117" data-hash="7fb415726d25cbf4c403cf7647d1c80c">
+ <p>While not strictly necessary for this example, it is easier to use a build tool. In this book, I will show examples with Maven or Gradle depending on the chapters.</p>
+</div> 
+<div class="readable-text" refid="118" id="118" data-hash="d0dd8793f775c05a5d477d5e7b5e5a14">
+ <p>For this project the only third party dependency that we need is the <code class="code">vertx-core</code> artifact plus its dependencies. This artifact is on Maven Central under the <code class="code">io.vertx</code> group identifier.</p>
+</div> 
+<div class="readable-text" refid="119" id="119" data-hash="dd31b49a0af88361dc8cbfd76d327330">
+ <p>An integrated development environment (IDE) like <em class="calibre10">IntelliJ IDEA Community Edition</em> is great, and it knows how to create Maven and Gradle projects. You can equally use Eclipse, Netbeans or even Visual Studio Code.</p>
+</div> 
+<div class="readable-text" refid="120" id="120" data-hash="1a35e2f549463eec5b5711af6368b152">
+ <p>For this chapter let us use Gradle. A suitable <code class="code">build.gradle.kts</code> file would look like listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/gradle-build" shape="rect" title="Example 1.12. Gradle configuration to build and run VertxEcho">1.12</a>.</p>
+</div>   
+<div class=" browsable-container listing-container" refid="121" id="121" data-hash="29cca2b9ff2b78a57232b2a093474ea8">
+ <h5>Listing&nbsp;1.12.&nbsp;Gradle configuration to build and run VertxEcho</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">plugins {
+  java
+  application
+}
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  implementation(&quot;io.vertx:vertx-core:3.8.0&quot;)
+}
+
+java {
+  sourceCompatibility = JavaVersion.VERSION_1_8
+}
+
+application {
+  mainClassName = &quot;chapter1.firstapp.VertxEcho&quot; #1
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgVGhpcyBpcyB0aGUgZnVsbHkgcXVhbGlmaWVkIG5hbWUgb2YgdGhlIGNsYXNzIGNvbnRhaW5pbmcgYSBtYWluIG1ldGhvZCBzbyB0aGF0IHdlIGNhbiB1c2UgdGhlIHJ1biBHcmFkbGUgdGFzay4="></div> 
+ </div>
+</div>   
+<div class="tip"> 
+ <div class=" callout-container caution-container">
+  <div class="readable-text" refid="122" id="122" data-hash="5c622e940054ac4ab45712e2d7b5d25d">
+   <h5>Tip</h5>
+  </div>
+  <div class="readable-text" refid="123" id="123" data-hash="088550010b273125aafad1e2c0df5bde">
+   <p>You may be more familiar with Apache Maven than Gradle. This book uses Gradle as it is a modern, efficient and flexible build tool. It also uses a concise domain-specific language for writing build files which is better than Maven XML files.</p>
+  </div>
+  <div class="readable-text" refid="124" id="124" data-hash="ba41bc76a1ab5ee1d780fcc8e804089d">
+   <p>You will find Maven build descriptors equivalent to those of Gradle in the source code repository.</p>
+  </div>
+ </div> 
+</div> 
+<div class="readable-text" refid="125" id="125" data-hash="57e28697c2687795bd8326f721f2c218">
+ <h3 class="calibre29" id="heading_id_15"><a class="pcalibre pcalibre1" id="the-vertxecho-class" shape="rect"></a>1.11.2 &nbsp;The VertxEcho class</h3>
+</div> 
+<div class="readable-text" refid="126" id="126" data-hash="91e240b2b4ac2a9fe34468ffab6557be">
+ <p>The class implementation is given in listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/firstapp" shape="rect" title="Example 1.14. Implementation of the VertxEcho class">1.14</a>. We can run the application with Gradle using the <code class="code">run</code> task (<code class="code">gradle run</code> or <code class="code">./gradlew run</code>):</p>
+</div>   
+<div class=" browsable-container listing-container" refid="127" id="127" data-hash="ab99c0c9e6feffa2b76becbeed05ff38">
+ <h5>Listing&nbsp;1.13.&nbsp;Running VertxEcho</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">$ ./gradlew run
+
+&gt; Task :run
+We now have 0 connections
+We now have 0 connections
+We now have 0 connections
+We now have 1 connections
+We now have 1 connections
+Jul 07, 2018 11:44:14 PM io.vertx.core.net.impl.ConnectionBase
+SEVERE: Connection reset by peer
+We now have 0 connections
+&lt;=========----&gt; 75% EXECUTING [34s]
+&gt; :run</pre> 
+  <div class="code-annotations-overlay-container" data-annotations=""></div> 
+ </div>
+</div>   
+<div class=" browsable-container listing-container" refid="128" id="128" data-hash="aabb8df7ed711dd75804d5ec100699ee">
+ <h5>Listing&nbsp;1.14.&nbsp;Implementation of the VertxEcho class</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">package chapter1.firstapp;
+
+import io.vertx.core.Vertx;
+import io.vertx.core.net.NetSocket;
+
+public class VertxEcho {
+
+  private static int numberOfConnections = 0;   #1
+
+  public static void main(String[] args) {
+    Vertx vertx = Vertx.vertx();
+
+    vertx.createNetServer()
+      .connectHandler(VertxEcho::handleNewClient)   #2
+      .listen(3000);
+
+    vertx.setPeriodic(5000, id -&gt; System.out.println(howMany()));   #3
+
+    vertx.createHttpServer()
+      .requestHandler(request -&gt; request.response().end(howMany())) #4
+      .listen(8080);
+  }
+
+  private static void handleNewClient(NetSocket socket) {
+    numberOfConnections++;
+    socket.handler(buffer -&gt; {    #5
+      socket.write(buffer);
+      if (buffer.toString().endsWith(&quot;/quit\n&quot;)) {
+        socket.close();
+      }
+    });
+    socket.closeHandler(v -&gt; numberOfConnections--);    #6
+  }
+
+  private static String howMany() {
+    return &quot;We now have &quot; + numberOfConnections + &quot; connections&quot;;
+  }
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgQXMgd2Ugd2lsbCBzZWUgaW4gdGhlIG5leHQgY2hhcHRlciwgZXZlbnQgaGFuZGxlcnMgYXJlIGFsd2F5cyBleGVjdXRlZCBvbiB0aGUgc2FtZSB0aHJlYWQsIHNvIHRoZXJlIGlzIG5vIG5lZWQgZm9yIEpWTSBsb2NrcyBvciB1c2luZyBBdG9taWNJbnRlZ2VyLgojMiBDcmVhdGluZyBhIFRDUCBzZXJ2ZXIgcmVxdWlyZXMgcGFzc2luZyBhIGNhbGxiYWNrIGZvciBlYWNoIG5ldyBjb25uZWN0aW9uLgojMyBUaGlzIGRlZmluZXMgYSBwZXJpb2RpYyB0YXNrIGJ5IGEgY2FsbGJhY2sgYmVpbmcgZXhlY3V0ZWQgZXZlcnkgNSBzZWNvbmRzLgojNCBTaW1pbGFybHkgdG8gYSBUQ1Agc2VydmVyLCBhIEhUVFAgc2VydmVyIGlzIGJlaW5nIGNvbmZpZ3VyZWQgYnkgZ2l2ZW4gdGhlIGNhbGxiYWNrIHRvIGJlIGV4ZWN1dGVkIGZvciBlYWNoIEhUVFAgcmVxdWVzdC4KIzUgVGhlIGJ1ZmZlciBoYW5kbGVyIGlzIGJlaW5nIGludm9rZWQgZXZlcnkgdGltZSBhIGJ1ZmZlciBpcyByZWFkeSBmb3IgY29uc3VtcHRpb24uIEhlcmUgd2UganVzdCB3cml0ZSBpdCBiYWNrLCBhbmQgYWxzbyB1c2UgYSBjb252ZW5pZW50IHN0cmluZyBjb252ZXJzaW9uIGhlbHBlciB0byBsb29rIGZvciBhIHRlcm1pbmFsIGNvbW1hbmQuCiM2IEFub3RoZXIgZXZlbnQgaXMgd2hlbiB0aGUgY29ubmVjdGlvbiBjbG9zZXMuIFdlIGRlY3JlbWVudCBhIGNvbm5lY3Rpb25zIGNvdW50ZXIgdGhhdCB3YXMgaW5jcmVtZW50ZWQgdXBvbiBjb25uZWN0aW9uLg=="></div> 
+ </div>
+</div>  
+<div class="readable-text" refid="129" id="129" data-hash="3c4171b901746bbf94b3c05111501bc4">
+ <p>This example is interesting in that we have few lines of code. It is centered around a plain old Java <code class="code">main</code> method, as there is no framework to bootstrap. All we need to create is a <code class="code">Vertx</code> context, which in turns offers methods to create tasks, servers, clients and more as we will discover in the next chapters.</p>
+</div> 
+<div class="readable-text" refid="130" id="130" data-hash="5d1143e2ab87f4fd5ce91a85411d710c">
+ <p>While not apparent here, an event-loop is managing the processing of events, be it a new TCP connection, the arrival of a buffer, a new HTTP request, or a periodic task that is being fired. Also, every event handler is being executed on the same (event-loop) thread.</p>
+</div> 
+<div class="readable-text" refid="131" id="131" data-hash="f1b3b740ad99a5e6ef443ad5615d5c8f">
+ <h3 class="calibre29" id="heading_id_16"><a class="pcalibre pcalibre1" id="the-role-of-callbacks" shape="rect"></a>1.11.3 &nbsp;The role of callbacks</h3>
+</div> 
+<div class="readable-text" refid="132" id="132" data-hash="1a06b5347fd9bb85fc7fcf5e25f7ca47">
+ <p>As we have just seen in listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/firstapp" shape="rect" title="Example 1.14. Implementation of the VertxEcho class">1.14</a>, <em class="calibre10">callbacks</em> are the primary method for Vert.x to notify of asynchronous events and pass them to some handlers. Combined with lambda expressions in Java, they make for a concise way to define event handling.</p>
+</div> 
+<div class="readable-text" refid="133" id="133" data-hash="1f6c936a250d9f1337fc1d7558d7f118">
+ <p>You may have heard or experienced the infamous <em class="calibre10">&quot;callback hell&quot;</em> where callbacks get nested into callbacks, leading to code that is difficult to read and reason about:</p>
+</div>   
+<div class=" browsable-container listing-container" refid="134" id="134" data-hash="6a45afcbf0dde0563f5ea179b71a4e1c">
+ <h5>Listing&nbsp;1.15.&nbsp;Callback hell illustrated</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">dothis(a -&gt; {
+  dothat(b -&gt; {
+    andthis(c -&gt; {
+      andthat(d -&gt; {
+        alsothis(e -&gt; {
+          alsothat(f -&gt; {
+            // ...
+          });
+        });
+      });
+    });
+  });
+});</pre> 
+  <div class="code-annotations-overlay-container" data-annotations=""></div> 
+ </div>
+</div> 
+<div class="readable-text" refid="135" id="135" data-hash="276ec5a9e72cc0127b6754c91910d5f9">
+ <p>Be reassured: while the Vert.x core APIs indeed use callbacks, Vert.x provides support for more programming models. Callbacks are the canonical mean for notification in event-driven APIs, but as we will see in the next chapters it is possible to build other abstractions on top of them such as future and promises, reactive extensions or coroutines.</p>
+</div> 
+<div class="readable-text" refid="136" id="136" data-hash="939ae5d2cfb3917d3c0315739ff3172c">
+ <p>While callbacks have their issues, there are many cases with minimal levels of nesting where they remain a very good programming model with minimal dispatch overhead.</p>
+</div> 
+<div class="readable-text" refid="137" id="137" data-hash="e9d4c9f2faf0926e0d80dfe3681005a5">
+ <h3 class="calibre29" id="heading_id_17"><a class="pcalibre pcalibre1" id="so-is-this-a-reactive-application" shape="rect"></a>1.11.4 &nbsp;So is this a reactive application?</h3>
+</div> 
+<div class="readable-text" refid="138" id="138" data-hash="c7ccb0195f043b957d58dd4840659b6c">
+ <p>This is a very good question to ask. It is important to remember that while Vert.x is a toolkit for building reactive applications, using the Vert.x API and modules does not <em class="calibre10">&quot;auto-magically&quot;</em> make an application a reactive one. Yet, the event-driven, non-blocking APIs that Vert.x provides tick the first box.</p>
+</div> 
+<div class="readable-text" refid="139" id="139" data-hash="5aac1dd32dde894ad0c24b7fd4719f74">
+ <p>The short answer is that no, this application is not reactive. Resiliency is not the issue as the only errors that can arise are I/O related, and they simply result in discarding the connections. The application is also responsive, as it does not perform any complicated processing. If we benchmarked the TCP and HTTP servers we would get very good latencies with low deviation and very few outliers. Here is an imperfect yet telling quick benchmark with `wrk`<a class="pcalibre footnote" href="/book/vertx-in-action/chapter-1/v-10/ftn.d5e523" id="d5e523" shape="rect"><sup class="footnote1">[2]</sup></a> running from a terminal:</p>
+</div>   
+<div class=" browsable-container listing-container" refid="140" id="140" data-hash="6eff2b7e4f1576e704f024916e83ef9e">
+ <h5>Listing&nbsp;1.16.&nbsp;Output of a benchmark session with wrk</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">$ wrk --latency http://localhost:8080/
+Running 10s test @ http://localhost:8080/
+  2 threads and 10 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   136.98us  106.91us   7.26ms   97.37%
+    Req/Sec    36.62k     4.09k   45.31k    85.64%
+  Latency Distribution
+     50%  125.00us
+     75%  149.00us
+     90%  199.00us
+     99%  340.00us
+  735547 requests in 10.10s, 44.89MB read
+Requests/sec:  72830.90
+Transfer/sec:      4.45MB</pre> 
+  <div class="code-annotations-overlay-container" data-annotations=""></div> 
+ </div>
+</div> 
+<div class="readable-text" refid="141" id="141" data-hash="f11ef6671f6237b47f29a1e65c9b7d24">
+ <p>The culprit for not being reactive clearly is elasticity. Indeed if we create new instances, each instance maintains its own connection counter. The counter scope is the application, so it should be a shared global counter between all instances.</p>
+</div> 
+<div class="readable-text" refid="142" id="142" data-hash="e53074ae125d6b3610064aa7cee09fe2">
+ <p>As this example shows, designing reactive applications is more subtle than just implementing responsive and resource-efficient systems. Ensuring that an application can run as many replaceable instances is surprisingly more engaging, especially as we need to think about <em class="calibre10">instance state</em> versus <em class="calibre10">application state</em> to make sure that instances are interchangeable.</p>
+</div>  
+<div class="tip"> 
+ <div class=" callout-container caution-container">
+  <div class="readable-text" refid="143" id="143" data-hash="ce21fee7b44843a39c049a2b481914ea">
+   <h5>What if I am a Windows user?</h5>
+  </div>
+  <div class="readable-text" refid="144" id="144" data-hash="8afb7a85993f8ad421bb46c4cd88966e">
+   <p><code class="code">wrk</code> is a command-line tool that works on Unix systems like Linux and macOS.</p>
+  </div>
+  <div class="readable-text" refid="145" id="145" data-hash="3a686ee58b88a2a7719e1c1e3b150d07">
+   <p>In this book we prefer Unix-style tooling and command-line interfaces over graphical user interfaces. We will use Unix tools that are powerful, intuitive and maintained by active open source communities.</p>
+  </div>
+  <div class="readable-text" refid="146" id="146" data-hash="b42cb5893f6d9eb699611def92cf32bd">
+   <p>Fortunately you donât have to leave Windows to benefit from these tools! While some of these tools work natively on Windows, starting from Windows 10 you can install the <em class="calibre9">Windows Subsystem for Linux (WSL)</em> and benefit from a genuine Linux environment alongside your more traditional Windows desktop environment <a class="pcalibre para2" href="/book/vertx-in-action/chapter-1/v-10/WSL" shape="rect">[WSL]</a>. Microsoft markets WSL as a major feature for developers on Windows, and I can only recommend that you invest some time to get familiar with it.</p>
+  </div>
+ </div> 
+</div>  
+<div class="footnote2" id="ftn.d5e523"> 
+ <div class="readable-text" refid="147" id="147" data-hash="9138ce409e43cf23964793a0a749f988">
+  <p><a class="pcalibre para2" href="/book/vertx-in-action/chapter-1/v-10/d5e523" shape="rect"><sup class="para3">[2]</sup></a> See <a class="pcalibre3 pcalibre" href="https://github.com/wg/wrk" shape="rect">github.com/wg/wrk</a></p>
+ </div> 
+</div> 
+<div class="readable-text" refid="148" id="148" data-hash="abf4c0bb90216e72156e0975d97ece00">
+ <h2 class="calibre17" id="heading_id_18"><a class="pcalibre pcalibre1" id="what-are-the-alternatives-to-vert-x" shape="rect"></a>1.12 &nbsp;What are the alternatives to Vert.x?</h2>
+</div> 
+<div class="readable-text" refid="149" id="149" data-hash="b10e41c51ab4ff20ae66e5bed0c615ed">
+ <p>As you will see with this book, Vert.x is a compelling technology for building end-to-end reactive applications. Reactive application development is a trendy topic and it is more important to understand the principles than blindly becoming an expert in one specific technology. What you will learn in this book easily transfers to other technologies and I highly encourage you to check them out. Here are the most popular alternatives to Vert.x for asynchronous and reactive programming.</p>
+</div> 
+<div class="readable-text" refid="150" id="150" data-hash="40b9c28c8f9926b5fb61913ad77dab8b">
+ <p>Node.js is an event-driven runtime for writing asynchronous JavaScript applications <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/NodejsInAction" shape="rect">[NodejsInAction]</a>. It is based on the V8 JavaScript engine that is used by Google Chrome. At first sight Vert.x and Node.js have lots of similarities. Still, they differ greatly. Vert.x runs multiple event-loops by default, unlike Node.js. Also, the JVM has a better JIT compiler and garbage collector, so the JVM is better suited for long-running processes. Last but not least Vert.x supports JavaScript.</p>
+</div> 
+<div class="readable-text" refid="151" id="151" data-hash="b5c8f667ada53745ffa1d496490e1047">
+ <p>Akka is a faithful implementation of the <em class="calibre10">Actor</em> model <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/AkkaInAction" shape="rect">[AkkaInAction]</a>. It runs on the JVM and primarily offers Scala APIs, although Java bindings are also being promoted. Akka is particularly interesting as actors are message-driven, location transparent, and actors offer supervision features that are interesting for error-recovery. Akka clearly targets the design of reactive applications <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/ReactiveAppDevelopment" shape="rect">[ReactiveAppDevelopment]</a>. As we will see in this book Vert.x is no less capable for the task. Vert.x has a concept of <em class="calibre10">verticles</em> that are used for processing asynchronous events. As we will see later in this book, verticles are a loose form of actors. Interestingly, Vert.x is significantly faster than Akka and most alternatives in established benchmarks such as <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/TechEmpower" shape="rect">[TechEmpower]</a>.</p>
+</div> 
+<div class="readable-text" refid="152" id="152" data-hash="119fa2fe506a529b1efc09c8c94c1fa4">
+ <p>The older and widespread Spring Framework now integrates a reactive stack <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/SpringInAction" shape="rect">[SpringInAction]</a>. It is based around <em class="calibre10">Project Reactor</em>, an API for reactive programming that is very similar to RxJava. The focus on <em class="calibre10">Spring Reactive</em> is essentially on reactive programming APIs, but it does not necessarily lead to end-to-end reactive applications. Many parts in the Spring Framework employ blocking APIs, so extra care must be taken to limit the exposure to blocking operations. Project Reactor is a compelling alternative to RxJava, but <em class="calibre10">Spring Reactive</em> is tied to this API and it may not always be the best way to express certain asynchronous constructions. Vert.x provides more flexibility as it supports callbacks, futures, Java <code class="code">CompletionStage</code>, Kotlin coroutines, RxJava and fibers. This means that with Vert.x it is easier to select the right asynchronous programming model for a certain task. Also like with Akka, Vert.x remains significantly faster in <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/TechEmpower" shape="rect">[TechEmpower]</a>, and applications boot faster than Spring-based ones.</p>
+</div> 
+<div class="readable-text" refid="153" id="153" data-hash="23dadac1a54f053f5be02a4002f0a8eb">
+ <p>The Netty framework provides non-blocking I/O APIs for the JVM <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/NettyInAction" shape="rect">[NettyInAction]</a>. It provides abstractions and platform-specific bug fixes compared to using raw NIO APis. It also provides threading models. The target of Netty is low-latency and high-performance network applications. While you can certainly build reactive applications with Netty, the APIs remain somehow low-level. Vert.x is one of the many technologies built on top of Netty (Spring Reactive and Akka have Netty integration), and you can get all the performance benefits of Netty with the simpler APIs of Vert.x.</p>
+</div> 
+<div class="readable-text" refid="154" id="154" data-hash="f38b62ea402db469e921c8395c5329c2">
+ <p>Scripting languages such as Python and Ruby also provide non-blocking I/O libraries such as <em class="calibre10">Async</em> (Ruby) and <em class="calibre10">Twisted</em> (Python). You can certainly build reactive systems with them. Again, the JVM performance is an advantage for Vert.x, along with the ability to use alternative JVM languages (Ruby is officially supported by Vert.x).</p>
+</div> 
+<div class="readable-text" refid="155" id="155" data-hash="6d024119ec3d53323330ba3dd3c8a14d">
+ <p>Native languages are becoming trendy again. Instead of using the venerable C/C++ languages, Go <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/GoInAction" shape="rect">[GoInAction]</a>, Rust <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/RustInAction" shape="rect">[RustInAction]</a> and Swift <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/SwiftInDepth" shape="rect">[SwiftInDepth]</a> are gaining mindshare. They all tick the boxes for building highly scalable applications, and they certainly can be used for creating reactive applications. That being said most efficient libraries in these languages are fairly low-level, and ultimately the JVM-based Vert.x / Netty combination still ranks favorably in benchmarks <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/TechEmpower" shape="rect">[TechEmpower]</a>.</p>
+</div> 
+<div class="readable-text" refid="156" id="156" data-hash="14ab1b37792740d337c37cb5d94a3516">
+ <p>In the next part, we are going to dissect the fundamentals of asynchronous programming with Vert.x.</p>
+</div> 
+<div class="readable-text" refid="157" id="157" data-hash="b93a2a22827715bdaa5eb1a108133961">
+ <h2 class="calibre17" id="heading_id_19"><a class="pcalibre pcalibre1" id="summary" shape="rect"></a>1.13 &nbsp;Summary</h2>
+</div> 
+<ul class="itemizedlist"> 
+ <li class="listitem readable-text" refid="158" id="158" data-hash="43b57059f2ea6c059435a5fdd8a4d54f"> Asynchronous programming allows multiplexing multiple networked connections on a single thread.<br /> </li> 
+ <li class="listitem readable-text" refid="159" id="159" data-hash="ffe72f90d507a0d6d2552f0e9e3950d4"> Managing non-blocking I/O is more complex than the equivalent imperative code based on blocking I/O, even for simple protocols.<br /> </li> 
+ <li class="listitem readable-text" refid="160" id="160" data-hash="7fe044eb12b3fb7a0936bd2947b24b68"> The event-loop and the reactor pattern simplify asynchronous event processing.<br /> </li> 
+ <li class="listitem readable-text" refid="161" id="161" data-hash="339c07a31b1562f30f57668f6264ba13"> A reactive system is both scalable and resilient to produce responses with consistent latencies despite demanding workloads and failures.<br /> </li> 
+ <li class="listitem readable-text" refid="162" id="162" data-hash="109d573c084371700bd9d89b3bd7da22"> Vert.x is an approachable, efficient toolkit for writing asynchronous and reactive applications on the JVM.<br /> </li> 
+</ul> 
+<div class="readable-text" refid="163" id="163" data-hash="a32fe7beec4618015b77ac7ca990c422">
+ <h2 class="calibre17" id="heading_id_20"><a class="pcalibre pcalibre1" id="references" shape="rect"></a>1.14 &nbsp;References</h2>
+</div> 
+<div class="bibliodiv"> 
+ <div class="bibliomixed"> 
+  <a class="pcalibre" id="d5e586" shape="rect"></a> 
+  <div class="readable-text" refid="164" id="164" data-hash="43a1a422167693e5a96fe29c3a8f609e">
+   <p><span class="bibliomisc"><a class="pcalibre" id="ReactiveManifesto" shape="rect"></a>[ReactiveManifesto] Jonas Bon&eacute;r, Dave Farley, Roland Kuhn, Martin Thompson and contributors. The Reactive Manifesto. 2014. Published at <a class="pcalibre3 pcalibre" href="https://www.reactivemanifesto.org/" shape="rect">www.reactivemanifesto.org/</a></span></p>
+  </div> 
+ </div> 
+ <div class="bibliomixed"> 
+  <a class="pcalibre" id="d5e590" shape="rect"></a> 
+  <div class="readable-text" refid="165" id="165" data-hash="351f43f7bbab81ebddea908eb51ee27c">
+   <p><span class="bibliomisc"><a class="pcalibre" id="NodejsInAction" shape="rect"></a>[NodejsInAction] Mike Cantelon, Marc Harter, T.J. Holowaychuk, and Nathan Rajlich. Node.js in Action. 2013. Manning Publications. ISBN 9781617290572.</span></p>
+  </div> 
+ </div> 
+ <div class="bibliomixed"> 
+  <a class="pcalibre" id="d5e593" shape="rect"></a> 
+  <div class="readable-text" refid="166" id="166" data-hash="9e520a962b2293ed9da6a006c59be610">
+   <p><span class="bibliomisc"><a class="pcalibre" id="AkkaInAction" shape="rect"></a>[AkkaInAction] Raymond Roestenburg, Rob Bakker, and Rob Williams. Akka in Action. 2016. Manning Publications. ISBN 9781617291012.</span></p>
+  </div> 
+ </div> 
+ <div class="bibliomixed"> 
+  <a class="pcalibre" id="d5e596" shape="rect"></a> 
+  <div class="readable-text" refid="167" id="167" data-hash="9153a80afe160423c60a2f77ea47dc26">
+   <p><span class="bibliomisc"><a class="pcalibre" id="TechEmpower" shape="rect"></a>[TechEmpower] TechEmpower benchmarks. Regularly updated and published at <a class="pcalibre3 pcalibre" href="https://www.techempower.com/benchmarks/" shape="rect">www.techempower.com/benchmarks/</a></span></p>
+  </div> 
+ </div> 
+ <div class="bibliomixed"> 
+  <a class="pcalibre" id="d5e600" shape="rect"></a> 
+  <div class="readable-text" refid="168" id="168" data-hash="4957c6a8a15e9086b9012c1676ba3d94">
+   <p><span class="bibliomisc"><a class="pcalibre" id="SpringInAction" shape="rect"></a>[SpringInAction] Craig Walls. Spring in Action, Fifth edition. 2018. Manning Publications. ISBN 9781617294945.</span></p>
+  </div> 
+ </div> 
+ <div class="bibliomixed"> 
+  <a class="pcalibre" id="d5e603" shape="rect"></a> 
+  <div class="readable-text" refid="169" id="169" data-hash="156c2a91ca23af1f6d8e800ff13abcea">
+   <p><span class="bibliomisc"><a class="pcalibre" id="GoInAction" shape="rect"></a>[GoInAction] William Kennedy with Brian Ketelsen and Erik St. Martin. Go in Action. 2015. Manning Publications. ISBN 9781617291784.</span></p>
+  </div> 
+ </div> 
+ <div class="bibliomixed"> 
+  <a class="pcalibre" id="d5e606" shape="rect"></a> 
+  <div class="readable-text" refid="170" id="170" data-hash="4fa31df3033032077748f88859e9e138">
+   <p><span class="bibliomisc"><a class="pcalibre" id="RustInAction" shape="rect"></a>[RustInAction] Tim McNamara. Rust in Action. 2019. Manning Publications. ISBN 9781617294556.</span></p>
+  </div> 
+ </div> 
+ <div class="bibliomixed"> 
+  <a class="pcalibre" id="d5e609" shape="rect"></a> 
+  <div class="readable-text" refid="171" id="171" data-hash="4a22433c74569526473ddbfcea076a9a">
+   <p><span class="bibliomisc"><a class="pcalibre" id="NettyInAction" shape="rect"></a>[NettyInAction] Norman Maurer and Marvin Allen Wolfthal. Netty in Action. 2015. Manning Publications. ISBN 9781617291470.</span></p>
+  </div> 
+ </div> 
+ <div class="bibliomixed"> 
+  <a class="pcalibre" id="d5e612" shape="rect"></a> 
+  <div class="readable-text" refid="172" id="172" data-hash="55b385edb962a935f4d701b31368c4c7">
+   <p><span class="bibliomisc"><a class="pcalibre" id="SwiftInDepth" shape="rect"></a>[SwiftInDepth] Tjeerd in 't Veen. Swift in Depth. 2018. Manning Publications. ISBN 9781617295188.</span></p>
+  </div> 
+ </div> 
+ <div class="bibliomixed"> 
+  <a class="pcalibre" id="d5e615" shape="rect"></a> 
+  <div class="readable-text" refid="173" id="173" data-hash="e5a8a2209b163f720d4d7e8f4b7809b4">
+   <p><span class="bibliomisc"><a class="pcalibre" id="ReactiveAppDevelopment" shape="rect"></a>[ReactiveAppDevelopment] Duncan K. DeVore, Sean Walsh, and Brian Hanafee. Reactive Application Development. 2018. Manning Publications. ISBN 9781617292460.</span></p>
+  </div> 
+ </div> 
+ <div class="bibliomixed"> 
+  <a class="pcalibre" id="d5e618" shape="rect"></a> 
+  <div class="readable-text" refid="174" id="174" data-hash="f974b2b4a31109e1e160f15f899ae9d4">
+   <p><span class="bibliomisc"><a class="pcalibre" id="FunctionalReactiveProg" shape="rect"></a>[FunctionalReactiveProg] Stephen Blackheath and Anthony Jones. Functional Reactive Programming. 2016. Manning Publications. ISBN 9781633430105.</span></p>
+  </div> 
+ </div> 
+ <div class="bibliomixed"> 
+  <a class="pcalibre" id="d5e621" shape="rect"></a> 
+  <div class="readable-text" refid="175" id="175" data-hash="346ad59f4afa30d6edd65a0c528762f6">
+   <p><span class="bibliomisc"><a class="pcalibre" id="WSL" shape="rect"></a>[WSL] Microsoft. Frequently Asked Questions about Windows Subsystem for Linux. Retrieved January 2020. <a class="pcalibre3 pcalibre" href="https://docs.microsoft.com/en-us/windows/wsl/faq" shape="rect">docs.microsoft.com/en-us/windows/wsl/faq</a></span></p>
+  </div> 
+ </div> 
+</div>

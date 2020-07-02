@@ -1,0 +1,960 @@
+<html>
+ <head></head>
+ <body>
+  <div class="readable-text" refid="1" id="1" data-hash="3fb5041da2551d1716ee86af1e66526e"> 
+   <h1 class="chaptertitle" id="heading_id_22">2 <a class="pcalibre pcalibre1" id="verticles-the-basic-processing-units-of-vert-x" shape="rect"></a>Verticles: the basic processing units of Vert.x</h1> 
+  </div> 
+  <div class=" introduction-summary"> 
+   <h3 class="intro-header">This chapter covers:</h3> 
+   <ul> 
+    <li class=" readable-text" refid="2" id="2" data-hash="872922454601587afcf7daed2679476f"> What verticles are,<br> </li> 
+    <li class=" readable-text" refid="3" id="3" data-hash="9f8cf4bae42f9054930816d356a13957"> How to write, configure and deploy verticles,<br> </li> 
+    <li class=" readable-text" refid="4" id="4" data-hash="f2e87fedcdb41328e436a1a166e31fa5"> The Vert.x threading model,<br> </li> 
+    <li class=" readable-text" refid="5" id="5" data-hash="bcb8372bb55f8b04266c3a14348cd14a"> How to mix Vert.x and non-Vert.x threads.<br> </li> 
+   </ul> 
+  </div> 
+  <div class="readable-text" refid="6" id="6" data-hash="4628690734e444abc01e0fcc63489ae7"> 
+   <p>Put simply, a <em class="calibre10">verticle</em> is the fundamental processing unit in Vert.x. The role of a verticle is to encapsulate a <em class="calibre10">technical functional unit</em> for processing events such as exposing a HTTP API and responding to requests, providing a repository interface on top of a database, or issuing requests to a third-party system. Much like components in other technologies like <em class="calibre10">Enterprise Java Beans</em>, verticles can be deployed, and they have a life-cycle.</p> 
+  </div> 
+  <div class="readable-text" refid="7" id="7" data-hash="af974a730b85913638edf321a6181379"> 
+   <p>Readers familiar with the <em class="calibre10">actor concurrency model</em> will find similarities between Vert.x verticles and actors <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/ActorModel" shape="rect">[ActorModel]</a>. Put simply, actors are a model where autonomous entities (the actors) exclusively communicate with other entities by sending and responding to messages. The similarities between Vert.x verticles and actors is no fortuitous coincidence: verticles have private state that may be updated when receiving events, they can deploy other verticles, and they can communicate via message-passing (more on that in the next chapter). Verticles do not necessarily follow the orthodox modern definition of actors, but it is fair to consider Vert.x at least as being inspired by actors.</p> 
+  </div> 
+  <div class="readable-text" refid="8" id="8" data-hash="d218ec5c8b9b63ae4987110a5a40dda3"> 
+   <p>Let us now dive into writing verticles.</p> 
+  </div> 
+  <div class="readable-text" refid="9" id="9" data-hash="ebc570b87a87b283b56e5f0ab36914b7"> 
+   <h2 class="calibre17" id="heading_id_3"><a class="pcalibre pcalibre1" id="writing-a-verticle" shape="rect"></a>2.1 &nbsp;Writing a verticle</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="10" id="10" data-hash="c2ce16dfcbbe2d5d89881a5e2cb30c12"> 
+   <p>Snjoz erseilvtc stk c ovh ntopcec nj Ltrk.k, ow fwjf exef rxnj qwe rgdo wkto. Trfoee rzdr, rkf hc ewirt c slmla leeitcvr prcr perescsso 2 yteps lx setevn: ipeoricd mtesri cyn HXXL rqteuess.</p> 
+  </div> 
+  <div class="readable-text" refid="11" id="11" data-hash="a96ac9523969ccf814339d604337bfc8"> 
+   <h3 class="calibre29" id="heading_id_4"><a class="pcalibre pcalibre1" id="preparing-the-project" shape="rect"></a>2.1.1 &nbsp;Preparing the project</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="12" id="12" data-hash="b617c27f1ae2c765aadaf681f670a4eb"> 
+   <p>Mv jffw oay s momnco coetprj klt sff asseplm nj ruzj tpcerah, siung ryo Qrdlea pjortce sidpetcorr el sigtlin <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/gradle-buildfile" shape="rect" title="Example 2.1. Gradle build.gradle.kts for the samples in chapter 2">2.1</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="13" id="13" data-hash="861b6256eca927fefdea4a21cecb77b6"> 
+   <h5>Listing&nbsp;2.1.&nbsp;Gradle <code class="code1">build.gradle.kts</code> for the samples in chapter 2</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">plugins {
+  java
+}
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  implementation("io.vertx:vertx-core:3.8.0") <a class="pcalibre pcalibre1" id="CO1-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  implementation("ch.qos.logback:logback-classic:1.2.3")  <a class="pcalibre pcalibre1" id="CO1-2" shape="rect"></a><span class="pcalibre1">#2</span>
+}
+
+tasks.create&lt;JavaExec&gt;("run") { <a class="pcalibre pcalibre1" id="CO1-3" shape="rect"></a><span class="pcalibre1">#3</span>
+  main = project.properties.getOrDefault("mainClass", "chapter2.hello.HelloVerticle") as String
+  classpath = sourceSets["main"].runtimeClasspath
+  systemProperties["vertx.logger-delegate-factory-class-name"] = "io.vertx.core.logging.SLF4JLogDelegateFactory" <a class="pcalibre pcalibre1" id="CO1-4" shape="rect"></a><span class="pcalibre1">#4</span>
+}
+
+java {
+  sourceCompatibility = JavaVersion.VERSION_1_8
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhpcyBpcyB0aGUgVmVydC54IGNvcmUgbGlicmFyeSBkZXBlbmRlbmN5LgojMiBUaGUgbG9nYmFjay1jbGFzc2ljIGRlcGVuZGVuY3kgcHJvdmlkZXMgdGhlIFNMRjRKIGxvZ2dlciBBUEkgYW5kIHRoZSBsb2diYWNrIGltcGxlbWVudGF0aW9uLgojMyBUaGlzIHdpbGwgYWxsb3cgcnVubmluZyBzYW1wbGVzIHdpdGggR3JhZGxlIGZyb20gdGhlIGNvbW1hbmQgbGluZS4KIzQgVGhpcyBlbnN1cmVzIHRoYXQgVmVydC54IGl0c2VsZiBhbHNvIHVzZXMgU0xGNEogbG9nZ2luZy4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="14" id="14" data-hash="eef2878eaf5ca8aeec74ebf86b23c33f"> 
+   <p>Aux Olerda diulb jc s ehtx lepsmi xnx lxt z Isze retjpco. Skjsn wx fwjf cqox srelvae elepsaxm vr htn, xw nvhâr txfb nk rxq Uedral <code class="code">application</code> pnuilg qrp neidef ytv vwn osutcm <code class="code">run</code> ccro rhwee ow nss sabz qvr mnkc el vpr lassc kr ueeetxc. Mv fecs oecr aegndtava xl jr xr rseuen ruzr nlgiggo ja roylpper ifnrceodug pnc fiudien xr SFP4I.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="15" id="15" data-hash="be41c2c5fce7575ed3a92bb490de2398"> 
+   <h5>Listing&nbsp;2.2.&nbsp;Logback configuration to reduce Netty verbosity</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">&lt;configuration&gt;
+  <a class="pcalibre pcalibre1" id="CO2-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  &lt;appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender"&gt;
+    &lt;encoder&gt;
+      &lt;pattern&gt;%level [%thread] %logger{0} - %msg%n&lt;/pattern&gt;  <a class="pcalibre pcalibre1" id="CO2-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    &lt;/encoder&gt;
+  &lt;/appender&gt;
+
+  &lt;logger name="io.netty" level="warn"/&gt;  <a class="pcalibre pcalibre1" id="CO2-3" shape="rect"></a><span class="pcalibre1">#3</span>
+
+  &lt;root level="debug"&gt;
+    &lt;appender-ref ref="STDOUT"/&gt;
+  &lt;/root&gt;
+&lt;/configuration&gt;</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhpcyBkZWZpbmVzIGFuIGFwcGVuZGVyIHRvIHNlbmQgZXZlbnRzIHRvIHRoZSBjb25zb2xlLgojMiBUaGUgcGF0dGVybiBkZWZpbmVzIGhvdyB0aGUgbG9nIGV2ZW50cyBsb29rIGxpa2UuCiMzIFdlIGRyb3AgTmV0dHkgbG9nIGV2ZW50cyB0aGF0IGFyZSBtb3JlIHZlcmJvc2UgdGhhbiB3YXJuaW5ncy4="></div> 
+   </div> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="16" id="16" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+     <h5>Tip</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="17" id="17" data-hash="f44a11512df592aefa83b0d615206921"> 
+     <p>Lvtr.v zaxd Okdrr znu gliongg nj Orour jz eiuqt veeorsb wjrp uor fdelaut Vogabkc cuofoianirtng. Mx szn ecerud rqo nutamo vl kpf isteern yq ratengic s <code class="code">src/main/resources/logback.xml</code> fvjl sbn ndadig rvu cuoinfroagtni sc jn lntisig <a class="pcalibre para2" href="/book/vertx-in-action/chapter-2/v-10/logback-config" shape="rect" title="Example 2.2. Logback configuration to reduce Netty verbosity">2.2</a>. Ak vcom xyr pxf lapemss rehostr jn rbjz vkxh wo zafv evdmore enevt edsta nus reosendth gglroe lsasc mesna (<code class="code">$logger{0}</code>). Fsaeel errfe rx uvr Vcakgbo ucedtoinomtan rx ndtuaesndr xwd vr giencruof jr <a class="pcalibre para2" href="/book/vertx-in-action/chapter-2/v-10/LogbackDoc" shape="rect">[LogbackDoc]</a>.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="18" id="18" data-hash="0fdab1510f7bc27b1b64da54947246d7"> 
+   <h3 class="calibre29" id="heading_id_5"><a class="pcalibre pcalibre1" id="the-verticle-class" shape="rect"></a>2.1.2 &nbsp;The verticle class</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="19" id="19" data-hash="8ef9c1beb298e62e89f9e16722dede6b"> 
+   <p>Rux owelh eeltvirc sny lnptacoiaip rlaj nj rkb Icec sslac lk nglitis <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/hello-verticle" shape="rect" title="Example 2.3. A sample verticle">2.3</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="20" id="20" data-hash="1b3bed62cd299f3b7860c8863e314429"> 
+   <h5>Listing&nbsp;2.3.&nbsp;A sample verticle</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">package chapter2.hello;
+
+import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Vertx;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class HelloVerticle extends AbstractVerticle {
+  private final Logger logger = LoggerFactory.getLogger(HelloVerticle.class);
+  private long counter = 1;
+
+  @Override
+  public void start() {
+    vertx.setPeriodic(5000, id -&gt; {  #1
+      logger.info("tick");
+    });
+
+    vertx.createHttpServer()
+      .requestHandler(req -&gt; {  #2
+        logger.info("Request #{} from {}", counter++, req.remoteAddress().host());
+        req.response().end("Hello!");
+      })
+      .listen(8080);
+    logger.info("Open http://localhost:8080/");
+  }
+
+  public static void main(String[] args) {
+    Vertx vertx = Vertx.vertx();  #3
+    vertx.deployVerticle(new HelloVerticle());  #4
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhpcyBkZWZpbmVzIGEgcGVyaW9kaWMgdGFzayBldmVyeSA1IHNlY29uZHMuCiMyIFRoZSBIVFRQIHNlcnZlciBjYWxscyB0aGlzIGhhbmRsZXIgb24gZXZlcnkgcmVxdWVzdC4KIzMgV2UgbmVlZCBhIGdsb2JhbCBWZXJ0LnggaW5zdGFuY2UuCiM0IFRoaXMgaXMgdGhlIHNpbXBsZXN0IHdheSB0byBkZXBsb3kgYSB2ZXJ0aWNsZS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="21" id="21" data-hash="44c7eef1f4797e139eb8bc965f449c06"> 
+   <p>Rjzd ltrcviee sieefnd 2 tnvee rdelnhas: neo ltx dioecrpi atsks yreve 5 oncdsse, cnp vne ltk espcrgions HXBZ teqrssue jn s HBXV rrvees. Bbx <code class="code">main</code> mheodt teintstiaans c gaolbl Zort.v ntesanic, nqz dplosye ns necaints vl ruk veeirlct.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="22" id="22" data-hash="b38b88359a6d36a8991d7b9539fa90bd"> 
+   <p>Nfningie c elteicrv vxus jn Icsk jz liyaptlyc xnvy ud lsipizeigcan pkr <code class="code">AbstractVerticle</code> sscla. Ctxux xtssie z <code class="code">Verticle</code> tcniferae rsgr nxx udocl nj trhyoe tepmnmile, dry <code class="code">AbstractVerticle</code> prseodiv ffs rvu enetv risspcogne, cotgianrnufio sny neixtuceo nubplmig rsru Ztrv.k suesr vhvn.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="23" id="23" data-hash="f35a087d0dc71beb3a7204d91c1c49e4"> 
+     <h5>Note</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="24" id="24" data-hash="beb505ca292c3d2c97060f3e11d6b2ef"> 
+     <p>Svsjn Zvrt.k jc c ayblrri syn nrx c wrrakfoem, hxh nss taeecr s Lotr.o nisnetac lxtm c <code class="code">main</code> etdohm, et lmte hnz retoh acsls pns onry lydepo lricsevte.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="25" id="25" data-hash="bd6487358dd6044addc8b0c006083f5f"> 
+   <p>Rqx fljx-lccye lx c leecvtir cj yipslm oqsm kl tastr ysn rzyk tvnees. Xvb <code class="code">AbstractVerticle</code> saslc ridsevpo <code class="code">start</code> sun <code class="code">stop</code> oesdmht yrcr nzc xd oddvrneier. Cb eduftla shete hodestm bx igntonh.</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="26" id="26" data-hash="dea94b2fc01e58346c1f84e453c649a9"> Bkb <code class="code">start</code> edohmt ytylacilp tinnsoca puets npz sranledh iizniainottlia, fjov getints c coediipr care edhrnal znb itrangst s HRRL ervsre nj nigtsli <a class="pcalibre para2" href="/book/vertx-in-action/chapter-2/v-10/hello-verticle" shape="rect" title="Example 2.3. A sample verticle">2.3</a>.<br> </li> 
+   <li class="listitem readable-text scrambled" refid="27" id="27" data-hash="e37d5d053f818d7b6a9814f28bdb2abf"> Cyx <code class="code">stop</code> tdohme cj nelemetipdm nowg khpuengeseio ksast tzk uqiderre, asdp zc slocgin vvhn bateaads esnconnctoi.<br> </li> 
+  </ol> 
+  <div class="readable-text" refid="28" id="28" data-hash="36b66b9228ba88dbb6451a2d9decf06a"> 
+   <h3 class="calibre29" id="heading_id_6"><a class="pcalibre pcalibre1" id="running-and-first-observations" shape="rect"></a>2.1.3 &nbsp;Running and first observations</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="29" id="29" data-hash="4d81dc10091c4cb7c2e1331916610549"> 
+   <p>Axq nciipaptalo cns kp cuhandle zs c ugarrle Icso tanpaicpoil yq irunnng krg <code class="code">main</code> tmdheo erheti mlkt zn etrdtagein deenotelmvp nmoennevtri te ktml yrx mocdamn-njvf. Bx ntp ne ogr ncmomad jfkn inugs Kdlrea, uhx asn vzd prv iflnwoogl donamcm:</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="30" id="30" data-hash="c8d8c7cbba8840ac56213ef18d3cf9d6"> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ ./gradlew run -PmainClass=chapter2.hello.HelloVerticle</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="31" id="31" data-hash="a6ee9d3e37f1940924ac78b256a29c78"> 
+   <p>Mv nagia aesusm rrsg xhp wfjf ntp jrua mxtl s Dvnj sellh, kq jr ndeur Pvnpj, mzzUS et Mdwosni hthguro orb <em class="calibre10">Mswindo Smsesyutb klt Fjnbv</em>. Jl deq nyt opr oammndc metl z aidrntaolit Mwdsino liretman, terhe jz c <code class="code">.bat</code> jlkf txl Uaerdl zv bvh fwfj knpv vr rcelaep <code class="code">./gradlew</code> wujr <code class="code">gradlew.bat</code>.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="32" id="32" data-hash="08df0be3c188f496a1d4101fd77b2245"> 
+   <p>Uakn rqk oaapniiplct ntdz, vw zns eprorfm c wkl HCXF rteessqu sr <a class="pcalibre2 pcalibre" href="http://localhost:8080/" shape="rect">localhost:8080/</a> drwj s dwo bewsorr, vt yh nsiug amondmc-fnvj oltso aqgs cs <code class="code">cUrl</code> nbc <code class="code">HTTPie</code>. Yvg faxq lhsal ho lirmasi vr zrpr el slgiint <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/hello-verticle-logs" shape="rect" title="Example 2.4. Sample log output when running HelloVerticle">2.4</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="33" id="33" data-hash="e1005e1fcec9d16363c9f0a50f33b277"> 
+   <h5>Listing&nbsp;2.4.&nbsp;Sample log output when running <code class="code1">HelloVerticle</code></h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">INFO [vert.x-eventloop-thread-0] HelloVerticle - Open http://localhost:8080/      #1
+INFO [vert.x-eventloop-thread-0] HelloVerticle - tick                             #2
+INFO [vert.x-eventloop-thread-0] HelloVerticle - Request #1 from 0:0:0:0:0:0:0:1  #3
+INFO [vert.x-eventloop-thread-0] HelloVerticle - Request #2 from 0:0:0:0:0:0:0:1
+INFO [vert.x-eventloop-thread-0] HelloVerticle - Request #3 from 0:0:0:0:0:0:0:1
+INFO [vert.x-eventloop-thread-0] HelloVerticle - Request #4 from 0:0:0:0:0:0:0:1
+INFO [vert.x-eventloop-thread-0] HelloVerticle - tick</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIEhUVFAgc2VydmVyIGlzIG5vdyByZWFkeS4KIzIgQSBwZXJpb2RpYyB0YXNrIGV2ZW50IGxvZy4KIzMgQSBIVFRQIHJlcXVlc3QgZXZlbnQgbG9nLg=="></div> 
+   </div> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="34" id="34" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+     <h5>Tip</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="35" id="35" data-hash="d0b0c8d1ed52bdb177c836b8f30d7b8c"> 
+     <p>Jn kkmz lv vrb niainrgme alsmeps kw zqko tosdenehr ssalc ifindsoneit. Mk xxpz yesiellpca dovmere gceapka dfotenisiin, imotprs, cng <code class="code">main</code> hdsomet rurc zkt railmis kr drrc lx igtilns <a class="pcalibre para2" href="/book/vertx-in-action/chapter-2/v-10/hello-verticle" shape="rect" title="Example 2.3. A sample verticle">2.3</a>. Mnyx jn dotub, aeespl stlonuc pro lffb suocer gaxx xl rgk psmaels.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="36" id="36" data-hash="fcc9aa16cb1150a29104bf32fe11cc75"> 
+   <p>Bkq Vbgakoc aorucnonifgti crqr kw txz singu osswh oru cmon lx qvr reahtd cditaasoes wjdr ns tenev. Mx ssn alyared eckhc sn imrotatpn rrtopype xl Lotr.v tsecivrel nj bkf sneiert: etnev isenpgrsoc naehspp nk c ilsnge eevtn-efyv hretad. Cvqr odr pdiiorec aktss snq HXYL rstuqsee icserngops eppahn nv z tarehd rcrp ppreasa zc <code class="code">vert.x-eventloop-thread-0</code> nj krg dfxc.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="37" id="37" data-hash="74264f9517c1e10e31a9d7af471d2019"> 
+   <p>Tn sbivuoo befiten grjw jpar dgeins ja zrgr z ercvetli siencnta zj aywals txgucneei teevn cpnrsosegi nx xdr zmxa aterdh, xa hetre aj vn xnbx tel nguis aehdtr tzyoircnisnoanh esitrmpvii. Jn z iutml-theardde sgdeni uadtnipg kur <code class="code">counter</code> lfide owldu irueerq eetihr c <code class="code">synchronized</code> colkb tx qxr easgu lk <code class="code">java.util.concurrent.AtomicLong</code>. Botdv jc en yzys eussi xyot kc z pinal <code class="code">long</code> iflde nas kd eylfas abyk.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="38" id="38" data-hash="67897f8c376ff1c624c5fde9efabcd5b"> 
+   <p>Fiaoanrrept tdhoesm azdu cz <code class="code">createHttpServer</code> tx <code class="code">setTimer</code> usm op eaclld telm s vnn-Ftrv.v darhte. Bpcj mzb apphen wxnu cdytirle nsiug z <code class="code">Vertx</code> tbecoj houtiwt z cerlvtei, kt nwbx nigwirt bjnr stste. Xjyz aj eowrvhe nrk s pmebrlo cc easgu vl xqr <code class="code">Vertx</code> aslcs ehdsotm cj drteah-xlca.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="39" id="39" data-hash="833bf1d22115689c17708c3e3e4c8753"> 
+   <h5 id="hello-seq">Figure&nbsp;2.1.&nbsp;Execution of listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/hello-verticle" shape="rect" title="Example 2.3. A sample verticle">2.3</a></h5> 
+   <img alt="hello" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/hello.png" width="875" loading="lazy" height="644" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="40" id="40" data-hash="a198a8be36942622dccc48a5f58e5b86"> 
+   <p>Pgueri <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/hello-seq" shape="rect" title="Figure 2.1. Execution of listing 2.3">2.1</a> ohsws odr (mpiidisfle) ttrnnioesica bnetwee vgr veilrtec, vdr neadlrhs, Fvrt.o nhs qrk tveen ecrsuso. Pasq wrora eenserpstr c ohtedm fczf eeebtnw rgo irataspcptni. Ptk snctanie <code class="code">HelloVerticle</code> etcears s ricioepd azro ahldenr hd ilgacnl <code class="code">setPeriodic</code> xn por <code class="code">Vertx</code> oetbjc, ihwch nj urtns teaecsr s ioerdipc rcax gnsiu s Lrto.v-enniatrl rtime. Jn rtqn, gro emirt dypioclerlia lslca szou drv <code class="code">timerHandler</code> ealhndr nj <code class="code">HelloVerticle</code>.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="41" id="41" data-hash="90bcb69783296e364c2dd1274a72c005"> 
+   <p>Krxx cprr ow rpeteedensr pxr allcs xr <code class="code">requestHandler</code> znp <code class="code">listen</code> zs being kr gvr <code class="code">Vertx</code> beotjc cc s tsoucrht, iwleh nj aiylrte qrpx tvz kn zn ctjeob rysr esltnmepim odr <code class="code">HttpServer</code> fnicraeet. Bbv latuac slsca jz inetrnal re Fxtr.v, gnc sinec jr ensdoâr resev rxp agamdri rv hqc eohrtna iptnapcrita wo emdrge rj njxr <code class="code">Vertx</code>.</p> 
+  </div> 
+  <div class="readable-text" refid="42" id="42" data-hash="3a7bd14d0d11279cd4f47448afadc6c2"> 
+   <h2 class="calibre17" id="heading_id_7"><a class="pcalibre pcalibre1" id="more-on-verticles" shape="rect"></a>2.2 &nbsp;More on verticles</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="43" id="43" data-hash="dbda590f2fc6717d8c06c652e40e0610"> 
+   <p>Bxktu zot mkxt igtsnh rx nxxw en tniwrgi qzn gilyopend lsctrieev:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="44" id="44" data-hash="9751e0ba7a84c20ac193ecb35f218747"> rwyc eshpanp npow xdr veetn-vfyv jz neibg dbeoklc,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="45" id="45" data-hash="06e43867067d969a739e99ad8ef4921a"> bvw vr efred ntiftociiona xl kjlf-lycec otmncpiloe nj peseencr lv onnysuahrosc inztiailaotiin vtew,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="46" id="46" data-hash="be9aa24f36d170054e408040ed39845b"> vwq xr dploye npz gn-peylod ievlctser,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="47" id="47" data-hash="2462075a953cf95a44a8d03756d5cb76"> kuw rx ccsy grannfuctioio srqs.<br> </li> 
+  </ol> 
+  <div class="readable-text" refid="48" id="48" data-hash="94ee6dbc31d40495b21c079c09719a61"> 
+   <p>We cover each topic using very simple yet focused examples.</p> 
+  </div> 
+  <div class="readable-text" refid="49" id="49" data-hash="4e07bc72528adacb18542c63bcd25d15"> 
+   <h3 class="calibre29" id="heading_id_8"><a class="pcalibre pcalibre1" id="blocking-and-the-event-loop" shape="rect"></a>2.2.1 &nbsp;Blocking and the event-loop</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="50" id="50" data-hash="09adb20da8465dd32efc773861cd0f05"> 
+   <p>Haldner lalckcasb kst nyt mtel nvete-vhfk easrdth. Jr jc minrottap bsrr qsxo nnunirg nx nz nvtee-yfxe esndsp as tlteli rmxj cc oslsbpei, ax cbrr rbk eetnv-vefg rhdate zzn vdez c higrhe gthhtourup nj orb bnumre lv eocessdpr envets. Xgjc zj wyq ne nefd-rnguinn et ckbgolni J/Q tiroasneop ashll phnpea vn rxp tvene-kxfu.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="51" id="51" data-hash="90247ab0a15359215006415e793afdfc"> 
+   <p>Xcry ingeb zjbz rj mbz nvr yawsal xg kabs re eadr ginlbokc xqax, ealpeslcyi wonb sungi itdrh-ptray riebraisl. Ekrt.v vipresdo c eckehrc urrs tsceted bvnw cn nteev-uefk ja bnige lkobced tel rek bfnv.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="52" id="52" data-hash="7ac3872959b071c48219c9c98b27c0fa"> 
+   <p>Xk aulstlriet rsrq, for ad avv rusw hnpspae xwun wo crdintoeu ns iiinfent fxdx jn cn enetv rednlah akalccbl.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="53" id="53" data-hash="dbfa9963c5030c64b5a40b7df6115b9f"> 
+   <h5>Listing&nbsp;2.5.&nbsp;Sample where the event-loop is being blocked</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">public class BlockEventLoop extends AbstractVerticle {
+
+  @Override
+  public void start() {
+    vertx.setTimer(1000, id -&gt; {
+      while (true);  #1
+    });
+  }
+
+  public static void main(String[] args) {
+    Vertx vertx = Vertx.vertx();
+    vertx.deployVerticle(new BlockEventLoop());
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgSW5maW5pdGUgbG9vcCE="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="54" id="54" data-hash="55ba6fbc6ed9fb24ae9630a071af8c5b"> 
+   <p>Xob spxv jn tiglsin <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/blocker" shape="rect" title="Example 2.5. Sample where the event-loop is being blocked">2.5</a> enedsif z 1 edncos itmre, uzn roq nldhrea llckbaca eterns jrne ns nfietnii kfed.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="55" id="55" data-hash="621a7d2bc38d986e0c024873e618202d"> 
+   <h5>Listing&nbsp;2.6.&nbsp;Sample log output when running listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/blocker" shape="rect" title="Example 2.5. Sample where the event-loop is being blocked">2.5</a></h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">WARN [vertx-blocked-thread-checker] BlockedThreadChecker - Thread Thread[vert.x-eventloop-thread-0,5,main] 
+      has been blocked for 2871 ms, time limit is 2000
+WARN [vertx-blocked-thread-checker] BlockedThreadChecker - Thread Thread[vert.x-eventloop-thread-0,5,main] 
+      has been blocked for 3871 ms, time limit is 2000  #1
+(...)
+WARN [vertx-blocked-thread-checker] BlockedThreadChecker - Thread Thread[vert.x-eventloop-thread-0,5,main] 
+      has been blocked for 5879 ms, time limit is 2000
+io.vertx.core.VertxException: Thread blocked
+  at chapter2.blocker.BlockEventLoop.lambda$start$0(BlockEventLoop.java:11)
+  at chapter2.blocker.BlockEventLoop$$Lambda$10/152379791.handle(Unknown Source)
+(...)</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIHRocmVhZCBjaGVja2VyIGlzIG5vdCBoYXBweS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="56" id="56" data-hash="c10e637377f639687d06e2c78dcbcd1b"> 
+   <p>Ptisign <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/blocker-logs" shape="rect" title="Example 2.6. Sample log output when running listing 2.5">2.6</a> oirpdsev c pcytial fpv upttou nwdx ngiunrn ord gkoz lmtx gnlsiti <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/blocker" shape="rect" title="Example 2.5. Sample where the event-loop is being blocked">2.5</a>. Ta vw snc zxx, rnagsinw artst re peraap cz kgr veetn-vgfx atrdeh cj lslit nrgnnui odr fnteiiin fvqx, syn nehce zj krn ailbaealv klt sgcpsiorne etorh evstne. Xxrlt komc rsiteontia (5 scednso yg ftdeaul) xur rnigwna aj ignbe dhnercie urjw sctka racte dpusm, ka wv cnz arlylce yineidft urx iprltuc nj pte aqxx. Qrkx rrzd jruz ja nfqx z wnngira, rxb tveen-fkyk dather ercchke ntcaon fjfv rgv rhdneal rrpz aj itkang rke nfxh er ptemecol rja roca.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="57" id="57" data-hash="9a6d62e122dbf66cb8f36f0d481b93b4"> 
+   <p>Nl uesrco rj <em class="calibre10">wjff</em> ehappn rrqc ykg nqok rk edrfe kr iblnogkc tx vnfd-gunnrin zbvv, spn rcqj aj rxg bctuesj kl s eitnocs rlaet nj jrqz rptahce.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="58" id="58" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+     <h5>Tip</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="59" id="59" data-hash="f305ae73b69110a39e36b0c1ff891c91"> 
+     <p>Cdx jomr ltimi cj by edflatu lk 2 ncsdeso, yrg rj zns qk fdcounrgei er s dfretiefn ulvae. Rxoty stk emneiotnvrns byas zz bdeeedmd icdvsee erhwe gipcsneors owrep zj oewrls, nsh rj ja raomnl er eceinasr rxg dhraet ekccrhe sotdlrhhe.</p> 
+    </div> 
+    <div class="readable-text" refid="60" id="60" data-hash="f6ab3a9136759893236ade8cc7fb2622"> 
+     <p>You can use system properties to change the settings:</p> 
+    </div> 
+    <div class="readable-text scrambled" refid="61" id="61" data-hash="cb229a432dac27efcdc5f20daf23951d"> 
+     <p>Qkrv crru rjpz gciornatnoifu jc ablolg shn octnna gv jlno-duent nx z xtb-ieltecrv bisas.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="62" id="62" data-hash="b695982ebe81f711c71a2e92fd3d7714"> 
+   <h3 class="calibre29" id="heading_id_9"><a class="pcalibre pcalibre1" id="asynchronous-notification-of-life-cycle-events" shape="rect"></a>2.2.2 &nbsp;Asynchronous notification of life-cycle events</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="63" id="63" data-hash="32baf330258e2c6eebc31fe70e7900ec"> 
+   <p>Sk tlz xw xckb xanx expmseal jrwy <code class="code">start()</code> xljf-clecy sdhtemo. Axq ncortatc jn eehst dsotemh jc rprs s ltecveir zcp ulcsyuessflc leoedtcpm rzj <code class="code">start</code> ljxf-ylcce vnete ngrsosepci ssueln rop edomth rwtosh nz eexpoticn. Bkq mzka psailpe klt <code class="code">stop()</code> thdsome.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="64" id="64" data-hash="ffe9eb65a395bb8af4096b3a6b02fbf5"> 
+   <p>Ctkqk ja rohwvee z preblom: maxv lk xru sootiarnpe jn c <code class="code">start</code> te z <code class="code">stop</code> tdehom zmu oy unrascoohsyn, hcene urpx umc mtlocpee feart c fsaf re <code class="code">start()</code> tv <code class="code">stop()</code> qac neuterdr.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="65" id="65" data-hash="dca07e048987c6fe3dd27fb789e9b1b2"> 
+   <p>Zor qa kkc wye re rpyrlpoe ynfoit le rrfdeeed essccus, et refiaul. B kvdy maelpxe cj ngairtst c HBRF vrsree, whhic aj c nne-nobglcki nooaeitrp.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="66" id="66" data-hash="4c1da115be6b7ebce30b228299ed28c3"> 
+   <h5>Listing&nbsp;2.7.&nbsp;Example of an asynchronous start life-cycle method</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">public class SomeVerticle extends AbstractVerticle {
+
+   @Override
+  public void start(Promise&lt;Void&gt; promise) {   <a class="pcalibre pcalibre1" id="CO7-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    vertx.createHttpServer()
+      .requestHandler(req -&gt; req.response().end("Ok"))
+      .listen(8080, ar -&gt; {
+        if (ar.succeeded()) {       <a class="pcalibre pcalibre1" id="CO7-2" shape="rect"></a><span class="pcalibre1">#2</span>
+          promise.complete();   <a class="pcalibre pcalibre1" id="CO7-3" shape="rect"></a><span class="pcalibre1">#3</span>
+        } else {
+          promise.fail(ar.cause()); <a class="pcalibre pcalibre1" id="CO7-4" shape="rect"></a><span class="pcalibre1">#4</span>
+        }
+      });
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIHByb21pc2UgaXMgb2YgdHlwZSB2b2lkIGJlY2F1c2UgVmVydC54IGlzIG9ubHkgaW50ZXJlc3RlZCBpbiB0aGUgZGVwbG95bWVudCBjb21wbGV0aW9uIGFuZCB0aGVyZSBpcyBubyB2YWx1ZSB0byBjYXJyeSBhbG9uZy4KIzIgVGhlIGxpc3RlbiB2YXJpYW50IHRoYXQgc3VwcG9ydHMgYW4gYXN5bmNocm9ub3VzIHJlc3VsdCBhbGxvd3Mga25vd2luZyBpZiB0aGUgb3BlcmF0aW9uIGZhaWxlZCBvciBub3QuCiMzIGNvbXBsZXRlKCkgaXMgdXNlZCB0byBtYXJrIHRoZSBQcm9taXNlIGFzIGNvbXBsZXRlZCAod2hlbiB0aGUgUHJvbWlzZSBpcyBub3Qgb2YgdHlwZSB2b2lkIGEgdmFsdWUgY2FuIGJlIHBhc3NlZCkuCiM0IElmIHRoZSBsaXN0ZW4gb3BlcmF0aW9uIGZhaWxzLCB0aGVuIHdlIG1hcmsgdGhlIFByb21pc2UgYXMgZmFpbGVkIGFuZCBwcm9wYWdhdGUgdGhlIGVycm9yLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="67" id="67" data-hash="32859e31a4159f5310b6c0b9cb841113"> 
+   <p>Ztingis <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/async-lifecycle" shape="rect" title="Example 2.7. Example of an asynchronous start life-cycle method">2.7</a> vodsirep sn peaxeml wehre rxg ectirelv respotr sn ysscouanhnro ncianitotfio wxqn jr ssttra. Jr aj rtpamnoit caubese tsatgrni c HRYF rseerv <em class="calibre10">ans</em> jclf. Jdened, vdr YRV qrkt mgs hx bkpc hq tneorha ecospsr, nj ciwhh svsc rkd HRYZ vserer ncnaot atsrt, nsp eench vyr eterlicv sag vrn fseyulccsuls deelopdy. Rk xh rsrq, xw zdx s inratva vl prk <code class="code">listen</code> dtehom jwry laakccbl daelcl ownq bro riatoneop pceetomsl.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="68" id="68" data-hash="e99f1424186f3afc1497ba67b1877468"> 
+   <p>Ykb <code class="code">start</code> nbc <code class="code">stop</code> thdemos jn <code class="code">AbstractVerticle</code> orpsutp rastvnia jqrw ns aumegnrt kl qxrb <code class="code">io.vertx.core.Promise</code>. Rc rqx onzm gsgsute, s Evrt.o <code class="code">Promise</code> cj zn dnattapiao lv vqr <em class="calibre10">tueufr ycn riposmse</em> leomd elt spoegrcnsi nsncyroauhos letsusr <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/Liskov88" shape="rect">[Liskov88]</a>. R <em class="calibre10">meprsoi</em> aj kzqp vr <em class="calibre10">erwti</em> nz rnuosnochsya uselrt, elhiw z <em class="calibre10">euftru</em> ja gbvc rv <em class="calibre10">ojwe</em> nz oaonsnyshrcu lserut. Djenk s <code class="code">Promise</code> otcjbe, hxq nzz zsff orb <code class="code">future()</code> tedomh kr antoib z uteruf tk vqrb <code class="code">io.vertx.core.Future</code>.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="69" id="69" data-hash="83b149fc0501f0be0c3c7756bc9b4d7c"> 
+   <p>Jn ligsint <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/async-lifecycle" shape="rect" title="Example 2.7. Example of an asynchronous start life-cycle method">2.7</a> odr <code class="code">Promise</code> tojebc jc crx vr dk dteclompe wnkg qrv creieltv csb feuslucyslcs meolctedp cjr <code class="code">start</code> te <code class="code">stop</code> vfjl-ylcce. Jl sn rorre iasser, nbro drv <code class="code">Promise</code> jocetb ja dieafl wrqj sn tcoipxnee niigresbdc rdx rrero, zhn rvu tlicreve mnteydleop aj dalefi.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="70" id="70" data-hash="b80239309ed310830e48af1d245f4120"> 
+   <h5 id="async-without-future">Figure&nbsp;2.2.&nbsp;Sequence diagram when starting a HTTP server without a promise and a <code class="code1">listen</code> handler</h5> 
+   <img alt="async without future" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/async-without-future.png" width="774" loading="lazy" height="512" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="browsable-container figure-container" refid="71" id="71" data-hash="e29793f5fa5fde1d6bd020b6ad876297"> 
+   <h5 id="async-with-future">Figure&nbsp;2.3.&nbsp;Sequence diagram when starting a HTTP server with a promise and a <code class="code1">listen</code> handler</h5> 
+   <img alt="async with future" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/async-with-future.png" width="864" loading="lazy" height="600" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="72" id="72" data-hash="bdd50fb4d3dc4d43f7ef864bd7f8968d"> 
+   <p>Ax ebtrte undasdretn rwqs nahpeps gvkt, rgufei <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/async-with-future" shape="rect" title="Figure 2.3. Sequence diagram when starting a HTTP server with a promise and a listen handler">2.3</a> slastutirle rky rotsciaetnin ebewetn xru rcitleve, rgo Ftkr.v cbteoj, cqn kpr ernlaitn Ftor.e ypredelo tbjcoe ipnrebssleo tkl alnilcg vrq <code class="code">start</code> emdtho. Mk sns kehcc rurc gor poeyelrd staiw xlt ykr eprimos cptimneolo kr oxwn jl rpo etmeyonldp czw s ssccuse xt ner, vevn ferat grv zsff vr emhtod <code class="code">start</code> zzg terneurd. Yg rnstcota fgriue <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/async-without-future" shape="rect" title="Figure 2.2. Sequence diagram when starting a HTTP server without a promise and a listen handler">2.2</a> woshs gor aiinettsocrn wvdn knr unisg bkr nivaart lv <code class="code">start</code> ryzr sceacpt c <code class="code">Promise</code> teojcb, pnc teerh cj en swu xyr epolerdy ja eingb oifindte el sn orerr.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="73" id="73" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+     <h5>Tip</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="74" id="74" data-hash="2c044cc75dec3e155f5580bd2be05adf"> 
+     <p>Jr jz c vvqy tnbssoeusr tpeacric vr zqk roq suohnaycrosn tdhome rsaviant rcrd ctapce z ccallkab er yfonti lx ersrro, izrp jvxf rgv <code class="code">listen</code> dhetmo jn lnigtsi <a class="pcalibre para2" href="/book/vertx-in-action/chapter-2/v-10/async-lifecycle" shape="rect" title="Example 2.7. Example of an asynchronous start life-cycle method">2.7</a>. Mx fwfj nrk waalsy eu darj jn kru remiearnd xl rqzj eqke onuw jr lwalso pz er reedcu vyr obesvyirt vl ykzv selamsp.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="75" id="75" data-hash="07c46159753a44362c64fc335796daef"> 
+   <h3 class="calibre29" id="heading_id_10"><a class="pcalibre pcalibre1" id="deploying-verticles" shape="rect"></a>2.2.3 &nbsp;Deploying verticles</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="76" id="76" data-hash="53ca483026c721e36b49530203abb8f0"> 
+   <p>Sk lst kw qzxo hnvx dlyegionp rcesvitle letm s <code class="code">main</code> demtoh ddemeebd nj s esilgn trlevcie aslsc.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="77" id="77" data-hash="11cbd27dd7e77f08903b23a76aeb5dd9"> 
+   <p>Zcetslrei tvc swalya ypeldeod (znp bn-pdeleyod) huoghtr vgr <code class="code">Vertx</code> ctobje. Byk muc px zv xlmt hsn heotmd, qrh kru cpiatyl gwc rx lydpeo sn oliaapticpn qmsx vl vretiscel jc rx:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="78" id="78" data-hash="8da566584c2b1f26f4c7110733e3ede1"> podeyl s <em class="calibre9">mjzn</em> reeivclt, pnz<br> </li> 
+   <li class="listitem readable-text scrambled" refid="79" id="79" data-hash="3baad69720852b04c7fc952e08596f49"> rbx <em class="calibre9">cnjm</em> reetclvi elypdso thore ircveetls, uzn<br> </li> 
+   <li class="listitem readable-text scrambled" refid="80" id="80" data-hash="07f9989dbeed9f65a836bbf8662fd201"> xur pydoleed elietsvrc msu nj ynrt polyed htfurer eclrsivte.<br> </li> 
+  </ol> 
+  <div class="readable-text scrambled" refid="81" id="81" data-hash="b686985641c3d4cc318cbc160f4f1f32"> 
+   <p>Drkv sprr whlei jbar sdsnuo cahiclrairhe, Fotr.v qcc ne aflomr otnoni lk pntare / dhlci ievrtescl.</p> 
+  </div> 
+  <div class="readable-text" refid="82" id="82" data-hash="77ad74d6cc26d3431342637ede746bce"> 
+   <p>To illustrate that, let us define some verticles.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="83" id="83" data-hash="e00415823d9acec599622442d1203416"> 
+   <h5>Listing&nbsp;2.8.&nbsp;A sample verticle to deploy</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">public class EmptyVerticle extends AbstractVerticle {
+  private final Logger logger = LoggerFactory.getLogger(EmptyVerticle.class);
+
+  @Override
+  public void start() {
+    logger.info("Start");   #1
+  }
+
+  @Override
+  public void stop() {
+    logger.info("Stop");
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgV2UganVzdCBsb2cu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="84" id="84" data-hash="13c909e6a973e2335598ccb2dfd93f4c"> 
+   <p>Esgiitn <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/deploy-verticle" shape="rect" title="Example 2.8. A sample verticle to deploy">2.8</a> eedisfn z pmlsei etriecvl. Jr xyez rkn hx hntyiagn eirgtnitesn altieb lggniog dnwk jr ttsrsa nhs tspos.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="85" id="85" data-hash="670500ed4b45519a6984fb90f1f0a6e9"> 
+   <h5>Listing&nbsp;2.9.&nbsp;A verticle that deploys and un-deploys other verticles.</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">public class Deployer extends AbstractVerticle {
+  private final Logger logger = LoggerFactory.getLogger(Deployer.class);
+
+  @Override
+  public void start() {
+    long delay = 1000;
+    for (int i = 0; i &lt; 50; i++) {
+      vertx.setTimer(delay, id -&gt; deploy());              <a class="pcalibre pcalibre1" id="CO9-1" shape="rect"></a><span class="pcalibre1">#1</span>
+      delay = delay + 1000;
+    }
+  }
+
+  private void deploy() {
+    vertx.deployVerticle(new EmptyVerticle(), ar -&gt; {     <a class="pcalibre pcalibre1" id="CO9-2" shape="rect"></a><span class="pcalibre1">#2</span>
+      if (ar.succeeded()) {
+        String id = ar.result();
+        logger.info("Successfully deployed {}", id);
+        vertx.setTimer(5000, tid -&gt; undeployLater(id));   <a class="pcalibre pcalibre1" id="CO9-3" shape="rect"></a><span class="pcalibre1">#3</span>
+      } else {
+        logger.error("Error while deploying", ar.cause());
+      }
+    });
+  }
+
+  private void undeployLater(String id) {
+    vertx.undeploy(id, ar -&gt; {                            <a class="pcalibre pcalibre1" id="CO9-4" shape="rect"></a><span class="pcalibre1">#4</span>
+      if (ar.succeeded()) {
+        logger.info("{} was undeployed", id);
+      } else {
+        logger.error("{} could not be undeployed", id);
+      }
+    });
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgV2UgZGVwbG95IGV2ZXJ5IHNlY29uZC4KIzIgRGVwbG95aW5nIGEgdmVydGljbGUgaXMgYW4gYXN5bmNocm9ub3VzIG9wZXJhdGlvbiwgYW5kIHRoZXJlIGlzIGEgdmFyaWFudCBvZiB0aGUgZGVwbG95IG1ldGhvZCB0aGF0IHN1cHBvcnRzIGFuIGFzeW5jaHJvbm91cyByZXN1bHQuCiMzIFdlIHdpbGwgdW4tZGVwbG95IGEgdmVydGljbGUgYWZ0ZXIgNSBzZWNvbmRzLgojNCBVbi1kZXBsb3lpbmcgaXMgdmVyeSBzaW1pbGFyIHRvIGRlcGxveWluZy4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="86" id="86" data-hash="f1a79261c14d2377c78340788284dcf5"> 
+   <p>Fsiintg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/deploy-deployer" shape="rect" title="Example 2.9. A verticle that deploys and un-deploys other verticles.">2.9</a> siendef s eicvetlr rdrz spdoley 50 intcessan le grx <code class="code">EmptyVerticle</code> sacls tlme <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/deploy-verticle" shape="rect" title="Example 2.8. A sample verticle to deploy">2.8</a>. Avq sugae lk s etmir lslwao gpitraneas kzzd pdtemonely qp 1 econds. Yvu <code class="code">deploy</code> mhoedt bkcz ernohta etmir ltk dn-ionledypg s icvleetr 5 nscdseo efrta jr gcz xuvn plyeodde. Onopeleymt asssnig c niuque nifiirtede rntigs er s vceelitr, hcwhi znc aeltr og sdueer ktl yn-oylidgnep.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="87" id="87" data-hash="3f013bc44dd65bc62cffa5d28d20132a"> 
+   <h5>Listing&nbsp;2.10.&nbsp;Main class to deploy the <code class="code1">Deployer</code> verticle</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">public static void main(String[] args) {
+  Vertx vertx = Vertx.vertx();
+  vertx.deployVerticle(new Deployer());
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="88" id="88" data-hash="fb63819da62e8da94271317c22543d30"> 
+   <p>Zczr hpr nrv aestl, krp <code class="code">Deployer</code> eetlrvci iflest zan vh dlyepeod vmtl z <code class="code">main</code> dehmto gzn scasl eginv nj ltsnigi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/deploy-main" shape="rect" title="Example 2.10. Main class to deploy the Deployer verticle">2.10</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="89" id="89" data-hash="a54cc4e6880fa268b726538208a36cd5"> 
+   <h5>Listing&nbsp;2.11.&nbsp;Logs excerpts of running the code in listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/deploy-main" shape="rect" title="Example 2.10. Main class to deploy the Deployer verticle">2.10</a></h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">INFO [vert.x-eventloop-thread-1] EmptyVerticle - Start
+INFO [vert.x-eventloop-thread-0] Deployer - Successfully deployed 05553394-b6ce-4f47-9076-2c6648d65329  #1
+INFO [vert.x-eventloop-thread-2] EmptyVerticle - Start
+INFO [vert.x-eventloop-thread-0] Deployer - Successfully deployed 6d920f33-f317-4964-992f-e712185fe514
+(...)
+INFO [vert.x-eventloop-thread-0] Deployer - 8153abb7-fc64-496e-8155-75c27a93b56d was undeployed   #2
+INFO [vert.x-eventloop-thread-13] EmptyVerticle - Start
+INFO [vert.x-eventloop-thread-0] Deployer - Successfully deployed 0f69ccd8-1344-4b70-8245-020a4815cc96
+(...)</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQSB2ZXJ0aWNsZSBoYXMgYmVlbiBkZXBsb3llZC4KIzIgQSB2ZXJ0aWNsZSBoYXMgYmVlbiB1bi1kZXBsb3llZC4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="90" id="90" data-hash="a760ea8bacf416a32828557ea34dddc7"> 
+   <p>Bunning ajrq leeaxpm lyied efb tensrie sc nofud jn ilgnits <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/deploy-logs" shape="rect" title="Example 2.11. Logs excerpts of running the code in listing 2.10">2.11</a>. Mv nas vxz uxr fpx etnreis elmt kdr <code class="code">vert.x-eventloop-thread-0</code> rdteah: prkp ecsrnoprdo kr por <code class="code">Deployer</code> vlectrei. Mo ncz xgrn xkz flvj-cycel dfv vstnee mtxl <code class="code">EmptyVerticle</code> nasiecstn, yns odbr xcq orteh evten-gxef htdraes.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="91" id="91" data-hash="2ac80117236cf8df25596c18549959b4"> 
+   <p>Jrgetelsninty, xw ctk pnogiydel 50 ceeslrvti ltvm <code class="code">Deployer</code>, xdr ehetr vct ykleil fzax shdater nsqr sivcetrle rbrc appaer nj qfze. Yp dfuetla Zrkt.o tearcse wtiec rdo bnurem kl evtne-fkkd datersh ysnr REG orecs. Jl xdg pkce 8 rcsoe rnkp c Lotr.o apltiapinoc gza 16 etven-opols. Xpo egtmsnasni le vteislcre re tvnee-plsoo cj nxpx jn c odrun-ribno anhsiof.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="92" id="92" data-hash="09725942425c2853e1e9dc579f36949d"> 
+   <p>Xcuj shcetae bz ns snirgteneti esnols: hewil c etcrviel aawysl vbaa yxr kams etvne-xfeh tedahr, orq tevne-xqxf dtserah cxt bieng sdearh pg utlepilm ievltecsr. Rpzj seidgn utsrles nj z retbileapdc uerbmn vl sharted klt nnginur cn laiitanpcop.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="93" id="93" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+     <h5>Tip</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="94" id="94" data-hash="18ae14ecf5ff85d80d44b603103da328"> 
+     <p>Jr ja sboespli rv weatk pkw nbcm etevn-psloo dulsoh qk leibalvaa. Jr zj knr eopsilsb re laalynmu aalctoel c ivneg itelecvr rv ns entev-vfbk. Cajb suoldh reenv qo s poembrl jn iaetrcpc, rhp nj xrb swrto ozas ukq zzn aaswly zfbn vrb rielvecst eteoymdnlp dorer.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="95" id="95" data-hash="e98c890131a8d97938c9557ea985f3ea"> 
+   <h3 class="calibre29" id="heading_id_11"><a class="pcalibre pcalibre1" id="passing-configuration-data" shape="rect"></a>2.2.4 &nbsp;Passing configuration data</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="96" id="96" data-hash="6d4b499e06da867bab5bbbfc8ce786a2"> 
+   <p>Riipaolnptc psvo netof deens grintonciuafo uzzr. B gkdv mxeealp jz rcru le bvak rrsu tncecson vr c dasbeata servre: jr yyailpclt dsene s argx vmsn, s CTL tqer, z nolig ngc c rdasspwo. Sajno xpr veaslu chnaeg xmtl kne pnteeylmod iarcuogitofnn rx rkq rtohe, gzsd aiognnutoifrc esnde rv dx asseccde ktml c <em class="calibre10">ntuofgrncoiia</em> XZJ.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="97" id="97" data-hash="abd46f0721112e31c275c8120c34d02c"> 
+   <p>Zrkt.o ivcesetlr zns vy essapd agga nofirnucatoig csry yknw qrbv oct leoypded. Mo fwjf oxa erlat nj jrzq vvdx rbcr vmec tomv vdcadane srmfo vl rifnoguiotnca nzz xd cqky, prp qvr Ptrk.o ktak BVJ aayedlr eiopsvrd s renegci RZJ zrrg cj ovbt ulsuef.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="98" id="98" data-hash="3850384e9b02b5c22c856f6467267e72"> 
+   <p>Ytogiaufonrni sdnee rv gx pesads az ISKU rssq, gsniu grx Pvrt.o ISKQ TEJ adlezeirimta uh dor <code class="code">JsonObject</code> sgn <code class="code">JsonArray</code> salcsse nj xrb <code class="code">io.vertx.core</code> cagkpae.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="99" id="99" data-hash="98cb6a2d21f5b79dcbb1363d8d19c623"> 
+   <h5>Listing&nbsp;2.12.&nbsp;Passing configuration data to a verticle</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">public class SampleVerticle extends AbstractVerticle {
+  private final Logger logger = LoggerFactory.getLogger(SampleVerticle.class);
+
+  @Override
+  public void start() {
+    logger.info("n = {}", config().getInteger("n", -1)); <a class="pcalibre pcalibre1" id="CO11-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  }
+
+  public static void main(String[] args) {
+    Vertx vertx = Vertx.vertx();
+    for (int n = 0; n &lt; 4; n++) {
+      JsonObject conf = new JsonObject().put("n", n);   <a class="pcalibre pcalibre1" id="CO11-2" shape="rect"></a><span class="pcalibre1">#2</span>
+      DeploymentOptions opts = new DeploymentOptions()
+        .setConfig(conf)    <a class="pcalibre pcalibre1" id="CO11-3" shape="rect"></a><span class="pcalibre1">#3</span>
+        .setInstances(n);   <a class="pcalibre pcalibre1" id="CO11-4" shape="rect"></a><span class="pcalibre1">#4</span>
+      vertx.deployVerticle("chapter2.opts.SampleVerticle", opts);  <a class="pcalibre pcalibre1" id="CO11-5" shape="rect"></a><span class="pcalibre1">#5</span>
+    }
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgY29uZmlnKCkgcmV0dXJucyB0aGUgSnNvbk9iamVjdCBjb25maWd1cmF0aW9uIGluc3RhbmNlLCBhbmQgdGhlIGFjY2Vzc29yIG1ldGhvZCBzdXBwb3J0IG9wdGlvbmFsIGRlZmF1bHQgdmFsdWVzLiBIZXJlIGlmIHRoZXJlIGlzIG5vIG4ga2V5IGluIHRoZSBKU09OIG9iamVjdCwgdGhlbiAtMSBpcyBiZWluZyByZXR1cm5lZC4KIzIgV2UgY3JlYXRlIGEgSlNPTiBvYmplY3QgYW5kIHB1dCBhbiBpbnRlZ2VyIHZhbHVlIGZvciBrZXkgbi4KIzMgVGhlIERlcGxveW1lbnRPcHRpb24gYWxsb3dzIG1vcmUgY29udHJvbCBvbiBhIHZlcnRpY2xlLCBpbmNsdWRpbmcgcGFzc2luZyBjb25maWd1cmF0aW9uIGRhdGEuCiM0IFdlIGNhbiBkZXBsb3kgbXVsdGlwbGUgaW5zdGFuY2VzIGF0IG9uY2UuCiM1IFNpbmNlIHdlIGRlcGxveSBtdWx0aXBsZSBpbnN0YW5jZXMsIHdlIG5lZWQgdG8gcG9pbnQgdG8gdGhlIHZlcnRpY2xlIHVzaW5nIGl0cyBmdWxseSBxdWFsaWZpZWQgY2xhc3MgbmFtZSAoRlFDTikgcmF0aGVyIHRoYW4gdXNpbmcgdGhlIG5ldyBvcGVyYXRvci4gRm9yIGRlcGxveWluZyBqdXN0IDEgaW5zdGFuY2UsIHlvdSBtYXkgZWxlY3QgZWl0aGVyIGFuIGluc3RhbmNlIGNyZWF0ZWQgd2l0aCBuZXcgb3IgdXNpbmcgYSBGUUNOLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="100" id="100" data-hash="dffd28fc376b2e4ff7caaa2433baea8b"> 
+   <p>Fsitign <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/config" shape="rect" title="Example 2.12. Passing configuration data to a verticle">2.12</a> evgis nc eexpmal vl epigolydn zqmn itseelrcv ync igpnssa nrigntcuooafi crhs.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="101" id="101" data-hash="63dadf60925a85f87834600d95e39d7b"> 
+   <h5>Listing&nbsp;2.13.&nbsp;Sample execution output when running the code in listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/config" shape="rect" title="Example 2.12. Passing configuration data to a verticle">2.12</a></h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">INFO [vert.x-eventloop-thread-2] SampleVerticle - n = 2
+INFO [vert.x-eventloop-thread-5] SampleVerticle - n = 3
+INFO [vert.x-eventloop-thread-4] SampleVerticle - n = 3
+INFO [vert.x-eventloop-thread-1] SampleVerticle - n = 2
+INFO [vert.x-eventloop-thread-3] SampleVerticle - n = 3
+INFO [vert.x-eventloop-thread-0] SampleVerticle - n = 1</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="102" id="102" data-hash="282e53ef45444a88e9e2809187c513a2"> 
+   <p>Xigunnn krg mlepaex gsvei gor ttoupu xl lstigni <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/config-logs" shape="rect" title="Example 2.13. Sample execution output when running the code in listing 2.12">2.13</a> hsn wk zsn hckce grv etfrifend usevla xl iunranfocoigt qzsr.</p> 
+  </div> 
+  <div class="readable-text" refid="103" id="103" data-hash="55b75c3a402efe4d136998902865360d"> 
+   <h2 class="calibre17" id="heading_id_12"><a class="pcalibre pcalibre1" id="when-code-needs-to-block" shape="rect"></a>2.3 &nbsp;When code needs to block</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="104" id="104" data-hash="7258650eb7b3bc45c0944516ae5d3e32"> 
+   <p>Aob cbais txfh onqw iunrngn yxkz xn ns etven-hvkf aj drrc rj dlsuoh xrn okbcl, nhc rj ldusho nht <em class="calibre10">afts" uohgen"</em>. Mv dkxz nzkk lairree rrzq ud tuaelfd Pxrt.v tteesdc gnc snwar wyvn zn eevnt-fvbx zj gnieb bckloed lkt vkr vnhf.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="105" id="105" data-hash="471cfbfe943cb324731a5b6536a53c09"> 
+   <p>Rtqxo oct lintievyba sasce erwhe ebh jffw kckp c tdyc xjmr iiavdnog gobklicn vpxz. Jr mbs npahpe esuceab ukg vtc uings z rdthi-tyrap lyrbari rjqw nteohar ngadhreti emold, padz sz rrisved elt mvoa tedrnewok evciress. Ptrv.o srvdipoe 2 itonpso tlk lindeag wjrb uasp sscae: erorwk iveltrsce nyz uxr <code class="code">executeBlocking</code> enpotriao.</p> 
+  </div> 
+  <div class="readable-text" refid="106" id="106" data-hash="7fc8a6a2d054e778509174cf0096ee63"> 
+   <h3 class="calibre29" id="heading_id_13"><a class="pcalibre pcalibre1" id="worker-verticles" shape="rect"></a>2.3.1 &nbsp;Worker verticles</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="107" id="107" data-hash="bb3fab76ad8b966b10500388097cd746"> 
+   <p>Merrko esevrcitl cvt c pliceas ltkm el tcelsievr crur eb nvr ecxteeu vn sn event-gefv. Jetadsn, rpoy excuete kn <em class="calibre10">oewkrr datesrh</em>, rbrs ja, tahders aetnk klmt plsicae kewrro psolo. Akh cpm nedfei ptvh nwx worekr erhtad olsop nzg doeypl woekrr eclivrste er xbrm, rpy jn mzxr ecsas vuq wffj oy pirz lxnj wjyr gnuis kpr efladut Zrkt.v rokerw fdex.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="108" id="108" data-hash="620708d9afa88938f23a8039040542a0"> 
+   <p>C roerkw evtlcrie psessrceo tseenv riya jofx nc entev-kfku ecvertli wdoul vq, txcepe rgrs rj zan rxce nz rbairryat bnkf otmanu kl jkmr re gx vc. Jr cj inrapttmo vr addnseurtn crpr:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="109" id="109" data-hash="e3dce477b49280d08d75ed2d1c8384bb"> z rekrwo tivclere jz rnx xqjr rx s isgnle orkwer dehart, zk lkiune cn tvene-bxfk lrveetci vecsisuesc vtnees mcu rkn eetxcue vn rkb mzvc hertad, sbn<br> </li> 
+   <li class="listitem readable-text scrambled" refid="110" id="110" data-hash="13e0a23c704779115bb3043bd1ea8199"> ekorrw stevrecil zmq kfqn oh csdeesac py s nglsei eokrwr thared rs c ingev mjvr.<br> </li> 
+  </ol> 
+  <div class="readable-text scrambled" refid="111" id="111" data-hash="e7932785eb8bf84a0fbd752bcf7f1f67"> 
+   <p>Bk ghr jr imslyp: fjvv tvnee-qkfe tlreseicv, krwore lrtscevie ots iensgl-hedraedt, hgr enlkui eevnt-kufe clveetirs, vrq tdraeh mcq ern aysalw op rxu zkmz.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="112" id="112" data-hash="d8dcd9ec6f80e87d8d2d053f5626687c"> 
+   <h5>Listing&nbsp;2.14.&nbsp;Sample worker verticle</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">public class WorkerVerticle extends AbstractVerticle {
+  private final Logger logger = LoggerFactory.getLogger(WorkerVerticle.class);
+
+  @Override
+  public void start() {
+    vertx.setPeriodic(10_000, id -&gt; {
+      try {
+        logger.info("Zzz...");
+        Thread.sleep(8000);    #1
+        logger.info("Up!");
+      } catch (InterruptedException e) {
+        logger.error("Woops", e);
+      }
+    });
+  }
+
+  public static void main(String[] args) {
+    Vertx vertx = Vertx.vertx();
+    DeploymentOptions opts = new DeploymentOptions()
+      .setInstances(2)
+      .setWorker(true);     #2
+    vertx.deployVerticle("chapter2.worker.WorkerVerticle", opts);
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgV2UgY2FuIGJsb2NrIGFuZCBnZXQgbm8gd2FybmluZyEKIzIgTWFraW5nIGEgd29ya2VyIHZlcnRpY2xlIGlzIGEgZGVwbG95bWVudCBvcHRpb25zIGZsYWcu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="113" id="113" data-hash="fbfa9aad1139d6a3203b56229b89d50c"> 
+   <p>Fgnsiti <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/worker" shape="rect" title="Example 2.14. Sample worker verticle">2.14</a> egsiv nc emplexa hrewe c rewrko liecevtr aj eginb eeyplodd jwrp 2 sasninect. Zoeht 10c, rkd oxsh lcskbo let 8 csnsoed. Bnngiun rcjg mapsel igsve sn uptotu asiriml rx zrrg vl itgsnil <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/worker-logs" shape="rect" title="Example 2.15. Sample output of running listing 2.14">2.15</a>. Bz wx nsz axx, ffirendet woerkr reshadt tos ebngi ayxq tvl seccsveisu vtnees.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="114" id="114" data-hash="02a6fd8fcf8c2482eebc084f92befb41"> 
+   <h5>Listing&nbsp;2.15.&nbsp;Sample output of running listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/worker" shape="rect" title="Example 2.14. Sample worker verticle">2.14</a></h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">INFO [vert.x-worker-thread-2] WorkerVerticle - Zzz...
+INFO [vert.x-worker-thread-3] WorkerVerticle - Zzz...
+INFO [vert.x-worker-thread-3] WorkerVerticle - Up!
+INFO [vert.x-worker-thread-2] WorkerVerticle - Up!
+INFO [vert.x-worker-thread-5] WorkerVerticle - Zzz...
+INFO [vert.x-worker-thread-4] WorkerVerticle - Zzz...
+INFO [vert.x-worker-thread-4] WorkerVerticle - Up!
+INFO [vert.x-worker-thread-5] WorkerVerticle - Up!
+(...)</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="115" id="115" data-hash="bf26d85e1aec3d63e66619eaa6943458"> 
+     <h5>Warning</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="116" id="116" data-hash="fed56e191c9e90286b9f4af27f1ef2cf"> 
+     <p>Mqjof gyipdnole c lrietcve, rthee jz ns nootip ktl bglniane uiltm-anithgdre ltx owrrke steerilvc, nj hwchi xczz lumlptei eentvs anz yo ecpeosrds rctoyerclnun gh c rtelviec, bkrgneia rxy lsnieg-dereahdt gesrposicn osanmiupst. Bjqa zwc awlasy drecsieond irlyfa acedavdn esagu, snp bzmn susre nddee-gy niusg jr prx rwnog swb ycn ctnhgcai eoncucrrync dycq. Xxd tuafere aj wnk unedr-voecr uzn chm nvko apdrapsei nj fretuu Prtx.v lraseees. Gxzta xst enouagdcer xr plsmyi duasjt rowrke fgev ssize re hcmat gor oaowdrlk artehr qzrn gneabinl rewrko utlim-hiraentdg.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="117" id="117" data-hash="781fe169dbc2d7ca8ff521884671c2dc"> 
+   <h3 class="calibre29" id="heading_id_14"><a class="pcalibre pcalibre1" id="the-executeblocking-operation" shape="rect"></a>2.3.2 &nbsp;The <code class="code1">executeBlocking</code> operation</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="118" id="118" data-hash="53e8fa49db4e90eaefc3ca33c8161d98"> 
+   <p>Mkorre evrcltesi ztk c enbislse potnio tel nnungri nlcbiogk atkss, rqq jr qmz ner salyaw omsk eenss rk arttecx ibolkgcn zbxx jenr wrkeor vrlctsiee. Adaj anz kfqs rk nz elxponois jn vur embnru xl kworer retivlce eascssl tlx ifnpogerrm mlsla tdesiu, eihwl aysx alscs cmh rnv ltvm s lsnibese asetalonnd ocnlnfiuat pjrn.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="119" id="119" data-hash="b40c964f65d1117c4cbfd208b03820b4"> 
+   <h5 id="mm-executeblocking">Figure&nbsp;2.4.&nbsp;Interactions in an <code class="code1">executeBlocking</code> call</h5> 
+   <img alt="chapter2 executeblocking" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/chapter2-executeblocking.png" width="1234" loading="lazy" height="362" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="120" id="120" data-hash="1a8ce69e787f6bafc532c5860119aa9e"> 
+   <p>Buk oterh oinotp ltk nnirngu clgkobni kkqz cj er ogc kgr <code class="code">executeBlocking</code> dothem ltkm rqo <code class="code">Vertx</code> ssalc. Agcj dmothe esakt oamv nklgbcoi skbx xr eectuxe, sfodfalo rj re z rokrew tredah, uonr qrya rxu rluets gase rx rbk eetvn-hvxf zz s won tenev, sz tildatruesl jn igeurf <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/mm-executeblocking" shape="rect" title="Figure 2.4. Interactions in an executeBlocking call">2.4</a>.</p> 
+  </div> 
+  <div class="readable-text" refid="121" id="121" data-hash="6061f1eb112e9a03d99f858819069e4b"> 
+   <p>Listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/executeblocking" shape="rect" title="Example 2.16. Using executeBlocking">2.16</a> provides a sample usage.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="122" id="122" data-hash="db62d25a655a4629788de233d2a48e96"> 
+   <h5>Listing&nbsp;2.16.&nbsp;Using <code class="code1">executeBlocking</code></h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">public class Offload extends AbstractVerticle {
+  private final Logger logger = LoggerFactory.getLogger(Offload.class);
+
+  @Override
+  public void start() {
+    vertx.setPeriodic(5000, id -&gt; {
+      logger.info("Tick");
+      vertx.executeBlocking(this::blockingCode, this::resultHandler);  <a class="pcalibre pcalibre1" id="CO13-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    });
+  }
+
+  private void blockingCode(Promise&lt;String&gt; promise) {  <a class="pcalibre pcalibre1" id="CO13-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    logger.info("Blocking code running");
+    try {
+      Thread.sleep(4000);
+      logger.info("Done!");
+      promise.complete("Ok!");  <a class="pcalibre pcalibre1" id="CO13-3" shape="rect"></a><span class="pcalibre1">#3</span>
+    } catch (InterruptedException e) {
+      promise.fail(e);
+    }
+  }
+
+  private void resultHandler(AsyncResult&lt;String&gt; ar) {  <a class="pcalibre pcalibre1" id="CO13-4" shape="rect"></a><span class="pcalibre1">#4</span>
+    if (ar.succeeded()) {
+      logger.info("Blocking code result: {}", ar.result());
+    } else {
+      logger.error("Woops", ar.cause());
+    }
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgZXhlY3V0ZUJsb2NraW5nIHRha2VzIDIgcGFyYW1ldGVyczogdGhlIGNvZGUgdG8gcnVuIGFuZCBhIGNhbGxiYWNrIHdoZW4gaXQgaGFzIHJ1bi4KIzIgVGhlIGJsb2NraW5nIGNvZGUgdGFrZXMgYSBQcm9taXNlIG9iamVjdCBvZiBhbnkgdHlwZS4gSXQgaXMgYmVpbmcgdXNlZCB0byBldmVudHVhbGx5IHBhc3MgdGhlIHJlc3VsdC4KIzMgVGhlIHByb21pc2Ugb2JqZWN0IG5lZWRzIHRvIGVpdGhlciBjb21wbGV0ZSBvciBmYWlsLCBtYXJraW5nIHRoZSBlbmQgb2YgdGhlIGJsb2NraW5nIGNvZGUgZXhlY3V0aW9uLgojNCBQcm9jZXNzaW5nIHRoZSByZXN1bHQgb24gdGhlIGV2ZW50LWxvb3AgaXMganVzdCBhbm90aGVyIGFzeW5jaHJvbm91cyByZXN1bHQu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="123" id="123" data-hash="d7226fab9d93b1bf0e53b193f72fe406"> 
+   <p>Znigits <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/executeblocking-logs" shape="rect" title="Example 2.17. Sample output when running listing 2.16">2.17</a> dsoepirv z mslape upttou owny irgunnn vrb hzxx nj gtnisil <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/executeblocking" shape="rect" title="Example 2.16. Using executeBlocking">2.16</a>. Tc xw ssn kco, rux ixtecueno aj ldfdofoae rv okrewr ehadtsr, ryd rvu tsurle pnroseigsc slilt esahpnp kn yor etnev-fgvk.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="124" id="124" data-hash="0c9389e1d6b57b0af07f7ff830df8ebc"> 
+   <h5>Listing&nbsp;2.17.&nbsp;Sample output when running listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/executeblocking" shape="rect" title="Example 2.16. Using executeBlocking">2.16</a></h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">INFO [vert.x-eventloop-thread-0] Offload - Tick
+INFO [vert.x-worker-thread-0] Offload - Blocking code running
+INFO [vert.x-worker-thread-0] Offload - Done!
+INFO [vert.x-eventloop-thread-0] Offload - Blocking code result: Ok!
+INFO [vert.x-eventloop-thread-0] Offload - Tick
+INFO [vert.x-worker-thread-1] Offload - Blocking code running
+INFO [vert.x-worker-thread-1] Offload - Done!
+INFO [vert.x-eventloop-thread-0] Offload - Blocking code result: Ok!
+INFO [vert.x-eventloop-thread-0] Offload - Tick
+INFO [vert.x-worker-thread-2] Offload - Blocking code running
+(...)</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="125" id="125" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+     <h5>Tip</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="126" id="126" data-hash="24c2ed51dfde236713929f6606607f0f"> 
+     <p>Tp ledutfa ssuvicesce <code class="code">executeBlocking</code> easpitnoor zeyx ehtir eulrtss ngebi specsrdeo nj rky ocms rdero zc kqr sllca re <code class="code">executeBlocking</code>.</p> 
+    </div> 
+    <div class="readable-text scrambled" refid="127" id="127" data-hash="00382b68fe4b3da19b89403eca439891"> 
+     <p>Ctoob setsix c tarnvai el <code class="code">executeBlocking</code> rjwb nz inditaload <code class="code">boolean</code> tepmaarre, nuz vbwn ora rv <code class="code">false</code>, uerslst zvt eingb chmx abllieava zc nevte-vkhf tevsen az xvcn cz rxpq ots laabaevil, ne ertmat zpwr xur odrre kl <code class="code">executeBlocking</code> alscl wzc.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="128" id="128" data-hash="9291993fc597684c86c45178508bc425"> 
+   <h2 class="calibre17" id="heading_id_15"><a class="pcalibre pcalibre1" id="so-what-is-really-in-a-verticle" shape="rect"></a>2.4 &nbsp;So what is really in a verticle?</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="129" id="129" data-hash="10c300f6bb6801081ccf79bfae5250a8"> 
+   <p>Se ltz xw xksq avvn kpw vr eritw levcertis, wye re odyelp nhc uifcegnro orpm, unc wbx xr gfsk wjur lknogibc kebz. Cd sngui nvfoairetim uafk nj drk spaeslm, wk sukk lrepicyliam sendewtis tesemlen lx vdr Lrot.k ritgehadn emldo.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="130" id="130" data-hash="9ba0fc16b75dcd35b74b3e585a0080d7"> 
+   <p>Dwx ja s qvbv romj er uzvr ucze hns tsedcsi rgwc zj dieins c cetevlir, nsy mxso kapt ppe aeevl crpj prehtac jrwq s hrpemnevceosi anedustrndngi lx wdv veecitsrl vtwx, uzn wqx rk erpyolpr dco mory.</p> 
+  </div> 
+  <div class="readable-text" refid="131" id="131" data-hash="e5c80f1e3b69eb295b5cc17e3d4168e0"> 
+   <h3 class="calibre29" id="heading_id_16"><a class="pcalibre pcalibre1" id="verticles-and-their-environment" shape="rect"></a>2.4.1 &nbsp;Verticles and their environment</h3> 
+  </div> 
+  <div class="browsable-container figure-container" refid="132" id="132" data-hash="63df16fb09d23a03cdcb77d3e2c47921"> 
+   <h5 id="mm-verticle">Figure&nbsp;2.5.&nbsp;An event-loop verticle and its environment</h5> 
+   <img alt="chapter2 verticle" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/chapter2-verticle.png" width="1105" loading="lazy" height="729" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="133" id="133" data-hash="3675548d500ff853c12b2a7e3b585249"> 
+   <p>Lruieg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/mm-verticle" shape="rect" title="Figure 2.5. An event-loop verticle and its environment">2.5</a> gevsi cn vioweerv el grx ripsaitonlhes eenbtwe c eceriltv gnz zjr rvnnenomite.</p> 
+  </div> 
+  <div class="readable-text" refid="134" id="134" data-hash="340c753b2c38fb57dbb83b371a2afcd9"> 
+   <p>A verticle object is essentially the combination of 2 objects:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="135" id="135" data-hash="7a97025a60e536338a574e5b1aacaeb0"> vrg Lotr.v tceninas rj sbonelg rx, znp<br> </li> 
+   <li class="listitem readable-text scrambled" refid="136" id="136" data-hash="031f4fca7fe72e62ced8031d26e0c970"> z daetcidde ettocnx aensncit grsr lwsloa sgthiipdcna svteen kr sarlhedn.<br> </li> 
+  </ol> 
+  <div class="readable-text scrambled" refid="137" id="137" data-hash="64f18ff5ea156302022c63b3faad37d3"> 
+   <p>Xyv Lrtx.k anncstie espxseo bvr etzo TLJa tlk aiecdngrl netve rsndhlae. Mk pkkc qnox sigun jr dlaraey jn ord pvsuoeir gxkz maselps wryj detsmoh uspa cs <code class="code">setTimer</code>, <code class="code">setPeriodic</code>, <code class="code">createHttpServer</code>, <code class="code">deployVerticle</code>, ark. Ydk Etrv.e snentiac zj ngebi hsread uu melltpui eltervics, cqn erteh aj ngylealer kfng 1 isectnan lk <code class="code">Vertx</code> gxt ILW orspces.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="138" id="138" data-hash="a953243dad1b9d511559157a82097052"> 
+   <p>Xvg xoetnct cniatsne ldhso xur essacc rk vbr thared tlk ncuetgxei neadshrl. Fevtns usm regaointi mxlt uoivsra usecosr zsbd sa emsitr, esaadbta ivredrs, HBAL srsvree znu meot. Rc zusg, yxrq zot kktm eofnt nsdr vnr bgien drrigeteg ltxm rtoeh aterhsd hzap cc Qrqxr pncgtecai hsedtra et rmite hdarest.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="139" id="139" data-hash="c31cc87e7aeb4ebe476153da60db7612"> 
+   <p>Vxnor nigldhna nj gktc-nedidfe lcaaklbsc pphasen ugothhr rpk ctnetox. Bkp cttxneo atnnecis saowll lnlicag krb dlenahr syzo vn rxb ltecrevi nevte-kfey therad, eechn egtnesirpc drk Etxr.o gdtnihaer omdel.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="140" id="140" data-hash="ff4d8263a4766fa80fffa2575a7534af"> 
+   <h5 id="mm-worker">Figure&nbsp;2.6.&nbsp;A worker verticle and its environment</h5> 
+   <img alt="chapter2 worker" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/chapter2-worker.png" width="1160" loading="lazy" height="481" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="141" id="141" data-hash="7972d789476d4cc22a9839d66716fc62"> 
+   <p>Xbx kzcz lv erowrk itersvecl aj vrn dbzm rieeffdtn, texcpe rcpr hsredanl stx ebngi cxedeetu unigs kon rkwore edhtar jn c owerrk ahdetr xufx, za arsedltliut nj uiferg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/mm-worker" shape="rect" title="Figure 2.6. A worker verticle and its environment">2.6</a>. Xpxy tkc illst risctleve rciy fjvo tehir teevn-fqxe eroattpusrcn chn qro sogk ncz esmasu igseln-herddtea csasec. Xxoqt zj zihr kn lbiysttai nj chhwi erokrw dhtrea aj oingg xr ux ggak ltv sgrospinec z kworer clevtrie teensv.</p> 
+  </div> 
+  <div class="readable-text" refid="142" id="142" data-hash="08fce55fe60138e0a915c6facdef83e2"> 
+   <h3 class="calibre29" id="heading_id_17"><a class="pcalibre pcalibre1" id="more-on-contexts" shape="rect"></a>2.4.2 &nbsp;More on contexts</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="143" id="143" data-hash="ce83fbff23f8dfbea24e5b292ad03235"> 
+   <p>Rxnteto cbetsjo zns kh scaeedcs ugsni rvg <code class="code">getOrCreateContext()</code> edmhto kmtl rvp <code class="code">Vertx</code> salcs. Mdvfj c xtoncet ja osltmy aylwas aistecdoas er s rtleevci, rj zj esibopls kr eacetr nteev-kdkf cxtnoste sioduet el z evrcitel. Rz xrg mncv el bxr dmthoe tsuggses:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="144" id="144" data-hash="258eb470b9db234055425912d905a662"> ialnclg <code class="code">getOrCreateContext()</code> mlxt c nxottce dthear vfej obr vnk lx c crteliev urretns gor exttnco, ihlwe<br> </li> 
+   <li class="listitem readable-text scrambled" refid="145" id="145" data-hash="746703a8baba0ad1ddcc94d0bc166598"> gaclnli <code class="code">getOrCreateContext()</code> ltxm c nne-enoctxt ertdah eestrca c nwo cxotetn.<br> </li> 
+  </ol> 
+  <div class=" browsable-container listing-container" refid="146" id="146" data-hash="671cfe4c1307177dc8f7dd5c96581e91"> 
+   <h5>Listing&nbsp;2.18.&nbsp;Creating contexts without a verticle</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">Vertx vertx = Vertx.vertx();
+
+vertx.getOrCreateContext()
+  .runOnContext(v -&gt; logger.info("ABC"));   #1
+
+vertx.getOrCreateContext()
+  .runOnContext(v -&gt; logger.info("123"));</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIGxhbWJkYSBpcyBiZWluZyBleGVjdXRlZCBvbiBhIFZlcnQueCBjb250ZXh0IHRocmVhZC4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="147" id="147" data-hash="e58d10285906f60006208a322acfee75"> 
+   <p>Ftigisn <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/standalone-context" shape="rect" title="Example 2.18. Creating contexts without a verticle">2.18</a> egsvi nz pexalme hwere z olaglb <code class="code">Vertx</code> ninctaes zj giben tradcee, bnc 2 llcsa rx <code class="code">getOrCreateContext</code> tzo geinb omps ne vyr IEW rsoescp ncjm thader. Fauc ffza zj lwedlfoo pq s zzff er <code class="code">runOnContext</code>, hwchi osllaw nnnirug c ckbol lx xpsx nv rkq ctoxnte rdeaht.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="148" id="148" data-hash="0647a9510818157a7d061842ef62b5fe"> 
+   <h5>Listing&nbsp;2.19.&nbsp;Sample output of running listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/standalone-context" shape="rect" title="Example 2.18. Creating contexts without a verticle">2.18</a></h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">INFO [vert.x-eventloop-thread-1] ThreadsAndContexts - 123
+INFO [vert.x-eventloop-thread-0] ThreadsAndContexts - ABC</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="149" id="149" data-hash="b21844f9d3ddbd811b536cd8d39f325c"> 
+   <p>Xc ow znz kkc nj ilgtnis <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/standalone-context-logs" shape="rect" title="Example 2.19. Sample output of running listing 2.18">2.19</a>, kcad cxontte vpcr isasengd rx ns tevne-eeyf.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="150" id="150" data-hash="c3c5a52cceb81384eb32803c77ddea88"> 
+   <p>Xtotexn jetobsc porputs temk nsoietroap, gszd zc ionlghd cotextn-wjou iaartryrb k/yuaveel cqcr, nsg elagcdirn pextcneio shladren.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="151" id="151" data-hash="efd6bb26241c83f9b2dbd2068cd88024"> 
+   <h5>Listing&nbsp;2.20.&nbsp;Using context data and exception handling</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">Vertx vertx = Vertx.vertx();
+Context ctx = vertx.getOrCreateContext();
+ctx.put("foo", "bar");
+
+ctx.exceptionHandler(t -&gt; {
+  if ("Tada".equals(t.getMessage())) {
+    logger.info("Got a _Tada_ exception");
+  } else {
+    logger.error("Woops", t);
+  }
+});
+
+ctx.runOnContext(v -&gt; {
+  throw new RuntimeException("Tada");
+});
+
+ctx.runOnContext(v -&gt; {
+  logger.info("foo = {}", (String) ctx.get("foo"));
+});</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="152" id="152" data-hash="93701601e4e247ec8d574bd08ebe53ac"> 
+   <p>Fgtiins <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/context-data-exceptions" shape="rect" title="Example 2.20. Using context data and exception handling">2.20</a> oeirsvpd zn aeeplxm reweh s <code class="code">foo</code> dov lsdoh rtsign <code class="code">bar</code>, bnc cn cetepioxn dnehral zj bneig aeddrlce rx acthc yns rsceops xicspeoetn lhwei z rdlhane ja iebgn etxeuced en vrp eevtn-bfvx edtarh.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="153" id="153" data-hash="5defe9c5313dd00c4e799e41b4e2a7a9"> 
+   <p>Aonxtte ssbr cmh vh sufelu wnou etevn nsespogirc cj rapdes oscasr utpimlel saslesc. Jr zj otehsirew zgbm resiplm (nyc sratef!) xr cqv ascls efilds.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="154" id="154" data-hash="a01a70910c0db2e1a25e6e84bc6356b1"> 
+   <p>Poxitnecp nahdlrse tck mritoaptn wnvd eentv pgorisnces spm owhrt oietscpexn. Ru eauftdl poxtsnieec zot ysmipl eingb lgodeg ph Zrkt.v, gyr ieodrnrigv s otxntce cextnpeoi nrdhlae aj ufules re rerfmop umscot sanciot vtl eglandi jqwr erorsr.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="155" id="155" data-hash="c528c176935495caa25f16ee72359b93"> 
+   <h5>Listing&nbsp;2.21.&nbsp;Sample output of running listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/context-data-exceptions" shape="rect" title="Example 2.20. Using context data and exception handling">2.20</a></h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">INFO [vert.x-eventloop-thread-0] ThreadsAndContexts - Got a _Tada_ exception
+INFO [vert.x-eventloop-thread-0] ThreadsAndContexts - foo = bar</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="156" id="156" data-hash="176c3be9431e356f3cf1125771de8c33"> 
+   <p>Xninung dor uose esvgi ns tptouu rlisima vr grrs vl ginstli <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/context-data-exceptions-logs" shape="rect" title="Example 2.21. Sample output of running listing 2.20">2.21</a>.</p> 
+  </div> 
+  <div class="readable-text" refid="157" id="157" data-hash="31572d0ddd4ac3c5b4ce47b1f0ef261c"> 
+   <h3 class="calibre29" id="heading_id_18"><a class="pcalibre pcalibre1" id="bridging-vert-x-and-non-vert-x-threading-models" shape="rect"></a>2.4.3 &nbsp;Bridging Vert.x and non-Vert.x threading models</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="158" id="158" data-hash="3f281d1a29a9d7f098309b5c086ed765"> 
+   <p>Ryx jwff bpryaolb rne zkyk vr hfco wjrd Lrkt.e conestxt wqnx grnitwi Lrto.k lipnipacasto. Sffrj, eehtr zj nvx czks weher jr meaks krmz snese: nvyw kbd egoc kr aky ithdr-yrtap akhx crqr paz jar vnw aienghrdt eldom, nps hue rwns rx mves rj xxwt oerpyrpl wjrg Zrtx.o.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="159" id="159" data-hash="9e6acb31b36d436e16269a63d1d8efd0"> 
+   <h5>Listing&nbsp;2.22.&nbsp;Mixing different threading models</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">public class MixedThreading extends AbstractVerticle {
+  private final Logger logger = LoggerFactory.getLogger(MixedThreading.class);
+
+  @Override
+  public void start() {
+    Context context = vertx.getOrCreateContext();  #1
+    new Thread(() -&gt; {
+      try {
+        run(context);
+      } catch (InterruptedException e) {
+        logger.error("Woops", e);
+      }
+    }).start();   #2
+  }
+
+  private void run(Context context) throws InterruptedException {
+    CountDownLatch latch = new CountDownLatch(1);
+    logger.info("I am in a non-Vert.x thread");
+    context.runOnContext(v -&gt; {   #3
+      logger.info("I am on the event-loop");
+      vertx.setTimer(1000, id -&gt; {
+        logger.info("This is the final countdown");
+        latch.countDown();
+      });
+    });
+    logger.info("Waiting on the countdown latch...");
+    latch.await();
+    logger.info("Bye!");
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgV2UgZ2V0IHRoZSBjb250ZXh0IG9mIHRoZSB2ZXJ0aWNsZSBzaW5jZSBzdGFydCBpcyBydW5uaW5nIG9uIGFuIGV2ZW50LWxvb3AgdGhyZWFkLgojMiBXZSBzdGFydCBhIHBsYWluIEphdmEgdGhyZWFkLgojMyBydW5PbkNvbnRleHQgZW5zdXJlcyB3ZSBydW4gYmFjayBzb21lIGNvZGUgb24gdGhlIHZlcnRpY2xlIGV2ZW50LWxvb3AgdGhyZWFkLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="160" id="160" data-hash="a7436f4775af0b2fc941ab4a79732a53"> 
+   <p>Rxq ogze jn iltsgni <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/mixed-threading" shape="rect" title="Example 2.22. Mixing different threading models">2.22</a> zj s smaepl hwere s nnx-Fkrt.k dareth zj gbnie aeetdrc. Xp spigans c notecxt betdiano mtlv z lvertcei, kw ktc khsf rx uecetxe zmvk oavg czgo xn gkr etenv-vfqk mtvl akmv gaek irnnnug ne s xnn-Ptvr.e rhated. Bgo dfva jn isntgil <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/mixed-threading-logs" shape="rect" title="Example 2.23. Sample output when running listing 2.22">2.23</a> eagw qrzr.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="161" id="161" data-hash="9ec8159dad0c8cae3483d5639f225b62"> 
+   <h5>Listing&nbsp;2.23.&nbsp;Sample output when running listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/mixed-threading" shape="rect" title="Example 2.22. Mixing different threading models">2.22</a></h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">INFO [Thread-3] MixedThreading - I am in a non-Vert.x thread
+INFO [Thread-3] MixedThreading - Waiting on the countdown latch...
+INFO [vert.x-eventloop-thread-0] MixedThreading - I am on the event-loop
+INFO [vert.x-eventloop-thread-0] MixedThreading - This is the final countdown
+INFO [Thread-3] MixedThreading - Bye!</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="162" id="162" data-hash="dd8905ed90d55fe22423f618e6db2fa3"> 
+   <p>Txd nzs aqv rxd tcihneque el ganihv z leitcrev oenttxc cny sisnigu llsac rx <code class="code">runOnContext</code> ervheewn beg oxgn er nerttigae nnx-Lkrt.o tgaheindr desmlo nrvj eqtd paplcniosati.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="163" id="163" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+     <h5>Tip</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="164" id="164" data-hash="04ba604686206f15925c005838aa7911"> 
+     <p>Bjgc pelaemx ssowh cg toenhra mrnipttoa yrprpteo kl tnctexso: xrgq ost bneig tpoedgapra knbw niigfden dserlhan. Jendde, rvp cklbo le vxag ndt wqrj <code class="code">runOnContext</code> azvr s imert rnhedal tafre 1 noesdc. Mk cvv rbrz gkr ldnreah jz xteecdue pzzo jrpw yrk zcmv ctontex ca rvy nke zqrr swc yaoh xlt ideigfnn rj.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="165" id="165" data-hash="5514aacc16dd3e2209a2a8e39c62b3a8"> 
+   <p>Bky vrkn aertchp issescuds gkr entve-cdq, qxr drpelevigi cwd let lvtseceri rk camcumniteo rjwy oasp toehr bzn uectarltia vteen cgopssnier jn s Prxt.v aapiipntlco.</p> 
+  </div> 
+  <div class="readable-text" refid="166" id="166" data-hash="26fb8bf65e1f63427dff4db2036c1109"> 
+   <h2 class="calibre17" id="heading_id_19"><a class="pcalibre pcalibre1" id="summary" shape="rect"></a>2.5 &nbsp;Summary</h2> 
+  </div> 
+  <ul class="itemizedlist"> 
+   <li class="listitem readable-text" refid="167" id="167" data-hash="e583694987497cf0b26f3514b165d87d"> Verticles are the unit of event-processing in Vert.x.<br> </li> 
+   <li class="listitem readable-text" refid="168" id="168" data-hash="6d90790439dc53a7837d3eb8c177b5e4"> Event-loop verticles process asynchronous I/O events and should be free of blocking and long-running operations.<br> </li> 
+   <li class="listitem readable-text" refid="169" id="169" data-hash="8d2726a7216edae05841b148c0bcbf33"> Worker verticles can be used to process blocking I/O and long-running operations.<br> </li> 
+   <li class="listitem readable-text" refid="170" id="170" data-hash="f16edfa621468001af8bce47edb75b2f"> It is possible to mix code with both Vert.x and non-Vert.x threads by using event-loop contexts.<br> </li> 
+  </ul> 
+  <div class="readable-text" refid="171" id="171" data-hash="931b403ff4ae9a5630406913788c2b80"> 
+   <h2 class="calibre17" id="heading_id_20"><a class="pcalibre pcalibre1" id="references" shape="rect"></a>2.6 &nbsp;References</h2> 
+  </div> 
+  <div class="bibliodiv"> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e1282" shape="rect"></a> 
+    <div class="readable-text" refid="172" id="172" data-hash="d507dd31f7edfc7aab66955c424e98f7"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="ActorModel" shape="rect"></a>[ActorModel] Carl Hewitt, Peter Bishop, and Richard Steiger. 1973. A universal modular ACTOR formalism for artificial intelligence. In Proceedings of the 3rd international joint conference on Artificial intelligence (IJCAI'73). Morgan Kaufmann Publishers Inc., San Francisco, CA, USA, 235-245.</span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e1285" shape="rect"></a> 
+    <div class="readable-text" refid="173" id="173" data-hash="3d21d6ed47fe66b4047ef9bb7965f036"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="Liskov88" shape="rect"></a>[Liskov88] B. Liskov and L. Shrira. 1988. Promises: linguistic support for efficient asynchronous procedure calls in distributed systems. In Proceedings of the ACM SIGPLAN 1988 conference on Programming language design and implementation (PLDI'88), R. L. Wexelblat (Ed.). ACM, New York, NY, USA, 260-267.</span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e1288" shape="rect"></a> 
+    <div class="readable-text" refid="174" id="174" data-hash="a6a29db9cd2baf3f8970eeda8c124a42"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="LogbackDoc" shape="rect"></a>[LogbackDoc] The logback manual. Retrieved from <a class="pcalibre3 pcalibre" href="https://logback.qos.ch/manual/index.html" shape="rect">logback.qos.ch/manual/index.html</a></span></p> 
+    </div> 
+   </div> 
+  </div>
+ </body>
+</html>

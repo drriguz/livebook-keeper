@@ -6,10 +6,14 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.riguz.livebook.HttpClient;
 import com.riguz.livebook.client.dto.TocMeta;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.message.BasicNameValuePair;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LiveBookApiClient {
     private final String bookName;
@@ -47,5 +51,25 @@ public class LiveBookApiClient {
         JsonElement chapters = json.getAsJsonObject("toc").getAsJsonArray("parts").get(0);
         Gson gson = new Gson();
         return gson.fromJson(chapters, TocMeta.class);
+    }
+
+    public String unlock(String chapter, int paragraph) throws IOException {
+        final String url = "https://livebook.manning.com/api/userBook/unlockBookElementContent";
+        List<NameValuePair> params = new ArrayList<>();
+        params.add(new BasicNameValuePair("bookShortName", bookName));
+        params.add(new BasicNameValuePair("bookElementShortName", chapter));
+        params.add(new BasicNameValuePair("paragraphIDs", paragraph + ""));
+        params.add(new BasicNameValuePair("meapVersion", meapVersion + ""));
+        params.add(new BasicNameValuePair("isSearch", "false"));
+        params.add(new BasicNameValuePair("isFreePreview", "true"));
+        params.add(new BasicNameValuePair("logTimings", "false"));
+        params.add(new BasicNameValuePair("previewDuration", "0.800000000000001"));
+        params.add(new BasicNameValuePair("timezone", "Asia/Shanghai"));
+        params.add(new BasicNameValuePair("platform", "browser-MacIntel"));
+        String result = HttpClient.post(url, params);
+        JsonObject json = JsonParser.parseString(result).getAsJsonObject();
+        JsonElement unlocked = json.getAsJsonArray("unlockedParagraphs").get(0)
+                .getAsJsonObject().getAsJsonPrimitive("content");
+        return unlocked.getAsString();
     }
 }

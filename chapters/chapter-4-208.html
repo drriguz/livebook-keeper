@@ -1,0 +1,1 @@
+<p>Remember that the <code class="code">RecordParser</code> decorates the file stream. It is paused, then the <code class="code">fetch</code> method asks for 1 element. Since the parser emits buffers of parsed data, asking 1 element in this example means asking for a buffer of 4 bytes (the magic number).</p>

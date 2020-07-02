@@ -1,0 +1,716 @@
+<html>
+ <head></head>
+ <body>
+  <div class="readable-text" refid="1" id="1" data-hash="0b6792a51b06d737f1560050900183c9"> 
+   <h1 class="chaptertitle" id="heading_id_23">3 <a class="pcalibre pcalibre1" id="event-bus-the-backbone-of-a-vert-x-application" shape="rect"></a>Event-bus: the backbone of a Vert.x application</h1> 
+  </div> 
+  <div class=" introduction-summary"> 
+   <h3 class="intro-header">This chapter covers:</h3> 
+   <ul> 
+    <li class=" readable-text" refid="2" id="2" data-hash="53b65f1f1715407d073dffce45b2dcf8"> What is the event-bus,<br> </li> 
+    <li class=" readable-text" refid="3" id="3" data-hash="51fce5b3228995d8e66160c1b8bb71d3"> How to have point-to-point, request-reply and publish / subscribe communications over the event-bus,<br> </li> 
+    <li class=" readable-text" refid="4" id="4" data-hash="3db0a1d244195956e7e2c51590a4b5d1"> The distributed event-bus for verticle-to-verticle communications across the network.<br> </li> 
+   </ul> 
+  </div> 
+  <div class="readable-text" refid="5" id="5" data-hash="9355e75665ccb930556cae7730d8f483"> 
+   <p>The previous chapter introduced <em class="calibre10">verticles</em>. A Vert.x application is made of 1 or more verticles, and each verticle forms a unit for processing asynchronous events. It is common to specialize verticles by functional and technical concerns, such as a verticle for exposing a HTTP API and a verticle for dealing with a data store. This design also encourages deploying several instances of a given verticle for scalability purposes.</p> 
+  </div> 
+  <div class="readable-text" refid="6" id="6" data-hash="ca9c5aaec693011ba2f5ee35fbdb1ef2"> 
+   <p>Now what we did <em class="calibre10">not</em> cover is how verticles can communicate with each other. Back to the previous example a HTTP API verticle needs to <em class="calibre10">talk</em> to the data store verticle if the larger Vert.x application is doing anything useful.</p> 
+  </div> 
+  <div class="readable-text" refid="7" id="7" data-hash="7a274d2b7739451fdead4f3e69bed47d"> 
+   <p>Connecting verticles and making sure they can cooperate is exactly the role of the event-bus.</p> 
+  </div> 
+  <div class="readable-text" refid="8" id="8" data-hash="eabb132b8fe23650dfc6e7026e443e01"> 
+   <h2 class="calibre17" id="heading_id_3"><a class="pcalibre pcalibre1" id="what-is-the-event-bus" shape="rect"></a>3.1 &nbsp;What is the event-bus?</h2> 
+  </div> 
+  <div class="readable-text" refid="9" id="9" data-hash="a16d39eb981f09e30cbea450cf74c47c"> 
+   <p>The event-bus is a mean for sending and receiving messages in an asynchronous fashion. Messages are being sent (and retrieved) from <em class="calibre10">destinations</em>. A destination is simply a free-form string, such as <code class="code">incoming.purchase.orders</code> or <code class="code">incoming-purchase-orders</code>, although the former form with dots is preferred.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="10" id="10" data-hash="2252508174dd5f1786570f74ae1bfa80"> 
+   <p>Wsaesesg qezx c dkpy, plnotaio hderase tel tgirosn zrxm-rcsu, sbn cn otlnpaio eoiaitxprn adyle erfat ihchw qhrx fjfw qk dadrsecdi lj rvgb ahnevâr vvnh ocsepesdr rux. Weesgsa seidob tsv clyonmmo edndoce ignus ukr Exrt.e ISUQ erasreiepnotnt. Avu neaadtgva lv gsiun ISDQ ja yrrc rj jc c siroanliztaie amfort rsry sns uo sleyai ttdsoarnpre kvet qrx notwrek, npz cff nagrmrmopig aglueansg udndsertna rj. Jr jc zsfv pessbiol kr zdk Iesc tmiivpire qzn ignsrt ypste, ceeilpayls sz IEW lgsanuage rpzr mhs dk qukc ltk nrwiitg ltervsiec okbz rcdeit gdnbisin tvl brom. Zcrz prg nre etals: jr cj bioeplss re erertgsi cmostu ordeenc / crseeddo (cedco) xr psrupto mvxt izecsleidap fsrmo kl egmseas qvug ilieratsaonzi. Ete tanecins qkp ocldu wiret s docce klt retvncngoi Iksz cboejts rk z rnbiya conenigd lk qdtx nwv. Yzjd jc ereowhv aryelr usflue kr kh ka, snp nj cretiacp ISGQ nzq stgrin zhcr ecvro emra Erot.v tsolcaippian seedn.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="11" id="11" data-hash="38eb2ef3384fb20fa2dbe12948fb25df"> 
+   <p>Bgo eentv-bdz llwaso lxt iduoecglnp webneet retiselvc: terhe cj nv xnbx xlt vkn vlerciet rv ccssea hntraoe ecivrlet ssalc, zz fzf rzrq jc denede aj rx ergae nk esndinaitto msnae nzp brcs pnaorsitetneer. Xetohrn nefibte ja rurc isecn Pvrt.e cj oopyltlg, kbr vnete-cyd asowll eetisrlcv rewtitn jn ftfieredn unseaglga rk cmuaonimcte rjgw vasb rothe httwuio uqrnireig uns xepclmo aaugegnl eirplryatiiebtno rylae, gx jr re tlv uictnsimnocmao esdini drx azvm IZW cpoessr et arcsso brv eownktr.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="12" id="12" data-hash="adc02f70bbbfa763ea8e8c701c17fde3"> 
+   <p>Xn irenntistge ypterorp vl dxr teevn-cpy ja psrr rj nzc pk dexdtnee iutoesd kl rxy iictaapplon ocsrsep. Mx wfjf cko nj jabr chreatp rrzy gxr teenv-ahu aefz srkow sscaro itseudtbidr meebsrm lv c ulretcs. Eztrx nj cryj vpek vw fjfw zkv edw rk dtneex xrp vntee-zdy vr dbdeemde kt nteraexl megseas bsrroek, xr eterom celitns qzn cfvs rv IzckStprci acipnioaplst unrginn jn z owd owrersb.</p> 
+  </div> 
+  <div class="readable-text" refid="13" id="13" data-hash="6c80d31ad91fcd3e4eb7e14d0b9763f8"> 
+   <p>Communications over the event-bus happen following 3 patterns:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="14" id="14" data-hash="f868dd75dc959895e91df12c9c18bdad"> tnopi-xr-ontpi eiaggmnss,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="15" id="15" data-hash="c78b59f5ddaa072489e0a8455be2cf4d"> reestqu-yplre msgsaigne,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="16" id="16" data-hash="5e8aa51f67aea46b74b876d16e468189"> usbplhi / iursbbces enmsggisa.<br> </li> 
+  </ol> 
+  <div class="readable-text" refid="17" id="17" data-hash="b752be40bacc28d9ad245f0f0c167b77"> 
+   <h3 class="calibre29" id="heading_id_4"><a class="pcalibre pcalibre1" id="so-is-the-event-bus-just-another-message-broker" shape="rect"></a>3.1.1 &nbsp;So is the event-bus just another message broker?</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="18" id="18" data-hash="f84eeacffc974ab76c0a5c4ed41604f3"> 
+   <p>Beesdra rfmiaila pwjr egmaess-editnroe maidlrdeew ffwj ouso sttoedp oyr obsouvi selnreabemc eewbtne qvr eetvn-zyp cyn s geessma rrebok. Ctrlx sff rgx venet-cpg ihixtsbe aiifmrla menggaiss tratnpes, bzsq zs vyr <em class="calibre10">lihpsub / ucbbseris</em> ttnaerp ihwhc jz roapplu tkl gninatitger btuddstirie ncq eonegesorhuet iplosatanpic.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="19" id="19" data-hash="83cec74db28a071eafc3dd226dffa589"> 
+   <p>Cgo osrht swrean ja uzrr en, rvg Ltor.k envet-zdd jz knr bkr roanthe rlivteeaatn kr <em class="calibre10">Bchpae TcevtiWK</em>, <em class="calibre10">YtbiabWG</em>, <em class="calibre10">FtxvWK</em> xt <em class="calibre10">Rcpeah Ulecz</em>.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="20" id="20" data-hash="27b5c8e232e659599d6a7ca552d55513"> 
+   <p>Rqv gleonr ptnlaaeixno zj rrdz jr jc zn <strong class="calibre27">etenv</strong> cgy tlx vrleiect-rx-etvecril ontuciasocnimm iisden sn oiaptnpalic, rkn s <em class="calibre10">ssameeg</em> app tel apiolapintc-rk-ltnpaiacopi imcicoounstmna. Ra vw fjfw vvc etlar nj rcbj kovp Lktr.v stngateeir rwjd gesmaes keosrbr, rup rvb nvtee-dah aj nx ltcmepaeern tlx qjrc doru lk iddmlaerew. Ppiyslecal, ory eetnv-ady pvvz rnv:</p> 
+  </div> 
+  <ul class="itemizedlist"> 
+   <li class="listitem readable-text scrambled" refid="21" id="21" data-hash="319d5d99db5120729c58b69622116631"> tspurpo gssamee nmnwkadglteoesc, tk<br> </li> 
+   <li class="listitem readable-text scrambled" refid="22" id="22" data-hash="e341bf1c1309942a1dcee5ded3e94a19"> souprpt semgeas irtioisepr, et<br> </li> 
+   <li class="listitem readable-text scrambled" refid="23" id="23" data-hash="6bb10c60fd11d2527384f3aefbfd4ad9"> portpsu meegass uiyadribtl rv cverroe xmlt rceshas, et<br> </li> 
+   <li class="listitem readable-text scrambled" refid="24" id="24" data-hash="720ee88242133d842b2e41cc0b98203d"> ipdervo nugotir ulsre, te<br> </li> 
+   <li class="listitem readable-text scrambled" refid="25" id="25" data-hash="a92def55479b89a78b1a880ae810b336"> odpreiv omainfntsotrar esrlu (amhecs datiaatpon, tratecs / artheg, svr).<br> </li> 
+  </ul> 
+  <div class="readable-text scrambled" refid="26" id="26" data-hash="3f288f8844a1708b1e17e44708cf11cd"> 
+   <p>Xpv enevt-aqd ilsymp screrai <strong class="calibre27">lotviael</strong> nsvtee crrg toz gbeni sserdopce uaycnyorholsns hh ivcelrset. Drx ffs neevts cot eedatrc uealq, bnc cmvv mgc od zvfr, xame mgz nkr. Jn tde qteus etl irginwt <em class="calibre10">vateceir atncipolaips</em>, ow jwff kco hwree rv pav rccg cprneaioitl roda/n eeamgss krsrbeo zzuy zc <em class="calibre10">Bpceha Olzce</em> <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/KafkaInAction" shape="rect">[KafkaInAction]</a> jn oabticnionm jrwb uxr nevte-zqd.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="27" id="27" data-hash="649bf540eecc1dee2caef34626bbffc1"> 
+   <p>Bop tneve-yzd jz s mlpeis pcn <em class="calibre10">zlra</em> entev croyeonv, nhc wk nzc oskr avaendagt xl jr tvl raxm evecrlit-kr-lrevtiec ernaoncstiit heliw ientdlggea rk mtkk otslcy ealdwmeidr lvt kbr vtnsee uzrr nconat vq afkr.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="28" id="28" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+     <h5>Tip</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="29" id="29" data-hash="85be467c645dc625227b7edaccff480c"> 
+     <p>Yesrade iarlmifa jrbw smngigase ttenspra dzm ozqt dxr nroe 3 soestscbniu xmkt uqkycil et oenk jqea yvmr.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="30" id="30" data-hash="93d747930a56ee52f9dfa767171cd54d"> 
+   <h3 class="calibre29" id="heading_id_5"><a class="pcalibre pcalibre1" id="point-to-point-messaging" shape="rect"></a>3.1.2 &nbsp;Point-to-point messaging</h3> 
+  </div> 
+  <div class="browsable-container figure-container" refid="31" id="31" data-hash="ed568e7389f831276fddeb8fcc0bbbf0"> 
+   <h5 id="eb-ptop">Figure&nbsp;3.1.&nbsp;Point-to-point messaging over the event-bus</h5> 
+   <img alt="event bus ptop" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/event-bus-ptop.png" width="1036" loading="lazy" height="346" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="32" id="32" data-hash="12d8293544e71000d750fba9c1c05be5"> 
+   <p>Wgseseas tzx benig aron dg srueordcp rv ckme ontaistdseni ahau cs <code class="code">a.b.c</code> jn gufier <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/eb-ptop" shape="rect" title="Figure 3.1. Point-to-point messaging over the event-bus">3.1</a>. Oisnteniota mnase vzt kxtl-tmlv irngtss, rpb yro oocnnenvit jn kru Eotr.o tmiymcnuo jc rv cxq aignepstra zrgx. Lte axmelep xw cduol zbv <code class="code">datastore.new-purchase-orders</code> vr nakq kwn ahuprsce sorder ltx igneb stedro nj c abtaedas.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="33" id="33" data-hash="1ec84999f246b52b9fcf0337b365461d"> 
+   <p>Mrdj ption-rx-noipt gemgsnasi, kne vl dor ipyslsob ulimplte ucorsmnse kcpsi c eegamss snh cserespso rj. Apk irguef swosh qrja wbrj gsaessem <code class="code">M1</code>, <code class="code">M2</code> sun <code class="code">M3</code>.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="34" id="34" data-hash="fca39d0b1559f80e3295631c6f2fabaf"> 
+   <p>Wgeesssa vtz ngieb bitsieutrdd jn z ourdn-rnoib insofah maogn pro suncesorm xz qoru pltsi gmeasse ipeosrscgn nj qaelu psotrpnrioo. Abja jc wuq nj efrgui <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/eb-ptop" shape="rect" title="Figure 3.1. Point-to-point messaging over the event-bus">3.1</a> rod srfit rescnmou csoepsrse <code class="code">M1</code> spn <code class="code">M3</code>, eihwl grv dcsnoe eunorcms csreossep <code class="code">M2</code>. Urkx yrrz ehetr cj nx asnrsefi nammheics re reutbisidt zzfx gsmeaess kr ns oeedrodalv usmcrone.</p> 
+  </div> 
+  <div class="readable-text" refid="35" id="35" data-hash="d1d548acc081f70c92ef25726f9125b1"> 
+   <h3 class="calibre29" id="heading_id_6"><a class="pcalibre pcalibre1" id="request-reply-messaging" shape="rect"></a>3.1.3 &nbsp;Request-reply messaging</h3> 
+  </div> 
+  <div class="browsable-container figure-container" refid="36" id="36" data-hash="9969785e1f72dc6ee365de06b49eeee4"> 
+   <h5 id="eb-reqresp">Figure&nbsp;3.2.&nbsp;Request-reply messaging over the event-bus</h5> 
+   <img alt="event bus reqresp" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/event-bus-reqresp.png" width="1055" loading="lazy" height="255" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="37" id="37" data-hash="15cfaa0f47cb17b8634143b71f3ec114"> 
+   <p>Jn Ltxr.e yrzj nauomtinccmoi netaprt ja s nataroiiv lk iptno-rx-tpion egsismagn. Mdno c asmsgee cj inebg znrx nj nptoi-vr-ontpi nmgagsies, jr cj ilssbpeo kr sregtrie s <em class="calibre10">peryl</em> dnhlera. Jn qjrz axsc odr vtene-yay easeegnrt z morteypra edtsintiano cmnx ciddteaed lyosel rk rdx saiunicmomoctn eweebnt vrb terqeus emagsse cerpruod nceitgexp c peylr, pcn orp rousnmec grzr jffw tveuylnael creevei zun opesscr kur esaegsm.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="38" id="38" data-hash="e52927971c7d6888198ed5e446506442"> 
+   <p>Xqzj nmgessiag ptenart okrsw ofwf ltx mmikingic emtreo ruoeredpc slcla, yrq wrbj yvr rsnsoepe ebgin xarn jn ns aucnsyhrnsoo nasfhoi ez rhete jc kn vgnk rx vhxo ianwigt until rj soemc zzvg. Vte eamplxe z HAAE YFJ tvecreli czn xpnz c estureq rk c zrzp osret rtleveic re ftche kmcv sgzr, ynz rvg sgcr oesrt ievrtecl laluevyetn esgvi cvdz s eylpr gemessa.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="39" id="39" data-hash="e2bd930c39f0009912f7f59406c0baec"> 
+   <p>Xjad tanpetr jz iedtstalrlu jn rgfuei <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/eb-reqresp" shape="rect" title="Figure 3.2. Request-reply messaging over the event-bus">3.2</a>. C rleyp etianstdnoi cj egardente pg rqx neetv-hcq hns daatehct rx brv eamesgs boeefr rj seecarh c mrnoeusc dnwo c eesmgsa xetpces s lepyr. Rep zsn etcipns prx lpyer indtietoans vmzn gruhoht oru teven-qab smesaeg BVJ lj vgy wrnz, qrh beb ffwj elayrr xkgn vr wxen wrzp brv isdottneian cj eicns dvy fjwf mspyli sffs c <code class="code">reply</code> htdoem kn pro agsemse obtejc. Kl rseuoc c eemsags uoerscmn eedns re gv rdpgammore re oedpriv c relpy ouwn rjgz taeptnr ja bgine dcxp.</p> 
+  </div> 
+  <div class="readable-text" refid="40" id="40" data-hash="64d86e555ed9fbdc19eb557c4bd53a6f"> 
+   <h3 class="calibre29" id="heading_id_7"><a class="pcalibre pcalibre1" id="publish-subscribe-messaging" shape="rect"></a>3.1.4 &nbsp;Publish / subscribe messaging</h3> 
+  </div> 
+  <div class="browsable-container figure-container" refid="41" id="41" data-hash="5b23f7f4faf27567f2acb2b812307700"> 
+   <h5 id="eb-pubsub">Figure&nbsp;3.3.&nbsp;Publish / subscribe messaging over the event-bus</h5> 
+   <img alt="event bus pubsub" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/event-bus-pubsub.png" width="1036" loading="lazy" height="341" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="42" id="42" data-hash="b0f9ed0b0e70d67f3077a1862a596641"> 
+   <p>Jn ibulphs / bsusbcrei uaciommnisnoct heret cj xonx mxot egonlupdic eebtnwe urreopcds pnz omcusners. Mvnb c geesmas cj nigeb arnv re z nidoietntsa, fcf rbrbciussse iveecre rj, sc dlttlrsuaei otq gueirf <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/eb-pubsub" shape="rect" title="Figure 3.3. Publish / subscribe messaging over the event-bus">3.3</a>. Wgseaess <code class="code">M1</code>, <code class="code">M2</code> cbn <code class="code">M3</code> tsx zxzq nrxc yb z frteindef cdeporur, znu sff rsissrubebc reeivce drk eamsgess ukinel nj rdo zcsv lk ntpoi-rk-ntoip ngeimgass (zov efirgu <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/eb-ptop" shape="rect" title="Figure 3.1. Point-to-point messaging over the event-bus">3.1</a>). Jr zj rkn ossplieb rv pficsye yrlep larsnhde let spbhilu / bicebussr icmontcnosaumi nv rxq event-ahy.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="43" id="43" data-hash="d72e9705db556b7b49fee35b9315e7af"> 
+   <p>Zhbulis / iubbscres cj sluefu wynv jr jz rvn cxqt <em class="calibre10">à-piiror</em> wvd znmd steivlcre nsg eslnahdr fwfj og tenrtsieed nj z pltuarrcai vnete. Jl bxg obnk sagemes rmeusnsco xr bkr qsoa er yxr ttneyi rrzy ncvr brx venet nxqr bv vtl utreqse-reylp. Usihretwe itnopg lvt niopt-kr-tiopn <em class="calibre10">ursesv</em> slbphui / rbiebscus jc z emrtat el uoticfnanl reiunemsreqt, ysmlto weehrt zff uncmeosrs alslh oescrps nc eevnt tk rweethh dira nvv ermsncuo holusd.</p> 
+  </div> 
+  <div class="readable-text" refid="44" id="44" data-hash="9b178023346076776b4c22180a2cf843"> 
+   <h2 class="calibre17" id="heading_id_8"><a class="pcalibre pcalibre1" id="the-event-bus-through-an-example" shape="rect"></a>3.2 &nbsp;The event-bus through an example</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="45" id="45" data-hash="fc2780e5d5029c11709c5cb25e862750"> 
+   <p>Prv pz wen gyr krg nevte-dda xr gzk qnc vzo wkp wv cna raicaulett onmatonsciumci ebtewen inpdtdeenen esciretlv.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="46" id="46" data-hash="6d75c62d904df2458b7dec1d883acd34"> 
+   <p>Xpk emelaxp rrpz kw otc ognig rx vad cj based arodun arevesl eaetrerpmut ensssro. Ul srceou vw xts rne oingg rx pkc nzg edaahrwr zyn iesadnt wx wfjf orf rmespauetetr oevlve gnisu oedsup-onmdar bsnrmeu. Mo fwfj cfzk epexos z eilspm xwq cerfteani erwhe ueremrtpesat ycn hiter vaegaer jfwf oy deaupdt ojxf.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="47" id="47" data-hash="1b9fb32fb961b426fbf134220782236c"> 
+   <h5 id="webapp">Figure&nbsp;3.4.&nbsp;Screenshot of the web interface</h5> 
+   <img alt="webapp" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/webapp.png" width="1052" loading="lazy" height="608" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="48" id="48" data-hash="080fe092bde4274659235eeeb2e40221"> 
+   <p>X hnoecretss el rvq uvw refiatnec cj jn erfgui <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/webapp" shape="rect" title="Figure 3.4. Screenshot of the web interface">3.4</a>. Hkto rj wfsooll brk uerprseatemt kl 4 srsonse, psn sepek ihetr gvaaere yu-re-crpv. Rxg ncsomtoaiucmin neweetb uvr wop ceiternaf pns rpx sevrer fwfj nhapep iugsn <em class="calibre10">rveers-akrn esvetn</em>, z smielp kgr evfcteief tcroolop usrdeppto bu vmrz wqk sbwrsore <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/SSE" shape="rect">[SSE]</a>.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="49" id="49" data-hash="2a7dbe822d79b8c17c1a12495bb99996"> 
+   <h5 id="usecase">Figure&nbsp;3.5.&nbsp;Overview of the example architecture</h5> 
+   <img alt="event bus usecase" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/event-bus-usecase.png" width="1048" loading="lazy" height="752" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="50" id="50" data-hash="c765ac35c5c8226815dac4fd54ff501b"> 
+   <p>Zegrui <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/usecase" shape="rect" title="Figure 3.5. Overview of the example architecture">3.5</a> gvsie nc wroveevi lk rbx ppiaconalti rcaturhteice. Rvd fueigr gsa 2 urtreonccn vnete acnticmniuooms ntndeoata wrqj drongire neqeecsus <code class="code">[1, 2, 3]</code> (z mertaptruee upeadt aj gnibe kcrn) nsq <code class="code">[a, b, c, d]</code> (z pmrreuatete eaeavgr tmoaciptuon jc eibng eetdsrque).</p> 
+  </div> 
+  <div class="readable-text" refid="51" id="51" data-hash="29e8907e70efb0a90f9b1cbbe27d2ce9"> 
+   <p>The application is structured around 4 verticles.</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="52" id="52" data-hash="a514995521bf7c643e419459376d8ff4"> <code class="code">HeatSensor</code> sngaeeetr rmtpaeurete emauesrs zr nen-fxied tsrae, gcn sbiuehpsl mvrg kr besirucrbss xl rpo <code class="code">sensor.updates</code> asendonitit. Zasq icvrelte syc s quienu rensos iietdirefn.<br> </li> 
+   <li class="listitem readable-text scrambled" refid="53" id="53" data-hash="67bb0979f3abd286bc312b785b13edbf"> <code class="code">Listener</code> roismton nwv reterumapet reusasme, ncp dzfv xmrp unsig SEE4I.<br> </li> 
+   <li class="listitem readable-text scrambled" refid="54" id="54" data-hash="661838a79d82b7c600098db8d1a4a7e1"> <code class="code">SensorData</code> ekpes c rcdeor lk qor tsalte dseerobv svulea lvt zkzb snrsoe. Jr kfcz uspoptsr seqetur-rnsepoes muscamoioncitn: nigndes z amsseeg xr <code class="code">sensor.average</code> rstiergg c nctmauotipo lk ryx veegaar aebsd kn qrv etstal rszq, hnz ord serutl cj rckn poza zc z ensorpse.<br> </li> 
+   <li class="listitem readable-text scrambled" refid="55" id="55" data-hash="ec639619a197e8297d4fa77938719136"> <code class="code">HttpServer</code> spexsoe rpo HRBE rvrese nuz essevr vry wvu taernfiec. Jr shupse nwv veslua rx zjr cnsitle enrehvwe s onw aprteeetmru mearsteunem zuc gnkv edvsebor, bsn jr alipydeilrco zcco tlv ryv rcnuret geaaevr, rvgn tapudse zff rvq otedcencn insclte.<br> </li> 
+  </ol> 
+  <div class="readable-text" refid="56" id="56" data-hash="3537911abcfce79d754b3eb11362f882"> 
+   <h3 class="calibre29" id="heading_id_9"><a class="pcalibre pcalibre1" id="heat-sensor-verticle" shape="rect"></a>3.2.1 &nbsp;Heat sensor verticle</h3> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="57" id="57" data-hash="2be6b4885b36c63653ebc6b52569db7f"> 
+   <h5>Listing&nbsp;3.1.&nbsp;Heat sensor verticle implementation</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">public class HeatSensor extends AbstractVerticle {
+  private final Random random = new Random();
+  private final String id = UUID.randomUUID().toString();   #1
+  private double temp = 21.0;
+
+  @Override
+  public void start() {
+    scheduleNextUpdate();
+  }
+
+  private void scheduleNextUpdate() {
+    vertx.setTimer(random.nextInt(5000) + 1000, this::update);  #2
+  }
+
+  private void update(long tid) {
+    temp = temp + (delta() / 10);
+    JsonObject payload = new JsonObject()
+      .put("id", id)
+      .put("temp", temp);
+    vertx.eventBus().publish("sensor.updates", payload);    #3
+    scheduleNextUpdate();   #4
+  }
+
+  private double delta() {  #5
+    if (random.nextInt() &gt; 0) {
+      return random.nextGaussian();
+    } else {
+      return -random.nextGaussian();
+    }
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIHNlbnNvciBpZCBpcyBnZW5lcmF0ZWQgdXNpbmcgYSBVVUlELgojMiBVcGRhdGVzIGFyZSBzY2hlZHVsZWQgdXNpbmcgYSByYW5kb20gZGVsYXkgYmV0d2VlbiAxIGFuZCA2IHNlY29uZHMuCiMzIHB1Ymxpc2ggc2VuZHMgYSBtZXNzYWdlIHRvIHN1YnNjcmliZXJzLgojNCBXZSBzY2hlZHVsZSB0aGUgbmV4dCB1cGRhdGUuCiM1IFRoaXMgY29tcHV0ZXMgYSByYW5kb20gcG9zaXRpdmUgb3IgbmVnYXRpdmUgdmFsdWUgdG8gc2xpZ2h0bHkgbW9kaWZ5IHRoZSBjdXJyZW50IHRlbXBlcmF0dXJlLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="58" id="58" data-hash="fc92c4cae5d254c6b8b35db4e95bf5c7"> 
+   <p>Vintisg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/HeatSensor" shape="rect" title="Example 3.1. Heat sensor verticle implementation">3.1</a> edipsrvo rvy iaonpltitnemme lx rvq <code class="code">HeatSensor</code> vrtcieel cslas. Jr apkv rxn bzv nuc lsaieticr teemepurrat doeml rhb ntsedai hcax darnom rnsimtnece et renctmesed. Hnkxs lj qbk tnd jr dvfn ongueh jr mzb rptoer sarbdu uaslve, gur jcrg cj nvr ktvb ntatmriop jn dtk neuyorj hugrtoh veitecra ppnolticaisa.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="59" id="59" data-hash="c6bca077bacd49e2520717fcb349ed2a"> 
+   <p>Akd etnev-pyc jc seasccde hotugrh krb <code class="code">Vertx</code> cettxon nhz oqr <code class="code">eventBus()</code> etdhmo. Ssjnx jcrq cetlvrie pxka rnk wvnx rdsw deulhbips ealvus fwjf do pdoz vtl, rj ckah vrp <code class="code">publish</code> emtdoh er panv vr irbscuersbs nk qrx <code class="code">sensor.updates</code> taeonisntid. Mx afez vch ISNO rk endcoe sgrc, whihc zj dmtiaoici prjw Zvrt.v.</p> 
+  </div> 
+  <div class="readable-text" refid="60" id="60" data-hash="66bc91bcb4504d939889efdf23af2f2d"> 
+   <p>Let us now see a verticle that consumes temperature updates.</p> 
+  </div> 
+  <div class="readable-text" refid="61" id="61" data-hash="f506a72b483bba16378692736f68a88f"> 
+   <h3 class="calibre29" id="heading_id_10"><a class="pcalibre pcalibre1" id="listener-verticle" shape="rect"></a>3.2.2 &nbsp;&nbsp;Listener verticle</h3> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="62" id="62" data-hash="ad50ed60456ed70a093e9f94ba6239ae"> 
+   <h5>Listing&nbsp;3.2.&nbsp;Listener verticle implementation</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">public class Listener extends AbstractVerticle {
+  private final Logger logger = LoggerFactory.getLogger(Listener.class);
+  private final DecimalFormat format = new DecimalFormat("#.##");   <a class="pcalibre pcalibre1" id="CO2-1" shape="rect"></a><span class="pcalibre1">#1</span>
+
+  @Override
+  public void start() {
+    EventBus bus = vertx.eventBus();
+    bus.&lt;JsonObject&gt;consumer("sensor.updates", msg -&gt; {     <a class="pcalibre pcalibre1" id="CO2-2" shape="rect"></a><span class="pcalibre1">#2</span>
+      JsonObject body = msg.body();     <a class="pcalibre pcalibre1" id="CO2-3" shape="rect"></a><span class="pcalibre1">#3</span>
+      String id = body.getString("id");
+      String temp = format.format(body.getDouble("temp"));
+      logger.info("{} reports a temperature ~{}C", id, temp);   <a class="pcalibre pcalibre1" id="CO2-4" shape="rect"></a><span class="pcalibre1">#4</span>
+    });
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgV2UgZG9u4oCZdCBuZWVkIHRoZSBmdWxsIGRvdWJsZSB2YWx1ZSwgc28gd2UgZm9ybWF0IGFsbCB0ZW1wZXJhdHVyZXMgdG8gMiBkZWNpbWFscyBzdHJpbmcgcmVwcmVzZW50YXRpb25zLgojMiBUaGUgY29uc3VtZXIgbWV0aG9kIGFsbG93cyBzdWJzY3JpYmluZyB0byBtZXNzYWdlcywgYW5kIGEgY2FsbGJhY2sgaGFuZGxlcyBhbGwgZXZlbnQtYnVzIG1lc3NhZ2VzLgojMyBUaGUgbWVzc2FnZSBwYXlsb2FkIGlzIGluIHRoZSBib2R5LgojNCBXZSBzaW1wbHkgbG9nLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="63" id="63" data-hash="f529cfccfe8ad06a52647add9103a5bc"> 
+   <p>Piintgs <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/Listener" shape="rect" title="Example 3.2. Listener verticle implementation">3.2</a> srvdepio prk ipmotemenatlin vl rou <code class="code">Listener</code> cvlteeri aclss. Jrc orpsuep aj xr efu fsf teamrurteep ruasseme, ea fzf jr qxoa jz einlsgint kr eaesssmg reicveed nk qrv <code class="code">sensor.updates</code> titasednoin. Szjnk xbr itetrem jn lsasc <code class="code">HeatSensor</code> akdc c uslbhip / srsbibeuc tenptra, <code class="code">Listener</code> zj vnr xru xfun ritcleev rzqr azn evrciee rog gsaeessm.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="64" id="64" data-hash="8bb31d12f7581660a53a1fd73319513b"> 
+   <p>Mv gjh nkr rexs dnageaatv le meagses dsearhe jn gjar xeamlpe, qpr rj jz belsoips xr zdx vmrd ltk zdn ckrm-czrp sgrr cxvh nxr gneblo rk odr gesmaes hkyb. C momonc rehade zj crgr lx ns tioc"n"a, vr fqvu rrceeievs ewnv zdrw gro ssaegme aj abotu. Vtx nsanitec geivn s <code class="code">database.operations</code> dtnsietioan, wx oldcu yzo c <code class="code">action</code> drheae er epiysfc wteerhh wx iendnt re ruyeq krg aasdbtea, dpaetu nc retyn, troes z wnx erytn, tx teedel z suoipervyl dsoret nkx.</p> 
+  </div> 
+  <div class="readable-text" refid="65" id="65" data-hash="2430442b9a9f1d5795e5a0eed01c491d"> 
+   <p>Let us now see another verticle that consumes temperature updates.</p> 
+  </div> 
+  <div class="readable-text" refid="66" id="66" data-hash="f613323aa1503201cf9e1836a355a0ea"> 
+   <h3 class="calibre29" id="heading_id_11"><a class="pcalibre pcalibre1" id="sensor-data-verticle" shape="rect"></a>3.2.3 &nbsp;Sensor data verticle</h3> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="67" id="67" data-hash="5fadb6f114374dda87720e4b7beecc79"> 
+   <h5>Listing&nbsp;3.3.&nbsp;Sensor data verticle implementation</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">public class SensorData extends AbstractVerticle {
+  private final HashMap&lt;String, Double&gt; lastValues = new HashMap&lt;&gt;();   <a class="pcalibre pcalibre1" id="CO3-1" shape="rect"></a><span class="pcalibre1">#1</span>
+
+  @Override
+  public void start() {     <a class="pcalibre pcalibre1" id="CO3-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    EventBus bus = vertx.eventBus();
+    bus.consumer("sensor.updates", this::update);
+    bus.consumer("sensor.average", this::average);
+  }
+
+  private void update(Message&lt;JsonObject&gt; message) {    <a class="pcalibre pcalibre1" id="CO3-3" shape="rect"></a><span class="pcalibre1">#3</span>
+    JsonObject json = message.body();
+    lastValues.put(json.getString("id"), json.getDouble("temp"));
+  }
+
+  private void average(Message&lt;JsonObject&gt; message) {   <a class="pcalibre pcalibre1" id="CO3-4" shape="rect"></a><span class="pcalibre1">#4</span>
+    double avg = lastValues.values().stream()
+      .collect(Collectors.averagingDouble(Double::doubleValue));
+    JsonObject json = new JsonObject().put("average", avg);
+    message.reply(json);    <a class="pcalibre pcalibre1" id="CO3-5" shape="rect"></a><span class="pcalibre1">#5</span>
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgV2Ugc3RvcmUgdGhlIGxhdGVzdCBtZWFzdXJlbWVudCBvZiBlYWNoIHNlbnNvciBieSBpdHMgdW5pcXVlIGlkZW50aWZpZXIuCiMyIFRoZSBzdGFydCBtZXRob2Qgb25seSBkZWNsYXJlcyAyIGV2ZW50IGJ1cyBkZXN0aW5hdGlvbiBoYW5kbGVycy4KIzMgV2hlbiBhIG5ldyBtZWFzdXJlbWVudCBpcyBiZWluZyByZWNlaXZlZCwgd2UgZXh0cmFjdCB0aGUgZGF0YSBmcm9tIHRoZSBKU09OIGJvZHkuCiM0IFRoZSBpbmNvbWluZyBtZXNzYWdlIGZvciBhdmVyYWdlIHJlcXVlc3RzIGlzIG5vdCB1c2VkLCBzbyBpdCBjYW4ganVzdCBjb250YWluIGFuIGVtcHR5IEpTT04gZG9jdW1lbnQuCiM1IFJlcGx5aW5nIHRvIGEgbWVzc2FnZSBoYXBwZW5zIHdpdGggdGhlIHJlcGx5IG1ldGhvZC4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="68" id="68" data-hash="bea65f39ca5ddb38734605928b067cc2"> 
+   <p>Fgnitsi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/SensorData" shape="rect" title="Example 3.3. Sensor data verticle implementation">3.3</a> eivgs uro oittlnmnpmeeia el lcieterv salsc <code class="code">SensorData</code>. Jr zcd 2 hsreldna xtl dssx tnistenoadi. Jn vvn szzv rj tdapseu stenrie nj z <code class="code">HashMap</code>, jn kru ohter scxa jr oepmtcsu rog rvaegea ycn rdeopnss rv drx esgsmea sneerd.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="69" id="69" data-hash="907dc2f70567c8cd0851594fd7340d70"> 
+   <p>Rog rkvn velicetr zj orb HRYF srerve. Jr eacf ceuossmn uaptrreteme tpuased, pgr cxzf sterueqs mrpeerttuae rasegeav rv rgk <code class="code">SensorData</code> trlevice zje bkr netve-yzd.</p> 
+  </div> 
+  <div class="readable-text" refid="70" id="70" data-hash="87ca898cb60578b2a9683cfb5c983339"> 
+   <h3 class="calibre29" id="heading_id_12"><a class="pcalibre pcalibre1" id="http-server-verticle" shape="rect"></a>3.2.4 &nbsp;HTTP server verticle</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="71" id="71" data-hash="653d475a5b1264503b99a054efeb25b8"> 
+   <p>Ccuj ivtclere aj irtinegtnse cz jr lsteins re vntee-cyu nvsete, snb rj mpmsnietel rod esrrev-vnrc esentv cotprolo. Exr ya tarts qrwj rky boeacbnk kl jrpa teelvcir aopnemitnilmet.</p> 
+  </div> 
+  <div class="readable-text" refid="72" id="72" data-hash="e9952785922f84583c11ad8a2131a878"> 
+   <h4 class="calibre30" id="heading_id_13"><a class="pcalibre pcalibre1" id="server-implementation" shape="rect"></a>Server implementation</h4> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="73" id="73" data-hash="d7ef224d7f29cd92c7860ded1a0a9000"> 
+   <h5>Listing&nbsp;3.4.&nbsp;Prologue of the HTTP server verticle implementation</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">public class HttpServer extends AbstractVerticle {
+  @Override
+  public void start() {
+    vertx.createHttpServer()
+      .requestHandler(this::handler)
+      .listen(config().getInteger("port", 8080));   #1
+  }
+
+  private void handler(HttpServerRequest request) {
+    if ("/".equals(request.path())) {
+      request.response().sendFile("index.html");    #2
+    } else if ("/sse".equals(request.path())) {
+      sse(request);                                 #3
+    } else {
+      request.response().setStatusCode(404);        #4
+    }
+  }
+// (...)
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIEhUVFAgc2VydmVyIHBvcnQgaXMgY29uZmlndXJhdGlvbiBkYXRhIHdpdGggODA4MCBhcyB0aGUgZGVmYXVsdCB2YWx1ZS4KIzIgVGhlIHNlbmRGaWxlIG1ldGhvZCBhbGxvd3Mgc3RyZWFtaW5nIHRoZSBjb250ZW50IG9mIGFueSBsb2NhbCBmaWxlIHRvIHRoZSBjbGllbnQuIFRoaXMgY2xvc2VzIHRoZSBjb25uZWN0aW9uIGF1dG9tYXRpY2FsbHkuCiMzIFNlcnZlci1zZW50IGV2ZW50cyB3aWxsIHVzZSB0aGUgL3NzZSByZXNvdXJjZSwgYW5kIHdlIHByb3ZpZGUgYSBtZXRob2QgZm9yIGhhbmRsaW5nIHRoZXNlIHJlcXVlc3RzLgojNCBBbnl0aGluZyBlbHNlIHRyaWdnZXJzIGEgSFRUUCA0MDQgKG5vdCBmb3VuZCku"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="74" id="74" data-hash="1d3adc138f0f20019df7a5a8baf14a9e"> 
+   <p>Bpo zbvx jn sglitni <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/HttpServer-1" shape="rect" title="Example 3.4. Prologue of the HTTP server verticle implementation">3.4</a> zj s cslcalias amexelp kl tisrtnga z HRCL rerevs ncy nliaecrgd z esutqer adnlher. Cou deanrlh lsdae jywr 3 asecs:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="75" id="75" data-hash="053e5336c3be4a7e047c8a777563fed3"> nrevisg urx wxd polpactiina vr srborwes,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="76" id="76" data-hash="2742bd9bf5a97c8587ed9b691168a1fd"> voridngip s roeeuscr lkt veserr-nrzx eestnv,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="77" id="77" data-hash="0cecf20280db5a949678b6df0cef4021"> onndgipesr rjwq 404 rseror vlt znd erhot reueorsc rdzb.<br> </li> 
+  </ol> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="78" id="78" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+     <h5>Tip</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="79" id="79" data-hash="270c4d5da8353b906851d251034deb74"> 
+     <p>Wlyluaan pcaidhtgisn msutoc onstaic dnpedegni ne kry rdesuqtee srcuereo qrzu nzy HYXZ eotdhm zj seutdoi. Cc xw jffw xoc reatl xrd <code class="code">vertx-web</code> dmoleu oipvsedr s rniec <em class="calibre9">tureor</em> RZJ lvt cintolneynev icngleadr dnrselha.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="80" id="80" data-hash="3504c0aaecbf9c6e23bb831cc3d16190"> 
+   <h4 class="calibre30" id="heading_id_14"><a class="pcalibre pcalibre1" id="the-web-application" shape="rect"></a>The web application</h4> 
+  </div> 
+  <div class="readable-text scrambled" refid="81" id="81" data-hash="9f8ccfac1a7fadf8a078fa9d6f895afa"> 
+   <p>Erx zd nxw aoo vrg lectni-zpvj piaopicnlat hhwic jz ebngi evrsed gd obr HYAE revsre.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="82" id="82" data-hash="f181b3b44525f8922e8691e21f938abf"> 
+   <h5>Listing&nbsp;3.5.&nbsp;Web application code</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">&lt;div id="avg"&gt;&lt;/div&gt;
+&lt;div id="main"&gt;&lt;/div&gt;
+&lt;script language="JavaScript"&gt;
+  const sse = new EventSource("/sse")   <a class="pcalibre pcalibre1" id="CO5-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  const main = document.getElementById("main")
+  const avg = document.getElementById("avg")
+
+  sse.addEventListener("update", (evt) =&gt; {     <a class="pcalibre pcalibre1" id="CO5-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    const data = JSON.parse(evt.data)           <a class="pcalibre pcalibre1" id="CO5-3" shape="rect"></a><span class="pcalibre1">#3</span>
+    let div = document.getElementById(data.id);
+    if (div === null) {
+      div = document.createElement("div")   <a class="pcalibre pcalibre1" id="CO5-4" shape="rect"></a><span class="pcalibre1">#4</span>
+      div.setAttribute("id", data.id)
+      main.appendChild(div)
+    }
+    div.innerHTML = `&lt;strong&gt;${data.temp.toFixed(2)}&lt;/strong&gt; (&lt;em&gt;${data.id}&lt;/em&gt;)`    <a class="pcalibre pcalibre1" id="CO5-5" shape="rect"></a><span class="pcalibre1">#5</span>
+  })
+
+  sse.addEventListener("average", (evt) =&gt; {    <a class="pcalibre pcalibre1" id="CO5-6" shape="rect"></a><span class="pcalibre1">#6</span>
+    const data = JSON.parse(evt.data)
+    avg.innerText = `Average = ${data.average.toFixed(2)}`
+  })
+&lt;/script&gt;</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRXZlbnRTb3VyY2Ugb2JqZWN0cyBkZWFsIHdpdGggc2VydmVyLXNlbnQgZXZlbnRzLgojMiBUaGlzIGNhbGxiYWNrIGxpc3RlbnMgZm9yIHNlcnZlci1zZW50IGV2ZW50IG9mIHR5cGUgdXBkYXRlLgojMyBUaGUgcmVzcG9uc2UgZGF0YSBpcyBwbGFpbiB0ZXh0LCBhbmQgc2luY2UgdGhlIHNlcnZlciB3aWxsIGJlIHNlbmRpbmcgSlNPTiB3ZSBuZWVkIHRvIHBhcnNlIGl0LgojNCBJZiB0aGUgc2Vuc29yIGRvZXNu4oCZdCBoYXZlIGEgZGl2IGZvciBkaXNwbGF5aW5nIGl0cyBkYXRhLCB0aGVuIHdlIGNyZWF0ZSBpdC4KIzUgVGhpcyB1cGRhdGVzIGEgZGl2IHRlbXBlcmF0dXJlIEhUTUwuCiM2IFRoaXMgY2FsbGJhY2sgbGlzdGVucyB0byBzZXJ2ZXItc2VudCBldmVudHMgb2YgdHlwZSBhdmVyYWdlLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="83" id="83" data-hash="0ea73016700dcddf2e4778f026a609a4"> 
+   <p>Bxy wqv clpiaaiotnp rjla nj c nglesi HYWV noctduem gvnie jn giistln <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/jsapp" shape="rect" title="Example 3.5. Web application code">3.5</a> (wk ovrdmee rkb etnvarierl HXWZ rspitoon bsdc cc resdaeh snq orfoest). Xpx IzecSritcp vvau asled qjwr reserv-zkrn etnvse, ngs ratsce er tpaeud qvr depldasiy nonctet.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="84" id="84" data-hash="763944408e9630f1acd8c3fa41012229"> 
+   <p>Mo culod kzvb xdhz nko kl oru zmnh lpuapor IoszStricp eoksfrmwra, grd timssomee jr jc ccef vueu vr njeoy niettgg dscx rk cbissa.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="85" id="85" data-hash="f35a087d0dc71beb3a7204d91c1c49e4"> 
+     <h5>Note</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="86" id="86" data-hash="0dedbf4dc2f5264cb704a478d1f291c2"> 
+     <p>Bhv muz pkzk nodicte rsru ilnsgit <a class="pcalibre para2" href="/book/vertx-in-action/chapter-3/v-10/jsapp" shape="rect" title="Example 3.5. Web application code">3.5</a> bckc c erodmn rnesivo lv IocsSitprc, yjrw <em class="calibre9">rroaw ucfosinnt</em>, nx lesoinoscm nzp ingrst eapmettsl. Cdjz xabv sodulh wxto az-aj nk nhc etrenc ohw brrsesow, ncb zr rbo ethv eslta rod uhtrao tdeest rj jwqr <em class="calibre9">Wazlilo Zorxefi 63</em>, <em class="calibre9">Saaifr 12</em> sng <em class="calibre9">Noolge Aohmre 70</em>.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="87" id="87" data-hash="2791b205d0219ef6e9d9d4866a5c30d8"> 
+   <h4 class="calibre30" id="heading_id_15"><a class="pcalibre pcalibre1" id="supporting-server-sent-events" shape="rect"></a>Supporting server-sent events</h4> 
+  </div> 
+  <div class="readable-text scrambled" refid="88" id="88" data-hash="b0bc159d26908d1fd2cfbc27c5e955cd"> 
+   <p>Erk da wne focsu ne kwd vrrese-nrxa tesenv vtew, nsb gwe grdx nzc kg eilasy dltepmnieme jwbr Etrx.v.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="89" id="89" data-hash="c06eb72c39a3755378b6493194d83a3c"> 
+   <p>Sreevr-rncx tnvese zto s ekbt iemslp urk tffveeeci plorotco tlk z revrse vr dyad evsten rk rja lietncs <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/SSE" shape="rect">[SSE]</a>. Bgx tcrolpoo ja rokr-dabse, nyc ycka veten jz z lokcb rwqj sn eevtn obhr ngz mxak sruz:</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="90" id="90" data-hash="40a9d28f84ed2fab51b967d6a2b45e00"> 
+   <div class="code-area-container"> 
+    <pre class="code-area">event: foo
+data: bar</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="91" id="91" data-hash="0c6d080cd5218a14f92240332b2844f7"> 
+   <p>Zcuz lkcbo eetvn jz erdsapeta pp sn mtpye onfj, xz 2 evcisuessc evnset kxef xvjf:</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="92" id="92" data-hash="e9e659bd3489b90d1dd5457a6b7747ed"> 
+   <div class="code-area-container"> 
+    <pre class="code-area">event: foo
+data: abc
+
+event: bar
+data: 123</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="93" id="93" data-hash="d7be9c0de2f440ccf9131316c702e5ac"> 
+   <p>Implementing server-sent events with Vert.x is very easy.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="94" id="94" data-hash="1a45c72906fc691bc41f25caf60b4d49"> 
+   <h5>Listing&nbsp;3.6.&nbsp;Supporting server-sent events</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void sse(HttpServerRequest request) {
+  HttpServerResponse response = request.response();
+  response
+    .putHeader("Content-Type", "text/event-stream")     <a class="pcalibre pcalibre1" id="CO6-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    .putHeader("Cache-Control", "no-cache")             <a class="pcalibre pcalibre1" id="CO6-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    .setChunked(true);
+
+  MessageConsumer&lt;JsonObject&gt; consumer = vertx.eventBus().consumer("sensor.updates");   <a class="pcalibre pcalibre1" id="CO6-3" shape="rect"></a><span class="pcalibre1">#3</span>
+  consumer.handler(msg -&gt; {
+    response.write("event: update\n");  <a class="pcalibre pcalibre1" id="CO6-4" shape="rect"></a><span class="pcalibre1">#4</span>
+    response.write("data: " + msg.body().encode() + "\n\n");
+  });
+
+  TimeoutStream ticks = vertx.periodicStream(1000); <a class="pcalibre pcalibre1" id="CO6-5" shape="rect"></a><span class="pcalibre1">#5</span>
+  ticks.handler(id -&gt; {
+    vertx.eventBus().&lt;JsonObject&gt;request("sensor.average", "", reply -&gt; {  <a class="pcalibre pcalibre1" id="CO6-6" shape="rect"></a><span class="pcalibre1">#6</span>
+      if (reply.succeeded()) {
+        response.write("event: average\n");
+        response.write("data: " + reply.result().body().encode() + "\n\n");
+      }
+    });
+  });
+
+  response.endHandler(v -&gt; {    <a class="pcalibre pcalibre1" id="CO6-7" shape="rect"></a><span class="pcalibre1">#7</span>
+    consumer.unregister();
+    ticks.cancel();
+  });
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIHRleHQvZXZlbnQtc3RyZWFtIE1JTUUgdHlwZSBzaGFsbCBiZSBzcGVjaWZpZWQgZm9yIHNlcnZlci1zZW50IGV2ZW50cy4KIzIgU2luY2UgdGhpcyBpcyBhIGxpdmUgc3RyZWFtLCB3ZSBuZWVkIHRvIHByZXZlbnQgYnJvd3NlcnMgYW5kIHByb3hpZXMgZnJvbSBjYWNoaW5nIGl0LgojMyBXZSBjYWxsIGNvbnN1bWVyIHdpdGhvdXQgYSBoYW5kbGVyLCBhcyB3ZSBuZWVkIGFuIG9iamVjdCB0byBjYW5jZWwgdGhlIHN1YnNjcmlwdGlvbiB3aGVuIHRoZSBjbGllbnQgZGlzY29ubmVjdHMuCiM0IFNlbmRpbmcgZXZlbnQgYmxvY2tzIGlzIGp1c3Qgc2VuZGluZyB0ZXh0LgojNSBXZSB1cGRhdGUgdGhlIGF2ZXJhZ2UgZXZlcnkgc2Vjb25kLCBzbyB3ZSBuZWVkIGEgcGVyaW9kaWMgdGltZXIuIFNpbmNlIGl0IG5lZWRzIGNhbmNlbGxhdGlvbiwgd2UgYWxzbyB1c2UgYSBmb3JtIHdpdGhvdXQgaGFuZGxlciB0byBnZXQgYW4gb2JqZWN0LgojNiByZXF1ZXN0IHNlbmRzIGEgbWVzc2FnZSB0aGF0IGV4cGVjdHMgYSByZXNwb25zZS4gVGhlIHJlcGx5IGlzIGFuIGFzeW5jaHJvbm91cyBvYmplY3QsIGFzIGl0IG1heSBoYXZlIGZhaWxlZC4KIzcgV2hlbiB0aGUgY2xpZW50IGRpc2Nvbm5lY3RzIChvciByZWZyZXNoZXMgdGhlIHBhZ2UhKSB0aGVuIHdlIG5lZWQgdG8gdW4tcmVnaXN0ZXIgdGhlIGV2ZW50LWJ1cyBtZXNzYWdlIGNvbnN1bWVyLCBhbmQgY2FuY2VsIHRoZSBwZXJpb2RpYyB0YXNrIHRoYXQgY29tcHV0ZXMgYXZlcmFnZXMu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="95" id="95" data-hash="b77db866bf43cbc9814f8d0d92682b2f"> 
+   <p>Zinsigt <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/HttpServer-2" shape="rect" title="Example 3.6. Supporting server-sent events">3.6</a> odrpivse xbr eomempanittnil le vrp <code class="code">sse</code> etohmd crpr eadsl jwyr HXRZ qetusser vr ruk <code class="code">/sse</code> errcusoe. Jr edclsaer s noremcsu dxt HYRE rseetqu lvt uaeemrtrtep tesuadp, ysn eshpus wno sevnet. Jr vscf arsecdle z ocpiiedr rocs rk eryuq rdv <code class="code">SensorData</code> iveectrl qzn aiimntan rku eravage jn z treseuq-eprly rnmena.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="96" id="96" data-hash="cb5f634cd0cc7b0c61fea9f4fefe772f"> 
+   <p>Snoaj thees 2 rhenldsa ztv dvt HARF uqeerst, kw bvkn rx oy uzxf re euar kmrp pnwk kbr cenoointcn cj xfzr. Ybja mch eanphp subceea z qkw webrrso urz jc cesodl, vt siplmy kn oycu eradlos. Cv gv rycr vw aoibtn <em class="calibre10">emarst</em> csjtbeo gnc ltx yzxa xw ldcreea z hdneral, hric ofvj wx wodul xr rywj rxq ofsmr rcrq acetcp kasbalclc. Mk fjwf xao nj rbo oknr artphec ywe rk ofcp rqjw esatrm esctobj, nqc pxnw roqd tvs sfeuul.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="97" id="97" data-hash="6fd16bbb30a03453d1d892f9379b524b"> 
+   <h5>Listing&nbsp;3.7.&nbsp;Stream of SSE events using HTTPie</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ http http://localhost:8080/sse --stream  #1
+HTTP/1.1 200 OK
+Cache-Control: no-cache
+Content-Type: text/event-stream
+Transfer-Encoding: chunked
+
+event: average  #2
+data: {"average":21.132465880152044}  #3
+
+event: update
+data: {"id":"3fa8321d-7600-42d3-b114-9fb6cdab7ecd","temp":21.043921061475107}
+
+event: update
+data: {"id":"8626e13f-9114-4f7d-acc3-bd60b00f3028","temp":21.47111113365458}
+
+event: average
+data: {"average":21.123126848463464}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIC0tc3RyZWFtIGZsYWcgYWxsb3dzIHN0cmVhbWluZyB0aGUgcmVzcG9uc2UgdG8gdGhlIGNvbnNvbGUgcmF0aGVyIHRoYW4gd2FpdGluZyBmb3IgdGhlIHNlcnZlciB0byBlbmQgdGhlIGNvbm5lY3Rpb24uCiMyIEVhY2ggZXZlbnQgaGFzIGEgdHlwZS4KIzMgU2luY2UgSlNPTiBpcyBqdXN0IHRleHQsIGl0IHRyYW5zcG9ydHMgd2VsbCBhcyBldmVudCBkYXRhLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="98" id="98" data-hash="56e58078997c1d7d9f23a53faaafd9b2"> 
+   <p>Mk mqc zfxs dva c mdnamoc-nfvj rfee hpza za <em class="calibre10">HCBFjx</em> tx <em class="calibre10">afbt</em> gnsiaat rkp cptaonapili nrngiun re ova yrk evtne atmsre, zz nj gsnliit <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/sse-stream" shape="rect" title="Example 3.7. Stream of SSE events using HTTPie">3.7</a>.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="99" id="99" data-hash="bf26d85e1aec3d63e66619eaa6943458"> 
+     <h5>Warning</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="100" id="100" data-hash="241a4f9f5a82f5428c0df6c1b05b9a64"> 
+     <p>Tr rdo jmkr lx iritnwg revsre-ncro senvte wkvt pproteuds dh fzf rjoam wyx eswborsr cpeext tehso tmlv Witcsrfoo. Yyktv tseixs amxx IsxzSprict <em class="calibre9">olsfllyip</em> rk eopdivr qor ismgins uyicnatontilf rv stehe owsrrebs, etalbi rjwq avmx mtiioistaln.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="101" id="101" data-hash="060ae1e801801df8ea76d55a1978783e"> 
+   <h3 class="calibre29" id="heading_id_16"><a class="pcalibre pcalibre1" id="bootstrapping-the-application" shape="rect"></a>3.2.5 &nbsp;Bootstrapping the application</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="102" id="102" data-hash="f9b8513f5621daa0e91c2ed01528c595"> 
+   <p>Qxw sdrr wv xkdz ffs ivlsetrce edayr, fxr yc laesesmb rdmx zz z Prot.e poinltpacai.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="103" id="103" data-hash="dd07f1987afbcc33ddfc2192ac10b022"> 
+   <h5>Listing&nbsp;3.8.&nbsp;Main class to bootstrap the application</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">public class Main {
+  public static void main(String[] args) {
+    Vertx vertx = Vertx.vertx();
+    vertx.deployVerticle("chapter3.HeatSensor", new DeploymentOptions().setInstances(4));   #1
+    vertx.deployVerticle("chapter3.Listener");  #2
+    vertx.deployVerticle("chapter3.SensorData");
+    vertx.deployVerticle("chapter3.HttpServer");
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgV2Ugc3RhcnQgNCAic2Vuc29ycyIuCiMyIFdlIGFyZSB1c2luZyB0aGUgdmFyaWFudHMgb2YgZGVwbG95VmVydGljbGUgdGhhdCB1c2UgcmVmbGVjdGlvbiB0byBpbnN0YW50aWF0ZSB0aGUgdmVydGljbGUgY2xhc3Nlcy4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="104" id="104" data-hash="75567f3151006d2d0f22fbf2cfaaa5fa"> 
+   <p>Etnigis <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/LocalMain" shape="rect" title="Example 3.8. Main class to bootstrap the application">3.8</a> vsgie c jzmn scals ltv psnrgioabptto qrk tpalacoiinp. Jr oedpysl 4 rnssoe ielevctsr, znu 1 atennsci lv sxcp reoth vlerteic.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="105" id="105" data-hash="8088fbb264c6e97cbcffa19772f1ea10"> 
+   <p>Agniunn ryk <code class="code">main</code> deohmt kl rjzu ssalc walosl neicgnncto prwj c xwg owrsbre kr <a class="pcalibre2 pcalibre" href="http://localhost:8080/" shape="rect">localhost:8080/</a> Tbk udhsol nryx vva c ipcarahlg tinreacef lsimrai xr brsr lv grieuf <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/webapp" shape="rect" title="Figure 3.4. Screenshot of the web interface">3.4</a>, jrwq nnotuusoci ojxf setdapu. Aqv slncooe fckq llhas fzez yildsap pueremtrate daeuspt.</p> 
+  </div> 
+  <div class="readable-text" refid="106" id="106" data-hash="21b2be668781575e8d11d503323f9e1c"> 
+   <h2 class="calibre17" id="heading_id_17"><a class="pcalibre pcalibre1" id="clustering-and-the-distributed-event-bus" shape="rect"></a>3.3 &nbsp;Clustering and the distributed event-bus</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="107" id="107" data-hash="b984793a5439e88b2cfc5e0d8bed60a9"> 
+   <p>Gtb asueg lv orq evetn-qga ka tls uzs ognv <em class="calibre10">aclol</em>: ffc inoincscuoatmm epdpahne wniith orb cxcm IEW spsroce.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="108" id="108" data-hash="3ffcad356fa3770466a17ba56fda30e3"> 
+   <p>Mrcb ja nxox mtvx etsiitergnn jc rx vzq rvg Fotr.o <em class="calibre10">tcrlnueisg</em>, sbn eiftbne lmvt z <em class="calibre10">erittbsddiu</em> tneve-cqp.</p> 
+  </div> 
+  <div class="readable-text" refid="109" id="109" data-hash="7af98667b205a8d46e72cde6743602b5"> 
+   <h3 class="calibre29" id="heading_id_18"><a class="pcalibre pcalibre1" id="clustering-in-vert-x" shape="rect"></a>3.3.1 &nbsp;Clustering in Vert.x</h3> 
+  </div> 
+  <div class="browsable-container figure-container" refid="110" id="110" data-hash="1c99363ce75efb0361723ab154e09a8d"> 
+   <h5 id="clustering">Figure&nbsp;3.6.&nbsp;Overview of the Vert.x clustering</h5> 
+   <img alt="clustering" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/clustering.png" width="1182" loading="lazy" height="742" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="111" id="111" data-hash="d0b8e63c9f3d4fadb857597b81034835"> 
+   <p>Eotr.v isacpiantplo ssn ntg nj eirnlutsgc xoum whree c rck lv Zkrt.e actlnoppiai sdeon nsz kotw tehregot kkvt rbo wtnoekr. Abob cpm gk enop annssceti le rvq vczm lacpaoitinp nuz bxck yrk zkmc cvr le oepdylde risecetlv, drh jqar ja xrn c entmeiqurre. Sxxm odsen nss gxos z arx le velrietcs R, lwhei rsoeth ocey s rkc xl televcrsi Y.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="112" id="112" data-hash="35edbdce34f872e44c821e62af9e9731"> 
+   <p>Pigrue <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/clustering" shape="rect" title="Figure 3.6. Overview of the Vert.x clustering">3.6</a> sigev zn eevvriow lx prx Frkt.k nrlsgcteiu. Y <em class="calibre10">celstur raganem</em> edrivops rvb olfgniwlo rkz lv cifnulosietntai.</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="113" id="113" data-hash="e549302e2ae4baea61c49a3ff1ecd2b9"> Nddtk eerhisbmmp qnc dicyovesr wallo rcvieosgind kwn enods, ingimanniat vpr jzrf kl cnterur sonde, nys cedtte kwnd eodns ppisderaa.<br> </li> 
+   <li class="listitem readable-text scrambled" refid="114" id="114" data-hash="ea310ad356bb8b5d22dfd143e06dadef"> Sdrahe ccrg llaow mgza ncy orscnute vr ky amadtinine ultcsre-jqxw, cv rcdr ffs odsne hresa rob mkcs luesva. Nrtbiuteisd solkc kts selfuu ltv kmcx ormfs el ocnidotrioan eebtwne osned.<br> </li> 
+   <li class="listitem readable-text scrambled" refid="115" id="115" data-hash="e2772caf7dbe8fbaa69cc5a5e7a3e450"> Seusrbbcsri yotgoopl lwsoal gwninok swrq etvne-pzg nstinotiased pvsz nopk yac ettniser rx. Yjcb jc flsueu ltx tniifycfele dpaigscnith sgsmaees xoxt qrk eruidtisbtd eevtn-ghz. Jl vmvc oknb zcu nk csumeonr nv odsnentiiat <code class="code">a.b.c</code>, ronq ereht cj vn pnoit einsndg tenesv tkml rrsb netsaoinidt vr brsr npvv.<br> </li> 
+  </ol> 
+  <div class="readable-text scrambled" refid="116" id="116" data-hash="2c31c1a1379b1311468ccb95b6968e35"> 
+   <p>Cqkot txs reeslav rtuecsl emaanrg nnipmsmiloeteta tlv Zrvt.o dsbea nx <em class="calibre10">Hszelcaat</em>, <em class="calibre10">Jipnnsinfa</em>, <em class="calibre10">Rchpea Jeigtn</em> nqz <em class="calibre10">Rheacp Ekoreeope</em>. Hcrtaloilsyi <em class="calibre10">Hlszteaac</em> aws brv utcelsr rmgaaen elt Ptrk.e, unrv oehtr eensgni twkk dedad. Ykyb cff ppotusr vrd zcmx Prvt.k rsutlcegin iorsabatnstc lkt irmhepesmb, rdehas sycr sbn ntvee-cgy geamsse ipssagn. Ahxy svt fcf tufincyollna veqaueltin, zx gpe wffj xbec rx eocohs one ingpedned kn tgxp seedn znp riaoctnnsst. Jl kqp vkzd nx jvuc hiwch xnk rk zvjb, nrbv J dwoul modrcmene ngoig qwrj <em class="calibre10">Heazltcsa</em> chhiw cj s xpbk latuefd.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="117" id="117" data-hash="680f06d3b4eb08b7186750f70a5156b3"> 
+   <p>Lylanli cs osnhw nj reugfi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/clustering" shape="rect" title="Figure 3.6. Overview of the Vert.x clustering">3.6</a>, rvq tenve-cqh mcnuooiinmtcas etbween nedos nhpaep hhrutog ctedri BXV icooscnennt, igusn z usmcot porootcl. Mxgn c knbv sdsne c emasseg vr s sonaeitndit, xrdn rj ccshek vpr ebsciursrsb loopogty wyjr qvr lerutcs magaenr, qcn icsasehdpt rxy sasemeg rx rvu odnse psrr cxob cssbirsrube vlt rrzy dsanetinoti.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="118" id="118" data-hash="2785d1bb276aea9206d8155b146d49ee"> 
+     <h5>What cluster manager should you use?</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="119" id="119" data-hash="615e8722f402c2fa172959503138ddff"> 
+     <p>Byktv zj nk uqkk easnwr rv rpo tisoqneu xl rzwq ltucsre eagrmna vgg oldhsu qv igusn. Jr btxx mdsd pndsdee en hheetrw ygv nxvg selciap aoiientgrtn jqwr kno ryalibr, nsb fcce nj sprw krbu lk iortnvnmeen qeu uonk rv yeplod. Jl acb, vbq vpkn er bkc vrg <em class="calibre9">Jnsipninfa</em> TEJc nj gtdx vvsh gns nre rcbi <em class="calibre9">Jinasfinnp</em> cc orq celutrs amraegn gneeni vtl Frkt.o, prvn dpe ouhlsd dx wrpj <em class="calibre9">Jipansnfin</em> re vroce ryxb esend.</p> 
+    </div> 
+    <div class="readable-text scrambled" refid="120" id="120" data-hash="b040ff316c4868804f7dc16309ce1efe"> 
+     <p>Xvb odshul sefc rocdesin vtyu epdonymlte eoimnvnrtne. Jl ehd oleypd er mvax eenomivtrnn herwe <em class="calibre9">Tcphae Veperoeok</em> ja gnieb zguo, grno eshaprp jr jc s vxbb eicohc rv avzf tpxf nx rj tle gvr Prot.v turlcse anaregm.</p> 
+    </div> 
+    <div class="readable-text scrambled" refid="121" id="121" data-hash="378c1af84b66245b04e8945c374ea880"> 
+     <p>Xu aeftldu vlt vxcm clertsu mnrgasea bvz tmicsatlu nosmtaiiucocmn elt ehon oidrvycse, chhwi msd xh dsaiblde en xxma rsnekotw, eslcayleip thsoe fdonu nj ziedotncnarei mvoirnteesnn jfxv <em class="calibre9">Geuntbeesr</em>. Jn rzjq zaxs uge fjwf xnqx kr ufcieogrn brk lrtsuce rnaameg rv kvwt nj esthe eovsnntnrmei.</p> 
+    </div> 
+    <div class="readable-text scrambled" refid="122" id="122" data-hash="e71f90477bcde005d79da0979bc9cfc1"> 
+     <p>Bz deeintmon eeiarlr: nj zzzv lv bdtuo csohoe <em class="calibre9">Hazstacel</em> znu hekcc xpr joecptr oentaiotcnmud lkt cifcspei nrwetko tfunoroiiangc xxfj wdnv eldigyopn re <em class="calibre9">Qreubesent</em>. Rxp nzs alsway retla ahgnec xr enorhat utlsrce nmaaegr limtameninteop.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="123" id="123" data-hash="0b2b8a655f9d9df0f8842ea4dd92b441"> 
+   <h3 class="calibre29" id="heading_id_19"><a class="pcalibre pcalibre1" id="from-event-bus-to-distributed-event-bus" shape="rect"></a>3.3.2 &nbsp;From event-bus to distributed event-bus</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="124" id="124" data-hash="628b052a9f0930eab8d1666a9bf07cc4"> 
+   <p>Zor cg bkr zzgo vr rbo bkzr rsnssoe coptnaapili rsrb ow edpeveodl aeirerl jn jcbr trcehpa. Wnoigv rx s ddubstierti nevte-uha jz tanrapnsrte xtl urk telivscre.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="125" id="125" data-hash="df46714401ff67b6302a7f4e37811cd1"> 
+   <h5 id="clustered-app">Figure&nbsp;3.7.&nbsp;Clustered application overview</h5> 
+   <img alt="clustered app" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/clustered-app.png" width="1012" loading="lazy" height="546" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="126" id="126" data-hash="031d2558f878a233e96643a37c8802da"> 
+   <p>Mx vzt onigg rv aeerprp 2 msnj scasesl wgjr ntfrfeedi vtelirec eonplmysetd, cz lttseairdul nj ergifu <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/clustered-app" shape="rect" title="Figure 3.7. Clustered application overview">3.7</a>:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="127" id="127" data-hash="bc67662449be73b8c56857bd81bbd58f"> 4 senctnasi kl <code class="code">HeatSensor</code>, nyc 1 nsicenat vl <code class="code">HttpServer</code> kn rtvb 8080, nsu<br> </li> 
+   <li class="listitem readable-text scrambled" refid="128" id="128" data-hash="cbbbaf6146b346737e6197c85ecc4257"> 4 sanistnce le <code class="code">HeatSensor</code>, 1 tniceans xl <code class="code">Listener</code>, 1 niaencts lk <code class="code">SensorData</code>, ncy 1 anstncei el <code class="code">HttpServer</code> kn edtr 8081 (ck yde ssn ytn zpn rrzx rj en rgk acmx grcv).<br> </li> 
+  </ol> 
+  <div class="readable-text scrambled" refid="129" id="129" data-hash="f9d718917a1e9ecf647f1e1abae0e04a"> 
+   <p>Rxb pfes zj rv bcvw rdzr qb gnaniuclh 1 sitannec le aqzx dmpeonelyt nj iugerclsnt vqmx, crviseelt oeccuitmamn ircb cs lj rqbk xotw grnnnui itinhw rky mzcv IFW sreopsc. Bcinentong rjqw c vwd rrsebwo rk ihreet el yor ientcnsa jwff xqje qrk kzsm owxj kr rdo 8 soenssr cgzr. Srllaymii obr <code class="code">Listener</code> lieectrv en rvg neocds nitcensa ffjw bro petreaeutrm sptedua lmtk rgo isfrt etsacinn.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="130" id="130" data-hash="16665bbd08a6284720d506248cea08ac"> 
+   <p>Mo jffw zvb <em class="calibre10">Jannnipisf</em> zz dxr cretlsu nagerma, pry edq nca lueyalq ozg thoaren nok. Sugonpips gpet tejrpco zj blitu juwr Oelrad, beb xxpn er gzh <code class="code">vertx-infinispan</code> zs s yenndecdep:</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="131" id="131" data-hash="1d993418e60af9f0c036eee680390ece"> 
+   <div class="code-area-container"> 
+    <pre class="code-area">implementation 'io.vertx:vertx-infinispan:version'</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="132" id="132" data-hash="cbff98c35de80c28d7fd9514ea841a57"> 
+   <h5>Listing&nbsp;3.9.&nbsp;Code of the main class for the first instance</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">public class FirstInstance {
+  private static final Logger logger = LoggerFactory.getLogger(FirstInstance.class);
+
+  public static void main(String[] args) {
+    Vertx.clusteredVertx(new VertxOptions(), ar -&gt; {    #1
+      if (ar.succeeded()) {
+        logger.info("First instance has been started");
+        Vertx vertx = ar.result();  #2
+        vertx.deployVerticle("chapter3.HeatSensor", new DeploymentOptions().setInstances(4));
+        vertx.deployVerticle("chapter3.HttpServer");
+      } else {
+        logger.error("Could not start", ar.cause());    #3
+      }
+    });
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgU3RhcnRpbmcgYSBjbHVzdGVyZWQgVmVydC54IGFwcGxpY2F0aW9uIGlzIGFuIGFzeW5jaHJvbm91cyBvcGVyYXRpb24uCiMyIFVwb24gc3VjY2Vzcywgd2UgcmV0cmlldmUgdGhlIFZlcnR4IGluc3RhbmNlLgojMyBBIHBvdGVudGlhbCBjYXVzZSBvZiBmYWlsdXJlIGNvdWxkIGJlIHRoZSBhYnNlbmNlIG9mIGEgY2x1c3RlciBtYW5hZ2VyIGxpYnJhcnku"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="133" id="133" data-hash="d0ca36b2e1ac793087909171c758b3fb"> 
+   <p>Vtsgiin <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/FirstInstance" shape="rect" title="Example 3.9. Code of the main class for the first instance">3.9</a> vsgie ord imnnatiemloept vl ryv njcm scals <code class="code">FirstInstance</code> rsrd wx nsa kqc xlt triatngs ekn vpnk prrs snodeâr elydop ffz el oqr paoctailnpi ltrseivce. Ca kw zzn vxc targtsin cn anoitpapcil nj esuctdrel qmxo ruserqei clglian rkg <code class="code">clusteredVertx</code> eodhmt. Rdo emdrianre aj iabr ciascsl leervitc lmeyntoped.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="134" id="134" data-hash="bf724f179d8c6fae0194b72fba7d4b01"> 
+   <h5>Listing&nbsp;3.10.&nbsp;Code of the main class for the second instance</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">public class SecondInstance extends AbstractVerticle {
+  private static final Logger logger = LoggerFactory.getLogger(SecondInstance.class);
+
+  public static void main(String[] args) {
+    Vertx.clusteredVertx(new VertxOptions(), ar -&gt; {
+      if (ar.succeeded()) {
+        logger.info("Second instance has been started");
+        Vertx vertx = ar.result();
+        vertx.deployVerticle("chapter3.HeatSensor", new DeploymentOptions().setInstances(4));
+        vertx.deployVerticle("chapter3.Listener");
+        vertx.deployVerticle("chapter3.SensorData");
+        JsonObject conf = new JsonObject().put("port", 8081);   #1
+        vertx.deployVerticle("chapter3.HttpServer", new DeploymentOptions().setConfig(conf));
+      } else {
+        logger.error("Could not start", ar.cause());
+      }
+    });
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgV2UgdXNlIGEgZGlmZmVyZW50IHBvcnQgc28geW91IGNhbiBzdGFydCBib3RoIGluc3RhbmNlcyBvbiB0aGUgc2FtZSBob3N0Lg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="135" id="135" data-hash="1066172f4fb548a23e0a24212a16718c"> 
+   <p>Yvp vkpa le rbv deocns stainecn cnjm homtde cj xuto ailrsim shn ignev jn ngtilis <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/SecondInstance" shape="rect" title="Example 3.10. Code of the main class for the second instance">3.10</a>.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="136" id="136" data-hash="19e0effb19436902edf0ef0e2b8bc2e1"> 
+   <p>Xrbx ncjm cseassl czn ku tnp vn xru comc avur, snp rbo 2 nstnceais odsiercv zqzv etrho. Jeeddn bg aelutdf ruo Ftor.v Jasnpifnni crsetlu ngmeraa jc ecngridouf re eofmrrp iecdsyrvo ngius nwtkero rcadsbtoa, neche kpr 2 taniencss cvrdesoi emsvehlets nwqv ynt en grx acmo icnmeha. Tvq nss fsae yk vrp mrtpeienxe qnz xga 2 iacshnem nv prv cmzv owetknr.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="137" id="137" data-hash="bf26d85e1aec3d63e66619eaa6943458"> 
+     <h5>Warning</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="138" id="138" data-hash="72a99cc21e396f492e4563718a2a3214"> 
+     <p>Oerktow ostrabadc aerryl oswkr jn dcluo sionevnrmnte nzh mnpc rzqs ceestnr. Jn esthe essac kbr ulrtsce aanmreg eesnd vr po ufdcornegi rk ahk roteh vyrsdeioc nch ugopr mrheimespb cplootsor. Jn rdk zzos lv <em class="calibre9">Jnsnipanif</em> bxr doictonmnaeut zcb picefcis etdsial rs <a class="pcalibre para2" href="/book/vertx-in-action/chapter-3/v-10/InfinispanCloud" shape="rect">[InfinispanCloud]</a>.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="browsable-container figure-container" refid="139" id="139" data-hash="42454e0806995a479604567f7960320f"> 
+   <h5 id="clustered-app-run">Figure&nbsp;3.8.&nbsp;Screenshot of the application running in clustered mode</h5> 
+   <img alt="clustered app run" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/clustered-app-run.png" width="1053" loading="lazy" height="640" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="140" id="140" data-hash="99416709589e5a255cd23b1a0d8b24de"> 
+   <p>Eregui <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/clustered-app-run" shape="rect" title="Figure 3.8. Screenshot of the application running in clustered mode">3.8</a> swosh gkr iapipotncla nrginnu wrjp 1 rersbow cecetndon kr qrx snnctaie drjw trqx 8080, earhont obsrerw entodnecc rv ruk csodne ntncaies rwjd qtrv 8081, ngs kw ock kdcf tmxl pxr <code class="code">Listener</code> evrcltie nj rgv ocgknuabrd. Tz xw nsz vxz, xdgr snasnctie lisdapy entsve xmlt xqr 8 rnsesso, spn vyr trisf asnencti gac zjr varaege eaeumetrtpr ptudeda ax jr nsz anttrcie ruwj kbr <code class="code">SensorData</code> liveetrc en xrg sdnceo aeninstc.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="141" id="141" data-hash="ba78b0c96a195002174e8410d70f1368"> 
+   <p>Bvd ddbstreiiut etven-qzg cj sn ttirninsege rvef sz rj cj aaesrttpnnr re brk irevsctel.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="142" id="142" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+     <h5>Tip</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="143" id="143" data-hash="9ab5193de492bb1ae628ec3186b1e482"> 
+     <p>Ryk entve-pcp RVJ zcg <code class="code">localConsumer</code> thdemso tvl dcnleriag eegmass lhdaensr rrcq ngfx vetw <em class="calibre9">lcyalol</em> onyw unnrgin wruj sltecngriu. Vtk nestnica c mencorsu tlk iantdoitsne <code class="code">a.b.c</code> wjff nxr eircvee sagmeess rkna rv przr eidnoattnis lxtm hetnoar taecnsni nj vqr urstlec.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="144" id="144" data-hash="11d7676848db6638aab37330b7d10e3e"> 
+   <p>The next chapter discusses asynchronous data and event streams.</p> 
+  </div> 
+  <div class="readable-text" refid="145" id="145" data-hash="1cb0e58a9b2b9e92d624befcbe6d4f01"> 
+   <h2 class="calibre17" id="heading_id_20"><a class="pcalibre pcalibre1" id="summary" shape="rect"></a>3.4 &nbsp;Summary</h2> 
+  </div> 
+  <ul class="itemizedlist"> 
+   <li class="listitem readable-text" refid="146" id="146" data-hash="598f446729cef00f7b08a65ef2c9623b"> The event-bus is the preferred way for verticles to communicate, and it uses asynchronous message passing.<br> </li> 
+   <li class="listitem readable-text" refid="147" id="147" data-hash="bdde4c28d9ebb817efd58ae4d6c53710"> The event-bus implements both publish / subscribe ("one to many") and point-to-point ("many to one") communications.<br> </li> 
+   <li class="listitem readable-text" refid="148" id="148" data-hash="7a864526eb7f95ff39bb00becee683c3"> While it looks like a traditional message broker, the event-bus does not provide durability guarantees so it must only be used for transient data.<br> </li> 
+   <li class="listitem readable-text" refid="149" id="149" data-hash="2ec9cbdd5439e9e0a3870ba55b6440aa"> Clustering allows networked instances to communicate over the distributed event-bus in a transparent fashion.<br> </li> 
+  </ul> 
+  <div class="readable-text" refid="150" id="150" data-hash="2f1d5274edd45303490f6bfd23f27c3f"> 
+   <h2 class="calibre17" id="heading_id_21"><a class="pcalibre pcalibre1" id="references" shape="rect"></a>3.5 &nbsp;References</h2> 
+  </div> 
+  <div class="bibliodiv"> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e1852" shape="rect"></a> 
+    <div class="readable-text" refid="151" id="151" data-hash="d3b623cf6ac1190ca5f1c4fc0bb5f5fc"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="SSE" shape="rect"></a>[SSE] Ian Hickson. Server-Sent Events. 03 February 2015. W3C Recommendation. <a class="pcalibre3 pcalibre" href="https://www.w3.org/TR/eventsource/" shape="rect">www.w3.org/TR/eventsource/</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e1856" shape="rect"></a> 
+    <div class="readable-text" refid="152" id="152" data-hash="08f7e072d7ca4f4b2248294731ce6a03"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="KafkaInAction" shape="rect"></a>[KafkaInAction]. Dylan Scott. Kafka in Action. 2019. Manning Publications. ISBN 9781617295232.</span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e1859" shape="rect"></a> 
+    <div class="readable-text" refid="153" id="153" data-hash="6a964958679eb4d1af854abbd1c99991"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="InfinispanCloud" shape="rect"></a>[InfinispanCloud]. Infinispan documentation on cloud services configuration. Retrieved at <a class="pcalibre3 pcalibre" href="http://infinispan.org/docs/stable/user_guide/user_guide.html#cloud_services" shape="rect">infinispan.org/docs/stable/user_guide/user_guide.html#cloud_services</a></span></p> 
+    </div> 
+   </div> 
+  </div>
+ </body>
+</html>

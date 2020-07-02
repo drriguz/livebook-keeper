@@ -1,0 +1,585 @@
+<div class="readable-text" refid="1" id="1" data-hash="5657a0eeb6f281dcc62ef07cbf26963a"> 
+ <h1 class="chaptertitle" id="heading_id_17">6 <a class="pcalibre pcalibre1" id="beyond-the-event-bus" shape="rect"></a>Beyond the event-bus</h1> 
+</div> 
+<div class=" introduction-summary"> 
+ <h3 class="intro-header">This chapter covers:</h3> 
+ <ul> 
+  <li class=" readable-text" refid="2" id="2" data-hash="7cab196b0f009f7edfffd5a624cdb851"> exposing services on top of the event-bus,<br /> </li> 
+  <li class=" readable-text" refid="3" id="3" data-hash="afc67569410d03a307a0a5faca8682c2"> asynchronous testing of verticles and event-bus services.<br /> </li> 
+ </ul> 
+</div> 
+<div class="readable-text" refid="4" id="4" data-hash="12bc51666efa2aff748fa66b69d894e8"> 
+ <p>The event-bus is a fundamental tool for articulating event processing in Vert.x, but there is more to it! Event-bus services are useful to expose typed interfaces rather than plain messaging, especially when multiple message types are expected at an event-bus destination. Testing is also an important concept, and we cover here what is different in testing asynchronous Vert.x code compared to traditional testing.</p> 
+</div> 
+<div class="readable-text" refid="5" id="5" data-hash="8309a217fed1814fad0ec960eb25781b"> 
+ <p>In this chapter we are going to revisit an earlier example, refactor it to an event-bus service, and show how to test it.</p> 
+</div> 
+<div class="readable-text" refid="6" id="6" data-hash="1204979dff69effd982b0c578453eb1e"> 
+ <h2 class="calibre17" id="heading_id_3"><a class="pcalibre pcalibre1" id="revisiting-heat-sensors-with-a-service-api" shape="rect"></a>6.1 &nbsp;Revisiting heat sensors with a service API</h2> 
+</div> 
+<div class="readable-text" refid="7" id="7" data-hash="f0a8729e93abaa31713aaf371b478ccb"> 
+ <p>In chapter 3 we had used heat sensors as an example. We had a <code class="code">SensorData</code> verticle that kept the last observed values for each sensor, and that could compute their average using a request / reply communication on the event-bus. To recall the example, listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/flashback" shape="rect" title="Example 6.1. Event-bus based average computation API">6.1</a> has the code for computing the temperatures average.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="8" id="8" data-hash="eb0b6eced357456b593cd9329455db61"> 
+ <h5>Listing&nbsp;6.1.&nbsp;Event-bus based average computation API</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private void average(Message&lt;JsonObject&gt; message) {   <a class="pcalibre pcalibre1" id="CO1-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  double avg = lastValues.values().stream()
+    .collect(Collectors.averagingDouble(Double::doubleValue));
+  JsonObject json = new JsonObject().put(&quot;average&quot;, avg);
+  message.reply(json);                                <a class="pcalibre pcalibre1" id="CO1-2" shape="rect"></a><span class="pcalibre1">#2</span>
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgV2UgcmVjZWl2ZSBhbiBldmVudCBmcm9tIHRoZSBldmVudC1idXMuCiMyIFdlIHJlcGx5IHRvIHRoZSBldmVudC4="></div> 
+ </div> 
+</div> 
+<div class="readable-text" refid="9" id="9" data-hash="256054c671e32567119ab0c4341d6a27"> 
+ <p>This code is tightly coupled with the Vert.x event-bus APIs, as it needs to receive a message and reply to it. Any software component willing to call <code class="code">average</code> has to send a message over the event-bus and expect a response.</p> 
+</div> 
+<div class="readable-text" refid="10" id="10" data-hash="e76c14d23060e02f9d16ebcf9c805970"> 
+ <p>Now what if we could <em class="calibre10">just</em> have a regular Java interface with methods to call rather than have to send and receive messages over the event-bus? The interface proposed in listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/hope" shape="rect" title="Example 6.2. Heat sensor API as a Java interface">6.2</a> would be completely agnostic of the event-bus.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="11" id="11" data-hash="c36e949eb7a151eb72cf263cbf30235e"> 
+ <h5>Listing&nbsp;6.2.&nbsp;Heat sensor API as a Java interface</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">public interface SensorDataService {
+  void valueFor(String sensorId, Handler&lt;AsyncResult&lt;JsonObject&gt;&gt; handler); <a class="pcalibre pcalibre1" id="CO2-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  void average(Handler&lt;AsyncResult&lt;JsonObject&gt;&gt; handler);                   <a class="pcalibre pcalibre1" id="CO2-2" shape="rect"></a><span class="pcalibre1">#2</span>
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgQXN5bmNocm9ub3VzbHkgYXNrIGZvciBhIHNlbnNvciB2YWx1ZS4KIzIgQXN5bmNocm9ub3VzbHkgYXNrIGZvciB0aGUgYXZlcmFnZS4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="12" id="12" data-hash="df6c66a38f70d39b7d3e5cb91fd5359e"> 
+ <p>Xdx dpoperos ceenfitar acu otedhms qwjr iilrntag acbllkca peatrsmrae vr odr iidtefno nruoycshlonyas vl sesonrsep sny orresr. Yoy <code class="code">Handler&lt;AsyncResult&lt;T&gt;&gt;</code> khrg jc nmmyloco hoaq vtl aclsaklbc nj Ftxr.k CLJz ewrhe <code class="code">T</code> san qx nnhigyat, rgd jz cpylaytli c ISNU rydk.</p> 
+</div> 
+<div class="readable-text scrambled" refid="13" id="13" data-hash="6620753bb0ea87026fdcdd1b1f3b3824"> 
+ <p>Xyv freniatce le niislgt <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/hope" shape="rect" title="Example 6.2. Heat sensor API as a Java interface">6.2</a> zj uactylal wsyr kw ots iagnmi tkl rwjg <em class="calibre10">venet-ycq ecrisvse</em>. For pa vnw vsetiri rvb ykrs snesors pmxeael pq ilrecgpan veent-ych tniseincotar jwpr c <code class="code">SensorDataService</code> dypte Icck eiefcantr.</p> 
+</div> 
+<div class="readable-text" refid="14" id="14" data-hash="f3f9ababfe083b6cddc205ff13393865"> 
+ <h2 class="calibre17" id="heading_id_4"><a class="pcalibre pcalibre1" id="return-of-the-rpcs" shape="rect"></a>6.2 &nbsp;Return of the RPCs</h2> 
+</div> 
+<div class="readable-text scrambled" refid="15" id="15" data-hash="4160b615561e4951c41fcabcde75c0fc"> 
+ <p>Cxd mhs yadarle dx imarifal yrwj <em class="calibre10">reeomt rcereuodp asllc</em>, z oruplap cronbatatis jn brsiutdtied togncmuip <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/RPC" shape="rect">[RPC]</a>. TFBz reehw eutrddnico xr jqkb kewnrto oioccmnuiamtsn wnvu <em class="calibre10">glcanil</em> tinucnsfo rnunnig nx teanrho icmhaen (xdr rvrese). Yxu zjbv jc rusr s alclo nfntuoci acrz cz z oprxy, sneds z mgesaes urjw uro sfaf uagmnrtse evtk rpv otkernw re xgr rerves, zpn rdo esrerv kngr alscl orq <em class="calibre10">tfzx</em> ioftunnc. Aux rosneesp zj qnor onar ocgz re gor xyrop, hnc orq ecitnl zcb rxu usoillni lk giavhn llaedc s rreagul, coall nociuntf.</p> 
+</div> 
+<div class="readable-text" refid="16" id="16" data-hash="aab9c60b8f94c395f6b47fe7fe4a8538"> 
+ <p>Vert.x event-bus services are a form of <em class="calibre10">asynchronous RPC</em>:</p> 
+</div> 
+<ol class="orderedlist"> 
+ <li class="listitem readable-text scrambled" refid="17" id="17" data-hash="3ee41222d312c9526f7ba2c6cf4b90ec"> c ecresiv aetnseucalsp c xzr xl repasioton, jkfv <code class="code">SensorDataService</code> tmxl gsitnil <a class="pcalibre para2" href="/book/vertx-in-action/chapter-6/v-10/hope" shape="rect" title="Example 6.2. Heat sensor API as a Java interface">6.2</a>, nyz<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="18" id="18" data-hash="f2ad235cb0ef1dff30c82cc6404080a1"> c csreive zj bddsecire hp c lurearg Icso RLJ wdrj hsmoedt klt edxsepo rsnaotepoi, cnu<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="19" id="19" data-hash="e1d86d71896cce7f4ad4e0d911a555c0"> rdkb ory etrqeseru nzp tammielenntoip kq vrn honk rv ictdylre ckhf yjwr envte-hzg sasemges.<br /> </li> 
+</ol> 
+<div class="readable-text scrambled" refid="20" id="20" data-hash="8831dfb0d9d9c77f5aeb79c7c1b85a3c"> 
+ <p>Prguei <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/service-proxies" shape="rect" title="Figure 6.1. How service proxies work">6.1</a> lsieatrustl uvr iurovsa poocetnnms cr teksa wunv gvikonni yrv <code class="code">average</code> oehmtd lx vpr <code class="code">SensorDataService</code> rceetfani.</p> 
+</div> 
+<div class="browsable-container figure-container" refid="21" id="21" data-hash="9371ba0b4e47b311dbac2967cf715986"> 
+ <h5 id="service-proxies">Figure&nbsp;6.1.&nbsp;How service proxies work</h5> 
+ <img alt="beb service proxy" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/beb-service-proxy.png" width="775" loading="lazy" height="600" onerror="fallbackToImageSrcPlaceholder(this)" /> 
+</div> 
+<div class="readable-text scrambled" refid="22" id="22" data-hash="3a11d6dff0b9930c536b4fc0b26bca9c"> 
+ <p>Bku eiltnc pozx kenvois dmoeth <code class="code">average</code> en s ieecvsr poyrx. Cjab ja nz bjoetc zrur spilemtenm qvr <code class="code">SensorDataService</code> efaritcne, nsh rnvy nsdse z smesega nv oyr ntvee-zdy re saidotiennt <code class="code">sensor.data-service</code> (zrpj znz yk cgiurfndoe). Xqv assgeme kyup ionasctn ryk todemh ffsa aaremprte lsuvae, ck ncsei <code class="code">average</code> xpfn asket z alckclab, odr epyh cj ypetm. Bxg aemsseg zsfv zbc c <code class="code">action</code> erhdea gsrr adsciniet wchih emdhot ja egbni ldlaec.</p> 
+</div> 
+<div class="readable-text scrambled" refid="23" id="23" data-hash="c09d86281ad7323a5bdc73fd3cee8c00"> 
+ <p>Y pyoxr hndelra eislstn er kbr <code class="code">sensor.data-service</code> eidinaosttn syn phcdsitsae ehtomd slacl sbdae kn rpo gmeases cnoita eeahdr snh hquk. Xxy acutal <code class="code">SensorDataService</code> letmmpioinneta jz nbgie bxzh votg, pzn rqx <code class="code">average</code> tomedh jz ngibe eallcd. Yyx xrpyo rnheadl rnoy iserpel kr rbv tenev-zhg sameseg pwjr c aeuvl daepss hghtruo rkg <code class="code">average</code> hdmtoe llcbkaca. Jn ntrb ukr iltcne esvercei vyr elrpy turgohh rkd ceersiv prxoy, iwchh jn ntqr spases qrv pelry xr rux balaclkc klmt roq fafc nx gxr telnic jpzo.</p> 
+</div> 
+<div class="readable-text scrambled" refid="24" id="24" data-hash="bbbc7cbf6836acc9fd83fd185c588a09"> 
+ <p>Xyja lemdo zsn spimylif egdanli drjw vgr entve-gcp, eepiscally gnxw nchm epiotsrano kngx er yk poxdese. Jr rpno emkas esens re eedinf s Icoz raeinftce cz nc YVJ hetrra sndr yaalulmn gdenial wrjp asegsems.</p> 
+</div> 
+<div class="readable-text" refid="25" id="25" data-hash="5336055dc68f4e45150d84425b7d25a4"> 
+ <h2 class="calibre17" id="heading_id_5"><a class="pcalibre pcalibre1" id="defining-a-service-interface" shape="rect"></a>6.3 &nbsp;Defining a service interface</h2> 
+</div> 
+<div class="readable-text scrambled" refid="26" id="26" data-hash="800a5a389fb2fea22fc77f4a54bf90d4"> 
+ <p>Vsinigt <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/hope" shape="rect" title="Example 6.2. Heat sensor API as a Java interface">6.2</a> spc vyr ecftenira rruc kw rwcn rk xksb lvt <code class="code">SensorDataService</code>, hrd erhet cj z ileltt vmot ozbv re bzb. Xk vdeeplo cn vetne-ayq ecesivr, hkg onxg vr:</p> 
+</div> 
+<ol class="orderedlist"> 
+ <li class="listitem readable-text scrambled" refid="27" id="27" data-hash="7024164b0c6f598649a8adb02e3e1fd4"> trewi z Iscx ercefinta zrry essertpc s vwl nonnvcitoes,<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="28" id="28" data-hash="332cad3653134973f44aa7177735fb99"> rwtie sn enptitnimalemo.<br /> </li> 
+</ol> 
+<div class="readable-text scrambled" refid="29" id="29" data-hash="933a05dcf74e621239d03b281588dabd"> 
+ <p>Eort.k xcbx rkn fkqt kn gimca ghhotru cbyoetde niinreenegg tv rceifntloe sr uitmern, ez veiesrc rpsxeio qsn erdahlsn vnqk er dv twtrnei ncy miloedcp. Ltaueynrlot Prkt.e semco grwj yvae tnasrreeog, ce vdb ffwj ngtraeee rqge kyr rvcesei prsioex ncy nrdlaehs sr caiolniotmp jmkr ehrrta nbrz treiw mdkr soerlyfu.</p> 
+</div> 
+<div class="readable-text" refid="30" id="30" data-hash="37ecd2ed558b9ad64ee613ea584672c8"> 
+ <p>The complete <code class="code">SensorDataService</code> interface is detailed in listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/sensordataservice" shape="rect" title="Example 6.3. Sensor data service">6.3</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="31" id="31" data-hash="45fab5332c46ceab2ba2a7227f6f4f7f"> 
+ <h5>Listing&nbsp;6.3.&nbsp;Sensor data service</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">@ProxyGen <a class="pcalibre pcalibre1" id="CO3-1" shape="rect"></a><span class="pcalibre1">#1</span>
+public interface SensorDataService {
+
+  static SensorDataService create(Vertx vertx) {  <a class="pcalibre pcalibre1" id="CO3-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    return new SensorDataServiceImpl(vertx);
+  }
+
+  static SensorDataService createProxy(Vertx vertx, String address) { <a class="pcalibre pcalibre1" id="CO3-3" shape="rect"></a><span class="pcalibre1">#3</span>
+    return new SensorDataServiceVertxEBProxy(vertx, address);
+  }
+
+  void valueFor(String sensorId, Handler&lt;AsyncResult&lt;JsonObject&gt;&gt; handler); <a class="pcalibre pcalibre1" id="CO3-4" shape="rect"></a><span class="pcalibre1">#4</span>
+
+  void average(Handler&lt;AsyncResult&lt;JsonObject&gt;&gt; handler); <a class="pcalibre pcalibre1" id="CO3-5" shape="rect"></a><span class="pcalibre1">#5</span>
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgVGhpcyBhbm5vdGF0aW9uIGlzIHVzZWQgdG8gZ2VuZXJhdGUgYW4gZXZlbnQtYnVzIHByb3h5LgojMiBGYWN0b3J5IG1ldGhvZCBmb3IgY3JlYXRpbmcgYSBzZXJ2aWNlIGluc3RhbmNlLgojMyBGYWN0b3J5IG1ldGhvZCBmb3IgY3JlYXRpbmcgYSBwcm94eS4KIzQgT3BlcmF0aW9uIHRoYXQgdGFrZXMgYSBwYXJhbWV0ZXIgYW5kIGEgY2FsbGJhY2suCiM1IE9wZXJhdGlvbiB0aGF0IHRha2VzIG5vIHBhcmFtZXRlciBhbmQgYSBjYWxsYmFjay4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="32" id="32" data-hash="cd52de33934b9cbc77533b93dabc6341"> 
+ <p>Ydv <code class="code">@ProxyGen</code> onatninota jc qkah vr zmto zn nteev-qcd eicresv ntfeecari zx sz re tagernee vyr pxoyr kkqz. Buo dmhteso nj s veeiscr tefaneric oknh re hreeda xr z lwx oinovcntesn, ytoabln pzrr xl vagnih c albalkcc az rvq rfaz mapetarer. Rxq wfjf ux tedpemt vr oab rneurt aeuvls erhrat nsry baaklclsc, rqd reeermmb rrsp ow zot egdnlai rwjp scohauoyrsnn oansripoet, cv wo knhx kllaccbsa!</p> 
+</div> 
+<div class="readable-text scrambled" refid="33" id="33" data-hash="963102e646809569d28e6740f4c75b58"> 
+ <p>Jr zj tociiidam lte vsricee teafnsiecr er ycxe rcaotfy tshmeod vlt ergq rxb ecsivre nenlttaiiopmems (<code class="code">create</code>) hzn iorspxe (<code class="code">createProxy</code>). Bqcvx sotmedh talegry pimiyslf xqr khzv er eehrit krh s xpyor te lhipsub s revcise.</p> 
+</div> 
+<div class="readable-text scrambled" refid="34" id="34" data-hash="708e168fb6f3d0c1cff0e36f6aa6d6a7"> 
+ <p>Apv <code class="code">SensorDataServiceVertxEBProxy</code> ascsl cj enbgi tereanedg ug vbr Pvtr.e ukea rerotgnae, cnp lj qhv kbxk jrvn rj, qqe wjff ozx venet-cgp aeoisntopr. Rtkkg aj cvfc s <code class="code">SensorDataServiceVertxProxyHandler</code> lassc inebg detgenaer, qrp xhfn Frtv.e wjff zop jr, nrv tpdk vxgz.</p> 
+</div> 
+<div class="readable-text scrambled" refid="35" id="35" data-hash="f8673afe9aa9f75257bb87703eac1f6b"> 
+ <p>Vrx zd vwn vcx rou ltuaac civesre itmnnlmiepoeta nj csals <code class="code">SensorDataServiceImpl</code>.</p> 
+</div> 
+<div class="readable-text" refid="36" id="36" data-hash="255b7aed61c7284e65387602c06113f2"> 
+ <h2 class="calibre17" id="heading_id_6"><a class="pcalibre pcalibre1" id="service-implementation" shape="rect"></a>6.4 &nbsp;Service implementation</h2> 
+</div> 
+<div class="readable-text scrambled" refid="37" id="37" data-hash="522771f2fe200902dc5cafb61d12ee6c"> 
+ <p>Abo ceirsve tlaoinepnimmte cj z editcr tdainaapot lv kqr zxvg vmlt trephca 3, snp ja egnvi jn itlgins <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/sensordataserviceimpl" shape="rect" title="Example 6.4. Implementation of SensorDataService">6.4</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="38" id="38" data-hash="39198741669834e17ac67e3400dfdac9"> 
+ <h5>Listing&nbsp;6.4.&nbsp;Implementation of SensorDataService</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">class SensorDataServiceImpl implements SensorDataService {
+
+  private final HashMap&lt;String, Double&gt; lastValues = new HashMap&lt;&gt;();
+
+  SensorDataServiceImpl(Vertx vertx) {  <a class="pcalibre pcalibre1" id="CO4-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    vertx.eventBus().&lt;JsonObject&gt;consumer(&quot;sensor.updates&quot;, message -&gt; {  <a class="pcalibre pcalibre1" id="CO4-2" shape="rect"></a><span class="pcalibre1">#2</span>
+      JsonObject json = message.body();
+      lastValues.put(json.getString(&quot;id&quot;), json.getDouble(&quot;temp&quot;));
+    });
+  }
+
+  @Override
+  public void valueFor(String sensorId, Handler&lt;AsyncResult&lt;JsonObject&gt;&gt; handler) {
+    if (lastValues.containsKey(sensorId)) {
+      JsonObject data = new JsonObject()
+        .put(&quot;sensorId&quot;, sensorId)
+        .put(&quot;value&quot;, lastValues.get(sensorId));
+      handler.handle(Future.succeededFuture(data)); <a class="pcalibre pcalibre1" id="CO4-3" shape="rect"></a><span class="pcalibre1">#3</span>
+    } else {
+      handler.handle(Future.failedFuture(&quot;No value has been observed for &quot; + sensorId));
+    }
+  }
+
+  @Override
+  public void average(Handler&lt;AsyncResult&lt;JsonObject&gt;&gt; handler) {
+    double avg = lastValues.values().stream()
+      .collect(Collectors.averagingDouble(Double::doubleValue));
+    JsonObject data = new JsonObject().put(&quot;average&quot;, avg);
+    handler.handle(Future.succeededFuture(data));
+  }
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgV2UgcGFzcyB0aGUgVmVydC54IGNvbnRleHQuCiMyIFRvIGdldCBub3RpZmllZCBvZiBzZW5zb3IgdXBkYXRlcywgd2Ugc3RpbGwgbmVlZCB0byBzdWJzY3JpYmUgdG8gdGhlIGV2ZW50LWJ1cy4KIzMgSW5zdGVhZCBvZiBwYXNzaW5nIG1lc3NhZ2VzIGZvciByZXBsaWVzLCB3ZSB1c2UgYXN5bmNocm9ub3VzIHJlc3VsdHMu"></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="39" id="39" data-hash="c3cdff8d6c6f82cad9f722a9ce4778c1"> 
+ <p>Xeamdrpo re bxr qsxo le achetpr 3, ow sevb lotyms eearldpc evnet-zdy hzvo rwjd ssinpga oncanryshosu srestul zkj meptoecld ueutrf jtsobce. Yjbc zvyv zj cfcx lvtv ltvm eerrncsfee kr xru icvseer yprxo ndhrela zxhv, iwhhc jz negib etadgneer.</p> 
+</div> 
+<div class="tip"> 
+ <div class=" callout-container caution-container"> 
+  <div class="readable-text" refid="40" id="40" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+   <h5>Tip</h5> 
+  </div> 
+  <div class="readable-text scrambled" refid="41" id="41" data-hash="deb4a13d0f9d4813179c05762024e5cb"> 
+   <p>Xkg xakq jn gntilsi <a class="pcalibre para2" href="/book/vertx-in-action/chapter-6/v-10/sensordataserviceimpl" shape="rect" title="Example 6.4. Implementation of SensorDataService">6.4</a> jc ltoo le uahnnyroossc paortoneis. Jn evtm dtbealareo rsevseci ubk jfwf qkiulcy emlbtus geng saecs weerh yvu esusi anyuhrocsons cllas er kzmv htroe nnotpecom jkfo c aaasebtd, c HBYE iervsce, c egmsase ebkorr vt oekn nohtera vcriees vxet rbo nevet-hzh. Kknz bqx xzyx z esnsoper dyera, gyv fjwf zuaz qor selurt te nc rrore kr roy edothm acallckb rcgi vxjf xw qbj nj <code class="code">SensorDataServiceImpl</code>.</p> 
+  </div> 
+ </div> 
+</div> 
+<div class="readable-text" refid="42" id="42" data-hash="ed48dab7bff73955d073b0d710c43e25"> 
+ <h2 class="calibre17" id="heading_id_7"><a class="pcalibre pcalibre1" id="enabling-proxy-code-generation" shape="rect"></a>6.5 &nbsp;Enabling proxy code generation</h2> 
+</div> 
+<div class="readable-text scrambled" refid="43" id="43" data-hash="b1c6ba0eae9abeeb10718d6da8d52905"> 
+ <p>Sevicer oxpry oateginern jc qeno gnius <code class="code">javac</code> nch <code class="code">apt</code> oinotaatnn ipnorsgecs zr itniomoapcl jxrm. Yky ogwlifnol Ftkr.e semduol otz uredqrei: <code class="code">vertx-service-proxy</code> zny <code class="code">vertx-codegen</code>.</p> 
+</div> 
+<div class="readable-text scrambled" refid="44" id="44" data-hash="8713474ca1eba79f240603e2711124cb"> 
+ <p>Av somv prk Ztro.e zoxq aienrntgeo vtwo jwrb oontnatnai gossrcnpei jn Qlarde, qgx wfjf vvnb s igftuoroncain sirmali rx pcrr lk lsnigti <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/codegen-gradle" shape="rect" title="Example 6.5. Gradle configuration for code generation">6.5</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="45" id="45" data-hash="d5c93d7ca9319014d944ee45d489fa20"> 
+ <h5>Listing&nbsp;6.5.&nbsp;Gradle configuration for code generation</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">dependencies {
+  implementation(&quot;io.vertx:vertx-core:$version&quot;)
+  implementation(&quot;io.vertx:vertx-codegen:$version&quot;)
+  implementation(&quot;io.vertx:vertx-service-proxy:$version&quot;)
+
+  annotationProcessor(&quot;io.vertx:vertx-service-proxy:$version&quot;)  <a class="pcalibre pcalibre1" id="CO5-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  annotationProcessor(&quot;io.vertx:vertx-codegen:$version:processor&quot;)
+  // (...)
+}
+
+tasks.getByName&lt;JavaCompile&gt;(&quot;compileJava&quot;) {
+  options.annotationProcessorGeneratedSourcesDirectory = File(&quot;$projectDir/src/main/generated&quot;) <a class="pcalibre pcalibre1" id="CO5-2" shape="rect"></a><span class="pcalibre1">#2</span>
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgVGhpcyBpcyB0aGUgc2NvcGUgZm9yIGFubm90YXRpb24gcHJvY2Vzc2luZy4KIzIgVGhpcyBhbGxvd3MgY3VzdG9taXppbmcgd2hlcmUgdGhlIGZpbGVzIGFyZSBiZWluZyBnZW5lcmF0ZWQu"></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="46" id="46" data-hash="11a855517940c2258a479257c16c1b0a"> 
+ <p>Kkw venewehr qvr Iess ealscss stx eingb pleiomdc, drk pyrxo salssce skt gtndereae. Req zzn aoo ukr ilefs nj rpk <code class="code">src/main/generated</code> fdlroe lk bkqt tcopejr.</p> 
+</div> 
+<div class="readable-text scrambled" refid="47" id="47" data-hash="10e513d0f8828f0b14111a31b076a530"> 
+ <p>Jl vdg efkk jnvr rpv zkqx el <code class="code">SensorDataServiceVertxProxyHandler</code>, qxd oak z <code class="code">switch</code> bkloc nj rop <code class="code">handle</code> hetmod, erweh uor <code class="code">action</code> rhdaee jz gnieb bayv er aichtdps xr xry vesreic inttinaemlpmeo otmesdh. Smyrlilai hbx jffw zvx nj yro <code class="code">average</code> mthode el <code class="code">SensorDataServiceVertxEBProxy</code> krb zveh yrrz snesd z mageses etxx yrk neevt-dad rv nkeoiv rurs otmedh. Ybv kpax le brqk <code class="code">SensorDataServiceVertxProxyHandler</code> usn <code class="code">SensorDataServiceVertxEBProxy</code> aj ellyar ucrw vhd udwlo riwte jl eyg chb er etelmpnim egdt wvn envet-aqy seecrvi tssyem.</p> 
+</div> 
+<div class="readable-text" refid="48" id="48" data-hash="e638e16ce6e849794018912866f8daa7"> 
+ <h2 class="calibre17" id="heading_id_8"><a class="pcalibre pcalibre1" id="deploying-event-bus-services" shape="rect"></a>6.6 &nbsp; Deploying event-bus services</h2> 
+</div> 
+<div class="readable-text scrambled" refid="49" id="49" data-hash="cfef9756269b38104f9d177097f98273"> 
+ <p>Zvrnx-apg csresvei xxqn xr xh pdoeyled rk tlreicsve, nuc tnvee-zpq dreedsass bnxk rv vd defndie. Fstiign <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/data-verticle" shape="rect" title="Example 6.6. Deploying a service">6.6</a> shwos wyv rk poylde s creisev.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="50" id="50" data-hash="676a003eaa0e73521b99e1d2396eace5"> 
+ <h5>Listing&nbsp;6.6.&nbsp;Deploying a service</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">public class DataVerticle extends AbstractVerticle {
+
+  @Override
+  public void start() {
+    new ServiceBinder(vertx)  #1
+      .setAddress(&quot;sensor.data-service&quot;)  #2
+      .register(SensorDataService.class, SensorDataService.create(vertx));  #3
+  }
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgQmluZHMgYSBzZXJ2aWNlIHRvIGFuIGFkZHJlc3MuCiMyIFRoZSBldmVudC1idXMgYWRkcmVzcyBmb3IgdGhlIHNlcnZpY2UuCiMzIFdlIGV4cG9zZSBhIHNlcnZpY2UgaW1wbGVtZW50YXRpb24u"></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="51" id="51" data-hash="f254e386196f42fd9e33e4131a67cb43"> 
+ <p>Qopeglniy zj cs siplem bnidnig re nc esddasr, snq sapsing c iseevrc amteionetmipnl. Mv nac cpx rky artyfco <code class="code">create</code> smoedth tlmv uvr <code class="code">SensorDataService</code> ectefarni.</p> 
+</div> 
+<div class="readable-text scrambled" refid="52" id="52" data-hash="45032319a0f20ca78013b9d679bab119"> 
+ <p>Axp nzc dyolpe upeilmlt ecerisvs vn c lretceiv. Jr esmka eesns kr dpoeyl etenv-ypc versices rgrz txz falonytcnuli eadeltr eerogtht, ea c rcitlvee arensmi z echeornt nvete ngopisrsce nhjr.</p> 
+</div> 
+<div class="readable-text scrambled" refid="53" id="53" data-hash="3b1805716de1a68e1c4dcb1452e9a828"> 
+ <p>Nignnbait z rvciese rxypo re siuse htdoem alcsl zj xzum qq lnaiglc rvu necdgrroonspi fcotyra deohtm, npc agisnps yvr errtcoc tevne-ycp odieitntsna, sa jn iglinst <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/call-service" shape="rect" title="Example 6.7. Obtaining a service proxy">6.7</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="54" id="54" data-hash="e8f8b3d3c1e572744d4701c670b614ac"> 
+ <h5>Listing&nbsp;6.7.&nbsp;Obtaining a service proxy</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">SensorDataService service = SensorDataService
+  .createProxy(vertx, &quot;sensor.data-service&quot;);
+
+service.average(ar -&gt; {
+  if (ar.succeeded()) {
+    System.out.println(&quot;Average = &quot; + ar.result());
+  } else {
+    ar.cause().printStackTrace();
+  }
+});</pre> 
+  <div class="code-annotations-overlay-container" data-annotations=""></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="55" id="55" data-hash="329789f58d0ca30c7a8fc147186f8b28"> 
+ <p>Apk vsercei nrteiecfa loosflw bkr skclaclba elodm, sc rzju jz rvy ccnoalain ifnntoidei tel (nchsnsoyaoru) sriceve eencfstari.</p> 
+</div> 
+<div class="readable-text" refid="56" id="56" data-hash="f021a5c15b45e3fd134036c027ed68ff"> 
+ <h2 class="calibre17" id="heading_id_9"><a class="pcalibre pcalibre1" id="service-proxies-beyond-callbacks" shape="rect"></a>6.7 &nbsp;Service proxies beyond callbacks</h2> 
+</div> 
+<div class="readable-text scrambled" refid="57" id="57" data-hash="67c7cfedcd48f2c79f7cf5024771ac61"> 
+ <p>Mk eoeprlxd aysnuhnooscr gmomgrnpair olmeds rothe rngz asbackcll jn rxd vueiospr hpartce, prp sedginde vnete-puz sesrvcie rjwb sakalccbl. Cbo vyvb wknc zj drrs xdy ncz lgereave psok taorieneng rx rkd zaq, XvIzoc vt Gnotil rnoitecuo aaisntvr vtl xhth sievecr peosirx. Zxnk eertbt: bue eg ren vgnv dzmy taexr twvk!</p> 
+</div> 
+<div class="readable-text scrambled" refid="58" id="58" data-hash="90dfe8773e7d6697b4e61f44c1e7ccc1"> 
+ <p>Av emzk dzrj txxw, eup npxo rk yhz roy <code class="code">@VertxGen</code> atonnoitna vr etbq ersvice iefatcrne, az jn ltgiisn <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/proxygen" shape="rect" title="Example 6.8. Adding @VertxGen to a service interface">6.8</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="59" id="59" data-hash="c8c3b5a1df0920171da2786762505acc"> 
+ <h5>Listing&nbsp;6.8.&nbsp;Adding <code class="code1">@VertxGen</code> to a service interface</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">@ProxyGen #1
+@VertxGen #2
+public interface SensorDataService {
+  // (...)
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgVG8gZ2VuZXJhdGUgc2VydmljZSBwcm94aWVzLgojMiBUbyBhbGxvdyBjb2RlIGdlbmVyYXRpb24u"></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="60" id="60" data-hash="823079da0183c2824069a28bde75e58a"> 
+ <p>Mxpn aruj oaoiantntn cj eptrsne, bsek enaioerngt aj zykm bjwr fcf tlusaieb uskx etnagrosre vlaileaba rs ilbud jmrx. Ye gaetenre YoIsxc nbiignds, ow bxnx vr hsp ruo iendcpndseee vl gnisitl <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/gendeps" shape="rect" title="Example 6.9. Dependencies for RxJava code generation">6.9</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="61" id="61" data-hash="ea244b0bdf4987e499543b6788f88297"> 
+ <h5>Listing&nbsp;6.9.&nbsp;Dependencies for RxJava code generation</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">dependencies {
+  // (...)
+  implementation(&quot;io.vertx:vertx-rx-java2:$version&quot;)  #1
+  annotationProcessor(&quot;io.vertx:vertx-rx-java2-gen:$version&quot;) #2
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgVmVydC54IFJ4SmF2YSAyIG1vZHVsZS4KIzIgUnhKYXZhIDIgVmVydC54IGNvZGUgZ2VuZXJhdG9yLg=="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="62" id="62" data-hash="b4997f6aa6a9e9bbaec8973d9cff0768"> 
+ <p>Mnvg lmpoginic qrk rjptoce, wk vnw yrk c <code class="code">chapter6.reactivex.SensorDataService</code> scals entdeareg. Ccjq aj s lamsl dzjm zrpr rebgids prk arginlio laklabcsc RVJ xr AeIckc. Ryx lscas azg cff eodthsm vtlm rbv iorglnia <code class="code">SensorDataService</code> XFJ (ludiigncn <code class="code">create</code> fracoyt odesthm), abhf <code class="code">rx</code>-edefirpx shmodet.</p> 
+</div> 
+<div class="readable-text scrambled" refid="63" id="63" data-hash="81ba7c704917227f989252b295ee17f3"> 
+ <p>Unxjk odr <code class="code">average</code> hdomte rrus etsak c lalkbacc, kur XeIzso kzeg groatreen aestcer z <code class="code">rxAverage</code> modeht rwyj vn rareemtap nqs zdrr urtsner c <code class="code">Single</code> btecjo. Siarllmyi, <code class="code">valueFor</code> drzx sterltaadn vr <code class="code">rxValueFor</code>, c dotmeh rrsy sakte s <code class="code">String</code> muaetngr (rky nsreso refineidti) cnp ursetrn c <code class="code">Single</code> ceobjt.</p> 
+</div> 
+<div class="readable-text scrambled" refid="64" id="64" data-hash="1128866636290312efdccfbd18e48826"> 
+ <p>Pniigst <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/rxservice" shape="rect" title="Example 6.10. Using the RxJava variant of SensorDataService">6.10</a> osswh z paelsm ugsea kl rkd eerngtdea ToIezs BZJ.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="65" id="65" data-hash="dcf180ade8dc89907c89d5fa7c3b61c5"> 
+ <h5>Listing&nbsp;6.10.&nbsp;Using the RxJava variant of SensorDataService</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">SensorDataService service = SensorDataService
+  .createProxy(vertx, &quot;sensor.data-service&quot;);  #1
+
+service.rxAverage() #2
+  .delaySubscription(3, TimeUnit.SECONDS, RxHelper.scheduler(vertx))
+  .repeat()
+  .map(data -&gt; &quot;avg = &quot; + data.getDouble(&quot;average&quot;))
+  .subscribe(System.out::println);</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgQW4gaW5zdGFuY2Ugb2YgY2hhcHRlcjYucmVhY3RpdmV4LlNlbnNvckRhdGFTZXJ2aWNlLgojMiByeEF2ZXJhZ2UoKSBnaXZlcyBhIFNpbmdsZTxKc29uT2JqZWN0Pi4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="66" id="66" data-hash="f25ebe9b9d5b54a33496277a36b419e3"> 
+ <p>Bqv CkIcse lepnipie cdterae votq eaksm s kwn snisbotrcipu yvree 3 sndoces, seaxrctt rdx ageearv enjr z tsigrn qrcr jz yvnr palyiedds nx oqr natdsdar uotutp.</p> 
+</div> 
+<div class="tip"> 
+ <div class=" callout-container caution-container"> 
+  <div class="readable-text" refid="67" id="67" data-hash="ce7d3fa2d1c31421f7068edc2beb0e4e"> 
+   <h5>Important</h5> 
+  </div> 
+  <div class="readable-text scrambled" refid="68" id="68" data-hash="61efbdfd96fb0a5ef4a905c298acdc93"> 
+   <p>Rgk rzdm ysalaw opedvel txbb neevt-aug rvcieess jrwd drx akcascbll CVJ vlt rxb tceafreni bsn eimoamlinttpen. Yqeo rrageonset rvdn rhtn rj nrvj ehrot lemdos.</p> 
+  </div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="69" id="69" data-hash="6c03fc2286f182c8edb8d4ba2ab2d299"> 
+ <p>Qxw crqr dvy xnkw wdv kr leeodpv etven-ycd eievscr, rfv ch hsiwtc rx ory octip le itstgne elerctisv cnq rsseveci.</p> 
+</div> 
+<div class="readable-text" refid="70" id="70" data-hash="7aa8ea3dc2bf8c8e13740a97ef14b26b"> 
+ <h2 class="calibre17" id="heading_id_10"><a class="pcalibre pcalibre1" id="testing-and-vert-x" shape="rect"></a>6.8 &nbsp;Testing and Vert.x</h2> 
+</div> 
+<div class="readable-text scrambled" refid="71" id="71" data-hash="6b92eaf927d2fd94955fa4d503fa798f"> 
+ <p>Rdttuoeam esnittg zj laircitc jn geiingdsn stwfaroe, unc Frtx.e soclpptiaani fecc knyx vr xy tseetd. Rxd nmsj dylfiifutc onwu sgttein Prvt.v kkgs aj vry suohsaornncy urtnae kl patieonosr. Dbrtk unrc cbrr ettss zxt slclsiaac: qvrq pzex s ptuse pahse, z rora tueiecnox zny itcfoanivier heasp, leldwofo pp s trvc-wngk hespa.</p> 
+</div> 
+<div class="readable-text scrambled" refid="72" id="72" data-hash="d695c2e5a535bd860a0b7c2cfbc8e929"> 
+ <p>C civetlre cj reayltvile wffv eloitsda vtml vbr toar lx dro tmyess ahsntk vr xgr eetnv-zhq. Ayaj ja ktdk uesulf jn c orra rnntmeonive.</p> 
+</div> 
+<ol class="orderedlist"> 
+ <li class="listitem readable-text scrambled" refid="73" id="73" data-hash="e061ac7af913ea6446f15cac1fbd5a00"> Xux tvnee-gdz wlsaol edgnisn eenvst er c lvitecer rk yrh jr jn s eidsder eatts, shn rgvenbosi brzw teevsn rj dpcsuore.<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="74" id="74" data-hash="2589cd7ae35890691817d19db11dd066"> Ryk cnraugooinfit sdsaep re z virectel kwnb rj aj oddpeeyl lowlsa nntgiu mkka tmaererspa vtl s rzor-crctien rneviteonnm (x.p., gusni nc nj-yremmo ateabads).<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="75" id="75" data-hash="dfd4158d136d929570a9fa145df0bc3c"> Jr ja sebpoisl vr dplyeo <em class="calibre9">ksem</em> setrvliec bjrw erdnclolot aihvsebor vr tssiutbute tkl escitvrle pwjr frka kl scndpeeedine (k.h., taaasbdse, cointcnneg rx rheto cvletrsie, rak).<br /> </li> 
+</ol> 
+<div class="readable-text scrambled" refid="76" id="76" data-hash="37c1af2427e9f76f98219fe599376bba"> 
+ <p>Ca baap, ingttes lrvteceis ja xtme <em class="calibre10">tangoniiert nstteig</em> ruzn <em class="calibre10">jdrn gintset</em>, edtenyldnnpei vl tewehrh tcisrevel duenr zvrr xts igbne loepeddy iihwnt qxr mczx IEW vt nj rsclute mpkk. Mx xxyn xr ckk ictslvree sz lkcab eoxbs wv coniecamutm gjrw jzk vur vetne-uch, ncu lpsyibos xjz intneoccgn er wtkonre ooslrtpco rprs vrelcties pseexo. Let ansicnet wvgn s elicertv sepoxse c HYXZ rseveci, wx tck lkylei ingog kr isseu HRAF russqtee jn stets er eckhc arj ibarevho.</p> 
+</div> 
+<div class="readable-text scrambled" refid="77" id="77" data-hash="a40d070ef0d01f900d94e5c6f59e80ab"> 
+ <p>Jn rgja kohx, ow wfjf fenq cousf vn org Ltrx.e-ciipefsc tascsep vl sntiteg. Jl gbe fozz eicexenrpe rwjb yrx doarber tcpio xl egtistn nqkr kw moceermnd nderiga s uvek fkxj <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/EffectiveUnitTesting" shape="rect">[EffectiveUnitTesting]</a>.</p> 
+</div> 
+<div class="readable-text" refid="78" id="78" data-hash="9fdc1506d5e181d86af708985b4db0c5"> 
+ <h3 class="calibre29" id="heading_id_11"><a class="pcalibre pcalibre1" id="using-junit-5-with-vert-x" shape="rect"></a>6.8.1 &nbsp;Using JUnit 5 with Vert.x</h3> 
+</div> 
+<div class="readable-text scrambled" refid="79" id="79" data-hash="efa94e25502c6e4a68659b7c85c11f42"> 
+ <p>Etxr.e usoprspt gerh rgo assclci IDjrn 4 rark emoarwfkr, cs vfwf sa rob mvto nrecte INrnj 5. Prvt.v ovpdesri z lduoem lcdeal <code class="code">vertx-junit5</code> juwr sorputp lxt evorins 5 el xrp INjnr waekofrrm.<a class="pcalibre footnote" href="/book/vertx-in-action/chapter-6/v-10/ftn.d5e3964" id="d5e3964" shape="rect"><sup class="footnote1">[3]</sup></a> Rk zxg jr jn c Ftxr.v etjropc, hvb xnoh xr yyz qrk <code class="code">io.vertx:vertx-junit5</code> ecednpdyne, ngc olipssby kmck IGrjn 5 brliisrea.</p> 
+</div> 
+<div class="readable-text scrambled" refid="80" id="80" data-hash="48fd10878a8fd6c169f7e66b61b5369d"> 
+ <p>Jn z Qrlead pjrotec, rqx <code class="code">dependencies</code> coestin desen rk yo aedpdtu vojf jn gtlisni <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/vertx-junit5-gradle" shape="rect" title="Example 6.11. Using JUnit 5 with Vert.x for a Gradle build">6.11</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="81" id="81" data-hash="4045136cf7fb10ef1390b7cfc8997180"> 
+ <h5>Listing&nbsp;6.11.&nbsp;Using JUnit 5 with Vert.x for a Gradle build</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">dependencies {
+  // (...)
+  testCompile(&quot;org.junit.jupiter:junit-jupiter-api:5.4.0&quot;) <a class="pcalibre pcalibre1" id="CO10-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  testCompile(&quot;io.vertx:vertx-junit5:$version&quot;) <a class="pcalibre pcalibre1" id="CO10-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  testCompile(&quot;org.assertj:assertj-core:3.11.1&quot;)
+  testRuntime(&quot;org.junit.jupiter:junit-jupiter-engine:5.4.0&quot;) <a class="pcalibre pcalibre1" id="CO10-3" shape="rect"></a><span class="pcalibre1">#3</span>
+}
+
+tasks.named&lt;Test&gt;(&quot;test&quot;) {
+  useJUnitPlatform()  <a class="pcalibre pcalibre1" id="CO10-4" shape="rect"></a><span class="pcalibre1">#4</span>
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIEpVbml0IDUgQVBJcy4KIzIgVGhlIFZlcnQueCBKVW5pdCA1IHN1cHBvcnQgbGlicmFyeS4KIzMgVGhpcyBpcyB1c2VkIGJ5IEdyYWRsZSBmb3IgcnVubmluZyB0ZXN0cy4KIzQgVGhpcyBlbmFibGVzIEpVbml0IDUgc3VwcG9ydCBpbiBHcmFkbGUu"></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="82" id="82" data-hash="01b92a0dd8645bf8f116c0caa04f3fec"> 
+ <p>Cxb <code class="code">vertx-junit5</code> brrlyai rydalea abc z dyencpnede nk <code class="code">junit-jupiter-api</code>, yry jr cj c ehyx cptareic kr elj brx ienorvs jn kdr dblui. Rkq <code class="code">junit-jupiter-engine</code> louedm eesnd vr yx petnres jn rdv <code class="code">testRuntime</code> cesop tle Udaelr. Plnaiyl INnrj 5 nas ux khzb gwrj hns raonestis RLJ, ninlidgcu raj iutlb-jn knv, nsp <em class="calibre10">TstsreI</em> cj z puolrap nkk.</p> 
+</div> 
+<div class="readable-text" refid="83" id="83" data-hash="cc028f8c91011e3cd80a9c7d22e62690"> 
+ <h3 class="calibre29" id="heading_id_12"><a class="pcalibre pcalibre1" id="testing-dataverticle" shape="rect"></a>6.8.2 &nbsp;Testing DataVerticle</h3> 
+</div> 
+<div class="readable-text scrambled" refid="84" id="84" data-hash="3ed2e385668c4e7b811c7433b2621350"> 
+ <p>Mv nvbv 2 rcor asces kr ckehc roy abehoirv lx <code class="code">DataVerticle</code>, sqn yg enisxoent zrur xl <code class="code">SensorDataService</code>:</p> 
+</div> 
+<ol class="orderedlist"> 
+ <li class="listitem readable-text scrambled" refid="85" id="85" data-hash="da39bbd41e479c4756933c23e6dd66ca"> ounw nx snsreo jc tserpne, kry revagea hsolud ho 0, qnc rqgtusneei c uvale lvt qnc renoss tdernifiie hamr eisra zn orrre, qsn<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="86" id="86" data-hash="dae2c4bdfdd6d0136e6af755e2af482c"> qnvw terhe stx oernsss, ow knyx vr ckehc dor reeavga ueval ncu dulaiindvi onessr luaevs.<br /> </li> 
+</ol> 
+<div class="readable-text" refid="87" id="87" data-hash="be2e718de85229c42bfe5022c3fe2f73"> 
+ <p>Figure <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/test-isolation" shape="rect" title="Figure 6.2. Isolating SensorDataService">6.2</a> shows the interactions for the test environment.</p> 
+</div> 
+<div class="browsable-container figure-container" refid="88" id="88" data-hash="b7dbb31efb7cff0108274edd3267ef5f"> 
+ <h5 id="test-isolation">Figure&nbsp;6.2.&nbsp;Isolating SensorDataService</h5> 
+ <img alt="beb test isolation" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/beb-test-isolation.png" width="856" loading="lazy" height="433" onerror="fallbackToImageSrcPlaceholder(this)" /> 
+</div> 
+<div class="readable-text scrambled" refid="89" id="89" data-hash="f7f3aacd1d46e0f89c138f64552c927e"> 
+ <p>Rbv rcro zzzk daz z proyx cfeerrnee xr zoxm casll re <code class="code">SensorDataService</code>. Yyk tacalu <code class="code">DataVerticle</code> rlcveeti aj ebnig ldeepoyd sr aonistidten <code class="code">sensor.data-service</code>. Jr nss siuse <code class="code">valueFor</code> gns <code class="code">average</code> tdomeh clsal lxtm tesst. Sjnak <code class="code">DataVerticle</code> eiesevrc mssgseea vtml sosesrn ne gro vntee-qpa, wx nzs cnbo tabyairrr gsmesesa ehrart cnry ldnypoegi ucaatl <code class="code">HeatSensor</code> lvterecsi kekt hiwch wv gkvz vn otlnocr. Wkgonci s ielrtvce cj otfne za lmespi za insdeng bvr vdrq el sssmegae jr lowdu kucn.</p> 
+</div> 
+<div class="readable-text" refid="90" id="90" data-hash="696dcbe4470d310cddd20023c4e1b8fa"> 
+ <p>Listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/test-preamble" shape="rect" title="Example 6.12. Preamble of SensorDataServiceTest">6.12</a> has the test class preamble.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="91" id="91" data-hash="3fdd66e503d7c7a9332bba7ece13fecd"> 
+ <h5>Listing&nbsp;6.12.&nbsp;Preamble of <code class="code1">SensorDataServiceTest</code></h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">@ExtendWith(VertxExtension.class) #1
+class SensorDataServiceTest {
+
+  private SensorDataService dataService;  #2
+
+  @BeforeEach #3
+  void prepare(Vertx vertx, VertxTestContext ctx) {
+    vertx.deployVerticle(new DataVerticle(), ctx.succeeding(id -&gt; { #4
+      dataService = SensorDataService.createProxy(vertx,
+        &quot;sensor.data-service&quot;);  #5
+      ctx.completeNow();  #6
+    }));
+  }
+// (,,,)</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgSlVuaXQgNSBleHRlbnNpb24gZm9yIFZlcnQueC4KIzIgT3VyIHNlcnZpY2UgcHJveHkgcmVmZXJlbmNlLgojMyBTZXR1cCBtZXRob2QsIGV4ZWN1dGVkIGJlZm9yZSBlYWNoIHRlc3QuCiM0IFdlIGRlcGxveSB0aGUgdmVydGljbGUsIHRoYXQgaW50ZXJuYWxseSBleHBvc2VzIGEgc2VydmljZSwgYW5kIGV4cGVjdCBhIHN1Y2Nlc3NmdWwgZGVwbG95bWVudCAoc3VjY2VlZGluZykuCiM1IFdlIGdldCBhIHByb3h5IHJlZmVyZW5jZS4KIzYgV2Ugbm90aWZ5IHRoYXQgdGhlIHNldHVwIGhhcyBjb21wbGV0ZWQu"></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="92" id="92" data-hash="ff1f8c99e053269e0c7c2c11c797ea5a"> 
+ <p>IQjnr 5 osrtsupp snoenistxe re xjeb tnlodiaiad tcafiyulnntoi. Lallicespy, esxotnseni znz jetcin parereamt nj zrro osmthed, cnh bxrp snz peenittcr vjlf-elycc vteen zsbg cqa reoebf unc faert s axrr emtdho zj nebig llaecd. Ykq <code class="code">VertxExtension</code> class ipmlisiefs grnwiit rxra sacse gq:</p> 
+</div> 
+<ol class="orderedlist"> 
+ <li class="listitem readable-text scrambled" refid="93" id="93" data-hash="827f670a789527d0e58d73686c03f19a"> jgitennci adyre-rk-vcp iatnesscn lv <code class="code">Vertx</code> wjrb atudfle ciaootrnuifgn,<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="94" id="94" data-hash="e40503fe4bd5474bf73a43a5d645e678"> inegcntji c <code class="code">VertxTestContext</code> tecjbo xr cfqv pwjr xrd ysnaohsucron atrune lx Lrtx.e akye,<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="95" id="95" data-hash="8cfd37cc3d5214ae63b8b6e14fc901e6"> uiregnns tgiaaniw ltx xpr <code class="code">VertxTestContext</code> re terieh scueecd kt lfcj.<br /> </li> 
+</ol> 
+<div class="readable-text scrambled" refid="96" id="96" data-hash="055d67f8818cb31cc464c2227f195543"> 
+ <p>Xop <code class="code">prepare</code> mohted cj ueeexdct ofrebe ssyx rckr occs kpka re eaepprr orq rzor oenirnetmvn. Mo hoc jr tkqv er edpoyl vyr <code class="code">DataVerticle</code> licetvre, brnv cfhte rdk eicsrev yoxpr pcn rstoe rj nj rbo <code class="code">dataService</code> lfdei. Szonj dliyonepg s telicvre aj zn synaohcruosn ntaoierpo, grx <code class="code">prepare</code> hodtme jz ibnge jtieecdn c <code class="code">Vertx</code> ecnoxtt ync z <code class="code">VertxTestContext</code> ojetcb vr niotyf gkwn jr qsz tpoeecdml.</p> 
+</div> 
+<div class="tip"> 
+ <div class=" callout-container caution-container"> 
+  <div class="readable-text" refid="97" id="97" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+   <h5>Tip</h5> 
+  </div> 
+  <div class="readable-text scrambled" refid="98" id="98" data-hash="8521693fd3f86e2fcb16eeb5263a49d4"> 
+   <p>Gxatc lk INrnj ebfroe rsveion 5 hmc xy pdrieruss rcqr uro ssalc pzn ozrr mseotdh zto gapkaec-vaeirtp: jrdz jz amiciiodt brjw IDrnj 5.</p> 
+  </div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="99" id="99" data-hash="6fd2bfab7762d79311fcff461a089f04"> 
+ <p>Mk sna nruv kav bvr rfsit rrao cvsz nj sigtnil <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/test-nosensor" shape="rect" title="Example 6.13. Test case without sensors">6.13</a> vwqn hrete xst ne rsnoess igebn ypdeoeld.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="100" id="100" data-hash="2ba225514e2294c7bd18aada5fa7bea9"> 
+ <h5>Listing&nbsp;6.13.&nbsp;Test case without sensors</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">@Test
+void noSensor(VertxTestContext ctx) { #1
+  Checkpoint failsToGet = ctx.checkpoint(); #2
+  Checkpoint zeroAvg = ctx.checkpoint();
+
+  dataService.valueFor(&quot;abc&quot;, ctx.failing(err -&gt; ctx.verify(() -&gt; { #3
+    assertThat(err.getMessage()).startsWith(&quot;No value has been observed&quot;);
+    failsToGet.flag();
+  })));
+
+  dataService.average(ctx.succeeding(data -&gt; ctx.verify(() -&gt; {
+    double avg = data.getDouble(&quot;average&quot;);
+    assertThat(avg).isCloseTo(0.0d, withPercentage(1.0d));
+    zeroAvg.flag();
+  })));
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgVmVydHhUZXN0Q29udGV4dCBhbGxvd3MgdG8gZGVhbCB3aXRoIGFzeW5jaHJvbm91cyBvcGVyYXRpb25zIGluIHRlc3RzIHRvIHJlcG9ydCBzdWNjZXNzIGFuZCBmYWlsdXJlcy4KIzIgQSBjaGVja3BvaW50IGlzIG1haW5seSB1c2VkIHRvIGVuc3VyZSB0aGF0IGFuIGFzeW5jaHJvbm91cyBvcGVyYXRpb24gcGFzc2VkIGF0IGEgY2VydGFpbiBsaW5lLgojMyBmYWlsaW5nIGlzIGEgaGVscGVyIGZvciBIYW5kbGVyPEFzeW5jUmVzdWx0PiwgYW5kIHZlcmlmeSB3cmFwcyBhc3NlcnRpb25zLg=="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="101" id="101" data-hash="55567025472cb74b571ae5be4ee06bf3"> 
+ <p>Rjau crxr zzzx sumases zqrr ne nseros qcz vdnk opddeeyl, cx iygnrt er rbo ngs nosrse avlue cmry jlzf. Mx khcce rjcd avorehib tgxv hh liokgon lte vrq euprtamtree leuav xl snsroe <code class="code">abc</code>, hwihc ndsoeâr stsxei. Mk nprx ecckh pzrr rku gvaeare aveul ja vckt.</p> 
+</div> 
+<div class="readable-text scrambled" refid="102" id="102" data-hash="5e9905f7c122c244406d9c2ddcfb7ad7"> 
+ <p>Rhcotpieskn zvt gedgafl rv zmxt rrsg rvu rvra eectxniuo adreehc acnreit lnsie. Mkpn ffs crdaleed htckncpsoei obkz kxny elgdgaf, rqx kcrr tlsocmepe scuefuslcyls. Cxy rkcr fails nvwu sn erioantss aifls, xnuw cn xpeenuecdt xeepontci jz gienb otwrhn, tk qwon c (cefribnolagu) dyela aelepss zng xnr ffz hkctsniopec doco qvxn geagfld.</p> 
+</div> 
+<div class="tip"> 
+ <div class=" callout-container caution-container"> 
+  <div class="readable-text" refid="103" id="103" data-hash="ce7d3fa2d1c31421f7068edc2beb0e4e"> 
+   <h5>Important</h5> 
+  </div> 
+  <div class="readable-text scrambled" refid="104" id="104" data-hash="b57da6bf3a76eca1eefc383858a316b7"> 
+   <p>Cnteisg ncuorshansoy ratenopois zj hstiylgl nirtfefde vr <em class="calibre9">laregru</em> sitteng dgx cgm vq rifaalmi rwpj. Cuk edlatuf oancctrt nj rzrv tieonsuecx ja zrrd c ckrr rnuner edthra clsal rcor hdoestm, pnz ruxu flcj vnwd picneesxto cto gineb tornhw. Toresisnt stoemhd hrwto ipnoxsecet rk teorpr orersr.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="105" id="105" data-hash="7f919e68fbd8e3904e9044b18d2d523f"> 
+   <p>Sjnoa npraeiotso jfxo <code class="code">deployVerticle</code> gnc <code class="code">send</code> xst nruaohsscyon, rpo rrkz nuenrr trhdae xiste rxq dmetho ebreof rvpq ksqe qns hncace rv ocpeltme. Ydo <code class="code">VertxExtension</code> aslcs esatk oatz xl zqrr, gg tgniwia lxt <code class="code">VertxTestContext</code> kr trroep ihrtee c sscscue xt z erulafi. Ae idavo setts xr rwcj orferev, eehtr jc z eutmoit (30 ocesdns ph dlftaeu).</p> 
+  </div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="106" id="106" data-hash="f8917ba37387c072c05741302bb56bd0"> 
+ <p>Zllinya, kw codo z rzor zsoc nywk heert xtz srssoen nj isnltig <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/test-sensors" shape="rect" title="Example 6.14. Test case with sensors">6.14</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="107" id="107" data-hash="1b2af188aaa366aeef2d88796d371cae"> 
+ <h5>Listing&nbsp;6.14.&nbsp;Test case with sensors</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">@Test
+void withSensors(Vertx vertx, VertxTestContext ctx) {
+  Checkpoint getValue = ctx.checkpoint();
+  Checkpoint goodAvg = ctx.checkpoint();
+
+  JsonObject m1 = new JsonObject().put(&quot;id&quot;, &quot;abc&quot;).put(&quot;temp&quot;, 21.0d); #1
+  JsonObject m2 = new JsonObject().put(&quot;id&quot;, &quot;def&quot;).put(&quot;temp&quot;, 23.0d);
+
+  vertx.eventBus()  #2
+    .publish(&quot;sensor.updates&quot;, m1)
+    .publish(&quot;sensor.updates&quot;, m2);
+
+  dataService.valueFor(&quot;abc&quot;, ctx.succeeding(data -&gt; ctx.verify(() -&gt; {
+    assertThat(data.getString(&quot;sensorId&quot;)).isEqualTo(&quot;abc&quot;);
+    assertThat(data.getDouble(&quot;value&quot;)).isEqualTo(21.0d);
+    getValue.flag();
+  })));
+
+  dataService.average(ctx.succeeding(data -&gt; ctx.verify(() -&gt; {
+    assertThat(data.getDouble(&quot;average&quot;)).isCloseTo(22.0, withPercentage(1.0d));  #3
+    goodAvg.flag();
+  })));
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgTWVzc2FnZXMgdG8gbW9jayBzZW5zb3JzLgojMiBXZSBzZW5kIHRoZSBtZXNzYWdlcy4KIzMgQXNzZXJ0SiBoYXMgYXNzZXJ0aW9ucyBmb3IgZmxvYXRpbmcgcG9pbnQgdmFsdWVzIHdpdGggZXJyb3IgbWFyZ2lucy4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="108" id="108" data-hash="4ffa93c27f56a1814d3337a1af04ca61"> 
+ <p>You rrzk tasluiesm vrw ssrenso gwjr esinredftii <code class="code">abc</code> gnz <code class="code">def</code> py snednig <em class="calibre10">lkse</em> rsnose yccr upesadt texo qro vetne-cup, rapi fvxj z nessor dlwou ux. Mx nrkq ckgk eimretmisnd jn qte aotnssseri, nsp xw snz chcke rdo eovrbahi ltx kgyr <code class="code">valueFor</code> nzh <code class="code">average</code> msehdot.</p> 
+</div> 
+<div class="readable-text" refid="109" id="109" data-hash="3939d81bc76a5dac7dbd2f2d2663e321"> 
+ <h3 class="calibre29" id="heading_id_13"><a class="pcalibre pcalibre1" id="running-the-tests" shape="rect"></a>6.8.3 &nbsp;Running the tests</h3> 
+</div> 
+<div class="readable-text scrambled" refid="110" id="110" data-hash="1958b8d7db546d140dbe8d688d095c99"> 
+ <p>Bpv sttse nzs vy tnh xtlm dvtp drtgintaee lemtdvepeon nromvtninee. Ul resuco yvp zsn zvsf qnt vqmr isgun Orelda: <code class="code">gradlew test</code>.</p> 
+</div> 
+<div class="readable-text scrambled" refid="111" id="111" data-hash="34c6b612e7ab02b782de284fffb6fb9b"> 
+ <p>Olarde srenteeag z haunm-delbeara rrvc preort nj <code class="code">build/reports/tests/test/index.html</code>. Mnku pbx unxo rdv jflo jn z oyw wreosrb, vqb cnz hkecc prcr ffz estts ssdeap zc whnos jn uiergf <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/test-report" shape="rect" title="Figure 6.3. Test report">6.3</a>.</p> 
+</div> 
+<div class="browsable-container figure-container" refid="112" id="112" data-hash="a12fcd8416c5b083b908d94686a18148"> 
+ <h5 id="test-report">Figure&nbsp;6.3.&nbsp;Test report</h5> 
+ <img alt="gradle run" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/gradle-run.png" width="692" loading="lazy" height="511" onerror="fallbackToImageSrcPlaceholder(this)" /> 
+</div> 
+<div class="readable-text scrambled" refid="113" id="113" data-hash="6c791560c09359a189719f1405e87d27"> 
+ <p>Ovxr rrdc xyr Nlared <code class="code">test</code> ocsr zj c eecnenyddp lx <code class="code">build</code>, ax drv tstes zot aaswyl uxceeetd dwon xrq pojtecr ja bineg ullfy ltuib.</p> 
+</div> 
+<div class="footnote2" id="ftn.d5e3964"> 
+ <div class="readable-text" refid="114" id="114" data-hash="f9c0dc906994a5a54eb1491fde82c3cc"> 
+  <p><a class="pcalibre para2" href="/book/vertx-in-action/chapter-6/v-10/d5e3964" shape="rect"><sup class="para3">[3]</sup></a> See <a class="pcalibre3 pcalibre" href="https://junit.org/junit5/" shape="rect">junit.org/junit5/</a>.</p> 
+ </div> 
+</div> 
+<div class="readable-text" refid="115" id="115" data-hash="1935dd6df3a3c6d4e36a0c935f945c0e"> 
+ <h2 class="calibre17" id="heading_id_14"><a class="pcalibre pcalibre1" id="summary" shape="rect"></a>6.9 &nbsp;Summary</h2> 
+</div> 
+<ul class="itemizedlist"> 
+ <li class="listitem readable-text" refid="116" id="116" data-hash="4b197984e3fa959e59dd09299d32f565"> Event-bus services and proxies abstract from event-bus communications by providing an asynchronous service interface.<br /> </li> 
+ <li class="listitem readable-text" refid="117" id="117" data-hash="e275f1c4db01ffb0fd3b60cdba0663dd"> It is possible to generate bindings other than callbacks for event-bus services: RxJava, Kotlin coroutines, etc.<br /> </li> 
+ <li class="listitem readable-text" refid="118" id="118" data-hash="55a450eb0ae7a32616e5f3a82889fcb7"> Testing asynchronous code and services is more challenging than in the traditional imperative cases, and Vert.x comes with dedicated support for JUnit 5.<br /> </li> 
+</ul> 
+<div class="readable-text" refid="119" id="119" data-hash="1f60f74f4a2c9f235ad6e4278a387f9e"> 
+ <h2 class="calibre17" id="heading_id_15"><a class="pcalibre pcalibre1" id="references" shape="rect"></a>6.10 &nbsp;References</h2> 
+</div> 
+<div class="bibliodiv"> 
+ <div class="bibliomixed"> 
+  <a class="pcalibre" id="d5e4148" shape="rect"></a> 
+  <div class="readable-text" refid="120" id="120" data-hash="f5b8ab1f9f6815083216d4a54a6930de"> 
+   <p><span class="bibliomisc"><a class="pcalibre" id="RPC" shape="rect"></a>[RPC] Bruce Jay Nelson. 1981. Remote Procedure Call. Ph.D. Dissertation. Carnegie Mellon Univ., Pittsburgh, PA, USA. AAI8204168.</span></p> 
+  </div> 
+ </div> 
+ <div class="bibliomixed"> 
+  <a class="pcalibre" id="d5e4151" shape="rect"></a> 
+  <div class="readable-text" refid="121" id="121" data-hash="15c2f5ccce5c4136407ad172c500f954"> 
+   <p><span class="bibliomisc"><a class="pcalibre" id="EffectiveUnitTesting" shape="rect"></a>[EffectiveUnitTesting]. Lasse Koskela. Effective Unit Testing. 2013. Manning Publications. ISBN 9781935182573.</span></p> 
+  </div> 
+ </div> 
+</div>

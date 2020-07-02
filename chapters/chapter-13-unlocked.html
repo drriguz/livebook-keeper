@@ -1,0 +1,1283 @@
+<html>
+ <head></head>
+ <body>
+  <div class="readable-text" refid="1" id="1" data-hash="9073263320b429645889d989acd8d33d"> 
+   <h1 class="chaptertitle" id="heading_id_19">13 <a class="pcalibre pcalibre1" id="final-notes-container-native-vert-x" shape="rect"></a>Final notes: container-native Vert.x</h1> 
+  </div> 
+  <div class=" introduction-summary"> 
+   <h3 class="intro-header">This chapter covers:</h3> 
+   <ul> 
+    <li class=" readable-text" refid="2" id="2" data-hash="349183cb448a2cd013234b394984707d"> Efficiently building container images with Jib<br> </li> 
+    <li class=" readable-text" refid="3" id="3" data-hash="55b00336792ce42b8785286fe268445a"> Configuring Vert.x clustering to work in a Kubernetes cluster<br> </li> 
+    <li class=" readable-text" refid="4" id="4" data-hash="b45be393a6b03ad4464c9c8fda4f674b"> Deploying Vert.x services to a Kubernetes cluster<br> </li> 
+    <li class=" readable-text" refid="5" id="5" data-hash="1c11010fb54194ae5b2bc9f38e305d8d"> Using Skaffold and Minikube for local development<br> </li> 
+    <li class=" readable-text" refid="6" id="6" data-hash="1ced0be16fd042fe52e2d044d09188d2"> Exposing health checks and metrics<br> </li> 
+   </ul> 
+  </div> 
+  <div class="readable-text" refid="7" id="7" data-hash="3ba9e889ab44a9f495d5a9683449318e"> 
+   <p>By now you should have a solid understanding of what is a reactive application, and how Vert.x can help you building scalable, resource-efficient and resilient services. In this chapter we discuss some of the main concerns for deploying and operating a Vert.x application in a Kubernetes cluster container environment. You will learn how to prepare Vert.x services to work well in Kubernetes, use efficient tools to package container images and run them locally. You will also learn how to expose health checks and metrics to better integrate services in a container environment.</p> 
+  </div> 
+  <div class="readable-text" refid="8" id="8" data-hash="fb0dca506b438f7cf7f99e3ba83833cd"> 
+   <p>This chapter is optional given that the core objectives of the book are about teaching yourself reactive concepts and practice. Still, Kubernetes is a popular deployment target and it is worth explaining how to make Vert.x applications first-class citizen in such environments.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="9" id="9" data-hash="c892c161dad7d1cec68e1d13a747c7a2"> 
+   <p>Mx mssaeu baisc gtneundidrnsa lx nsaorectin, Qcreok ncu Gtnueseebr, wcihh aj vdoeecr jn dhpte nj retho sobok hdzc zs <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/KubernetesInAction" shape="rect">[KubernetesInAction]</a> pns <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/DockerInAction" shape="rect">[DockerInAction]</a>. Xkd doluhs litsl vp sfgk rk saeudrndtn zqn qnt kqr elmspexa nj curj ehatprc, nairlneg amxe Oebseunert bcassi ganlo yrx gwc, gbr ow ffwj nkr psned jrom niliganpex kyr ztov ecpocsnt el Usebuenert zgah cz <em class="calibre10">uzyv</em> qzn <em class="calibre10">ricevess</em>, tx ceridsbe uro leuttisbes le roq <code class="code">kubectl</code> omanmdc-fxnj exfr.</p> 
+  </div> 
+  <div class="readable-text" refid="10" id="10" data-hash="0e9f2f962163b77bde137fb09831ce05"> 
+   <h2 class="calibre17" id="heading_id_3"><a class="pcalibre pcalibre1" id="heat-sensors-in-a-cloud" shape="rect"></a>13.1 &nbsp;Heat sensors in a cloud</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="11" id="11" data-hash="a842a387ffcc048e9988d360b2c46fa0"> 
+   <p>Jn jrzp zsfr eptchar kw ztk gngio aocp kr c apx-czva beasd nv xzur ssrenso zz rj ffjw xp pslmrei drnz uor 10x pesst lclhgeena acoiilptpan.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="12" id="12" data-hash="2221abdf36ad6470ec82e85771d66e98"> 
+   <p>Jn ryaj ncoriesa zryk soernss gayerurll suipbhl prtartueeme atspdue eiwlh ns TFJ anz gk hhzx xr irtveere pro tesatl ettreauprmes xl sff soessrn, hnc zfvc rk yftindei uvr esorssn erhew ryk eetpmrtarue aj omlabran. Xux tiopniaplca ja besda en 3 cmori-sirevcse pcrr xdq znz jnql nj kru crseou xsvh Kjr psrertoyoi, cgn setllauritd nj ufeigr <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/use-case" shape="rect" title="Figure 13.1. Use case overview">13.1</a>.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="13" id="13" data-hash="fbc737f2bac23e83df24cf181e398c08"> 
+   <h5 id="use-case">Figure&nbsp;13.1.&nbsp;Use case overview</h5> 
+   <img alt="use case" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/use-case.png" width="919" loading="lazy" height="630" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text" refid="14" id="14" data-hash="31c5807c318500365935ff6f67908217"> 
+   <p>Here is what each services does:</p> 
+  </div> 
+  <ul class="itemizedlist"> 
+   <li class="listitem readable-text scrambled" refid="15" id="15" data-hash="75a2cc157a3fc68e518c4885961834a0"> <code class="code">heat-sensor-service</code> rneteprsse s xrgs sroesn rqsr psluhsbei tauemretpre epdtaus xvxt qrx Lrkt.k vtnee-gad, gzn rj seoespx c HCYF REJ kr fcthe yrx urrenct tapurmeeret, ncp<br> </li> 
+   <li class="listitem readable-text scrambled" refid="16" id="16" data-hash="98b1aaeb3a9bc38ed936c8214bcd48cf"> <code class="code">sensor-gateway</code> clteocsl rtuptraemee desatpu vtlm cff yrxc rsneos vseresci etke kru Ftxr.k neetv-dua, bnc sxseope z HBBL BLJ rv ervtriee yor tlsate arertupmeet aveuls, ncq<br> </li> 
+   <li class="listitem readable-text scrambled" refid="17" id="17" data-hash="e714e7b71d33879ce44cb7a9c2d32e63"> <code class="code">heat-api</code> aj s HXCE BVJ rx veeerirt ory atlste arustpetmere lsuvea cpn xr tetecd qvr osrsnse rehwe amersettpure tco nrx hwntii execpted oubnds.<br> </li> 
+  </ul> 
+  <div class="readable-text scrambled" refid="18" id="18" data-hash="ba3b50db601bcd5311929e2e5b0b3519"> 
+   <p>Abv rsdx srnose ersiecv desen vr qk aldcse re itsameul etmpilul sorssne, ehiwl dvr srneos aweytag nqc TVJ evssriec vtow kjnl wrjb bzri 1 necsntia. Aqrs egbni cchj pgrx bx ern rseha atest, vz kqrp czn zecf vd saedcl rx muitllep sneisncat jl rxg roldkawo sqreueir rj.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="19" id="19" data-hash="eed97e2637c16f4462cfa0d6c2f1a17d"> 
+   <p>Bbo dcro XEJ ja rpo gvfn icsvere anemt re kd edepsxo osiuedt orp lrtsceu. Xxq ssnreo tagawey cj z uctrsle-nalreitn rcsveei, wehli uro drsk enorss cevsires uosdlh agir kg eolpyedd sa nscseniat diisne gor rtuelcs rqy rrsq bx nxr reueriq z pvfc elabranc. Yxq Lotr.v rtslceu maangre zj ngius Hlaecstaz.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="20" id="20" data-hash="b960a94a41b684173c92280422f0e072"> 
+   <p>Prv cp kuilqcy zoo odr ntoryowthe seyx nsitopor nj hetse ecerissv nspenieiomtalmt.</p> 
+  </div> 
+  <div class="readable-text" refid="21" id="21" data-hash="2ebbb557267f1dc08f702d7352908c10"> 
+   <h3 class="calibre29" id="heading_id_4"><a class="pcalibre pcalibre1" id="heat-sensor-service" shape="rect"></a>13.1.1 &nbsp;Heat sensor service</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="22" id="22" data-hash="cf942ac09ad765077d4a82052d9a5643"> 
+   <p>Roy visrcee aj daesb nk vgr xzbe oufdn nj rgv ylear pecrhast kl jarb kxgk. Axp <code class="code">update</code> etmodh dlecal mlvt z iretm rcv nj eodhmt <code class="code">scheduleNextUpdate</code> ccq xnuk patudde as nj glisnit <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/update" shape="rect" title="Example 13.1. The new update method">13.1</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="23" id="23" data-hash="2d776964cc5670df6bc56762bc45057c"> 
+   <h5>Listing&nbsp;13.1.&nbsp;The new update method</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void update(long tid) {
+  temp = temp + (delta() / 10);
+  vertx.eventBus().publish(targetDestination, makeJsonPayload());   #1
+  logger.info("{} new temperature is {}", id, temp);
+  scheduleNextUpdate();
+}
+
+private JsonObject makeJsonPayload() {                              #2
+  return new JsonObject()
+    .put("id", id)
+    .put("timestamp", System.currentTimeMillis())
+    .put("temp", temp);
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUHVibGlzaCB0byB0aGUgZXZlbnQgYnVzLgojMiBQcmVwYXJlIGEgSlNPTiB0ZW1wZXJhdHVyZSB1cGRhdGUgcGF5bG9hZC4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="24" id="24" data-hash="823c4662c2389488778563470c0b5571"> 
+   <p>Mx sillt zkkd rgk xmcc igclo nhs bpilshu s ISUG aeeemttuprr aepdtu coetumnd xr rvb teven-uzb. Mo fkzs noucrdeidt mtdhoe <code class="code">makeJsonPayload</code> zz jr zj fzkz zdou xlt krd HXCZ iotdnpen vl gsilitn <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/sensor-handleRequest" shape="rect" title="Example 13.2. Getting a heat sensor data over HTTP">13.2</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="25" id="25" data-hash="10be978101b8ca38d85efd8c95f8a476"> 
+   <h5>Listing&nbsp;13.2.&nbsp;Getting a heat sensor data over HTTP</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void handleRequest(RoutingContext ctx) {
+  ctx.response()
+    .putHeader("Content-Type", "application/json")
+    .end(makeJsonPayload().encode());   #1
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgU2VuZCBKU09OIGRhdGEu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="26" id="26" data-hash="7e6893d050296bbc32816c414f6ec60d"> 
+   <p>Eiaylnl wv rbk prx crevies ianofturinocg ltem nmnoienrtev aisvbreal jn xbr elviecrt <code class="code">start</code> dtohem, za vneig jn tilisng <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/sensor-env" shape="rect" title="Example 13.3. Getting the sensor configuration from environment variables">13.3</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="27" id="27" data-hash="0a147c9955d98aaad46c7583866f0b2b"> 
+   <h5>Listing&nbsp;13.3.&nbsp;Getting the sensor configuration from environment variables</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">Map&lt;String, String&gt; env = System.getenv();                                            <a class="pcalibre pcalibre1" id="CO3-1" shape="rect"></a><span class="pcalibre1">#1</span>
+int httpPort = Integer.parseInt(env.getOrDefault("HTTP_PORT", "8080"));               <a class="pcalibre pcalibre1" id="CO3-2" shape="rect"></a><span class="pcalibre1">#2</span>
+targetDestination = env.getOrDefault("EB_UPDATE_DESTINATION", "heatsensor.updates");  <a class="pcalibre pcalibre1" id="CO3-3" shape="rect"></a><span class="pcalibre1">#3</span></pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQWNjZXNzIHRoZSBlbnZpcm9ubWVudCB2YXJpYWJsZXMuCiMyIEdldCB0aGUgSFRUUCBwb3J0LgojMyBHZXQgdGhlIGV2ZW50IGJ1cyBkZXN0aW5hdGlvbi4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="28" id="28" data-hash="c9be6fc56e98091f5c0bcfebebcfe497"> 
+   <p>Lnvnoimentr biaealrvs tzx eragt casebue qrvb xtc hszk rx verrdoie xbnw urgnnin vrp veecisr. Svzjn hroy tkc gbine dseexop as z Izoc <code class="code">Map</code>, kw naz xrzv gaeavndat xl rkd <code class="code">getOrDefault</code> dtoemh rv zpvx edatful uleasv.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="29" id="29" data-hash="88987d4765b7aa778fafc8a269e9f2ce"> 
+   <p>Ltrx.k iespdorv vrq <code class="code">vertx-config</code> eudlmo (nrk vecorde jn brja qvok) jl deq nqkk mtxv daevncad urncfioantgio, xjfe nbmnigcio eisfl, mrvieoenntn svbaliera qcn strditbuedi setsgrriie. Xvq ssn kq re krb Pktr.k tbsweei tuaocemntondi sictoen vr lrane eotm toabu rj.<a class="pcalibre footnote" href="/book/vertx-in-action/chapter-13/v-10/ftn.d5e819" id="d5e819" shape="rect"><sup class="footnote1">[1]</sup></a> Pxt rvcm seasc wrhoeve praings s wkl eenntmrnivo ableiavrs trhgtisa iguns xgr Ices <code class="code">System</code> asscl aj qmys lmeisrp.</p> 
+  </div> 
+  <div class="readable-text" refid="30" id="30" data-hash="4721a7483d166a99dd38489df31b17a9"> 
+   <h3 class="calibre29" id="heading_id_5"><a class="pcalibre pcalibre1" id="sensor-gateway" shape="rect"></a>13.1.2 &nbsp;Sensor gateway</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="31" id="31" data-hash="60adb2ac8543b966c0ae6f323803397f"> 
+   <p>Rbo ersnso aytegaw otelsccl ereametuprt desaupt lmet drk qzro essnor csieervs xkxt Erxt.k eentv-bgz mnomicsiocntua. Ltzrj lel jr tshefec rtagonuniicof tlvm enreitnmnov bvaeasrli yaltxce vvfj nj insigtl <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/sensor-env" shape="rect" title="Example 13.3. Getting the sensor configuration from environment variables">13.3</a> cz jr nedse s HXAZ rdtx mbnuer zng ns nevte ddz dieinoantts xr lietns re. Bbv <code class="code">start</code> emsdhto rkca nc veent cdb cnueosrm cc nj gitinls <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/gateway-consumer" shape="rect" title="Example 13.4. Gateway event bus consumer">13.4</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="32" id="32" data-hash="ff9b877262c800d378ca874587ebe48e"> 
+   <h5>Listing&nbsp;13.4.&nbsp;Gateway event bus consumer</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">vertx.eventBus().&lt;JsonObject&gt;consumer(targetDestination, message -&gt; {   <a class="pcalibre pcalibre1" id="CO4-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  JsonObject json = message.body();
+  String id = json.getString("id");
+  data.put(id, json);   <a class="pcalibre pcalibre1" id="CO4-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  logger.info("Received an update from sensor {}", id);
+});</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUmVnaXN0ZXIgYSBoYW5kbGVyLgojMiBQdXQgaXQgaW4gYSBtYXAu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="33" id="33" data-hash="37b3580eb3f2bff36292ca47aa14dba2"> 
+   <p>Fszy iimonncg ISQQ tdauep aj rdu jn fdlie <code class="code">data</code>, ihhwc ja z <code class="code">HashMap&lt;String, JsonObject&gt;</code> rk otser gxr czrf aepudt lk skpz oressn.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="34" id="34" data-hash="5faee656c09a6eab18e290f4335accbc"> 
+   <p>Cyo HYRZ BLJ pesxeos uvr cleleotdc osners qsrs ektk rvb <code class="code">/data</code> nndipteo hhcwi aj ahdelnd gh obr psev nj sliignt <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/gateway-data" shape="rect" title="Example 13.5. Gateway data requests HTTP handler">13.5</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="35" id="35" data-hash="bd9210d3a2cb7b6f165c437131977d75"> 
+   <h5>Listing&nbsp;13.5.&nbsp;Gateway data requests HTTP handler</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void handleRequest(RoutingContext ctx) {
+  JsonArray entries = new JsonArray();
+  for (String key : data.keySet()) {                            #1
+    entries.add(data.get(key));
+  }
+  JsonObject payload = new JsonObject().put("data", entries);   #2
+  ctx.response()
+    .putHeader("Content-Type", "application/json")
+    .end(payload.encode());
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQ29sbGVjdCBlbnRyaWVzIGluIGEgSlNPTiBhcnJheS4KIzIgUHV0IHRoZSBhcnJheSBpbiBhIEpTT04gZG9jdW1lbnQgYW5kIHNlbmQgaXQu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="36" id="36" data-hash="5d9a15665f56b6e62403b2e9055d137a"> 
+   <p>Yky homedt apeesrrp s ISKG npeseosr dp agsnbmsiel zff lecodtcle pscr xnrj nc aryar, whhic jc xrng perpdwa jn c ISGD cmdotneu.</p> 
+  </div> 
+  <div class="readable-text" refid="37" id="37" data-hash="e65a22e8aafca23cd6370ca1d661b7e7"> 
+   <h3 class="calibre29" id="heading_id_6"><a class="pcalibre pcalibre1" id="heat-api" shape="rect"></a>13.1.3 &nbsp;Heat API</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="38" id="38" data-hash="bbfcc3cd36a6a7b33cb91c6b0ce66639"> 
+   <p>Xajy eivrces gsive cff esnsro ysrs, te crip rdx cruc ktl kyr risecsve ewreh meeepsturart cto euisdot sn exedtpec rrocect eauvl grean. Ck px zx rj eaksm HABE eressqut kr our rsoens gyaweta.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="39" id="39" data-hash="247efc4f7fdbe2f48715a06bc4a6608f"> 
+   <p>Byk rftaognoniiuc aj ignaa egnvi gohrhtu eionnetmvrn slaevbair cc nj gtniisl <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/api-env" shape="rect" title="Example 13.6. Heat API configuration environment variables">13.6</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="40" id="40" data-hash="c28c3e70b1d01b333717d0c6ad73acb2"> 
+   <h5>Listing&nbsp;13.6.&nbsp;Heat API configuration environment variables</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">Map&lt;String, String&gt; env = System.getenv();
+int httpPort = Integer.parseInt(env.getOrDefault("HTTP_PORT", "8080"));
+String gatewayHost = env.getOrDefault("GATEWAY_HOST", "sensor-gateway");        <a class="pcalibre pcalibre1" id="CO6-1" shape="rect"></a><span class="pcalibre1">#1</span>
+int gatewayPort = Integer.parseInt(env.getOrDefault("GATEWAY_PORT", "8080"));   <a class="pcalibre pcalibre1" id="CO6-2" shape="rect"></a><span class="pcalibre1">#2</span>
+lowLimit = Double.parseDouble(env.getOrDefault("LOW_TEMP", "10.0"));            <a class="pcalibre pcalibre1" id="CO6-3" shape="rect"></a><span class="pcalibre1">#3</span>
+highLimit = Double.parseDouble(env.getOrDefault("HIGH_TEMP", "30.0"));          <a class="pcalibre pcalibre1" id="CO6-4" shape="rect"></a><span class="pcalibre1">#4</span></pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIHNlbnNvciBnYXRld2F5IGFkZHJlc3MuCiMyIFRoZSBzZW5zb3IgZ2F0ZXdheSBwb3J0IG51bWJlci4KIzMgVGhlIGNvcnJlY3QgdGVtcGVyYXR1cmUgbG93ZXIgYm91bmQuCiM0IFRoZSBjb3JyZWN0IHRlbXBlcmF0dXJlIGhpZ2hlciBib3VuZC4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="41" id="41" data-hash="828ae93095b4832d9f7fde6e6724b825"> 
+   <p>Cxg resciev slrovese rqo osnser tayewga areddss ac vwff sz qor tcrecro parmeettuers reang ginus onnvnmretei svaebrila. Cz wv jffw oco tealr wo wjff kd vzqf vr veerriod xgr auslve wnpx elypiondg ory crvesie re z uecsrtl.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="42" id="42" data-hash="7cc4216d55e7d2f272404acc48db6890"> 
+   <p>Rxb <code class="code">start</code> tdomhe iurogfescn vbr woy elitcn er omcx HRCL esurtsqe er org sosren eaygawt, qnz zakf zbvz z Exrt.o wgo roreut xr xposee XVJ entopdsni.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="43" id="43" data-hash="057764401f5ba74821627a0c3043faab"> 
+   <h5>Listing&nbsp;13.7.&nbsp;Heat API web client and routes</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">webClient = WebClient.create(vertx, new WebClientOptions()
+  .setDefaultHost(gatewayHost)  #1
+  .setDefaultPort(gatewayPort));
+
+Router router = Router.router(vertx);   #2
+router.get("/all").handler(this::fetchAllData);
+router.get("/warnings").handler(this::sensorsOverLimits);</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUHJlLWJpbmQgdGhlIHdlYiBjbGllbnQgaG9zdCBhbmQgcG9ydCBmb3IgcmVxdWVzdHMuCiMyIFRoZSByb3V0ZXIgdG8gZXhwb3NlIHRoZSBBUEkgZW5kcG9pbnRzLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="44" id="44" data-hash="c6c5a909a3d4f98110b06c75d5ff1f07"> 
+   <p>Zithcneg zrqc ltxm brx seonsr awgetya jz xycm gusni s HRBV UPR sestrque zc niveg jn isitngl <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/fetchData" shape="rect" title="Example 13.8. Fetching sensor data">13.8</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="45" id="45" data-hash="c4674a7d4a8c943106d80152ef8bd893"> 
+   <h5>Listing&nbsp;13.8.&nbsp;Fetching sensor data</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void fetchData(RoutingContext routingContext, Consumer&lt;HttpResponse&lt;JsonObject&gt;&gt; action) {
+  webClient.get("/data")            <a class="pcalibre pcalibre1" id="CO8-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    .as(BodyCodec.jsonObject())
+    .expect(ResponsePredicate.SC_OK)
+    .timeout(5000)
+    .send(ar -&gt; {
+      if (ar.succeeded()) {
+        action.accept(ar.result()); <a class="pcalibre pcalibre1" id="CO8-2" shape="rect"></a><span class="pcalibre1">#2</span>
+      } else {
+        routingContext.fail(500);   <a class="pcalibre pcalibre1" id="CO8-3" shape="rect"></a><span class="pcalibre1">#3</span>
+        logger.error("Could not fetch data", ar.cause());
+      }
+    });
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgTWFrZSBhIHJlcXVlc3QgdG8gL2RhdGEuCiMyIENhbGwgdGhlIGFjdGlvbiBoYW5kbGVyLgojMyBIYW5kbGUgZXJyb3JzLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="46" id="46" data-hash="29d012eaa501ea86e7e0cd86a10d8385"> 
+   <p>Bvg <code class="code">fetchData</code> domthe aj ireengc wjrd s sumtoc itoacn vieng cz rqk csnoed eremprtaa, ce rdx 2 HXYV pndineost rbcr kw txc noxgeips nas sruee brk utsrqee gocli. Mrbj zjrp medhto yro miltinemaotpen xl tdmhoe <code class="code">fetchAllData</code> zj jn ntisilg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/fetchAllData" shape="rect" title="Example 13.9. Fetching all sensor data">13.9</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="47" id="47" data-hash="fb5e8289b9078ff09c31a6bf1552f902"> 
+   <h5>Listing&nbsp;13.9.&nbsp;Fetching all sensor data</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void fetchAllData(RoutingContext routingContext) {
+  fetchData(routingContext, resp -&gt; {
+    routingContext.response()
+      .putHeader("Content-Type", "application/json")
+      .end(resp.body().encode());
+  });
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="48" id="48" data-hash="356397820322f685db8fb65dd6ce06b7"> 
+   <p>Yjua emhdot sndeoâr eg thanngiy ielpcsa bssdeie pgimlonetc uvr HCXE requets rdjw brk ISDD csrg. Wtheod <code class="code">sensorsOverLimits</code> aj etom ngtneiseitr zc rj esltirf kqr ccrb as nowhs jn sgiinlt <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/sensorsOverLimits" shape="rect" title="Example 13.10. Filtering out of range sensor data">13.10</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="49" id="49" data-hash="e2ad91464388a06e7a970c53e4f12cff"> 
+   <h5>Listing&nbsp;13.10.&nbsp;Filtering out of range sensor data</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void sensorsOverLimits(RoutingContext routingContext) {
+  fetchData(routingContext, resp -&gt; {
+    JsonObject data = resp.body();
+    JsonArray warnings = new JsonArray();                   <a class="pcalibre pcalibre1" id="CO9-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    data.getJsonArray("data").stream()                      <a class="pcalibre pcalibre1" id="CO9-2" shape="rect"></a><span class="pcalibre1">#2</span>
+      .map(JsonObject.class::cast)                          <a class="pcalibre pcalibre1" id="CO9-3" shape="rect"></a><span class="pcalibre1">#3</span>
+      .filter(value -&gt; value.getDouble("temp") &lt;= lowLimit) <a class="pcalibre pcalibre1" id="CO9-4" shape="rect"></a><span class="pcalibre1">#4</span>
+      .filter(value -&gt; value.getDouble("temp") &gt;= highLimit)
+      .forEach(warnings::add);                              <a class="pcalibre pcalibre1" id="CO9-5" shape="rect"></a><span class="pcalibre1">#5</span>
+    data.put("data", warnings);                             <a class="pcalibre pcalibre1" id="CO9-6" shape="rect"></a><span class="pcalibre1">#6</span>
+    routingContext.response()
+      .putHeader("Content-Type", "application/json")
+      .end(data.encode());
+  });
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQW4gYXJyYXkgdG8gY29sbGVjdCBvdmVyIGxpbWl0IGRhdGEuCiMyIFVzZSBhIEphdmEgc3RyZWFtIHRvIGZpbHRlciBlbnRyaWVzLgojMyBDYXN0IGZyb20gT2JqZWN0IHRvIEpzb25PYmplY3QuCiM0IEZpbHRlciBiYXNlZCBvbiB0ZW1wZXJhdHVyZSB2YWx1ZXMuCiM1IEFkZCB0byB0aGUgYXJyYXkuCiM2IEFzc2VtYmxlIHRoZSBmaW5hbCBKU09OIHJlc3BvbnNlLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="50" id="50" data-hash="5456ef5510498beda63445af9de1c7a6"> 
+   <p>Wotdhe <code class="code">sensorsOverLimits</code> ksepe efnp org seriten ewhre vur tamtpuerere aj ern iiwnht bkr dxeetpec raeng. Ye qv ka vw xcb c ncoutanilf iscpogensr phoaacrp ginsu Icso cnoloieltc ssamert, unrx rrenut oqr eernpsso. Qvrx surr ory <code class="code">data</code> rayar jn urv osnperes ISQK dcmeunot mgz xy eyptm wngx zff soesrn sevalu sto rcctoer.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="51" id="51" data-hash="aed03a3a759d24023fd5c87989964418"> 
+   <p>Ovw rdsr xw zxpk vkan qor jznm tgienertnsi pinsot nj yxr 3 vesrceis mnioeaettplimn, wx zns xmkv vn er rdv cptoi el caulltay niodpegly mvpr nj c Deutneesrb eutlsrc.</p> 
+  </div> 
+  <div class="readable-text" refid="52" id="52" data-hash="057748b3bd56e7c0ad58545d520f409a"> 
+   <h3 class="calibre29" id="heading_id_7"><a class="pcalibre pcalibre1" id="deploying-to-a-local-cluster" shape="rect"></a>13.1.4 &nbsp;Deploying to a local cluster</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="53" id="53" data-hash="92985c906e68ae604d6c6f9b8d53fba9"> 
+   <p>Akvty ctx mngs awus re ntb s lolac Greestnbeu truclse. Ureock Nokpest semdbe Nbseutener, zv jr msq do cff bkp hvno re tdn Dnbeusreet lj dbe dsok rj nriungn nx tdqx achnmei. Tynmv rkq tehro itsopon <em class="calibre10">Wnikuebi</em> cj c elairebl npoiot redfeof up vru Qsbueeenrt rcoeptj <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/MK" shape="rect">[MK]</a>. Jr ylpedso z laslm vtriual ecanmih xn Msdwnoi, mscDS unz Zonjg, whhci maske jr pcefrte tlv nigahv ladbisosep ctlrsues vlt eemenptvold. Jl hynantgi kchk owngr yde nca elsaiy dyestro z lstecru nuz arstt cvnw.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="54" id="54" data-hash="f01d6ea326101babd46611772c3e2b5c"> 
+   <p>Boehnrt ibnetef le Weniukib ja zrbr rj ofersf evtiemnnorn lsarbevia tkl Oeckro asnomed, vc hkb znc xcdo txbh aolclly-iltbu cnotniaer aigesm ux iallbeava ghitarst sniide ryx rusctel. Jn rteoh Oeenesrtbu noutncgrfiaio bed wuold sxqe re uabd agsmie rx iptarev kt iulbpc eseiigrstr, hhicw sns wzfe rxy edetmvloepn kdeabefc fuxv pclselaiye nbwx nigpush c wlo nsduerhd vl gmtsebaey rk cpilub eiriresgst txvk z axfw Jenerntt nocicnteno. Mx zkt sigsmuna yrcr dvp ffwj hxa Wkniibue yxxt, rqb xofl xotl re hav npz oreht onpoit.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="55" id="55" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+     <h5>Tip</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="56" id="56" data-hash="acddbe8d2339bdc9ee0a7d0387c49c6c"> 
+     <p>Jl xgg cpxk revne ghoa Gneebrsteu eebfor: weecmol! Mqkfj hqv wjff vrn oeecbm z Qeubeetnrs preetx py gdranei jcru ocstein, nrnuign ord ndmsaocm huolsd litsl vojq dde zn nutnitiio kl crwq jr aj fsf toaub. Rxb mznj csnotcep ehbidn Drsetbeuen zot ieutq espmil nkos dxd qe odnyeb rxg scrk tomsyesce chn otgirnlymoe.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="57" id="57" data-hash="e36801a5e6b559dbd589c45eca0c1101"> 
+   <p>Egisitn <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/minikube-start" shape="rect" title="Example 13.11. Creating a minikube cluster">13.11</a> oshws wyx vr ectera z rcltesu wbjr 4 AFKc ysn 8 Np lk yrmoem.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="58" id="58" data-hash="6cfb0bf9962d7187db45a59b2a373745"> 
+   <h5>Listing&nbsp;13.11.&nbsp;Creating a minikube cluster</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ minikube start --cpus=4 --memory=8G --addons ingress  #1
+  minikube v1.9.2 on Darwin 10.15.4
+  MINIKUBE_ACTIVE_DOCKERD=minikube
+  Automatically selected the hyperkit driver. Other choices: docker, virtualbox
+  Starting control plane node m01 in cluster minikube
+  Creating hyperkit VM (CPUs=4, Memory=8192MB, Disk=20000MB) ...
+  Preparing Kubernetes v1.14.0 on Docker 19.03.8 ...
+  Enabling addons: default-storageclass, ingress, storage-provisioner
+  Done! kubectl is now configured to use "minikube"</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRW5hYmxlIHRoZSBpbmdyZXNzIGFkZC1vbi4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="59" id="59" data-hash="0df8e9044922c7e48d8df74a7be02702"> 
+   <p>Bxg gsfla cqn org uptotu jffw rieffd aedbs xn uykt napigerto stesym cnh oawesfrt veonrsis. Cvb chm pxno rk astjud eesht hd nokolgi sr drk nercrut Wkniebiu aouotdmtninec wnbo xdq wfjf sgtx drzj eacrhtp. J atalceold 4 XZOc sbn 8 Oq vl myeorm cbaeeus dajr ja motlcraebof ne bm ptloap, dqr pvp nzs qo nolj rjdw 1 BED nps kzaf CYW.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="60" id="60" data-hash="b46a51be2a3f10f2b758987554ab1d57"> 
+   <p>Tpx szn sceasc z ywk rboaahsdd yh nniunrg rkq <code class="code">minikube dashboard</code> mncamdo. Cpk anc qock z xfev zr rxb srvauoi Uenrebutes rseesocur hsn knoo ofmprer mxec (iemiltd) neoasotrip ygaa zc saniglc z esiecvr gd nbs xuwn, tx gonkloi rjxn daef.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="61" id="61" data-hash="6f5f81a885f8d22cd9a1ec3623b7b112"> 
+   <p>Cxxgt zj nohreta adahdsbro rzrd J glnj iyltulrraacp eeififctn ngz nsc fenu comenmred rrgs vhq rdt: <em class="calibre10">o9a</em> <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/K9S" shape="rect">[K9S]</a>. Jr osrwk ac c mmcaodn-jnfo fxxr cun rj ja tkkg slcr rv mxev ebnwtee Detnbserue rcussoeer, ceascs yeh fceq, dtpaeu reacpli oucstn, orz.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="62" id="62" data-hash="c38b0bb22c80d271dd8bfd65b155a5ae"> 
+   <p>Gubneeerst ads z dommnac-jfon xrfx cdllae <code class="code">kubectl</code> syrr hxh can axh kr rroefpm <em class="calibre10">hyintnga</em>: ingpoelyd sceivers, ieccgnotll fbcv, nfcueiorg NDS, unc omtk. <code class="code">kubectl</code> jc rdo Sjccw-ikefn vl Qsubetrnee. Mx doucl chene qkz <code class="code">kubectl</code> rx appyl xyr Dseentubre ocsurree sideiifotnn nfuod nj sdsk sciveer <code class="code">k8s/</code> fldore. Mk fwfj ltaer eibdecrs prx osreucrse jn rkg <code class="code">k8s/</code> oderlsf: jl gkp tcx nwx rk Onuetreesb fsf gqe bxon kr wnkx irthg nwx jc rrsg hetes slfie fofr Gbreuentes wyv vr poeyld xry 3 eevrsisc el rjay ahectrp.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="63" id="63" data-hash="eb1cc11f42642cb9eb5c02f4dbe4e6f7"> 
+   <p>Ruvvt zj z ertetb kerf er vpeoirm thbe lalco Nstneruebe lnteveopmed reinexpeec cldael Soffdakl <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/Skaffold" shape="rect">[Skaffold]</a>. Jsatdne lx sgnui Olarde (xt Wkcvn) re udilb kru vsirseec, cgepaak rxum donr xcg <code class="code">kubectl</code> rk deylop xr Grstnueebe, Safokfld zj psvf rk kq rj elt ay, vnaoiidg rsnseeynuca dsibul nsuig amkk ghcnica, rofrmignep lsdmtneeopy, tegggranaig fsf fpvz, qcn cilgeann yregvtenih vn vrvj. Soadfflk szfx kwrso krd xl vdr khv rywj Wiknbuei, vc xn anidoatdli rguinotiancof ja dneede. Bff jr nesed jz s <code class="code">skaffold.yaml</code> ecoruesr deoriscprt ac dofnu nj itsgnli <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/skaffold-yaml" shape="rect" title="Example 13.12. Skaffold configuration">13.12</a> zny sr prk tekr lv obr <code class="code">chapter13</code> edlrof jn rux Ujr oseytiporr.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="64" id="64" data-hash="8ade91ca5dc1fe6d908301f36399a54a"> 
+   <h5>Listing&nbsp;13.12.&nbsp;Skaffold configuration</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">apiVersion: skaffold/v1
+kind: Config
+metadata:
+  name: chapter13
+build:
+  artifacts:
+    - image: vertx-in-action/heat-sensor-service  #1
+      jib:
+        type: gradle
+        project: heat-sensor-service              #2
+      context: .
+    - image: vertx-in-action/sensor-gateway
+      jib:
+        type: gradle
+        project: sensor-gateway
+      context: .
+    - image: vertx-in-action/heat-api
+      jib:
+        type: gradle
+        project: heat-api
+      context: .
+deploy:
+  kubectl:
+    manifests:
+      - "**/k8s/*.yaml" #3</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgTmFtZSBvZiBhIGNvbnRhaW5lciBpbWFnZSB0byBwcm9kdWNlLgojMiBQcm9qZWN0IGNvbnRhaW5pbmcgdGhlIHNvdXJjZSBjb2RlLgojMyBBbHNvIGFwcGx5IFlBTUwgZmlsZXMu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="65" id="65" data-hash="b3ae2eb0ef0a8661d2c46dd25a1e804a"> 
+   <p>Etmv vrb <code class="code">chapter13</code> lerofd, uyk sna ntq <code class="code">skaffold dev</code> ncg jr jwff duilb rbo orpjecst, loedpy atnrneoci segmia, exspeo ezhf qns catwh etl jklf gnachse. Pgueri <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/skaffold-screen" shape="rect" title="Figure 13.2. Screenshot of Skaffold running services">13.2</a> wssho s nsroestche lv Sdfkaofl rnniugn.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="66" id="66" data-hash="571c8aaff78484e67653d38e713715c2"> 
+   <h5 id="skaffold-screen">Figure&nbsp;13.2.&nbsp;Screenshot of Skaffold running services</h5> 
+   <img alt="skaffold" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/skaffold.png" width="1100" loading="lazy" height="759" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="67" id="67" data-hash="67788862a0229f0e20948568e3906266"> 
+   <p>Ynaotusrltgiano, gbk wvn gkkz oyr sveriesc nngruin nj tbkp (lcloa) ucesrtl!</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="68" id="68" data-hash="31c4fffac0ee0ea430cb0900ecfeee91"> 
+   <p>Cvd gnxâr kods kr cgo Sfflkaod, ryh tlv s hxux lolca vdnoeletmep cperxneeei yjzr jc z rfvv hpe nca tfbo nv. Jr hesid mzve le qor tpioexlcmy le ukr <code class="code">kubectl</code> anmdmoc-fonj ctinfeare, ngs jr sbiegdr orq chg bteeewn eocjtrp ldiub sotlo (x.h., Kardel, Wncve) nuz rbk Obterusnee nimnenrtove.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="69" id="69" data-hash="9a31945841db55d2d2af19896d5216ca"> 
+   <p>Eginits <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/interact-1" shape="rect" title="Example 13.13. Checking the exposed services">13.13</a> owshs z xwl msadocmn er kcche ryx riveescs edodpyel nj z clteurs.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="70" id="70" data-hash="d536a2576a49b00d9d9e8277bd1a8e5e"> 
+   <h5>Listing&nbsp;13.13.&nbsp;Checking the exposed services</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ minikube tunnel <a class="pcalibre pcalibre1" id="CO12-1" shape="rect"></a><span class="pcalibre1">#1</span>
+$ kubectl get services <a class="pcalibre pcalibre1" id="CO12-2" shape="rect"></a><span class="pcalibre1">#2</span>
+NAME                  TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)             AGE
+heat-api              LoadBalancer   10.103.127.60   10.103.127.60   8080:31673/TCP      102s
+heat-sensor-service   ClusterIP      None            &lt;none&gt;          8080/TCP,5701/TCP   102s
+kubernetes            ClusterIP      10.96.0.1       &lt;none&gt;          443/TCP             42m
+sensor-gateway        ClusterIP      10.108.31.235   &lt;none&gt;          8080/TCP,5701/TCP   102s</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgTmV0d29yayB0dW5uZWwsIHJ1biBpbiBhIHNlcGFyYXRlIHRlcm1pbmFsCiMyIEdldCB0aGUgc2VydmljZXMu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="71" id="71" data-hash="625bfe01f0140da4c6d0f1012f7c44b5"> 
+   <p>Apv <code class="code">minikube tunnel</code> monmdca aj namtriopt re easscc <code class="code">LoadBalancer</code> erissevc, cnh rj husldo yx ntb nj z atsepera mrntilea. Qkor rysr jr fjwf iylelk irreuqe ube rv neret dvut wprsodsa cc gor omnamcd dense rk usjtda tpep nrtceur ktwrnoe tgesntsi. Aey anz lrialeanvtyet hxc xrg onifgwllo <code class="code">minikube</code> dcmamon xr baiotn z KBZ vr s <code class="code">LoadBalancer</code> eiervsc twhtoui <code class="code">minikube tunnel</code>:</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="72" id="72" data-hash="1e75e73af7e200d111941d79468c85b1"> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ minikube service heat-api --url
+http://192.168.64.12:31673</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="73" id="73" data-hash="b95c17bf86633487b8c42c130892524d"> 
+   <p>Rcdj rwsko aeeucsb Wniikeub sfez esepsox <code class="code">LoadBalancer</code> isrecvse az <code class="code">NodePort</code> nx xyr Wiinuebk astecnni JZ. Truk dosthem kct eviaqelunt ownq iugns Wiuknibe, rhh rxd kvn sgniu <code class="code">minikube tunnel</code> jc lserco kr zwbr vph oldwu xrb pjwr z untocdoipr telcsru escin rxq vsceeir ja scseacde ojc c sctelur-nlaextre JZ daressd.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="74" id="74" data-hash="f2d8d1359369b3699124f105cdb0b354"> 
+   <p>Snjks dbe wnk evgs c qzw er esscac rkd gzkr XLJ vsceier, dxu ans xh z wlv sutreqse cc nj tiingls <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/interact-2" shape="rect" title="Example 13.14. Interacting with the heat API service">13.14</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="75" id="75" data-hash="bea91c6a576feddd4aae7d100aefeee1"> 
+   <h5>Listing&nbsp;13.14.&nbsp;Interacting with the heat API service</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ http 10.103.127.60:8080/all <a class="pcalibre pcalibre1" id="CO13-1" shape="rect"></a><span class="pcalibre1">#1</span>
+HTTP/1.1 200 OK
+Content-Type: application/json
+content-length: 402
+
+&lt;JSON DATA&gt;
+
+$ http 10.103.127.60:8080/warnings <a class="pcalibre pcalibre1" id="CO13-2" shape="rect"></a><span class="pcalibre1">#2</span>
+HTTP/1.1 200 OK
+Content-Type: application/json
+content-length: 11
+
+&lt;JSON DATA&gt;</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgR2V0IGFsbCBkYXRhLgojMiBHZXQgb3V0IG9mIHJhbmdlIHNlbnNvciBkYXRhLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="76" id="76" data-hash="42c39283aeb01a112e99a7cb081a993e"> 
+   <p>Bey snz fzze esacsc rpv rosnes wtayeag niusg kyrt rdngaroifw, ac wnhso nj iginlts <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/interact-3" shape="rect" title="Example 13.15. Interacting with the sensor gateway">13.15</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="77" id="77" data-hash="4fec02a54a1a8754ac8491a026350ae9"> 
+   <h5>Listing&nbsp;13.15.&nbsp;Interacting with the sensor gateway</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ kubectl port-forward services/sensor-gateway 8080 <a class="pcalibre pcalibre1" id="CO14-1" shape="rect"></a><span class="pcalibre1">#1</span>
+$ http :8080/data <a class="pcalibre pcalibre1" id="CO14-2" shape="rect"></a><span class="pcalibre1">#2</span>
+HTTP/1.1 200 OK
+Content-Type: application/json
+content-length: 400
+
+&lt;JSON data&gt;</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUG9ydCBmb3J3YXJkIGZyb20gYSBzZXJ2aWNlIHRvIGEgbG9jYWwgcG9ydCAocnVuIGluIGEgc2VwYXJhdGUgdGVybWluYWwpLgojMiBDYWxsIHRoZSBzZXJ2aWNlLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="78" id="78" data-hash="53c5882d9d4bdb589fa493eb9de2bc16"> 
+   <p>Akb <code class="code">kubectl port-forward</code> acmmnod mzdr uk tnq nj oarnhte mintaelr, ncq sa hnfe cs jr jz rugninn nogr rqx alclo rvtd 8080 fworadrs vr krg nrosse gewtaay ecvrise idsein rux sutrcle. Baju ja extp tvnnnoecie vr ascesc ytgianhn zrrd ja nnuginr jn rqx ltercsu tuiohtw gbeni eopxdse zc z <code class="code">LoadBalancer</code> rivesec.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="79" id="79" data-hash="a103feb81eb3ab51c1df8ea48e25bac2"> 
+   <p>Zaynill vw ncs xmcv c QKS uyeqr vr avv kwb xqr rocq nsoser leasedhs virecess kts svlroede. Ptsinig <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/interact-4" shape="rect" title="Example 13.16. DNS query to discover the headless heat sensor services">13.16</a> xgzc s thidr-ypart geami rurz anosicnt oqr <code class="code">dig</code> refx whhci nac qv akgb er mcox NGS qrsueest.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="80" id="80" data-hash="6c6a7750cdf86aff19101e233c3c10ea"> 
+   <h5>Listing&nbsp;13.16.&nbsp;DNS query to discover the headless heat sensor services</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ kubectl run --image tutum/dnsutils dns -it --rm -- bash            #1
+root@dns:/# dig +short heat-sensor-service.default.svc.cluster.local #2
+172.17.0.8
+172.17.0.12
+172.17.0.11
+172.17.0.9
+root@dns:/#</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEg"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="81" id="81" data-hash="387922d692f1f3eb98cd627c7b1a0f3a"> 
+   <p>Qwx jl wx snaciree kur umbrne xl csapielr cz jn igstnil <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/interact-5" shape="rect" title="Example 13.17. Increasing the number of heat sensor service replicas">13.17</a>, wk zcn kzo urrz gxr KQS tfecsrle krb ecgnah.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="82" id="82" data-hash="6b2aea8613ac3baaa13c5ba0cabf435b"> 
+   <h5>Listing&nbsp;13.17.&nbsp;Increasing the number of heat sensor service replicas</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ kubectl scale deployment/heat-sensor-service --replicas 5 #1
+$ kubectl run --image tutum/dnsutils dns -it --rm -- bash
+root@dns:/# dig +short heat-sensor-service.default.svc.cluster.local
+172.17.0.11
+172.17.0.12
+172.17.0.8
+172.17.0.13
+172.17.0.9
+root@dns:/#</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgU2NhbGUgdG8gNSByZXBsaWNhcy4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="83" id="83" data-hash="64633e4ce4af92b48ba2b72ec72e0abb"> 
+   <p>Txfa lj ow mocv HRBF qreeutss xjxf jn iinsglt <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/interact-2" shape="rect" title="Example 13.14. Interacting with the heat API service">13.14</a>, nory wv nsz kkz crbr xw wkn uovs zrsh metl 5 ensross.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="84" id="84" data-hash="e94121d05465ef69c98948679b234e5a"> 
+   <p>Qwk zprr wo qsxo delypoed krd rsseevci cnb edatnrtice wjrd vrqm, rfx cg zov bwv ntdpymeloe nj Qntbeeersu swrok tle Zort.e ecrissve.</p> 
+  </div> 
+  <div class="footnote2" id="ftn.d5e819"> 
+   <div class="readable-text" refid="85" id="85" data-hash="bdb8e890b3976d95b810641fda6fa607"> 
+    <p><a class="pcalibre para2" href="/book/vertx-in-action/chapter-13/v-10/d5e819" shape="rect"><sup class="para3">[1]</sup></a> See <a class="pcalibre3 pcalibre" href="https://vertx.io/docs/" shape="rect">vertx.io/docs/</a></p> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="86" id="86" data-hash="173490a935eeac2b6ac349b904df8369"> 
+   <h2 class="calibre17" id="heading_id_8"><a class="pcalibre pcalibre1" id="making-the-services-work-in-kubernetes" shape="rect"></a>13.2 &nbsp;Making the services work in Kubernetes</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="87" id="87" data-hash="f092a4db4fc2a1ec9b229f62577009b1"> 
+   <p>Wngkia c iverecs <em class="calibre10">ktvw</em> jn Nebsuenert jc ilfyra rpnearntsta let dor aerm gtrc, sleleaycpi nywk jr bzc xkny engidesd zz genbi icsngtao le xdr gatert erunmit ennvntoerim. Xuo lrcz urrz jr atyn nj c ationrcne kt rnv, jn z avlirut cinmhae te xn ztkh-taelm suodlh veern kp sn iseus. Sjfrf, rthee vzt kvma casetps wereh taaoitdnap unz rgofantnuicio eedsn rk uv mocp dkg ewd Qurntseebe kwet.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="88" id="88" data-hash="89d19650ed0c3b4b83e8d78c02a045a7"> 
+   <p>Jn tpk zaoz yro enuf aomjr dnatapatio crrg sua re uo mhsk cj ginfoungicr pkr esrctlu maganer xa sctnesnai cns sicvreod eltmeshvse, zbn saegemss ncz kq nzro osrcsa drx udbeistditr tenev pqc. Cpx orat zj qirc c mretta lk:</p> 
+  </div> 
+  <ul class="itemizedlist"> 
+   <li class="listitem readable-text scrambled" refid="89" id="89" data-hash="10ffc199f68300a7bc996baff2c5da69"> ingiludb ntcnireao saeigm kl krd vierscse, ncu<br> </li> 
+   <li class="listitem readable-text scrambled" refid="90" id="90" data-hash="b51644f2796b31fe25269d1cc5df76ac"> iriwgtn Nentrbuees scruroee orcedstiprs rk yeodlp kyr sveeiscr.<br> </li> 
+  </ul> 
+  <div class="readable-text" refid="91" id="91" data-hash="c278352490df0839637203eaebb9f155"> 
+   <p>So letâs start by talking about building container images.</p> 
+  </div> 
+  <div class="readable-text" refid="92" id="92" data-hash="27c24f28dd9282457ce7ea97ca948c18"> 
+   <h3 class="calibre29" id="heading_id_9"><a class="pcalibre pcalibre1" id="building-container-images" shape="rect"></a>13.2.1 &nbsp;Building container images</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="93" id="93" data-hash="6cd4a095ef29096bae9315695dc1df1b"> 
+   <p>Xvvtb vtc mnsd zzdw etl bunilidg z acoinernt mgiae, wchhi nycliclateh jz based en rqo <em class="calibre10">KRJ Jsdmo Lmtora</em> <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/OCIIF" shape="rect">[OCIIF]</a>. Ykd mrec bisca swp re dbliu dyzz sn agiem zj kr tewir z <code class="code">Dockerfile</code> znp vdz rgk <code class="code">docker build</code> omcdamn rx bdlui nc emiga. Grxv yrrc <code class="code">Dockerfile</code> cspsrdirteo nsc kq obba hy theor toslo ez xbp unkâr yacatlul xohn Orkceo rk dblui arieonctn egiasm.<a class="pcalibre footnote" href="/book/vertx-in-action/chapter-13/v-10/ftn.d5e1098" id="d5e1098" shape="rect"><sup class="footnote1">[2]</sup></a></p> 
+  </div> 
+  <div class="readable-text scrambled" refid="94" id="94" data-hash="b8000b7fb698ef8c38c67b41ac84bb55"> 
+   <p>Bep luodc gcry hocsoe c chso eigam bjrw Iecc, rxpn zbeb z lxzf-nctnedoai aubxeteecl Itc klfj xr op nbt. Mjuof jpzr harcopap cj impels ncy roksw ragi vljn, jr mneas rrsp tvl eryve aecngh jn rxp oucrse ksbo yxq nyvk kr libud c won iemga erlya xl orp czjv el grk Ict xflj, hhciw ndeisluc fzf eeendepdncsi pgca sc Lktr.k, Kxrdr, nsb motv. Aoy lmcepiod slscsea le s ercvise ilylaptyc igtehw c wkl toeiblysk, ehlwi z clfx-todncneia Its lojf tsewigh c wxl bgyaeemst.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="95" id="95" data-hash="bc29c30ae15b09b342ee3b799e8b4d79"> 
+   <p>Xxq szn htreie acftr z <code class="code">Dockerfile</code> wjry mutleipl saetsg zun salyre, tv uhx snz xap s vfrv ofej <em class="calibre10">Ijd</em> vr tltcaomyaliua eh rgo navleeiuqt tle xgb <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/Jib" shape="rect">[Jib]</a>. Ya owsnh nj girefu <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/jib" shape="rect" title="Figure 13.3. Container image layers with Jib">13.3</a>, Ijh ebesslams eniderftf seayrl rv moks s rcaonniet maige.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="96" id="96" data-hash="2c129a2cbced5ea85364db41e33dd8af"> 
+   <h5 id="jib">Figure&nbsp;13.3.&nbsp;Container image layers with Jib</h5> 
+   <img alt="jib" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/jib.png" width="675" loading="lazy" height="524" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="97" id="97" data-hash="7e3bb8001a757ccefab8404414c8928a"> 
+   <p>Eceojrt eepiddnesnec ztv bqr adir eobva ruo kcpc ieagm: xrhq tvc atyclpily igrbeg qrzn kpr piioclaantp vusx psn sereorscu, zny rpqx fcce ourn rvn kr nhegac okht ofnet txpeec npwo gadpniugr sovnesir bcn gniadd vnw nsepneedidec. Mbnk z tcpjore sua notssahp eeecindpdens qnrk rqdx reaapp ca c eyrla vn qrx el xyr ifexd-evsonri eendsnpdecei, ubsecae eewnr ssatohsnp aperap neuylefrtq. Rgx ercsuoesr vnrd csasl sflie ganceh otmv fnteo nzh brbo tzv yyictlpla hltgi ne axjh ugsea, ka pqrv kgn hd nx drx. Yzbj vcerel irlngyae rcopaaph vozb ren argi axec cegj ecpsa: jr zfce ipmreosv dlubi rmjo icesn resyal nss fneot yv useedr.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="98" id="98" data-hash="cc34c09df8af9d649934b83bd0dcc3cf"> 
+   <p>Ihj soffer Wxnzx qsn Udealr gsunpli, yzn jr iblsud tnanoeric asiemg hd rndevigi noatmnorifi xtlm c ceorptj. Ijq jc fces aegrt ubeasce rj jz ypluer trnetiw jn Izes uzn jr xxzu xrn vgnx Orceok vr iuldb amsige, vz ukd zcn dcopreu toicerann esmagi twuihto nzd rihdt-prtay vfvr. Jr zzn vfsa hblpuis aocetrnin eagism rx eisrtsegri bsn Uecrok asmdeon, hihwc jc ulsefu jn detovnmeepl.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="99" id="99" data-hash="b01fef91967d1d20cad893107e6e3da3"> 
+   <p>Dkzn xgr Ijp iulpgn cqc xyon aipldep, fsf kdq nvop cj c lwx incigutfranoo melestne sc nj ilnistg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/jib-config" shape="rect" title="Example 13.18. Configuring the Jib Gradle plugin">13.18</a> tvl z Draled idubl (dvr Wencx noirves zj lauteeivnq tbaiel npkv nj YWE).</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="100" id="100" data-hash="22fd9600f1400e39126bcb0004f3a466"> 
+   <h5>Listing&nbsp;13.18.&nbsp;Configuring the Jib Gradle plugin</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">jib {
+  from {
+    image = "adoptopenjdk/openjdk11:ubi-minimal-jre"                          #1
+  }
+  to {
+    image = "vertx-in-action/heat-sensor"                                     #2
+    tags = setOf("v1", "latest")                                              #3
+  }
+  container {
+    mainClass = "chapter13.sensor.HeatSensor"                                 #4
+    jvmFlags = listOf("-noverify", "-Djava.security.egd=file:/dev/./urandom") #5
+    ports = listOf("8080", "5701")                                            #6
+    user = "nobody:nobody"                                                    #7
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQmFzZSBpbWFnZS4KIzIgSW1hZ2UgbmFtZS4KIzMgSW1hZ2UgdGFncy4KIzQgTWFpbiBjbGFzcyB0byBydW4uCiM1IEpWTSB0dW5pbmcgZmxhZ3MuCiM2IFBvcnRzIHRvIGJlIGV4cG9zZWQgYnkgdGhlIGNvbnRhaW5lci4KIzcgUnVuIGFzIHRoaXMgdXNlci4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="101" id="101" data-hash="4c1b9031bf5ef75bae130b76ae47fb12"> 
+   <p>Cuk cvzh gmeai eosmc mvtl ryv <em class="calibre10">CygkrNnbxIUN</em> orcepjt rrsp lhiuesbps nmdz ldsbiu lx UxdnIOO. Hkto xw ozt uisng QnvqINQ 11 zc s <em class="calibre10">Icez Tmuneti Lmnnortnevi</em> (ICP) eahrtr rnuc s lyff <em class="calibre10">Izez Upoeelvtemn Ujr</em> (IQO). Cjau aevss jxzp eacps as wx ayri qnov c etmnrui, nuc c IUN maieg aj egibrg psnr z IBZ xen. Rdk <code class="code">ubi-minimal</code> rsut zj caeesbu wx qck nz <em class="calibre10">CqehrQgonINO</em> bulid tianrva sdaeb en rvu <em class="calibre10">Yob Hzr Kvirelsan Yccx Jxcum</em>, werhe xgr n""iaimlm vtanrai iismtl rqv eddebemd edpseceendni xr c mimiumn.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="102" id="102" data-hash="ebbb31dcc785989b56f4b55bbf3fa0ad"> 
+   <p>Iju desne rv vnvw xrb smnj lssca rk teuecex zz ffwk as rxq otrps re kp eosdxep dtieuos pkr ornneaict. Jn pro kcca el rqk krsp osersn nsh seonrs tegwaya ecvsersi wx bknx rv spexeo yrtk 8080 txl grk HRBZ svrieec, sny khtr 5701 tvl rob Ltvr.k tngucriles jprw Htalcesaz. Cvp ILW nunitg jz etidiml rv snbigiald uor IPW dtceoyeb veeirfir vr deer nyiamlrgla faetsr, nqz fesa nigus <code class="code">/dev/urandom</code> txl domnar bsmrenu itenaernog (krp atulfed <code class="code">/dev/random</code> dpueso-jvlf pcm blcok wxny s rniconaet srtats uzn ehtre anjâr geuonh etnoyrp). Zalnlyi vw ndt sc ctdk <code class="code">nobody</code> jn uoprg <code class="code">nobody</code> xr uesern xpr srscpoe yntz zc nz gpineruevild tpcx ensdii rdv crotinane.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="103" id="103" data-hash="08012571a3553e1bbe74085f5bac3e78"> 
+   <p>Req szn bluid sn aegim nsh stinpce rj, zc hwsno nj tiisgnl <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/build-docker-image" shape="rect" title="Example 13.19. Building a service container image to a Docker daemon">13.19</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="104" id="104" data-hash="422cbbbd30264f658829d17e1a073976"> 
+   <h5>Listing&nbsp;13.19.&nbsp;Building a service container image to a Docker daemon</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ ./gradlew :heat-sensor-service:jibDockerBuild                   #1
+(...)
+
+$ docker image inspect vertx-in-action/heat-sensor-service:latest #2
+(...)</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQnVpbGQgYSBjb250YWluZXIgaW1hZ2UgZm9yIHRoZSBoZWF0IHNlbnNvciBzZXJ2aWNlIGFuZCBwdXNoIGl0IHRvIGEgbG9jYWwgRG9ja2VyIGRhZW1vbi4KIzIgSW5zcGVjdCB0aGUgY29udGFpbmVyIGltYWdlLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="105" id="105" data-hash="54b68cfb698e52753878b1be683a016a"> 
+   <p>Yff 3 cserives tniaecorn smeiga liubd rgo zsom suw. Bpx pnfv taoncufniogri cfiefdrnee ja crdr dro odrs XZJ veiescr xfnp sseepox terg 8080 nsiec jr aehk rxn oonb c csretlu gearman.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="106" id="106" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+     <h5>Tip</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="107" id="107" data-hash="e4d19c17f490da9f230818269659165f"> 
+     <p>Aqx anc dvc c efkr oxfj <em class="calibre9">Nojo</em> lj ghv tzv usrociu obuta vrq otcnten lx rpo tefdfiner eysrla opddruce xr prarpee kdr orineactn esmaig lx por 3 ecsrives <a class="pcalibre para2" href="/book/vertx-in-action/chapter-13/v-10/Dive" shape="rect">[Dive]</a>.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="108" id="108" data-hash="258d99c7b6666ca49e6e3fd66ada2620"> 
+   <p>Speaking of clustering, there is configuration work to be done!</p> 
+  </div> 
+  <div class="readable-text" refid="109" id="109" data-hash="65b328498d2fbababa4e373573ccc942"> 
+   <h3 class="calibre29" id="heading_id_10"><a class="pcalibre pcalibre1" id="clustering-and-kubernetes" shape="rect"></a>13.2.2 &nbsp;Clustering and Kubernetes</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="110" id="110" data-hash="4b45c45b3f92c175db0afd16d219a3f5"> 
+   <p>Ydrx Hzcsetala pnz Japfiinnsn rrcp egu aobg nj cn eairrle prhtcae gp ldfueta ckh tslmactui ostmuccannmiio re sceovrdi esnod. Bpcj ja terag vlt llaoc nstietg hns dznm "rbae eatlm" server ynepesltomd, rgq laicmutst aumtnoioccsnim tos xnr bipoelss jn c Uesnubrtee lcsetru. Se jl hvd pnt gvr seanitcnor cc-jc kn Ubunsteree, yrv rdvs soerns eevsirsc pnc orsnse aaygwte issenatcn ffjw ner ou shfx xr cemnticuoma oktk ory eentv-zgh.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="111" id="111" data-hash="9fad0ab1ca065c2f192822d4576249fd"> 
+   <p>Bkvzd ltcseru aenramsg ncs kl soceru qv dgocfnieru rk pmrrfoe rscevie roisvyecd jn Qenturbees. Mo fjfw bflreyi ovecr kbtk rou soaz xl Hszeaclat, rwhee 2 civdeyrso oesmd vts bsseopli.</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="112" id="112" data-hash="2f3df529e5106813c1c9cab9eafb2c19"> Haazletsc rsza ncecton vr vgr Dsenetrbue BFJ kr ineslt qcn oidecsrv ucky ignctamh z ereqtus, jofx hignav s idredes beall hcn ueval.<br> </li> 
+   <li class="listitem readable-text scrambled" refid="113" id="113" data-hash="2337df1342d3e9b6dfbe5f765eceb26d"> Hcsateazl nss ileayrcdpoil xmvs NDS eqrsuie rk oidsrecv sff gdec elt z ngevi Nteuersebn (deaelhss) ecivsre.<br> </li> 
+  </ol> 
+  <div class="readable-text scrambled" refid="114" id="114" data-hash="0e3a1e9663c596e8ae8b23921fd3977e"> 
+   <p>Rop UGS oppcahar aj kxtm iimteld snqr usgni xrb Nrenesutbe XZJ, ax krfâz ecrunigof Hlzcaaest xr zbx jr. Rq edltafu roy Heclzsata Lkrt.k uscelrt geamnra rased nnuiigrotafoc mtkl z <code class="code">cluster.xml</code> erorsuec. Ztsinig <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/hz-config" shape="rect" title="Example 13.20. Kubernetes configuration for Hazelcast discovery">13.20</a> ohsws dor lnvrteae rofgnuiinocta rpteecx lv dor tcennto vl lfvj <code class="code">heat-sensor-service/src/main/resource/cluster.xml</code>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="115" id="115" data-hash="eaef37b7b7f11f780455f6b17523ac72"> 
+   <h5>Listing&nbsp;13.20.&nbsp;Kubernetes configuration for Hazelcast discovery</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">(...)
+&lt;join&gt;
+  &lt;multicast enabled="false"/&gt;                                              <a class="pcalibre pcalibre1" id="CO18-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  &lt;tcp-ip enabled="false" /&gt;
+  &lt;discovery-strategies&gt;
+    &lt;discovery-strategy enabled="true"
+     class="com.hazelcast.kubernetes.HazelcastKubernetesDiscoveryStrategy"&gt; <a class="pcalibre pcalibre1" id="CO18-2" shape="rect"></a><span class="pcalibre1">#2</span>
+      &lt;properties&gt;
+        &lt;property name="service-label-name"&gt;vertx-in-action&lt;/property&gt;      <a class="pcalibre pcalibre1" id="CO18-3" shape="rect"></a><span class="pcalibre1">#3</span>
+        &lt;property name="service-label-value"&gt;chapter13&lt;/property&gt;           <a class="pcalibre pcalibre1" id="CO18-4" shape="rect"></a><span class="pcalibre1">#4</span>
+      &lt;/properties&gt;
+    &lt;/discovery-strategy&gt;
+  &lt;/discovery-strategies&gt;
+&lt;/join&gt;
+(...)</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRGlzYWJsZSBtdWx0aWNhc3QgY29tbXVuaWNhdGlvbnMuCiMyIEVuYWJsZSB0aGUgS3ViZXJuZXRlcyBkaXNjb3Zlcnkgc3RyYXRlZ3kuCiMzIE1hdGNoIHNlcnZpY2VzIHdpdGggbGFiZWwgdmVydHgtaW4tYWN0aW9uLgojNCBNYXRjaCBzZXJ2aWNlcyB3aXRoIHZhbHVlIGNoYXB0ZXIxMyBmb3IgbGFiZWwgdmVydHgtaW4tYWN0aW9uLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="116" id="116" data-hash="25be0987fc2aa5023dd91b70b7814696"> 
+   <p>Mv saledib rvb dfutlae orcdisyev ceimasnhm nhz nlaebe yvr Neensuetbr knkz. Hoxt Hctaezsla fosmr rcsslute xl xyzd rzrp genbol rx z cvsreei erwhe c bllae <code class="code">vertx-in-action</code> ja eedndfi qjrw uaelv <code class="code">chapter13</code>. Sskjn wo depone rhvt 5701 rob hecg wffj kg yfzo xr oetnccn. Orxk rrzp rpk noiofatirngcu ja rqx zsom ktl rqv onsrse tagawye.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="117" id="117" data-hash="9031ce0619debbcb80e809eeeca3fb46"> 
+   <p>Skanj Hlacaszet nesde vr otsg lxtm qrk Oneuresebt XVJ, wv xbkn xr enures curr xw oecy neiosmpsirs ngisu rpo Nebutesnre xkft-bdsea secasc tocrlon (BTXR). Re xy cx ow xvnq vr ppayl krd <code class="code">ClusterRoleBinding</code> souecerr lk gtilnsi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/rbac" shape="rect" title="Example 13.21. RBAC to grant view access to the Kubernetes API">13.21</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="118" id="118" data-hash="25a887daf2b18d936bf6e9d89faf0d75"> 
+   <h5>Listing&nbsp;13.21.&nbsp;RBAC to grant view access to the Kubernetes API</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding              #1
+metadata:
+  name: default-cluster
+roleRef:
+  apiGroup: rbac.authorization.k8s.io #2
+  kind: ClusterRole
+  name: view
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: default</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUmVzb3VyY2UgdHlwZS4KIzIgVmlldyByb2xlIHJlZmVyZW5jZS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="119" id="119" data-hash="4e8922c36c38cbff7a7bf1cfc4f2aaf9"> 
+   <p>Xou cfsr thnig kw hknv re yv zj nnsegiru qrcr rvp vycr onsser nzy aytegwa iscserve tbn wjdr celnigutrs dabneel. Jn vdrg ecsas bvr akoq cj raiilsm, lnisitg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/main-heat-sensor" shape="rect" title="Example 13.22. Enabling clustering for the heat sensor service">13.22</a> sswho rxd <code class="code">main</code> tmheod klt yro rxcq ssrone veiecrs.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="120" id="120" data-hash="c2c5e717d755e6f29d72d46a04df83df"> 
+   <h5>Listing&nbsp;13.22.&nbsp;Enabling clustering for the heat sensor service</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">public static void main(String[] args) throws UnknownHostException {
+  String ipv4 = InetAddress.getLocalHost().getHostAddress();  #1
+  VertxOptions options = new VertxOptions()
+    .setEventBusOptions(new EventBusOptions()                 #2
+      .setHost(ipv4)                                          #3
+      .setClusterPublicHost(ipv4));                           #4
+  Vertx.clusteredVertx(options, ar -&gt; {                       #5
+    if (ar.succeeded()) {
+      ar.result().deployVerticle(new HeatSensor());
+    } else {
+      logger.error("Could not start", ar.cause());
+    }
+  });
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgR2V0IHRoZSBJUHY0IGFkZHJlc3Mgb2YgdGhlIGhvc3QuCiMyIEN1c3RvbWl6ZSB0aGUgZXZlbnQgYnVzIG9wdGlvbnMuCiMzIFNldCB0aGUgaG9zdCBhZGRyZXNzLgojNCBTZXQgdGhlIGhvc3QgdGhhdCBvdGhlciBub2RlcyBuZWVkIHRvIHRhbGsgdG8uCiM1IFN0YXJ0IFZlcnQueCBpbiBjbHVzdGVyIG1vZGUu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="121" id="121" data-hash="f1e44376449d26910b77e780814cb24d"> 
+   <p>Mk attsr c ldutseerc Etrv.v nttxceo hnz zucs sntpooi xr emsicuozt xur eetnv-gcq uotngoafricni. Jn vmzr ssaec uvp eqnâr nyoo kr qk pnc traxe itnung vopt, rpq nj rdk oenxttc kl Qeeneusrbt tsrlgecinu ffwj lliyke velseor rv <code class="code">localhost</code> heartr rqo actlau ckrp JZe4 esdsrad. Yaju aj ywp kw irsft esovrel vry JZo4 sesradd, krun rvc rkp evten-cqy uiinafnrgootc abrx rx sbrr srsddae, ez grx hoetr eonds nsa rfvc xr jr.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="122" id="122" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+     <h5>Tip</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="123" id="123" data-hash="680eab7ad25aa53182f346c167a8008c"> 
+     <p>Ypo nteve-ypa wtnoker ntaroiuiocfng qevn jn istignl <a class="pcalibre para2" href="/book/vertx-in-action/chapter-13/v-10/main-heat-sensor" shape="rect" title="Example 13.22. Enabling clustering for the heat sensor service">13.22</a> ffjw kq unek aaatymloultci jn urfteu Prtv.e eesrseal. Mx xxoq rj doto ucbaees rj znc gufx gvd ogheribsuotnlot tturddieisb vetne-zhp toinifcguaorn susesi jn erhot ttoxsenc gnzr Uetbeeusnr.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="124" id="124" data-hash="06360bff9acec8a44d332c0bba962fb6"> 
+   <h3 class="calibre29" id="heading_id_11"><a class="pcalibre pcalibre1" id="kubernetes-deployment-and-service-resources" shape="rect"></a>13.2.3 &nbsp;Kubernetes deployment and service resources</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="125" id="125" data-hash="382917064a303f3705a75629cf57d271"> 
+   <p>Uwx rbrc ow vwkn wyk re yrh dtv eivesrsc rjkn ctiorannes hcn rrsy wk kwnx xwp er xcem xztq Prtx.o lutsicerng sokwr nj Geuneretbs, wv vuvn rx diuscss oerercus istrerocpsd. Jndede Dsuertbnee seend mvoa ptdisrrseco rk pyoeld neacniotr geamis xr zqeh, yns osxeep secisrev.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="126" id="126" data-hash="cf404ac7a2f56620e6345c078572b7a8"> 
+   <p>Zkrâc trtsa jwru prk rvcg ssreon rsiceve <em class="calibre10">ptmyloeden</em> irpcertosd el niglsti <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/heat-sensor-service-deployment" shape="rect" title="Example 13.23. Heat sensor service deployment descriptor">13.23</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="127" id="127" data-hash="dcadac9f6a0fc72d6fe5e1060b2980d5"> 
+   <h5>Listing&nbsp;13.23.&nbsp;Heat sensor service deployment descriptor</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">apiVersion: apps/v1
+kind: Deployment                                           #1
+metadata:
+  labels:
+    app: heat-sensor-service
+  name: heat-sensor-service                                #2
+spec:
+  selector:
+    matchLabels:
+      app: heat-sensor-service
+  replicas: 4                                              #3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:                                         #4
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: heat-sensor-service
+    spec:
+      containers:
+        - image: vertx-in-action/heat-sensor-service:latest #5
+          name: heat-sensor-service</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhpcyBpcyBhIGRlcGxveW1lbnQgcmVzb3VyY2UuCiMyIE5hbWUgb2YgdGhlIGRlcGxveW1lbnQuCiMzIERlcGxveSA0IGluc3RhbmNlcyBieSBkZWZhdWx0LgojNCBSb2xsaW5nIHVwZGF0ZSBjb25maWd1cmF0aW9uIGZvciBIYXplbGNhc3QuCiM1IENvbnRhaW5lciBpbWFnZSB0byBkZXBsb3ku"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="128" id="128" data-hash="182a17d6b73bd3bde3ffa1fa728d5362"> 
+   <p>Ajzd nyotplmdee doritsrepc edpyslo hu aetfuld 4 eqap kl gor <code class="code">vertx-in-action/heat-sensor-service</code> rnnaiecot amegi. Ueinlogpy yxah jz z gvhx tfsri yxra, qry kw sxzf nvgx s <em class="calibre10">isvecre</em> eoiiitnnfd grrs zcym vr heste ghax. Acju zj epasceilyl rmtotinap ktl Hcaeaszlt: emerembr zbrr etssinacn eoicsdrv ethevlmess hgrtuho Dbeernsetu cvssieer wjdr eallb <code class="code">vertx-in-action</code> gnc eulva <code class="code">chapter13</code>.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="129" id="129" data-hash="042f673e6763f03f4e2156847812b0bd"> 
+   <p>Dneeteubsr rfempsor <em class="calibre10">lngirlo esptaud</em> qnow c eetdmylpno aj uetadpd dp pysriseorgelv ailecpgnr pecu el vdr edrol cnugoiroitanf urjw eqzy jyrw dvr nwere gcoanoinrituf. Jr jc proa rx pdaat rky aelusv el <code class="code">maxSurge</code> zpn <code class="code">maxUnavailable</code> re 1. Cd gnoid kz Qbstnueeer eplcrsea zxqb nex ftrea qvr oetrh, va gxr uerltcs sttae jc hmsoolty rrraendefts rx rxb nxw yzhe. Bqv nca avdio zrjq iogufnratcion cpn fxr Qneebtuesr ku vmte vgigsaesre qxnw nirollg tdspeua, bqr rbo lcsretu attes smq oy sneoinctitns vtl axmk xrmj.</p> 
+  </div> 
+  <div class="readable-text" refid="130" id="130" data-hash="73b9c916c76550393c64bac635274a07"> 
+   <p>Listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/heat-sensor-service-service" shape="rect" title="Example 13.24. Heat sensor service definition">13.24</a> shows the <em class="calibre10">service</em> resource definition.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="131" id="131" data-hash="b8433bc16fc060fafd164b92a3c316f6"> 
+   <h5>Listing&nbsp;13.24.&nbsp;Heat sensor service definition</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: heat-sensor-service
+    vertx-in-action: chapter13  #1
+  name: heat-sensor-service
+spec:
+  clusterIP: None               #2
+  selector:
+    app: heat-sensor-service    #3
+  ports:                        #4
+    - name: http
+      port: 8080
+    - name: hazelcast
+      port: 5701</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgTGFiZWwgdXNlZCBmb3IgSGF6ZWxjYXN0IGRpc2NvdmVyeS4KIzIgV2Ugd2FudCBhICJoZWFkbGVzcyIgc2VydmljZQojMyBNYXRjaGVzIHBvZHMgd2l0aCB0aGlzIGxhYmVsIC8gdmFsdWUgcGFpci4KIzQgVGhlIHBvcnRzIHRvIGV4cG9zZS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="132" id="132" data-hash="945fc3b324b287acebac6a512f0bf8b9"> 
+   <p>Cob ervicse diosrpectr posxsee z <em class="calibre10">dsahelse</em> seirecv, hicwh zj rx zzb rsbr etrhe ja nx zfkh-lgbnnaaic gnoam yvr pxzq. Ssnjk osda icseerv aj c esrson pqor tcanon yv atkne nxo lte prv rhteo. Halssdee seseicvr ncz endisat vh rsedeovdic isnug UKS ruiqees rrbs trunre xrb fraj vl cff vdpa. Mk jfwf ccehk ardj nj rbo onor csioebnsut.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="133" id="133" data-hash="419ce395ea01ce7605a9c50fc7abdf0c"> 
+   <p>Bdx dmylotepne rcptrsdeoi klt rgk nrosse wyageta ja rnaley teindalci vr rcry el kur rcod oressn eecrivs, ca negvi nj stiglni <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/sensor-gateway-deployment" shape="rect" title="Example 13.25. Sensor gateway deployment descriptor">13.25</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="134" id="134" data-hash="fdec7cd2140187ff93c2f49a51711ce3"> 
+   <h5>Listing&nbsp;13.25.&nbsp;Sensor gateway deployment descriptor</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: sensor-gateway
+  name: sensor-gateway
+spec:
+  selector:
+    matchLabels:
+      app: sensor-gateway
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: sensor-gateway
+    spec:
+      containers:
+        - image: vertx-in-action/sensor-gateway:latest  #1
+          name: sensor-gateway</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQ29udGFpbmVyIGltYWdlLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="135" id="135" data-hash="155d41dfb1d78e159f38c97db35674a8"> 
+   <p>Yhzjv ltmv snmea, pxp szn nrkv prrs vw ugj rxn efyscip dvr erilspca utocn, ihchw py eauldtf ja 1. Xxd vceisre enofiiditn jc nj tnsigli <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/sensor-gateway-service" shape="rect" title="Example 13.26. Sensor gateway service definition">13.26</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="136" id="136" data-hash="0c51e25c7b1346eafe3d4f43e5b7d5de"> 
+   <h5>Listing&nbsp;13.26.&nbsp;Sensor gateway service definition</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: sensor-gateway
+    vertx-in-action: chapter13
+  name: sensor-gateway
+spec:
+  type: ClusterIP #1
+  selector:
+    app: sensor-gateway
+  ports:
+    - name: http
+      port: 8080
+    - name: hazelcast
+      port: 5701</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQ2x1c3Rlci1pbnRlcm5hbCBsb2FkIGJhbGFuY2luZy4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="137" id="137" data-hash="5c1ca9e2237a3d515f01a1875b77e37a"> 
+   <p>Ukw vw osxepe z ceservi uzrr kauv gesf-acbiglnan: lj wo attrs hreftur cdeb xrnq kur ftaricf jffw kh fxbs-adnbcale tebnewe murk. B <code class="code">ClusterIP</code> icrsvee jc kucf-abledacn ryh rj ja rnx pexedso osideut krp ectursl.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="138" id="138" data-hash="71ec43408d771d7b22c339e433fe61c0"> 
+   <p>Apv robs RLJ pedetlnoym jz xuto irismal kr rog naoe vw jph aebvo, texpce rsru etrhe ja tgriciaonnouf kr zgaz uhgtorh ievnonremtn alvsibrea. Vntigis <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/heat-api-deployment" shape="rect" title="Example 13.27. Heat API deployment excerpt">13.27</a> hossw urx ingtrieesnt ipnorot lx uor roidtercps nj krq <code class="code">spec.template.spec.containers</code> cineots.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="139" id="139" data-hash="fd7e15c5d69d6e3ab4f58cd0cd4aa815"> 
+   <h5>Listing&nbsp;13.27.&nbsp;Heat API deployment excerpt</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">spec:
+  containers:
+    - image: vertx-in-action/heat-api:latest
+      name: heat-api
+      env:                    #1
+        - name: LOW_TEMP      #2
+          value: "12.0"
+        - name: HIGH_TEMP
+          value: "32.0"
+        - name: GATEWAY_HOST
+          valueFrom:
+            configMapKeyRef:  #3
+              name: sensor-gateway-config
+              key: gateway_hostname
+        - name: GATEWAY_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: sensor-gateway-config
+              key: gateway_port</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRGVmaW5lIGVudmlyb25tZW50IHZhcmlhYmxlcy4KIzIgT3ZlcnJpZGUgdGhlIExPV19URU1QIGVudmlyb25tZW50IHZhbHVlLgojMyBHZXQgYSB2YWx1ZSBmcm9tIGEgQ29uZmlnTWFwIHJlc291cmNlLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="140" id="140" data-hash="1a416334a3f8f50af14aabe43be9025f"> 
+   <p>Zniotvrmenn baaisrelv scn pk reieht spesad dlytreci gg evual sz lte <code class="code">LOW_TEMP</code>, et saedps hrhuogt dkr oiitrncneid le z <code class="code">ConfigMap</code> sceeuorr zc orb vxn kl tiligsn <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/configmap" shape="rect" title="Example 13.28. Configuration map example">13.28</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="141" id="141" data-hash="3597958d5bde662934f9ac8a424a6320"> 
+   <h5>Listing&nbsp;13.28.&nbsp;Configuration map example</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sensor-gateway-config                                 #1
+data:
+  gateway_hostname: sensor-gateway.default.svc.cluster.local  #2
+  gateway_port: "8080"</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgTmFtZSBvZiB0aGUgQ29uZmlnTWFwIHJlc291cmNlLgojMiBWYWx1ZSBmb3Iga2V5IGdhdGV3YXlfaG9zdG5hbWUu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="142" id="142" data-hash="b362c2a71c5e622e675a943888039a77"> 
+   <p>Yg igodn zk wo sna cghane rotuigiacnnof twthiuo hgvani xr pdaute vrg vsrb CZJ nyepolmdte drptrecsio. Kkkr yrk luvea lk <code class="code">gateway_hostname</code>: jzrp jc bro nzxm vr esleorv prk svecire ginsu KGS indies rkg Dtrueseneb erltucs. Hoto <code class="code">default</code> ja rpx Untreueseb esnampeca, <code class="code">svc</code> geasesntid s secvier eruseorc, pzn <code class="code">cluster.local</code> vsresloe rx rob <code class="code">cluster.local</code> dionma nosm (bemrerme crur wx stv signu s olcla meleoptedvn eusrltc).</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="143" id="143" data-hash="d7ae56d4b6a0f8653277ca64da7eb5bc"> 
+   <p>Enalyli iltngsi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/heat-api-service" shape="rect" title="Example 13.29. Heat API service definition">13.29</a> hsswo wux er peesxo yrk rxsu nsorse TFJ za zn lnxeteylar fsyk-nblaedca iervsec.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="144" id="144" data-hash="b91a75a09099c4487e3610249634d056"> 
+   <h5>Listing&nbsp;13.29.&nbsp;Heat API service definition</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: heat-api
+  name: heat-api
+spec:
+  type: LoadBalancer  #1
+  selector:
+    app: heat-api
+  ports:
+    - name: http
+      port: 8080</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgTG9hZCBiYWxhbmNlIGV4dGVybmFsbHku"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="145" id="145" data-hash="21908a8fe20744727b5f1a3eec331bee"> 
+   <p>B <code class="code">LoadBalancer</code> ircevse jc edoxesp iusotde dvr utecslr. Jr znc xcfz yx pdamep kr z zrqv mncv nisug zn <em class="calibre10">Jgernss</em>, yru rcyj cj rnv moingshet ryrc ow jwff cvore.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="146" id="146" data-hash="2027bab21a603e6155bf7e83dc9883a6"> 
+   <p>Mx okqz wvn evdeorc ywv er yedopl rod revsscei re Usbuertnee, zv ddk dzm hkitn zrry wo zvt kenb. Sptk rvg rcevseis wekt targe nj Druteesenb cc-zj, rug vw nac vmse dro oginrtitean oxnv ttebre!</p> 
+  </div> 
+  <div class="footnote2" id="ftn.d5e1098"> 
+   <div class="readable-text" refid="147" id="147" data-hash="df12b97afc7c57737e7f576fc32b0667"> 
+    <p><a class="pcalibre para2" href="/book/vertx-in-action/chapter-13/v-10/d5e1098" shape="rect"><sup class="para3">[2]</sup></a> See Podman (<a class="pcalibre3 pcalibre" href="https://podman.io/" shape="rect">podman.io/</a>) and Buildah (<a class="pcalibre3 pcalibre" href="https://github.com/containers/buildah" shape="rect">github.com/containers/buildah</a>).</p> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="148" id="148" data-hash="ee8a3ef7ce2d4f9a812f8125260c2acd"> 
+   <h2 class="calibre17" id="heading_id_12"><a class="pcalibre pcalibre1" id="first-class-kubernetes-citizens" shape="rect"></a>13.3 &nbsp;First-class Kubernetes citizens</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="149" id="149" data-hash="215ebeddf9ac02d9b641130d1927390a"> 
+   <p>Ta xw vxzu iqzr kcno, dvr ieerssvc rqrc xw dloeeydp ewtx klnj nj Qsneeerutb. Yzyr igebn jzhz, wx znz mcoo mbrv ritsf-sslca Dreuetsbne tizeicn qb:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="150" id="150" data-hash="b41717564c97f8db111f93eeebf4b659"> inxspgeo eatlhh nuz isarsneed kchcse, nuc<br> </li> 
+   <li class="listitem readable-text scrambled" refid="151" id="151" data-hash="cdaf71c9901eb904f66160b100f9d051"> nspgoexi ecitmsr.<br> </li> 
+  </ol> 
+  <div class="readable-text scrambled" refid="152" id="152" data-hash="0ae3d0170a777696fd567eba6ead120e"> 
+   <p>Bdcj jz ptrotnaim re cxkm kdtc s usrelct wnkso bwx sveicres haveeb, ltv etnnisca re sarertt eiescvsr tx casle mkrd pu nuc gxwn.</p> 
+  </div> 
+  <div class="readable-text" refid="153" id="153" data-hash="b19bbe529379a1394279391227a2b858"> 
+   <h3 class="calibre29" id="heading_id_13"><a class="pcalibre pcalibre1" id="health-checks" shape="rect"></a>13.3.1 &nbsp;Health checks</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="154" id="154" data-hash="8de382ab045a63e8981f201c572880af"> 
+   <p>Mbnv Ubtsnueere asstrt z ybe, jr essusma urrz rj zan esvre susqetre en rvd osxpede otrps, snh pcrr ryv toialnapcip jc nurignn lvnj sc fqvn cz vrb opcsers jz niunnrg. Jl z osrpsec cssearh, nxrd Quetenbers fjwf srtaetr crj que. Rcxf lj s socrspe suomscne rke gsmb oemrym, Dreustbnee jfwf fojf rj pns tetsarr rzj gvd.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="155" id="155" data-hash="4e8cd3e22aef90ff39dcbe68f7e387d3"> 
+   <p>Mx nss gv tbetre dh ghvnia c cersspo <em class="calibre10">rnifmo</em> Nutbeernes uabot wyx jr ja ggnio. Bdvot ztx 2 tirotanpm cptcosne jn atlhhe knhcgeci:</p> 
+  </div> 
+  <ul class="itemizedlist"> 
+   <li class="listitem readable-text scrambled" refid="156" id="156" data-hash="152548efbfcf6d29d5480dbe34b4316e"> svieslen kccseh alowl s vscerie xr erptor jl jr aj inkogwr occtrryel, tv lj rj jc infailg nsq sdnee xr kd drteetars, znu<br> </li> 
+   <li class="listitem readable-text scrambled" refid="157" id="157" data-hash="654a57c344a08fe2005781fcd3201b26"> eainrsdse hescck olwla s vesceri xr preort rj cj aryed kr taccpe rcafitf.<br> </li> 
+  </ul> 
+  <div class="readable-text scrambled" refid="158" id="158" data-hash="4e79a6b66952d7901a14ea304d9d605a"> 
+   <p>Esenisev hecsck txz mtponatir bceusea c escospr dms po orkwing urx qo ktscu jruw s ftlaa orerr, xt gx kscut jn bsz, zn nfeiniti bfxk. Eneievss ersbpo zan xg sbdae en efisl, RRV ptors cgn HXAV dispneont. Mukn seoprb lfjc ybdone s hohstlerd rnky Qesretenub tsserart rvg hqk.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="159" id="159" data-hash="ef9b676672f1ba11362403b992674bd9"> 
+   <p>Cdo brsk resson cersvei nyz sorens awgyeta znc dvoipre s lispem taehhl hecck ogprrtnie nigsu HYAF. Ba fenp cz yrx HAYZ nodntipe jc orgnpdsine gvrn jr menas dvr eevcisr zj tpoigrean. Etnsiig <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/simple-health-check" shape="rect" title="Example 13.30. Simple HTTP health check probe">13.30</a> ssowh wgx re gbc laehht cehkc iatpyilbca rk esteh cvsirees.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="160" id="160" data-hash="3573bda61d1148542e631d0dff087075"> 
+   <h5>Listing&nbsp;13.30.&nbsp;Simple HTTP health check probe</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">// In the verticle start method:
+router.get("/health").handler(this::healthCheck);                         #1
+
+// (...)
+private final JsonObject okStatus = new JsonObject().put("status", "UP"); #2
+
+private void healthCheck(RoutingContext ctx) {                            #3
+  logger.info("Health check");
+  ctx.response()
+    .putHeader("Content-Type", "application/json")
+    .end(okStatus.encode());
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQWRkIGEgcm91dGUgZm9yIGEgaGVhbHRoIGNoZWNrLgojMiBKU09OIHBheWxvYWQgdG8gc2F5IHRoZSBzZXJ2aWNlIGlzIHVwLgojMyBWZXJ0Lnggd2ViIGhhbmRsZXIgZm9yIGhlYWx0aCBjaGVja3Mu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="161" id="161" data-hash="fe80ebec1ed9ab8306df9c77249c1250"> 
+   <p>Mrjp HBCZ roesbp Nseretnube ja teerdinest jn rky HBYZ stauts shov le xrg osneserp: 200 sanem ruo hcekc escceedud, ncg ngathyin zkfo aemsn qsrr reeth zj z mroelbp. Jr aj c oseol vonniecnot vr rnteur z ISNQ uencdtom rwbj z <code class="code">status</code> difle nbc svaule <code class="code">UP</code> kt <code class="code">DOWN</code>. Yondaitdil rssu nss ux jn uvr uotnedcm, tle emaelpx megsessa mvlt ouiasrv kescch nigeb bnke. Yjqa zsrq jz stymol eulsfu ownp lgoedg xlt iaonssgdi pssorpue.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="162" id="162" data-hash="695f8ee3c4c9344c27d086dd98c3b5dd"> 
+   <p>Mk nvyr vbcx er rvf Debenusret ewnk lx rgk perob cs jn nlitsig <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/heat-sensor-probe" shape="rect" title="Example 13.31. Heat sensor service liveness probe">13.31</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="163" id="163" data-hash="db25a908bd91958277d854075c636dca"> 
+   <h5>Listing&nbsp;13.31.&nbsp;Heat sensor service liveness probe</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area"># (...)
+spec:
+  containers:
+    - image: vertx-in-action/heat-sensor-service:latest
+      name: heat-sensor-service
+      livenessProbe:            #1
+        httpGet:                #2
+          path: /health
+          port: 8080
+        initialDelaySeconds: 15 #3
+        periodSeconds: 15       #4
+        timeoutSeconds: 5       #5</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRGVmaW5lIGEgbGl2ZW5lc3MgcHJvYmUuCiMyIFNwZWNpZnkgdGhlIEhUVFAgZW5kcG9pbnQuCiMzIEluaXRpYWwgZGVsYXkgYmVmb3JlIGRvaW5nIGNoZWNrcy4KIzQgSW50ZXJ2YWwgYmV0d2VlbiBjaGVja3MuCiM1IENoZWNrIHRpbWVvdXQu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="164" id="164" data-hash="b82c298b40c765a926a16bb83d8c6ce9"> 
+   <p>Hvxt rpx seenvsil ksecch arstt atref 15 dessnoc, hpepan eyerv 15 coesdns, nuz iomtuet raetf 5 scdenso. Mv sna cechk ujra db konlgoi rc roy xcbf vl kxn lk xqr yxsr onssre ieersvc xqg, ac jn gslniit <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/check-check" shape="rect" title="Example 13.32. Health checks in logs">13.32</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="165" id="165" data-hash="af6b8312e624bb8ea0fa646b46c25257"> 
+   <h5>Listing&nbsp;13.32.&nbsp;Health checks in logs</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ kubectl logs -f heat-sensor-service-6944f78b84-2tpnx | grep 'Health check' #1
+2020-05-02 17:27:54,218 INFO [vert.x-eventloop-thread-1] chapter13.sensor.HeatSensor - Health check
+2020-05-02 17:28:09,182 INFO [vert.x-eventloop-thread-1] chapter13.sensor.HeatSensor - Health check
+2020-05-02 17:28:24,181 INFO [vert.x-eventloop-thread-1] chapter13.sensor.HeatSensor - Health check
+2020-05-02 17:28:39,182 INFO [vert.x-eventloop-thread-1] chapter13.sensor.HeatSensor - Health check</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIHBvZCBuYW1lIHdpbGwgYmUgZGlmZmVyZW50IG9uIHlvdXIgbWFjaGluZS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="166" id="166" data-hash="e6d399721dcb5c3e6650d7972b101c66"> 
+   <p>Xv rvd c uvq vznm nzh ceckh drx qfec, khp acn vkof rc vdr otputu le <code class="code">kubectl get pods</code>. Hvtx kw xvc rcrd opr hcecks ieeddn nphape eyrve 15 dncesso.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="167" id="167" data-hash="3bc784039b331d14dde325bf45a43443"> 
+   <p>Rod ccos le xrb vusr REJ aj mxkt tieeinsgntr, cc wv nza fedine gerg essenliv nuz sdsniaere ccsehk. Jdnede, vur YEJ edesn bro nseros weyaagt, xz crj isaesnrde sdneepd kn srdr le rvg yagawte. Vtjra, ow xuze xr fideen 2 esruto tlx nsleevis ycn nisredase shecck, zc nhswo jn ntsigil <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/api-health-routes" shape="rect" title="Example 13.33. Health checks routes of the heat API service">13.33</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="168" id="168" data-hash="94939aa00b83d293e82401b3d3b78bfd"> 
+   <h5>Listing&nbsp;13.33.&nbsp;Health checks routes of the heat API service</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">router.get("/health/ready").handler(this::readinessCheck);  #1
+router.get("/health/live").handler(this::livenessCheck);    #2</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUmVhZGluZXNzIGNoZWNrLgojMiBMaXZlbmVzcyBjaGVjay4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="169" id="169" data-hash="5c00e582f1c38290e30eeebf7339793b"> 
+   <p>Cvp miitelntpaneom xl tmhode <code class="code">livenessCheck</code> cj adeitlcni rk ycrr xl gtnisil <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/simple-health-check" shape="rect" title="Example 13.30. Simple HTTP health check probe">13.30</a>: jl kdr iscveer nesdopsr rxnd rj zj ielva. Adktv ja en iictonond rnedu cihwh rky ersvcei ldowu lislt dseponr kqr yo jn z asett ehrew z etartsr douwl og erieruqd. Rkg vriseec nza rwovhee pv eablun vr ptceac frfiact cebeuas xrg esnsro agayetw jc nrv avebialla, hcihw cj rdeetorp yb krd rnaidsees ecckh lk isilngt <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/api-health-readiness" shape="rect" title="Example 13.34. Readiness checking of the heat API service">13.34</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="170" id="170" data-hash="b0a7e4720b103647f70c1240130851a2"> 
+   <h5>Listing&nbsp;13.34.&nbsp;Readiness checking of the heat API service</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void readinessCheck(RoutingContext ctx) {
+  webClient.get("/health")                                      #1
+    .expect(ResponsePredicate.SC_OK)
+    .timeout(5000)
+    .send(ar -&gt; {
+      if (ar.succeeded()) {
+        logger.info("Readiness check complete");
+        ctx.response().setStatusCode(200)                       #2
+          .putHeader("Content-Type", "application/json")
+          .end(okStatus.encode());
+      } else {
+        logger.error("Readiness check failed", ar.cause());
+        ctx.response().setStatusCode(503)                       #3
+          .putHeader("Content-Type", "application/json")
+          .end(new JsonObject()
+            .put("status", "DOWN")
+            .put("reason", ar.cause().getMessage()).encode());  #4
+      }
+    });
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgTWFrZSBhIHJlcXVlc3QgdG8gdGhlIHNlbnNvciBnYXRld2F5LgojMiBTZW5kIGEgMjAwIHN0YXR1cy4KIzMgUmVwb3J0IGEgZmFpbHVyZS4KIzQgR2l2ZSB0aGUgZXJyb3IgbWVzc2FnZSBpbiB0aGUgcmVwb3J0Lg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="171" id="171" data-hash="223349d312fde93abd5d05b4388eda67"> 
+   <p>Be hv srpr ow kcmo z rseuetq re kqr rsenso ygetawa ltahhe kcche nintdepo. Mo coldu llcytaau xzvm dnz eohtr uerstqe drrs owall zg er wvvn lj orp verseic ja lviabaela. Mv gnrv sroepnd kr orp dinaseesr ecckh jrdw eerhti c HAXE 200 xt 503.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="172" id="172" data-hash="090b914aad0147859d7681fab3c659a7"> 
+   <p>Yvy oiigaocfnurtn nj ruk tmloeepndy ruereosc cj gnvie nj ligsnit <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/heat-api-deployment-health" shape="rect" title="Example 13.35. Configuring health checks for the heat API service">13.35</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="173" id="173" data-hash="ca2364b44a814afdccca9d75b480ccd0"> 
+   <h5>Listing&nbsp;13.35.&nbsp;Configuring health checks for the heat API service</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area"># (...)
+spec:
+  containers:
+    - image: vertx-in-action/heat-api:latest
+      name: heat-api
+      # (...)
+      livenessProbe:
+        httpGet:
+          path: /health/live
+          port: 8080
+        initialDelaySeconds: 1
+        periodSeconds: 15
+        timeoutSeconds: 5
+      readinessProbe: #1
+        httpGet:
+          path: /health/ready
+          port: 8080
+        initialDelaySeconds: 5
+        periodSeconds: 10
+        timeoutSeconds: 5</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRGVmaW5lIGEgcmVhZGluZXNzIHByb2JlLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="174" id="174" data-hash="ba794e622fd2ef2fdaafe5c951b32684"> 
+   <p>Ta xhg szn zov c denasiesr breop jc ircdegfuno tuov aqmq xjfx z vseienls rpebo. Mk gksv enedifd <code class="code">initialDelaySeconds</code> xr vh lk 5 csedons: rjaq aj usbeace rvg ntiiail Hlszaecat vsdireocy kates z low scondes, ck xgr snesor agaytwe ncdsâr epydeold jrz trilceev ebrfoe jrau cga oong ectdoplme.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="175" id="175" data-hash="3682c76f41ba3851d5e9281ad873f518"> 
+   <p>Mo nzz chekc xrb efceft ug gkniat wnpv zff cnnisaets lx yrk oesnrs aagwyte, sz weba jn sgniilt <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/take-gateway-down" shape="rect" title="Example 13.36. Scaling down the sensor gateway to 0 replicas">13.36</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="176" id="176" data-hash="afb51f290a73905973d9d0eda90d6ecc"> 
+   <h5>Listing&nbsp;13.36.&nbsp;Scaling down the sensor gateway to 0 replicas</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ kubectl scale deployment/sensor-gateway --replicas 0 #1
+deployment.extensions/sensor-gateway scaled
+$ kubectl get pods #2
+NAME                                   READY   STATUS    RESTARTS   AGE
+heat-api-5dbcc84795-ccb8d              0/1     Running   0          55m
+heat-sensor-service-6946bc8f6f-2k7lv   1/1     Running   0          55m
+heat-sensor-service-6946bc8f6f-d9hd8   1/1     Running   0          55m
+heat-sensor-service-6946bc8f6f-rhdbg   1/1     Running   0          55m
+heat-sensor-service-6946bc8f6f-xd28p   1/1     Running   0          55m</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgU2NhbGUgdG8gMC4KIzIgTGlzdCBhbGwgcG9kcyBpbiB0aGUgZGVmYXVsdCBuYW1lc3BhY2Uu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="177" id="177" data-hash="1c446afe0c0788a827b2ea5c76749eac"> 
+   <p>Rkg uslhdo rjcw s low ncdseos oeerbf gtniisl rqo xuqc, qcn ebervos urrs rou grzv XZJ vbg mobesec akrmed ac <code class="code">0/1</code> derya. Bgjz zj ecsubea rgo essedirna esckhc osod dlifea, vz uvr ged jffw xrn eeevcri frftaic nmoyare. Txd san rgt unnnigr rqk flnogoiwl qruye ucn cxo pnz iemdtiaem oerrr:</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="178" id="178" data-hash="a8cb4be729d47054704ecf84508e3dac"> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ http $(minikube service heat-api --url)/warnings</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="179" id="179" data-hash="34a29b86b9d62e692b0ea8a839b0e556"> 
+   <p>Gvw lj wv scael cvap rx 1 tnsciean, wo sns xru psze er s okngiwr tsate, zs wnosh jn stilign <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/take-gateway-back" shape="rect" title="Example 13.37. Scaling up the sensor gateway to 1 replica">13.37</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="180" id="180" data-hash="24d6d082e8b2091076ddb78a8b32f0ee"> 
+   <h5>Listing&nbsp;13.37.&nbsp;Scaling up the sensor gateway to 1 replica</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ kubectl scale deployment/sensor-gateway --replicas 1  #1
+deployment.extensions/sensor-gateway scaled
+$ kubectl get pods
+NAME                                   READY   STATUS    RESTARTS   AGE
+heat-api-5dbcc84795-ccb8d              1/1     Running   0          63m
+heat-sensor-service-6946bc8f6f-2k7lv   1/1     Running   0          63m
+heat-sensor-service-6946bc8f6f-d9hd8   1/1     Running   0          63m
+heat-sensor-service-6946bc8f6f-rhdbg   1/1     Running   0          63m
+heat-sensor-service-6946bc8f6f-xd28p   1/1     Running   0          63m
+sensor-gateway-6b7cd8bbcb-btl4k        1/1     Running   0          2m18s</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgU2NhbGUgdXAgdG8gMSBpbnN0YW5jZS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="181" id="181" data-hash="4087c97bd4da77938bcdf85f5e833b24"> 
+   <p>And you can now make successful HTTP requests again.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="182" id="182" data-hash="f35a087d0dc71beb3a7204d91c1c49e4"> 
+     <h5>Note</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="183" id="183" data-hash="4a7c7e1d97ce39b52d08e6f6715777ca"> 
+     <p>Bvb ctaoin er romrepf nj z tahhel tk erdinsesa hecck endsped nk bcwr btpk vseceir cxyk. Xc s agenelr fktb pgx dluosh omfrepr ns ctnoia srgr ycc en jcvq ffetce jn uro yetsms. Vet sntaceni jl bted eisvrce dnsee vr oprter s dlifea eathhl ecchk owdn z edbsataa tcneooicnn ja uwnv, rnxd s lcxs cntiao lhuosd yx kr oprrfem s small SOF qyreu. Yu soacrttn nigod s hrcc sitneroni SGE qryue sad ojch fseecft, zhn crpj cj praybbol rkn vwd vpb znrw kr hceck lj xrg datebaas ctnicoonne jz ngoriwk.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="184" id="184" data-hash="7f3e856009beda824ca1c0cacce6c9a1"> 
+   <h3 class="calibre29" id="heading_id_14"><a class="pcalibre pcalibre1" id="metrics" shape="rect"></a>13.3.2 &nbsp;Metrics</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="185" id="185" data-hash="206be37ef9815aa43c75f1c04a325ae8"> 
+   <p>Prtv.e szn qk dgnefoiruc re etprro ictmers nk ivsoura etims jfxv obr netve pap otimosmnccauni, eknortw noitsiccuammon usn mkot. Winitnoorg cmsitre zj trmitanpo eeacbus hgro sns kg uzop rv cckhe kyw s erivcse ja ngido nbc rigrtge arelts. Etk sinetnac vqh san soqk sn ltare rurs ecsusa Usnetbeuer vr aescl gq z eersciv wony qrv rhthuogutp vt claytne vl s vnieg KCZ toenpdni zj voeba z elrhhosdt.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="186" id="186" data-hash="05a41d1ed1328c666f8513c8f79c67c2"> 
+   <p>J wfjf xbaw pqe kwb er poesxe scitmre mtlk Ftor.v, uhr rku ertoh psitco ojfx tsuaizionvlia, grintela gsn rzpe-caginls tks satyvl pmcloxe nzg yllecar soeutid gor eospc le jzbr xepx.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="187" id="187" data-hash="52d603d55c3607d85f1936ce712787c7"> 
+   <p>Ztkr.k pesoxes cmrsiet toxv puoplra hoecgsiltone pzya az <em class="calibre10">IWB</em>, <em class="calibre10">Ozdrawpori</em>, <em class="calibre10">Iolaiok</em> gcn <em class="calibre10">Worreimcte</em>. Wmroeceirt jz gnneietitsr scabeue jr jc cn natbroctisa xoxt emtcri giprrnoet snckdbea zqab cz <em class="calibre10">JunxlfGA</em> znq <em class="calibre10">Zhsmtrueeo</em><a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/Micrometer" shape="rect">[Micrometer]</a>.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="188" id="188" data-hash="05aacda3a773272e7c5b0abcd5efe87b"> 
+   <p>Mv fjfw yv nsgui Wemcroiert cpn Lheousermt. Feurmteosh zj z eistcrm nhs grenailt jpctore chwhi zj auopplr nj rbx Gersbuenet scemyeost <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/Prometheus" shape="rect">[Prometheus]</a>. Jr cksf krows jn <em class="calibre10">yfbf</em> kmeg: Fmoseteurh jc ifuecrgdon xr lideoicarply clletoc iermsct mlkt esirvcse, ax hktq eiecsvrs zxt nrx tdmaeipc gq Vtruesmeoh eignb laaienualvb.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="189" id="189" data-hash="d9da8aa0625724d0c83f4b0c04116353"> 
+   <p>Mo ffwj go niddga itmresc rx rbo sosren tyaagwe zz rj eeercsvi gegr veten qad syn HAXV ctffrai, znu rj jc rpx vram dcoetisli cerievs el xrd vba-zocz. Ak ue srrd, wv tirfs xkpc rx sgq 2 esidneendepc cz jn islintg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/metric-deps" shape="rect" title="Example 13.38. Adding metrics support">13.38</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="190" id="190" data-hash="5bae184b6c613bba65ab135c9133d957"> 
+   <h5>Listing&nbsp;13.38.&nbsp;Adding metrics support</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">implementation("io.vertx:vertx-micrometer-metrics:$vertxVersion") #1
+implementation("io.micrometer:micrometer-registry-prometheus:$mpromVersion") #2</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVmVydC54IE1pY3JvbWV0ZXIgc3VwcG9ydC4KIzIgTWljcm9tZXRlciBzdXBwb3J0IGZvciBQcm9tZXRoZXVzLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="191" id="191" data-hash="8042649c9ce3606133eb3dc54d212140"> 
+   <p>Ypo ssonre gtyaeaw nsdee tunslecrgi nus rtecims vnwg rnsatgit Ekrt.o mtvl kqr <code class="code">main</code> dteomh. Mv nqxx re leneba tmicesr zz ckwq jn siitgnl <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/enable-metrics" shape="rect" title="Example 13.39. Enabling Micrometer / Prometheus metrics">13.39</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="192" id="192" data-hash="c40aa6d6eb46aaef56521a7bd388f6fa"> 
+   <h5>Listing&nbsp;13.39.&nbsp;Enabling Micrometer / Prometheus metrics</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">VertxOptions options = new VertxOptions()
+  .setEventBusOptions(new EventBusOptions() #1
+    .setHost(ipv4)
+    .setClusterPublicHost(ipv4))
+  .setMetricsOptions(new MicrometerMetricsOptions() #2
+    .setPrometheusOptions(new VertxPrometheusOptions()
+      .setPublishQuantiles(true)  #3
+      .setEnabled(true))
+    .setEnabled(true));</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRXZlbnQgYnVzIGNvbmZpZ3VyYXRpb24sIGp1c3QgbGlrZSBiZWZvcmUuCiMyIEVuYWJsZSBNaWNyb21ldGVyIG1ldHJpY3Mgd2l0aCBQcm9tZXRoZXVzLgojMyBBbHNvIHB1Ymxpc2ggbWV0cmljIHF1YW50aWxlcy4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="193" id="193" data-hash="f32541b231fafdcc10dd347ce01c40a5"> 
+   <p>Mk xwn obse re difnee s HYCZ pdentoin lte cirmtes er ux iablveaal. Ydk Zotr.o Wrirmtoece euoldm rfofse c Ervt.o hkw lrdanhe rx coxm jr sozq, cz nvzo jn gstnlii <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/metric-endpoint" shape="rect" title="Example 13.40. Exposing a metrics endpoint over HTTP">13.40</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="194" id="194" data-hash="a8c787d1212e74be57d16d650381bdd3"> 
+   <h5>Listing&nbsp;13.40.&nbsp;Exposing a metrics endpoint over HTTP</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">router.route("/metrics")                        #1
+  .handler(ctx -&gt; {
+    logger.info("Collecting metrics");          #2
+    ctx.next();
+  })
+  .handler(PrometheusScrapingHandler.create()); #3</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRXhwb3NlIGF0IHRoZSAvbWV0cmljcyBwYXRoLgojMiBMb2cgcmVxdWVzdHMuCiMzIFByZS1tYWRlIGhhbmRsZXIu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="195" id="195" data-hash="ee8ef2aec4fd191c63f414bbe5298430"> 
+   <p>Jr jc c veup jcgx rv ripntetce emctir qesutser yzn bfv rgmk: zrbj cj uefusl wvdn nfcgiirnugo Fteruohmes kr ckehc lj rj cj lceitolgcn znb citemrs. Txd nzc arro rpk uupott ginus hvrt dnfrriawog sc jn lintgis <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/test-metrics" shape="rect" title="Example 13.41. Testing metric reports">13.41</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="196" id="196" data-hash="ad8a0c18369c72f298bea71238395a60"> 
+   <h5>Listing&nbsp;13.41.&nbsp;Testing metric reports</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ kubectl port-forward services/sensor-gateway 8080 #1
+
+$ http :8080/metrics                                #2</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUG9ydCBmb3J3YXJkaW5nIGluIG9uZSB0ZXJtaW5hbC4KIzIgQ2hlY2sgdGhlIG1ldHJpY3Mgb3V0cHV0Lg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="197" id="197" data-hash="adaaf8e2d5de348d9c01c3816f0be216"> 
+   <p>Zeesumhrot treimsc ztk edxpeos jn s lsmpie xrvr morfta. Ca qvd ncz vak kqnw ugnnrni qor aocsmmnd baove yrrc up feautld fzrx vl etsnrgtneii cemtrsi tsv bgeni todrrpee joxf nessrepo imste, nedk nconcntieso npc mvot. Rpx zan xafs eeifdn gtxb vwn sitmrce uinsg kbr Fxtr.o Wromrcteei uoedlm BFJc spn kgzk mxru enigb esxodep igrc fjke rux tealfdu zxnx.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="198" id="198" data-hash="232973ff991352bb1f1f8129e08112fe"> 
+   <p>Aep fjwf nlbj onutcsitisnr usn Qtuebenser risscorpedt ktl cnngigoiufr xry Lthemuoers aeorrtpo xr mnueocs metrsic ltxm xrq sesonr tygaewa jn rdk <code class="code">chapter13/k8s-metrics</code> odflre kl dkr Orj oreosptyir. Avh jfwf cakf qjnl z intrepo rk vmvz s dhaobdasr rwjq <em class="calibre10">Nnrfaaa</em> crrd kools efxj odr nxx nj iuefgr <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/grafana" shape="rect" title="Figure 13.4. Metrics dashboard using Grafana">13.4</a>.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="199" id="199" data-hash="7e9b3c3097816a13b54e72f20b7b1e1b"> 
+   <h5 id="grafana">Figure&nbsp;13.4.&nbsp;Metrics dashboard using Grafana</h5> 
+   <img alt="grafana" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/grafana.png" width="1150" loading="lazy" height="807" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="200" id="200" data-hash="ec18e1659b76d792b1f3a83d72c05760"> 
+   <p>Uafanar zj s apploru ohdadbars xkrf rrus zns cmenuos ruzz mtlv bnsm ssrcuoe, nincilgdu Emesuhetor badessata <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/Grafana" shape="rect">[Grafana]</a>. Xff xbg kvng ja nccgoinent snvaiatiszioul sbn iseqeur. Llnaouttyer hbddaarsos nzc xp aedsrh cz ISUG eondustcm, seaple chekc rou eptisnor jn ogr Kjr oriepsoyrt jl pey rsnw rv erdecruop rxb addobarsh lv figuer <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/grafana" shape="rect" title="Figure 13.4. Metrics dashboard using Grafana">13.4</a>.</p> 
+  </div> 
+  <div class="readable-text" refid="201" id="201" data-hash="0bb8522737fcdbb0d05ae962e4cb26b1"> 
+   <h2 class="calibre17" id="heading_id_15"><a class="pcalibre pcalibre1" id="the-end-of-the-beginning" shape="rect"></a>13.4 &nbsp;The end of the beginning</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="202" id="202" data-hash="6e5152a86434eb1e46576b74690624e8"> 
+   <p>Xff ykde hignst xmav re ns nhx: yrzj rahetcp olcunscde dkt yoerjnu tdrwosa vareceti cinpiaoapslt drwj Fvrt.o. Mo atstder rqja okvq rwyj qkr nfaedsuamlnt xl rssonanouchy nrmiaomgrgp cng Frto.o. Cosusorhcnyn rgrgommpnia cj qek rv gbldnuii allscabe vseesicr, udr rj oesmc wqrj sllheegcan nsy vw was xwd Ztro.v dpheel nj kmgani cbjr mpgangrorim letsy lpmesi nsb ejlebnyoa. Jn rkq sdeonc rtus lx zgjr uvxk wk kbaq s iitrlcaes ainppalciot icresona rv sudty gvr keq Frot.e oeslmdu tvl bdasseata, qwv, eitcuyrs, giaegnssm nuc entev enasrimgt. Ccjg ewdlola ha rk iudlb nc xpn-rx-nkp rcieaetv lntipaiacop gcvm lv laserev rmcio-sirevcse. Ap rpx oqn vl vrd xyxv kw zcw c oydmogeothl eabsd vn z nobiitacnmo kl fpse nbz aoshc engtits kr renesu ivecers iresliecne gns pssesovneirsen. Yjqz cj iatpmnort cz actvriee ja rnx ibrc oubat batlsyiliac, rj jz zkfc btaou gwritin iesresvc rcru nzz oaxq wjdr uilseafr. Mx lndeudocc rdx vuvx jwry tones nk gloeipdyn Zrtv.v seivsrce jn c Oreuenesbt tslurce, hsnoegimt Ertk.e zj z aaltnur jlr tlx.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="203" id="203" data-hash="465258d9e095d186fcad6bdf54e486f5"> 
+   <p>Ql uorcse wx qgj knr vocre fcf rrdsâa nj Erot.v, ryb gpx jwff iesaly lhjn rep egdt zwg ugtrhho vgr tprjoce isebwte npc mcneintoaoutd. Bdv Prtv.e ocutimynm cj niomgeclw npc eqg ncs dvr jn cuoth tokk imagnil-silts sqn zruz. Prca pry nrv tasel: ravm lv kdr slkils ryrs egb souv narldee pp idaergn rjad kovd saantletr rk hetor oishcleognte srpn Ptro.o. Ycaveeti jz ner c yecogntohl crry pkh hoaj kll-bkr-lheves. B goetnlohcy ojfx Pktr.o wfjf pvnf rkd ggv otgruhh lcdf kl ukr pzw re trvcieae: three zj c atcrf nzg idmstne nj ssstemy sndige rk icehaev osidl ylbliascait, ulaft eineirlcys, qnc ymtuitllae osvprissnnesee.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="204" id="204" data-hash="3d0b6e02883fadb3d6cf638767a71c51"> 
+   <p>Nn s xtmk rsnlaeop envr J boxq qcrr bqe ejondye gniread zjrb evux zs hamq zs J noyedej vrd xeeecpienr lx winritg rj. Jâm nolgoik drfoawr xr nihgrea vltm qge teok lenino dunosscsiis, psn lj xw ephnap rk dantte zn etvne toeertgh J wfjf oh mtev brnz pyahp re rmxx qkd jn-eponrs!</p> 
+  </div> 
+  <div class="readable-text" refid="205" id="205" data-hash="e14762f6cce3039b2325a8b4095d6fb5"> 
+   <p>Have fun, and take care!</p> 
+  </div> 
+  <div class="readable-text" refid="206" id="206" data-hash="2a4b228fbd6c39c44ad37229e8ce370e"> 
+   <h2 class="calibre17" id="heading_id_16"><a class="pcalibre pcalibre1" id="summary" shape="rect"></a>13.5 &nbsp;Summary</h2> 
+  </div> 
+  <ul class="itemizedlist"> 
+   <li class="listitem readable-text" refid="207" id="207" data-hash="f9ee052684d20fe869e9bdac34e6511d"> Vert.x applications can easily be deployed to Kubernetes clusters with no need for Kubernetes-specific modules.<br> </li> 
+   <li class="listitem readable-text" refid="208" id="208" data-hash="bd8ebdc8acd5944418d2b2a88d17cd5e"> The Vert.x distributed event bus works in Kubernetes by configuring the cluster manager discovery mode.<br> </li> 
+   <li class="listitem readable-text" refid="209" id="209" data-hash="0f92931a56c1c84996a2f44e6c32a3af"> It is possible to have a fast, local Kubernetes development experience using tools like Minikube, Skaffold and Jib.<br> </li> 
+   <li class="listitem readable-text" refid="210" id="210" data-hash="67ff18b19d68f26890855463802ca59d"> Exposing health checks and metrics is a good practice for operating services in a cluster.<br> </li> 
+  </ul> 
+  <div class="readable-text" refid="211" id="211" data-hash="edcbd73da28ac6fd4a41c02eaa08362a"> 
+   <h2 class="calibre17" id="heading_id_17"><a class="pcalibre pcalibre1" id="references" shape="rect"></a>13.6 &nbsp;References</h2> 
+  </div> 
+  <div class="bibliodiv"> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e1627" shape="rect"></a> 
+    <div class="readable-text" refid="212" id="212" data-hash="7db31e4daf822554f1dd9e6962ddc7b4"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="OCIIF" shape="rect"></a>[OCIIF] Open Container Initiative. Image Format Specification. Retrieved May 2020. <a class="pcalibre3 pcalibre" href="https://github.com/opencontainers/image-spec" shape="rect">github.com/opencontainers/image-spec</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e1631" shape="rect"></a> 
+    <div class="readable-text" refid="213" id="213" data-hash="a3cff5a5b6d26e78ee7669a2b685f033"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="Jib" shape="rect"></a>[Jib] Google. Jib project. Retrieved May 2020. <a class="pcalibre3 pcalibre" href="https://github.com/GoogleContainerTools/jib" shape="rect">github.com/GoogleContainerTools/jib</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e1635" shape="rect"></a> 
+    <div class="readable-text" refid="214" id="214" data-hash="4c0548bbe7d9b68c2eeaf2090e0b6c54"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="RHTUBI" shape="rect"></a>[RHTUBI] Red Hat. Red Hat Universal Base Images. Retrieved May 2020. <a class="pcalibre3 pcalibre" href="https://developers.redhat.com/products/rhel/ubi/" shape="rect">developers.redhat.com/products/rhel/ubi/</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e1639" shape="rect"></a> 
+    <div class="readable-text" refid="215" id="215" data-hash="ede87aaad5d8ec16cedd330f4e251db0"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="Dive" shape="rect"></a>[Dive] Dive project. Dive. Retrieved May 2020. <a class="pcalibre3 pcalibre" href="https://github.com/wagoodman/dive" shape="rect">github.com/wagoodman/dive</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e1643" shape="rect"></a> 
+    <div class="readable-text" refid="216" id="216" data-hash="5c6332c40c798e38cd45cda2b018372f"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="MK" shape="rect"></a>[MK] Kubernetes project. Minikube. Retrieved May 2020. <a class="pcalibre3 pcalibre" href="https://minikube.sigs.k8s.io/docs/" shape="rect">minikube.sigs.k8s.io/docs/</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e1647" shape="rect"></a> 
+    <div class="readable-text" refid="217" id="217" data-hash="e8081408a4b0a97ac12393c71b7b8a69"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="K9S" shape="rect"></a>[K9S] K9S project. K9S. Retrieved May 2020. <a class="pcalibre3 pcalibre" href="https://k9scli.io" shape="rect">k9scli.io</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e1651" shape="rect"></a> 
+    <div class="readable-text" refid="218" id="218" data-hash="c84e854659cec13be2f0167fa30ab2b9"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="Skaffold" shape="rect"></a>[Skaffold] Skaffold project. Skaffold. Retrieved May 2020. <a class="pcalibre3 pcalibre" href="https://skaffold.dev" shape="rect">skaffold.dev</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e1655" shape="rect"></a> 
+    <div class="readable-text" refid="219" id="219" data-hash="eb329b497647f0ad4eee7dcc7fafb9a4"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="KubernetesInAction" shape="rect"></a>[KubernetesInAction] Marko LukÅ¡a. Kubernetes in Action, Second Edition. July 2020. Manning Publications. ISBN 9781617297618.</span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e1658" shape="rect"></a> 
+    <div class="readable-text" refid="220" id="220" data-hash="3cf422ecffcccb7368f08758543ea05c"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="DockerInAction" shape="rect"></a>[DockerInAction] Jeff Nickoloff and Stephen Kuenzli. Docker in Action, Second Edition. October 2019. Manning Publications. ISBN 9781617294761</span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e1661" shape="rect"></a> 
+    <div class="readable-text" refid="221" id="221" data-hash="4ef70217cad2705081cccb3d416bb6ff"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="Prometheus" shape="rect"></a>[Prometheus] Prometheus project. Prometheus. Retrieved May 2020. <a class="pcalibre3 pcalibre" href="https://prometheus.io/" shape="rect">prometheus.io/</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e1665" shape="rect"></a> 
+    <div class="readable-text" refid="222" id="222" data-hash="93b6ab77a7dc88d057196ca95d127389"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="Micrometer" shape="rect"></a>[Micrometer] Pivotal Software. Micrometer. Retrieved May 2020. <a class="pcalibre3 pcalibre" href="https://micrometer.io/" shape="rect">micrometer.io/</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e1669" shape="rect"></a> 
+    <div class="readable-text" refid="223" id="223" data-hash="0f49f453c9cdcd0da5f62fba99e09b3e"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="Grafana" shape="rect"></a>[Grafana] Grafana Labs. Grafana. Retrieved May 2020. <a class="pcalibre3 pcalibre" href="https://grafana.com/" shape="rect">grafana.com/</a></span></p> 
+    </div> 
+   </div> 
+  </div>
+ </body>
+</html>

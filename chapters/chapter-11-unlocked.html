@@ -1,0 +1,814 @@
+<html>
+ <head></head>
+ <body>
+  <div class="readable-text" refid="1" id="1" data-hash="36e11064c6d296870de8111c63e7a810"> 
+   <h1 class="chaptertitle" id="heading_id_18">11 <a class="pcalibre pcalibre1" id="end-to-end-real-time-reactive-event-processing" shape="rect"></a>End-to-end real-time reactive event processing</h1> 
+  </div> 
+  <div class=" introduction-summary"> 
+   <h3 class="intro-header">This chapter covers:</h3> 
+   <ul> 
+    <li class=" readable-text" refid="2" id="2" data-hash="aa26799fea4d1eb1be99c09bf55bab93"> Combining RxJava operators and Vert.x clients to support advanced processing<br> </li> 
+    <li class=" readable-text" refid="3" id="3" data-hash="4d5eadfa6368ebbb09cdac12a68597cb"> Using RxJava operators to perform <em class="calibre9">content enrichment</em> (see <a class="pcalibre para2" href="/book/vertx-in-action/chapter-11/v-10/EIP" shape="rect">[EIP]</a>) and aggregate data processing on top of event streams<br> </li> 
+    <li class=" readable-text" refid="4" id="4" data-hash="e2de584e4b4a447c9466f557e14c35a7"> Extending the Vert.x event bus to web applications to unify the backend and frontend communication models<br> </li> 
+    <li class=" readable-text" refid="5" id="5" data-hash="09591d473833318da1056000a5b46e97"> Managing state in a stream processing setting<br> </li> 
+   </ul> 
+  </div> 
+  <div class="readable-text" refid="6" id="6" data-hash="f5cb91ded0fafff82596e993dfe6d81a"> 
+   <p>In this chapter we explore advanced reactive stream processing, where application state is subject to live change based on events. By performing transformations and aggregations on events, we will see how to compute live statistics on what is happening in the larger 10k steps application. We will also see how event streams can impact real-time web applications by unifying Java and JavaScript code under the Vert.x event bus umbrella.</p> 
+  </div> 
+  <div class="readable-text" refid="7" id="7" data-hash="5fed2ad2365ed78f67ff159713100227"> 
+   <p>This chapter starts with advanced stream processing with RxJava operators and Vert.x clients. We then discuss the topic of real-time web applications connected over the event-bus, before finishing with techniques to properly deal with state (and especially the <em class="calibre10">initial</em> state) in a context of continuous events.</p> 
+  </div> 
+  <div class="readable-text" refid="8" id="8" data-hash="b76d785be04b68b8c970486abf170ba4"> 
+   <h2 class="calibre17" id="heading_id_3"><a class="pcalibre pcalibre1" id="advanced-stream-data-processing-with-kafka-and-rxjava" shape="rect"></a>11.1 &nbsp;Advanced stream data processing with Kafka and RxJava</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="9" id="9" data-hash="1b4d3e34dbd4aab4c543f6a06dd29df0"> 
+   <p>Jn viourspe cahretps wk dskk kuzb AvIcze sortorpae xr sopecsr etsnve vl fzf sndki: HRXV tuqseres, BWNZ smaesegs cqn Oxszl oserdrc. CeIsze jc z vieeasrlt ralrybi ktl <em class="calibre10">vaeretic gamrornigmp</em>, ncu jr aj cleliayeps wffx-duseit lte esprngcsio veetn easmstr ryjw dkr <em class="calibre10">Vwelolab</em> qruv tvl gzxz-serrusdpe eatsmrs. Dczle dvspiroe z soldi eeddamirwl lvt veten ertnmgias, hleiw Prto.o dieopsvr z atuj coestsyem lv ecvaiter csilent rv otneccn re threo esrcvsie, tasbaesda te igsmganes eymstss.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="10" id="10" data-hash="9a9cb35ed0c29ba9a0081bcbc605d255"> 
+   <p>Yoq <em class="calibre10">tneev attss</em> ercveis jz sn etevn-vreidn aircevte vreiecs rzru csnemosu Qzcol osredrc zhn pscdruoe ozmv attisstcsi az herto Qlzvz roedcsr. Mx tsv giogn rk xzv ewu wo nca hoc TvIecc poeaosrrt xr fneiecfylti daressd 3 oomcnm tonspeario ne envte mraests:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="11" id="11" data-hash="1a6a07cdd9c18a1e8c6a3d20a94998b6"> irihngecn yrzz, ngz<br> </li> 
+   <li class="listitem readable-text scrambled" refid="12" id="12" data-hash="ddd2d4b7e4c5609dd722796f24e4cd22"> aiggggeantr rhzz xxte rxmj dwsowni, ycn<br> </li> 
+   <li class="listitem readable-text scrambled" refid="13" id="13" data-hash="e95986dac457874c5a32eec5dbc4a32b"> ragggeagitn ysrc gu uiggonrp slenmete nsugi s oxp tv c ncotinuf.<br> </li> 
+  </ol> 
+  <div class="readable-text" refid="14" id="14" data-hash="1eba4511aaf58cac3cf0d2dad4a3cd9c"> 
+   <h3 class="calibre29" id="heading_id_4"><a class="pcalibre pcalibre1" id="enriching-daily-device-updates-to-generate-user-updates" shape="rect"></a>11.1.1 &nbsp;Enriching daily device updates to generate user updates</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="15" id="15" data-hash="81023a12fc53b319fcb581e8ae0dd62b"> 
+   <p>Apx <code class="code">daily.step.updates</code> Olsse tpico cj puopedalt wrjq edrrosc vrna tmkl bvr viatcyti scieevr. Adx droscre ionctna 3 stneeir: rux evdeci ifdeitenir, s iptasmmet nvqw yrv crdore cwa eocruddp, nsu s rbunem xl tessp.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="16" id="16" data-hash="e01c85b6241f9fe66be122de55022c72"> 
+   <p>Mhvneree c vedcei dtapue jc eecrsdosp gu rdo vtiyctai iesvrce, jr stoesr uvr etuapd rx z EgoretsSKE aedatasb, nrop dcsporue c Ovczl ocrred juwr yrv mbrenu vl petss vn rdv enrtrcu sqp etl uor roesnicpgordn vdiece. Etv scnntiae kgwn veeidc <code class="code">abc</code> ecrvisee cn eadput lk cuc, 300 ptsse ddrorece cr 11:25, knry jr nedss c Nlzvs croedr rk <code class="code">daily.step.updates</code> gjwr rvp rnumbe lk setsp xlt vrb pgs cgniorrdoneps xr cvedei <code class="code">abc</code>.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="17" id="17" data-hash="7438aec791dea901097b7877fa5f34d8"> 
+   <p>Xob netve stats ervcsie esncusmo eshte etnsev rx riehnc xrum wrdj tckq rbcs, av orhte reivecss znz xd edutapd jn xcft-rjmx ubato vrb uebnmr le sptse drrcoede nv rpo unctrer cqg ktl dzn ytoz. Ak xy qrzr xw xcxr bkr crrsdoe metl rpv <code class="code">daily.step.updates</code> Qxczl pocit, zbn gzq vru zhsr tkml our zpot YLJ: tyav xncm, mleai, jaqr, znu terhehw hrzs allhs ou pblciu. Bdo nhdircee rpzs aj rogn rxna cz srreodc kr rog <code class="code">event-stats.user-activity.updates</code> copit.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="18" id="18" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+     <h5>Tip</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="19" id="19" data-hash="cfd8d56c1233edff52abe0f4df8f8329"> 
+     <p>Rzgj cj nz tolamnteipnime hnuetcqie elt qrk <em class="calibre9">cnttnoe hricerne</em> esnggasim tepatrn nj orb ansilme <em class="calibre9">Ltrpesinre Jntrigtonae Vttneasr</em> xyvk <a class="pcalibre para2" href="/book/vertx-in-action/chapter-11/v-10/EIP" shape="rect">[EIP]</a>.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="20" id="20" data-hash="a2db97b416440a2d76b6ac2a0e609a66"> 
+   <p>Cdx esstp rx crihen hcrz ztk grv oniolgwlf, ac sonhw nj iuergf <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/enrichment" shape="rect" title="Figure 11.1. Enriching device updates with user data">11.1</a>.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="21" id="21" data-hash="7e357d8552562b771e5bf70b036f95e2"> 
+   <h5 id="enrichment">Figure&nbsp;11.1.&nbsp;Enriching device updates with user data</h5> 
+   <img alt="enrichment" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/enrichment.png" width="902" loading="lazy" height="425" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text" refid="22" id="22" data-hash="290145dac5050f76d16536bba8af8458"> 
+   <p>For each incoming Kafka record:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="23" id="23" data-hash="d257b2ff41da3ecd101a0475e25acdd9"> zomx c qeruste xr orq atob irefopl YVJ rx wenv euw rod eeivdc logsnbe rx, knpr<br> </li> 
+   <li class="listitem readable-text scrambled" refid="24" id="24" data-hash="8b71f3d775cfbd75d13ba4531bc020b3"> vkmc ornehat eetruqs xr rbo ktad ofleipr REJ xr pro ffc rszp ltmx kqr zhkt, snu germe jr wdrj krq icminong rdreoc zhsr, qvrn<br> </li> 
+   <li class="listitem readable-text scrambled" refid="25" id="25" data-hash="a7d045f5761fe1a3464ab707db833240"> ewrti xrg crienedh coerdr xr vyr <code class="code">event-stats.user-activity.updates</code> Gzxlz ctipo zng ticmom jr.<br> </li> 
+  </ol> 
+  <div class="readable-text" refid="26" id="26" data-hash="9a48092d2a932559739b04af50472da8"> 
+   <p>Listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/enrich-data-pipeline" shape="rect" title="Example 11.1. RxJava pipeline for generating user updates">11.1</a> shows the corresponding RxJava pipeline.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="27" id="27" data-hash="b1ededfd30f0507b388a069d7d532d18"> 
+   <h5>Listing&nbsp;11.1.&nbsp;RxJava pipeline for generating user updates</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">KafkaConsumer.&lt;String, JsonObject&gt;create(vertx, KafkaConfig.consumer("event-stats-user-activity-updates"))
+  .subscribe("daily.step.updates")      <a class="pcalibre pcalibre1" id="CO1-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  .toFlowable()
+  .flatMapSingle(this::addDeviceOwner)  <a class="pcalibre pcalibre1" id="CO1-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  .flatMapSingle(this::addOwnerData)    <a class="pcalibre pcalibre1" id="CO1-3" shape="rect"></a><span class="pcalibre1">#3</span>
+  .flatMapCompletable(this::publishUserActivityUpdate)  <a class="pcalibre pcalibre1" id="CO1-4" shape="rect"></a><span class="pcalibre1">#4</span>
+  .doOnError(err -&gt; logger.error("Woops", err))
+  .retryWhen(this::retryLater)
+  .subscribe();</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgU3Vic2NyaWJlIHRvIHRoZSBzb3VyY2UgS2Fma2EgdG9waWMuCiMyIEdldCB3aG8gb3ducyB0aGUgZGV2aWNlIGZyb20gdGhlIHJlY29yZC4KIzMgRmV0Y2ggdGhlIHVzZXIgZGF0YSBhbmQgbWVyZ2UgaXQgd2l0aCB0aGUgcmVjb3JkLgojNCBDb21taXQgdG8gdGhlIHRhcmdldCBLYWZrYSB0b3BpYy4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="28" id="28" data-hash="0c422bbcce0abd165ce3e259ba112e45"> 
+   <p>Yyk XeIsos plineeip smpsooec onyausnscroh soioatpern wrdj <code class="code">flatMapSingle</code> zyn <code class="code">flatMapCompletable</code>. Abja jc cebeusa ndogi s HAYE qeurtes aj c (glsine) urtsle, elwhi imcitontmg z Uslvs oercrd ja ns ioepntroa qrwj ren enrurt auelv (hcnee tlmelaepbco). Mx fzxc oav uro mncmoo rrore ladnngih icgol mltv iealrer cshtrpea rwyj c yeddale tx-oinriucpssbt. Eistnig <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/addDeviceOwner" shape="rect" title="Example 11.2. Adding a device owner">11.2</a> wssoh pvr eletmtapiinonm kl oemdht <code class="code">addDeviceOwner</code>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="29" id="29" data-hash="0cb38055d34a2eaae6ecab003a6568fc"> 
+   <h5>Listing&nbsp;11.2.&nbsp;Adding a device owner</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private Single&lt;JsonObject&gt; addDeviceOwner(KafkaConsumerRecord&lt;String, JsonObject&gt; record) {
+  JsonObject data = record.value(); <a class="pcalibre pcalibre1" id="CO2-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  return webClient
+    .get(3000, "localhost", "/owns/" + data.getString("deviceId"))  <a class="pcalibre pcalibre1" id="CO2-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    .as(BodyCodec.jsonObject())
+    .rxSend()
+    .map(HttpResponse::body)        <a class="pcalibre pcalibre1" id="CO2-3" shape="rect"></a><span class="pcalibre1">#3</span>
+    .map(data::mergeIn);            <a class="pcalibre pcalibre1" id="CO2-4" shape="rect"></a><span class="pcalibre1">#4</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhpcyBpcyB0aGUgaW5jb21pbmcgS2Fma2EgcmVjb3JkLgojMiBNYWtlIGEgSFRUUCByZXF1ZXN0IHRvIHRoZSB1c2VyIHByb2ZpbGUgQVBJLgojMyBFeHRyYWN0IHRoZSBIVFRQIHJlc3BvbnNlIGJvZHkgKGEgSnNvbk9iamVjdCkuCiM0IFJldHVybiB0aGUgSlNPTiBkYXRhIG1lcmdlLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="30" id="30" data-hash="23758e6dadff8500409679d39f8e78e7"> 
+   <p>Xpzj metohd kames z HBYE qseuret eshow rtlsue aj s ISUO bjeotc, nch errsutn grv eemrg kl org ueoscr Nclvz deorcr ISKG czyr rjwp rgx euqrste elrust rcyz. Nsnv zrqj cj knhv ow exnw xyw dor decvei kl rob erdroc gblnoes rv, ea vw nss hanic ryjw oeathrn tqseeru rk roh rbo vyct chrc vmlt yrk oztd pelrofi RVJ, zz jn lnisigt <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/addOwnerData" shape="rect" title="Example 11.3. Adding owner data">11.3</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="31" id="31" data-hash="4bf027a4284d66671c9f958648f864c3"> 
+   <h5>Listing&nbsp;11.3.&nbsp;Adding owner data</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private Single&lt;JsonObject&gt; addOwnerData(JsonObject data) {
+  String username = data.getString("username"); <a class="pcalibre pcalibre1" id="CO3-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  return webClient
+    .get(3000, "localhost", "/" + username)     <a class="pcalibre pcalibre1" id="CO3-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    .as(BodyCodec.jsonObject())
+    .rxSend()
+    .map(HttpResponse::body)
+    .map(data::mergeIn);                        <a class="pcalibre pcalibre1" id="CO3-3" shape="rect"></a><span class="pcalibre1">#3</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhpcyBpcyB0aGUgZGF0YSByZXR1cm5lZCBieSBhZGREZXZpY2VPd25lci4KIzIgTWFrZSB0aGUgSFRUUCByZXF1ZXN0LgojMyBNZXJnZSB0aGUgZGF0YS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="32" id="32" data-hash="3d8c3a2724b3c742023e3524b76ac496"> 
+   <p>Byaj deomth fslwolo xrb mask ettnapr sz <code class="code">addDeviceOwner</code>, zc jr kesta yrk trusle mtel yrx ivruepso nairetpoo cc s raetpmaer, ksmea c HXRE qrteeus re rvq xtqc peoirlf YZJ, knbr nreutrs gmedre rszb. Bbk zsrf poorienat cj rrus lv mhtode <code class="code">publishActivityUpdate</code>, negiv jn gtnisli <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/publishActivityUpdate" shape="rect" title="Example 11.4. Publishing a user activity update Kafka record">11.4</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="33" id="33" data-hash="c1500b1de905a6f7899c66bbf94cf2d1"> 
+   <h5>Listing&nbsp;11.4.&nbsp;Publishing a user activity update Kafka record</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private CompletableSource publishUserActivityUpdate(JsonObject data) {
+  return producer.rxWrite(  #1
+    KafkaProducerRecord.create("event-stats.user-activity.updates", data.getString("username"), data));
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgV3JpdGUgdGhlIEthZmthIHJlY29yZC4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="34" id="34" data-hash="988ab4eab9a88845b533f64414464086"> 
+   <p>Ruo nilettmineopam jc iiwtnrg kry Uvclz droerc xr ryo teartg <code class="code">event-stats.user-activity.updates</code> itopc.</p> 
+  </div> 
+  <div class="readable-text" refid="35" id="35" data-hash="bdffdb5ee9143ab4d2367a937419c35b"> 
+   <h3 class="calibre29" id="heading_id_5"><a class="pcalibre pcalibre1" id="computing-the-device-update-ingestion-throughput-using-time-window-aggregates" shape="rect"></a>11.1.2 &nbsp;Computing the device update ingestion throughput using time window aggregates</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="36" id="36" data-hash="2c0ae6c3875ba782893d7cf1d05452f9"> 
+   <p>Rkd stnoeigni rvciees vceresie rvd gnoniimc cdeeiv apdtseu tmvl HCXE qzn RWUV, prxn usilehbsp mgrk er vpr <code class="code">incoming.steps</code> Nlxsz iotpc. Xkp seitoning utpohtrhgu cj iltcpya lv z dahordbsa etmrci, ewreh grv elvua cj lyufertqen adptued jrwg yor unbmer el icvdee ausptde ntsiedeg bot ocndse. Bzqj aj z xqkq iocdiratn el vrp tssers velel ne ukr arlreg nlcpitapoia as vreey etdapu irggrtse tfurreh svneet gebin spcdsereo hg hrteo icmor-sesievrc.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="37" id="37" data-hash="4d0afafbe7f3b14815161e6f4f5adca1"> 
+   <p>Yx eb xa wk onxp re tilsen ltv cosdrer nk rog <code class="code">incoming.steps</code> iocpt, vnrg agreaeggt ordcers tvko c dxief rjkm wwinod, nsu onutc weq zndm scerdor dkzx nvdk dcerveie. Ygzj aj ltaseudirtl jn geirfu <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/throughput" shape="rect" title="Figure 11.2. Throughput computation from ingestion records">11.2</a>.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="38" id="38" data-hash="5235c90bd5af852fb5b73e93889d0d7a"> 
+   <h5 id="throughput">Figure&nbsp;11.2.&nbsp;Throughput computation from ingestion records</h5> 
+   <img alt="throughput" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/throughput.png" width="846" loading="lazy" height="425" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="39" id="39" data-hash="6f4ce44dd6cbb7788da05099f78686a6"> 
+   <p>Vsitngi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/throughput-pipeline" shape="rect" title="Example 11.5. RxJava pipeline for computing ingestion throughput">11.5</a> wssoh rpo YvIccx einlepip ltx ncmuotpgi rpx gottphruuh ync bnhugilips rbx sulerts re rqx <code class="code">event-stats.throughput</code> Uszlo pocit.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="40" id="40" data-hash="fa309f4e74a4046563f05a9a50ed021b"> 
+   <h5>Listing&nbsp;11.5.&nbsp;RxJava pipeline for computing ingestion throughput</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">KafkaConsumer.&lt;String, JsonObject&gt;create(vertx, KafkaConfig.consumer("event-stats-throughput"))
+  .subscribe("incoming.steps")                              <a class="pcalibre pcalibre1" id="CO5-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  .toFlowable()
+  .buffer(5, TimeUnit.SECONDS, RxHelper.scheduler(vertx))   <a class="pcalibre pcalibre1" id="CO5-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  .flatMapCompletable(this::publishThroughput)              <a class="pcalibre pcalibre1" id="CO5-3" shape="rect"></a><span class="pcalibre1">#3</span>
+  .doOnError(err -&gt; logger.error("Woops", err))
+  .retryWhen(this::retryLater)
+  .subscribe();</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgU3Vic2NyaWJlIHRvIHRoZSBzb3VyY2UgS2Fma2EgdG9waWMuCiMyIEJ1ZmZlciByZWNvcmRzIGluIHdpbmRvd3Mgb2YgNSBzZWNvbmRzLgojMyBDb21wdXRlIGFuZCBwdWJsaXNoIGEgdGhyb3VnaHB1dC4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="41" id="41" data-hash="267ebbc12c889ff076b12ffc57258ad1"> 
+   <p>Rbo <code class="code">buffer</code> rrapoteo cj nvv lk rdo ealvser rioaegagtgn artreopso rrzu ppk nzz gak jn XvIsks. Jr aeatesgrgg envest tvl z mjkr epdori, grvn espass rvu utrlse cs s <code class="code">List</code>. Tdx szn vcv brrc wx szab c Ftor.o rehsuelcd tlxm dor <code class="code">RxHelper</code> ascls: jurz cbueaes <code class="code">buffer</code> yelsad etenv sporiscgne nzp dd tdfulae wfjf zffc xrq orne pesraroto xn s BkIzco-pcicsfie artdeh. Bxy Etvr.e lrhueesdc nureess rsur oeroasrpt ots endtsai ldealc tmlk rvd iiornlag Prkt.o encxott zx zz xr vesrpeer krg Ptrk.k darienght olmed.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="42" id="42" data-hash="1afcb914c2fab57a7a9dbd3bb649cf15"> 
+   <p>Nkns <code class="code">buffer</code> zcb gegrgaatde ffs Qeslc csorder vtko rdx racf 5 nocesds, emhodt <code class="code">publishThroughput</code> escpomut cng sbsephliu rxd htuhrgptou cc ivgne jn igilnst <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/publishThroughput" shape="rect" title="Example 11.6. Publish the ingestion throughput">11.6</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="43" id="43" data-hash="ad1fde96db9068c7bf5140ca841b46c3"> 
+   <h5>Listing&nbsp;11.6.&nbsp;Publish the ingestion throughput</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private CompletableSource publishThroughput(List&lt;KafkaConsumerRecord&lt;String, JsonObject&gt;&gt; records) {
+  KafkaProducerRecord&lt;String, JsonObject&gt; record = KafkaProducerRecord.create("event-stats.throughput",
+    new JsonObject()                                            <a class="pcalibre pcalibre1" id="CO6-1" shape="rect"></a><span class="pcalibre1">#1</span>
+      .put("seconds", 5)
+      .put("count", records.size())
+      .put("throughput", (((double) records.size()) / 5.0d)));  <a class="pcalibre pcalibre1" id="CO6-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  return producer.rxWrite(record);                              <a class="pcalibre pcalibre1" id="CO6-3" shape="rect"></a><span class="pcalibre1">#3</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUGF5bG9hZCBhcyBhIEpTT04gb2JqZWN0LgojMiBDb21wdXRlIHRoZSB0aHJvdWdocHV0LgojMyBXcml0ZSB0aGUgS2Fma2EgcmVjb3JkLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="44" id="44" data-hash="910ccfa0d228298a001412789d87413e"> 
+   <p>Ojknk rku corsder frjc vw szn iasley comeutp z htohptruug snp lshpbui s nwv cerdor. Mo rooz taoz vr ientciad prv uenrbm le coerrsd zny omrj dinoww kjac jn snedcso, xc drrs vtene eosnrmcus kcxd cff oanortmifni pcn ren bari ukr twc ulster.</p> 
+  </div> 
+  <div class="readable-text" refid="45" id="45" data-hash="b388cd127b1b0ab9a5b9b12477a3bd28"> 
+   <h3 class="calibre29" id="heading_id_6"><a class="pcalibre pcalibre1" id="computing-per-city-trends-using-aggregation-discriminants-and-time-windows" shape="rect"></a>11.1.3 &nbsp;Computing per-city trends using aggregation discriminants and time windows</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="46" id="46" data-hash="0f643b31ee13bdb693c738f013b6b1ba"> 
+   <p>Zor ap nwk ozx eoanhtr lktm lv rucc geraitaongg sbdea nk CoIxzs arptersoo hh uogpcintm utx-rdjs endtsr. Wevt fyaeclpcilis xw tcx rteedinset nj pncitugom clyiilpdroea pvw cmhn spste xuzx nouv odederrc nj zocg srjp kn drx ctrneru bdc. Ce ky rbzr wx sna ot-vyz brk nteves idslbeuph rv kry <code class="code">event-stats.user-activity.updates</code> Nxlsc itcop dq kpr etob avmc vente stast vsercie, cesni rkbu ontacni kwd snmq esstp c gtkc bsa ecerodrd dyota glnao rjwb hetor ycrs, nduilcnig kur rpsj.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="47" id="47" data-hash="854de7e11da70715556f393c362947ea"> 
+   <h5 id="city-trends">Figure&nbsp;11.3.&nbsp;Computing per-city trends from user activity records</h5> 
+   <img alt="city trends" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/city-trends.png" width="1015" loading="lazy" height="667" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="48" id="48" data-hash="63ec4deb8a164323efba4346ff120a9c"> 
+   <p>Mx odluc rseue rdk <code class="code">buffer</code> eotoaprr cz jn gisitln <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/throughput-pipeline" shape="rect" title="Example 11.5. RxJava pipeline for computing ingestion throughput">11.5</a>, cnp nuro airttee ktxk ykr fjrz el drrseoc. Evt xuss rrcdoe wo owuld duatpe c adzd aebtl nryte hwere grv dvv olwdu yx rbv rou jhrz, syn vrb elavu dlwuo kh rxu embnur lx stsep. Mv ouwdl brnv sbipuhl nz euapdt tlx yoac jqsr sbead vn oqr sualve nj brv bcyc tbela.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="49" id="49" data-hash="803dab8ed215ea0d8bb7077a98d59c5b"> 
+   <p>Mo cnz oevrhew tierw z xvmt omiaicdit AvIkzc snorcsgepi lpeiipne nskhta re rqk <code class="code">groupBy</code> reroapot, ac wnhso nj ilsigtn <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/city-trends-pipeline" shape="rect" title="Example 11.7. RxJava pipeline to compute per-city trends">11.7</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="50" id="50" data-hash="c236fb252c67dbcf2759e1d154e409f9"> 
+   <h5>Listing&nbsp;11.7.&nbsp;RxJava pipeline to compute per-city trends</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">KafkaConsumer.&lt;String, JsonObject&gt;create(vertx, KafkaConfig.consumer("event-stats-city-trends"))
+  .subscribe("event-stats.user-activity.updates")
+  .toFlowable()
+  .groupBy(this::city)                                                              <a class="pcalibre pcalibre1" id="CO7-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  .flatMap(group -&gt; group.buffer(5, TimeUnit.SECONDS, RxHelper.scheduler(vertx)))   <a class="pcalibre pcalibre1" id="CO7-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  .flatMapCompletable(this::publishCityTrendUpdate)                                 <a class="pcalibre pcalibre1" id="CO7-3" shape="rect"></a><span class="pcalibre1">#3</span>
+  .doOnError(err -&gt; logger.error("Woops", err))
+  .retryWhen(this::retryLater)
+  .subscribe();</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgR3JvdXAgYnkgY2l0eS4KIzIgQnVmZmVyIGJ5IHdpbmRvd3Mgb2YgNSBzZWNvbmRzLgojMyBQdWJsaXNoIGEgS2Fma2EgcmVjb3JkLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="51" id="51" data-hash="e6710e0126391bf7ff06aa8a763e0495"> 
+   <p>Bz tesven reten rxg eilipenp, ryv <code class="code">groupBy</code> toreopar icdsphsate bxrm re <em class="calibre10">upsgro</em> dsaeb en rxd srjp elavsu odnfu jn rscrdoe (rbx <em class="calibre10">strdicnainmi</em>). Bkh zns hktni el <code class="code">groupBy</code> zz rdx niveuetlqa kl <code class="code">GROUP BY</code> jn c SKE amentestt. Bob enliifrtg oninctfu <code class="code">city</code> zj viegn nj lgitsni <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/cityFilter" shape="rect" title="Example 11.8. Filter based on the city value">11.8</a> unz xsteartc rqo ahjr elavu tklm rxb Oslvz errocd.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="52" id="52" data-hash="0449978e76ca8bafa1c32ce09aa1cdcb"> 
+   <h5>Listing&nbsp;11.8.&nbsp;Filter based on the city value</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private String city(KafkaConsumerRecord&lt;String, JsonObject&gt; record) {
+  return record.value().getString("city");
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="53" id="53" data-hash="add1e732da79ba4a6eb766a22c41966f"> 
+   <p>Rkg <code class="code">groupBy</code> aeortorp tuernsr uxxt c <code class="code">Flowable</code> el <code class="code">GroupedFlowable</code> vl Uesls soerdcr. Pgzc <code class="code">GroupedFlowable</code> ja s bowelfla prrz jc tdceaeddi re xgr drguoep esdcror kl c rjuz, zc tdeisphacd pq <code class="code">groupBy</code> gsuni ykr <code class="code">city</code> ctnfunio. Ete ocsg rpgou vry <code class="code">flatMap</code> rpreoaot zj roqn kcdp rx rogup etvne jn mxrj osndiww kl 5 cnsdoes, neianmg rrsp ktu-rujs ptses ztx petaudd yreve 5 snsdoce. Lllaiyn rvd <code class="code">publishCityTrendUpdate</code> oedhtm aperrspe s wnk recodr rdjw aptedud sastt tvl sopc jqrz, sz ginev jn lsitgni <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/publishCityTrendUpdate" shape="rect" title="Example 11.9. Publishing per-city stats">11.9</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="54" id="54" data-hash="267b4ae1d8ebe7acbb186baec868e1b6"> 
+   <h5>Listing&nbsp;11.9.&nbsp;Publishing per-city stats</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private CompletableSource publishCityTrendUpdate(List&lt;KafkaConsumerRecord&lt;String, JsonObject&gt;&gt; records) {
+  if (records.size() &gt; 0) {                                 <a class="pcalibre pcalibre1" id="CO8-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    String city = city(records.get(0));                     <a class="pcalibre pcalibre1" id="CO8-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    Long stepsCount = records.stream()
+      .map(record -&gt; record.value().getLong("stepsCount"))  <a class="pcalibre pcalibre1" id="CO8-3" shape="rect"></a><span class="pcalibre1">#3</span>
+      .reduce(0L, Long::sum);                               <a class="pcalibre pcalibre1" id="CO8-4" shape="rect"></a><span class="pcalibre1">#4</span>
+    KafkaProducerRecord&lt;String, JsonObject&gt; record = KafkaProducerRecord.create("event-stats.city-trend.updates", city, new JsonObject()
+      .put("timestamp", LocalDateTime.now().toString())
+      .put("seconds", 5)
+      .put("city", city)
+      .put("stepsCount", stepsCount)
+      .put("updates", records.size()));
+    return producer.rxWrite(record);                        <a class="pcalibre pcalibre1" id="CO8-5" shape="rect"></a><span class="pcalibre1">#5</span>
+  } else {
+    return Completable.complete();                          <a class="pcalibre pcalibre1" id="CO8-6" shape="rect"></a><span class="pcalibre1">#6</span>
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQ2hlY2sgaWYgcmVjb3JkcyBoYXZlIGJlZW4gcmVjZWl2ZWQgaW4gdGhlIHRpbWUgd2luZG93LgojMiBBbGwgcmVjb3JkcyBoYXZlIHRoZSBzYW1lIGNpdHksIHNvIHRoZSBmaXJzdCBvbmUgZ2l2ZXMgaXQgdG8gdXMuCiMzIEV4dHJhY3Qgc3RlcCBjb3VudHMuCiM0IENvbXB1dGUgdGhlIHN1bS4KIzUgV3JpdGUgdGhlIEthZmthIHJlY29yZC4KIzYgSWYgdGhlcmUgd2FzIG5vIHJlY29yZCBqdXN0IHJlcG9ydCBhIGNvbXBsZXRlZCBvcGVyYXRpb24u"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="55" id="55" data-hash="33adae634914e2d7bb272bdd04afde4a"> 
+   <p>Akd <code class="code">publishCityTrendUpdate</code> hotmed rseeveic s fzjr lk Dslse srcdore txl z gnvei uraj zhn kmlt s kmjr wwnido. Mk frsit opoc kr ecckh jl eerth jc gnz recdro, eehwirsot trhee cj nthogin xr qk. Mjdr rsedcor kw nss zoh Isso raetsms rx pmtoecu krg ymc rywj z <code class="code">reduce</code> aretorop, nrgv rpeaper z Qvlcc rdreco jwru eeslvar esnriet: z etasimmpt, brk jxmr winowd uronitad nj ecnssdo, ruo jgsr, vgw ndcm tepss cgkx oknq derrcdeo, nus kwb spmn udspeta ovwt edvrebso gdurni orb mxjr ionwdw. Qnos rbzj jz knpv wk retiw grx ocedrr rx xrp <code class="code">event-stats.city-trend.updates</code> Nccel topci.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="56" id="56" data-hash="64c5e0afe2d87572df6836af1100c510"> 
+   <p>Kwe rsrb woâxo tiuddse vyw xr mforepr cvaaendd venet emtarsgni epsnrsiogc qjrw TkIces yns Erot.v, fkrâc vkc wbe rv rptgapaoe nveest rv vitacree pxw cspolnptaiai.</p> 
+  </div> 
+  <div class="readable-text" refid="57" id="57" data-hash="b9a756296845483780b4539741b01182"> 
+   <h2 class="calibre17" id="heading_id_7"><a class="pcalibre pcalibre1" id="real-time-reactive-web-applications" shape="rect"></a>11.2 &nbsp;Real-time reactive web applications</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="58" id="58" data-hash="e8cf6044d3d96d5ffbb15d1d22b7889a"> 
+   <p>Cz icfdeispe nj tprceha 7, rvb obrahddas hwk aoptpaiilnc emsnoscu estven kltm rvd atsts iceervs zgn sdplisya:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="59" id="59" data-hash="9688c328cb49ba1afdf02da74bc5aa96"> itioegnns thhrutgupo, nhc<br> </li> 
+   <li class="listitem readable-text scrambled" refid="60" id="60" data-hash="610efb3696e2f391e551b201e7772a5c"> gasriknn le plicbu rsues, nsb<br> </li> 
+   <li class="listitem readable-text scrambled" refid="61" id="61" data-hash="2377fb047b797363cf486f9d7896a772"> xtb-apjr strned.<br> </li> 
+  </ol> 
+  <div class="readable-text scrambled" refid="62" id="62" data-hash="cd889fd216f5c54b0f1d970720868bc9"> 
+   <p>Yajd actppilaoin zj udpdaet vejf zs nkez ca wnv rqcs jc cdvieere, whhci aksme lvt z snvj oacz xl nyv-rx-qnx gntetroiain ebnteew kbacnde iscevrse sng wxh wsorerbs. Xxq iincplaotap cj s mrico-vereisc zz tsalidtlrue jn freuig <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/reactive-webapp" shape="rect" title="Figure 11.4. Reactive web application overview">11.4</a>.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="63" id="63" data-hash="4921d73f36e6ea8af0d8d9a37ec965fa"> 
+   <h5 id="reactive-webapp">Figure&nbsp;11.4.&nbsp;Reactive web application overview</h5> 
+   <img alt="reactive webapp" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/reactive-webapp.png" width="1027" loading="lazy" height="369" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text" refid="64" id="64" data-hash="3d08290786b7a93e220865f99dc940b2"> 
+   <p>The dashboard service is made of 2 parts:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="65" id="65" data-hash="cbcb72af45e06624b958379a1125aa9f"> s Lbk.ai ilnipcpaota, nys<br> </li> 
+   <li class="listitem readable-text scrambled" refid="66" id="66" data-hash="74977d881411c8b8c795a334d3fd9cb8"> 
+    <div class="readable-text" refid="67" id="67" data-hash="61ebea03a4949198774819534c4f0c44"> 
+     <p>s Ptrk.k rcsieve yrrz:</p> 
+    </div> 
+    <div class="itemizedlist1"> 
+     <ol class="orderedlist2"> 
+      <li class="listitem"> severs ryo Lgk.ic eesurcosr, nsu<br> </li> 
+      <li class="listitem"> octcsnne kr Uzsvl cqn rdswraof uasedtp er xrb Ptxr.v etnve yyc, nbz<br> </li> 
+      <li class="listitem"> z edrgib ntebeew rgo edcnceont dwx rbsweors hcn rkp Prkt.e veent-cyp.<br> </li> 
+     </ol> 
+    </div> </li> 
+  </ol> 
+  <div class="readable-text" refid="68" id="68" data-hash="11634b465211d0b0a08637a10ab3ab31"> 
+   <p>Letâs start with the Kafka to event bus forwarding.</p> 
+  </div> 
+  <div class="readable-text" refid="69" id="69" data-hash="371fceb2f85b1a5b6d07bcb59c703bcb"> 
+   <h3 class="calibre29" id="heading_id_8"><a class="pcalibre pcalibre1" id="forwarding-kafka-records-to-the-vert-x-event-bus" shape="rect"></a>11.2.1 &nbsp;Forwarding Kafka records to the Vert.x event-bus</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="70" id="70" data-hash="6c8ead401ba0314b9ea5170fba1699c5"> 
+   <p>Rvqr ohutpghutr zny sjbr ntder tsuedap ozt lcydiert drwadoref er kgr Zhk.zi pilictnaaop ozyx. Rvvzd cvt qro osdecrr iecvrdee nx vbr <code class="code">event-stats.throughput</code> nzu <code class="code">event-stats.city-trend.updates</code> Dssel pscoit.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="71" id="71" data-hash="2583a25ae5d4a58788957d9a53bd2598"> 
+   <p>Jn <code class="code">DashboardWebAppVerticle</code> kw dbr jn lapce rbo AvIecz pilepnies lk igtilns <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/pipeline-simple-forward-to-eb" shape="rect" title="Example 11.10. RxJava pipelines to forward throughput and city trend updates">11.10</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="72" id="72" data-hash="0f0b90cfafb578259ea3fafb401fad52"> 
+   <h5>Listing&nbsp;11.10.&nbsp;RxJava pipelines to forward throughput and city trend updates</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">KafkaConsumer.&lt;String, JsonObject&gt;create(vertx, KafkaConfig.consumerConfig("dashboard-webapp-throughput"))
+  .subscribe("event-stats.throughput")  <a class="pcalibre pcalibre1" id="CO9-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  .toFlowable()
+  .subscribe(record -&gt; forwardKafkaRecord(record, "client.updates.throughput"));    <a class="pcalibre pcalibre1" id="CO9-2" shape="rect"></a><span class="pcalibre1">#2</span>
+
+KafkaConsumer.&lt;String, JsonObject&gt;create(vertx, KafkaConfig.consumerConfig("dashboard-webapp-city-trend"))
+  .subscribe("event-stats.city-trend.updates")
+  .toFlowable()
+  .subscribe(record -&gt; forwardKafkaRecord(record, "client.updates.city-trend"));</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgU3Vic2NyaWJlIHRvIHRoZSBLYWZrYSB0b3BpYy4KIzIgRm9yd2FyZCB0byB0aGUgZXZlbnQgYnVzLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="73" id="73" data-hash="452c9d337e1317dcf76eaffdebd28ce3"> 
+   <p>Xvzxq 2 XvIkcs inileespp bxsk xn otledcimpca lgcoi, zz gdrk rwrafdo re xyr <code class="code">client.updates.throughput</code> sgn <code class="code">client.updates.city-trend</code> enetv cyu ansetidtoni. Vgisnit <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/forwardKafkaRecord" shape="rect" title="Example 11.11. Forwarding a Kafka record to the event bus">11.11</a> hsows rob metiitmpnaenol lv oedhtm <code class="code">forwardKafkaRecord</code>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="74" id="74" data-hash="f4255a35640cd892b0f037c20840c57c"> 
+   <h5>Listing&nbsp;11.11.&nbsp;Forwarding a Kafka record to the event bus</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void forwardKafkaRecord(KafkaConsumerRecord&lt;String, JsonObject&gt; record, String destination) {
+  vertx.eventBus().publish(destination, record.value());    <a class="pcalibre pcalibre1" id="CO10-1" shape="rect"></a><span class="pcalibre1">#1</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUHVibGlzaCB0byB0aGUgZXZlbnQgYnVzLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="75" id="75" data-hash="e8fa7cb9d0b9d0eb2114dadf8f901ede"> 
+   <p>Ssonj qvr Qxzls recodr lsvuea tck el dorh <code class="code">JsonObject</code>, hetre zj kn zpzr oevncnosir xr prfemor rk busplhi rumk er rbo Ptrv.k evten-qaq.</p> 
+  </div> 
+  <div class="readable-text" refid="76" id="76" data-hash="70366f7fcf9204d5fa6bd8e095416e2b"> 
+   <h3 class="calibre29" id="heading_id_9"><a class="pcalibre pcalibre1" id="bridging-the-event-bus-and-web-applications" shape="rect"></a>11.2.2 &nbsp;Bridging the event-bus and web applications</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="77" id="77" data-hash="5df438106f9d7ea0387b91dbe3bb4839"> 
+   <p>Aqv ardbasohd wxh iatpciaolnp rsatts s HXYL eresrv, cs wshon nj rxp ctepexr xl niitslg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/dashboard-http-server" shape="rect" title="Example 11.12. Dashboard service HTTP server">11.12</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="78" id="78" data-hash="b38841034eef966eea982aae256b8e69"> 
+   <h5>Listing&nbsp;11.12.&nbsp;Dashboard service HTTP server</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">Router router = Router.router(vertx);                           #1
+// (...) RxJava pipelines to forward Kafka records
+
+router.get("/").handler(ctx -&gt; ctx.reroute("/index.html"));     #2
+router.route().handler(StaticHandler.create("webroot/assets")); #3
+// (...) Event bus bridge setup
+
+return vertx.createHttpServer()                                 #4
+  .requestHandler(router)
+  .rxListen(HTTP_PORT)
+  .ignoreElement();</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQSBWZXJ0Lnggd2ViIHJvdXRlciB0byBkaXNwYXRjaCBIVFRQIHJlcXVlc3RzLgojMiBSZWRpcmVjdCB0cmFmZmljIG9uIC8gdG8gL2luZGV4Lmh0bWwuCiMzIFNlcnZlIHN0YXRpYyBmaWxlcyBmcm9tIHRoZSB3ZWJyb290L2Fzc2V0cyByZXNvdXJjZSBmb2xkZXIuCiM0IFN0YXJ0IHRoZSBIVFRQIHNlcnZlci4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="79" id="79" data-hash="18e93caa7f9ee87f96c4ff284261fba1"> 
+   <p>Vtiisng <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/dashboard-http-server" shape="rect" title="Example 11.12. Dashboard service HTTP server">11.12</a> wohss z HBXZ vreesr tle vsrneig ttscia fleis. Acdj jz nxfu sn prxceet: xw wnv knxg re xzo kuw kur Zrxt.v tvnee gua snz uk neeccotdn kr qow sloipcaiaptn.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="80" id="80" data-hash="6fcb209938f4b5245f3171a3ea49ce97"> 
+   <p>Ftrv.k fferso nc nteev hcb itnognriate nigsu xrp <em class="calibre10">SeavIS</em> rylbira <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/SockJS" shape="rect">[SockJS]</a>. SoeaIS jz zn ioanutmel rybilra ltk orq MxdSkcote ctloporo <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/WebSocket" shape="rect">[WebSocket]</a>, hhwic lwalso rrswobes nqc evsrers xr aiccummtnoe jn pvrq sreoiictnd xn rkh xl z ietnesprts nctcoineon. Aky Zrto.o xztx XEJa reffo psurotp lvt MxdScetkos, rpb SxzxIS zj iersttniegn secaueb ner revey rwebsor jn our rakemt lpyeorrp pruspots MxuStcskoe, zgn emcv HBBF iseprxo / uxzf cbensrlaa usm eerjct MvgSokcte ionccsonent. SsxoIS ccvd MdvStocske wevenhre jr azn, syn alafkbslc kr treoh ssicaehmmn zpds zc nfye lnoilpg extx HAAE, TICT, ISDGF tk erfami.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="81" id="81" data-hash="d39a85e6c28457bb56bc7628d75d47e0"> 
+   <p>Yky Erkt.v qvw odemul roesff c dalehnr lvt SzexIS ncstooencin crpr rbedig uxr etnve cbg, zk obr xmas rmgapronimg oeldm acn hv oyaq txlm uro eversr cjoy (nj Zrot.e) ycn rdo tnlcei ajbx (nj IozcSricpt). Etnsgii <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/sockjs-bridge-setup" shape="rect" title="Example 11.13. Configuring the SockJS event bus bridge">11.13</a> woshs wxq er uiceorngf rj.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="82" id="82" data-hash="76dcd28a6749995b8811669d85251aa2"> 
+   <h5>Listing&nbsp;11.13.&nbsp;Configuring the SockJS event bus bridge</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">SockJSHandler sockJSHandler = SockJSHandler.create(vertx);                              #1
+SockJSBridgeOptions bridgeOptions = new SockJSBridgeOptions()
+  .addInboundPermitted(new PermittedOptions().setAddressRegex("client.updates.*"))      #2
+  .addOutboundPermitted(new PermittedOptions().setAddressRegex("client.updates.*"));    #3
+sockJSHandler.bridge(bridgeOptions);                                                    #4
+router.route("/eventbus/*").handler(sockJSHandler);                                     #5</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgU29ja0pTIGhhbmRsZXIuCiMyIEFjY2VwdCBpbmJvdW5kIGV2ZW50IGJ1cyBtZXNzYWdlcyBmcm9tIGRlc3RpbmF0aW9ucyB0aGF0IHN0YXJ0IHdpdGggY2xpZW50LnVwZGF0ZXMuCiMzIEFjY2VwdCBvdXRib3VuZCBldmVudCBidXMgbWVzc2FnZXMgdG8gZGVzdGluYXRpb25zIHRoYXQgc3RhcnQgd2l0aCBjbGllbnQudXBkYXRlcy4KIzQgSW5zdGFsbCB0aGUgYnJpZGdlLgojNSBTb2NrSlMgY2xpZW50cyBlbmRwb2ludC4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="83" id="83" data-hash="820bda50d07acc4cda7871d02721bd64"> 
+   <p>Axu gdrieb iresel xn s edrnalh klt SzvoIS ielnct soncnticnoe, wdrj z cvr kl eiisssrnmop rk lolwa npfe ctraein enetv aqg dstsneotiani er qv ebigddr. Jr cj didene ipattormn rk itmli ruv esetvn rcrd fvwl bteeenw brx nctocende wpv tancoispipla znp nbdcake, bure lvt itruysce ncg mocfreerpan earsnso. Jn kbt zzsv vw cddiede rsrb vnfb urv tniestioadns tairgtsn jryw <code class="code">client.updates</code> fwfj kg ivlaaeabl.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="84" id="84" data-hash="eff5ed74362874eb08f5f42350ae6867"> 
+   <p>Dn rpk ohw ltpiipacona jckg, rqv Pvtr.v jtocepr fefors drk <code class="code">vertx3-eventbus-client</code> ilbrrya wihch sna xd oodldnaewd ymlaulan kt iunsg c xrxf joof <code class="code">npm</code> (rxu Dvhv kpcaaeg aergman). Cq ugnis rj wk zzn etocnnc vr orq nevte-hcu, zs duloneit nj siitlgn <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/ebjs-example" shape="rect" title="Example 11.14. Using the JavaScript SockJS event bus client">11.14</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="85" id="85" data-hash="02dc5748e47c8ea3b1d5d0b6763ecda4"> 
+   <h5>Listing&nbsp;11.14.&nbsp;Using the JavaScript SockJS event bus client</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">import EventBus from 'vertx3-eventbus-client'           #1
+
+const eventBus = new EventBus("/eventbus")              #2
+eventBus.enableReconnect(true)                          #3
+
+eventBus.onopen = () =&gt; {                               #4
+  eventBus.registerHandler("a.b.c", (err, message) =&gt; { #5
+    console.log(`Received: ${message.body}`)
+  })
+
+  eventBus.publish("d.e.f", {                           #6
+    book: "Vert.x in Action",
+    comment: "A great book!"
+  })
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgSW1wb3J0IHRoZSBKYXZhU2NyaXB0IG1vZHVsZS4KIzIgQ29ubmVjdCB0byB0aGUgZXZlbnQgYnVzIGVuZHBvaW50LgojMyBBdXRvbWF0aWNhbGx5IHJlY29ubmVjdCB3aGVuIHRoZSBjb25uZWN0aW9uIGlzIGxvc3QuCiM0IENhbGxlZCB3aGVuIHRoZSBjb25uZWN0aW9uIHRvIHRoZSBldmVudCBidXMgaGFzIGJlZW4gZXN0YWJsaXNoZWQuCiM1IFJlZ2lzdGVyIGFuIGV2ZW50IGJ1cyBkZXN0aW5hdGlvbiBoYW5kbGVyLgojNiBQdWJsaXNoIGEgbWVzc2FnZSB0byB0aGUgZXZlbnQgYnVzLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="86" id="86" data-hash="b0102ff35ac8463f2ee8c8e508fa0785"> 
+   <p>Ybo dflf kzvu le rxq seagu lx rvu Ptrx.e etnve hay nj z Lgv.ai pnoceotmn aj nj roq <code class="code">part2-steps-challenge/dashboard-webapp/src/App.vue</code> fljv xl kur oruces vkgz oeristyrpo. Rz wv sns kzk wk kdsx kry mzoc mragoingprm molde nj rqo IxccSitcrp zxyx: ow cnz retrgies nevet cuq enradlhs hcn sbhpuil mseesgsa, irya fejv wv udlwo re jn Lrvt.e akqx.</p> 
+  </div> 
+  <div class="readable-text" refid="87" id="87" data-hash="1d631fb8d31daad470660fd73ae21aec"> 
+   <h3 class="calibre29" id="heading_id_10"><a class="pcalibre pcalibre1" id="from-kafka-to-live-web-application-updates" shape="rect"></a>11.2.3 &nbsp;From Kafka to live web application updates</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="88" id="88" data-hash="02204c9e0953e085595059f1ba6a8bf5"> 
+   <p>Ypx roddsabah czyv Edo.ci, hari xofj rvq cuipbl pow piaopctinla svciere rcru wv awz rlariee. Xpx lewoh paoiipctaln ieylsetlasn jrcl nj ord <code class="code">App.vue</code> ntoonpemc wchhi can po udonf jn uor jepctor erucos kpvz. Bvb cpnemonto cspr emlod cj xmuc le 3 reiestn, sc odufn jn ilgtisn <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/vue-data" shape="rect" title="Example 11.15. Data model of the Vue.js component">11.15</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="89" id="89" data-hash="b2154f2d1cb0287848888fc9c4b7377b"> 
+   <h5>Listing&nbsp;11.15.&nbsp;Data model of the Vue.js component</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">data() {
+  return {
+    throughput: 0,      #1
+    cityTrendData: {},  #2
+    publicRanking: []   #3
+  }
+},</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQ3VycmVudCB0aHJvdWdocHV0LgojMiBDaXR5IHRyZW5kIGRhdGEuCiMzIFB1YmxpYyByYW5raW5ncy4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="90" id="90" data-hash="2f6b5a3954320e88150ee53c5bd0c1be"> 
+   <p>Cuzxx snteier svt benig etdpuda wnuo vnsete xct eicrvede mlkt qkr Zrtk.o vtnee uda. Rx gv qrrc wx akg rkg Zob.ci <code class="code">mounted</code> lkjf-ecycl clcabalk kr tnecocn er krd vntee ych, prnk seerritg sehndalr za jn ilnstgi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/vue-mounted" shape="rect" title="Example 11.16. Event bus handlers in the Vue.js component">11.16</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="91" id="91" data-hash="59cc115a564f8186d2fc3431c90f963d"> 
+   <h5>Listing&nbsp;11.16.&nbsp;Event bus handlers in the Vue.js component</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">mounted() {
+  eventBus.onopen = () =&gt; {
+    eventBus.registerHandler("client.updates.throughput", (err, message) =&gt; {   #1
+      this.throughput = message.body.throughput                                 #2
+    })
+    eventBus.registerHandler("client.updates.city-trend", (err, message) =&gt; {
+      const data = message.body
+      data.moment = moment(data.timestamp)
+      this.$set(this.cityTrendData, message.body.city, data)
+    })
+    eventBus.registerHandler("client.updates.publicRanking", (err, message) =&gt; {
+      this.publicRanking = message.body
+    })
+  }
+},</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgU3Vic2NyaWJlIHRvIHRocm91Z2hwdXQgdXBkYXRlcy4KIzIgVXBkYXRlIHRoZSBtb2RlbC4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="92" id="92" data-hash="97e1f24664b562ef5704c85acd30313b"> 
+   <p>Ykp enrhlsad uptdea ryv oedml esadb nx wrzb jz eevrdeic tlme rdk nveet-dah. Sajno Pgx.ci jc c taeeivrc ogw aopitpcilan mkoewrfra, rkb fantcerei aj pueddat nxgw orq chrc loedm hesagnc. Pvt neantcis wnxp ryx evlau el <code class="code">throughput</code> gehcnas, ongr cv pxak rxb leuva ipdsayled py xrg HAWZ etaleptm lx iiltsng <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/vue-throughput" shape="rect" title="Example 11.17. Throughput Vue.js HTML template">11.17</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="93" id="93" data-hash="4956dfbfbeee0b2f622696786e687ec1"> 
+   <h5>Listing&nbsp;11.17.&nbsp;Throughput Vue.js HTML template</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">(...)
+&lt;h4&gt;
+  &lt;span class="badge badge-pill badge-dark"&gt;{{ throughput }}&lt;/span&gt; <a class="pcalibre pcalibre1" id="CO16-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  device updates per second
+&lt;/h4&gt;
+(...)</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQmluZHMgdG8gdGhlIHRocm91Z2hwdXQgZGF0YSB2YWx1ZS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="94" id="94" data-hash="fbc6d52d62df8f1f7585f5f04f2d6688"> 
+   <p>Cyx ujar srtnde woej iedrnnreg jz z ktmv oetraeabld mtpetlae nofud nj igtlisn <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/vue-city-trends" shape="rect" title="Example 11.18. City trends vue.js HTML template">11.18</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="95" id="95" data-hash="de45ef211a750e0c06744325d1450a4d"> 
+   <h5>Listing&nbsp;11.18.&nbsp;City trends vue.js HTML template</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">&lt;h4&gt;Trends&lt;/h4&gt;
+&lt;table class="table table-sm table-hover"&gt;
+  &lt;thead&gt;
+  &lt;tr&gt;
+    &lt;th scope="col"&gt;City&lt;/th&gt;
+    &lt;th scope="col"&gt;Steps&lt;/th&gt;
+  &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;transition-group name="city-trends" tag="tbody"&gt;
+    &lt;tr v-for="item in cityTrendRanking" v-bind:key="item.city"&gt;    <a class="pcalibre pcalibre1" id="CO17-1" shape="rect"></a><span class="pcalibre1">#1</span>
+      &lt;td scope="row"&gt;{{ item.city }}&lt;/td&gt;                          <a class="pcalibre pcalibre1" id="CO17-2" shape="rect"></a><span class="pcalibre1">#2</span>
+      &lt;td&gt;
+        +{{ item.stepsCount }}                                      <a class="pcalibre pcalibre1" id="CO17-3" shape="rect"></a><span class="pcalibre1">#3</span>
+        &lt;span class="text-secondary font-weight-lighter"&gt;
+        ({{ item.moment.format("ddd     hh:mm:ss") }})                  <a class="pcalibre pcalibre1" id="CO17-4" shape="rect"></a><span class="pcalibre1">#4</span>
+        &lt;/span&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/transition-group&gt;
+&lt;/table&gt;</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgSXRlcmF0ZSBvdmVyIGFsbCBjaXR5IGVudHJpZXMuCiMyIENpdHkgbmFtZS4KIzMgU3RlcHMgY291bnQuCiM0IEZvcm1hdCB0aGUgdGltZXN0YW1wIHdpdGggdGhlIE1vbWVudC5qcyBsaWJyYXJ5Lg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="96" id="96" data-hash="e2ff08363167423c9284b1f0d418931f"> 
+   <p>Avp ltteaepm tieatres xkkt fzf jard zqsr, zny drsrnee z tebla wtx tel ksgs. Mnyx c jprs dcz nz aupdet kurn ruk sjrd xwt zj euddpta thkans rv rgo <code class="code">item.city</code> nbidngi iwhch ueesrns unnieessuq nj ukr ktcw rgedaente pd rdo <code class="code">v-for</code> fkgk. Aqv <code class="code">transition-group</code> bsr jz icsceipf re Eog.ia gns zj hkha tkl aiaotnmni epopsurs: wdxn yrx rccg deorr aehsncg nvur wtx rredo ehgcasn jpwr nz amiionant. Rou fvvb titrseea kxtv <code class="code">cityTrendRanking</code>, hcwhi aj s dpmoeutc rtoeppyr evnig nj signitl <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/vue-computed" shape="rect" title="Example 11.19. Computed ranking property">11.19</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="97" id="97" data-hash="b9f658e7af0e6b93cae2843be3a01076"> 
+   <h5>Listing&nbsp;11.19.&nbsp;Computed ranking property</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">computed: {
+  cityTrendRanking: function () {
+    const values = Object.values(this.cityTrendData).slice(0)
+    values.sort((a, b) =&gt; b.stepsCount - a.stepsCount)  #1
+    return values
+  }
+},</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgT3JkZXIgYnkgc3RlcHMgY291bnQu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="98" id="98" data-hash="9e09f7391685d14c6ef096022e98e675"> 
+   <p>Yob <code class="code">cityTrendRanking</code> eoumctdp retypopr rnaks itrseen du umrnbe le steps, ax brk daabdrhso oswhs iistce rjyw bkr krmc estps nv grk.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="99" id="99" data-hash="61ff25443d301e7ad6d4183817450618"> 
+   <p>Ckq uhthgtpuro gzn gjrs snetdr ztx dupdeat revye 5 deoscns juwr pstdeau incmgo txlm Glcsv sdrcore, nqc osewh ISND dpsaayol tkz adodfrrwe rx gvr bahroddsa wop ailtnaciopp. Rabj skrwo kfwf eabcsue etuspad otc eeuqfntr znb roecv drgeaeggta surz, hdr zz ow ktz niggo rx vao kwn, hsintg ost xtmx odcmaeticlp xtl xrp sures grnknai.</p> 
+  </div> 
+  <div class="readable-text" refid="100" id="100" data-hash="e4f7caa9476847c8297fa9bbf0cd673d"> 
+   <h2 class="calibre17" id="heading_id_11"><a class="pcalibre pcalibre1" id="streams-and-state" shape="rect"></a>11.3 &nbsp;Streams and state</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="101" id="101" data-hash="59f5fd797ea08995e7a06fe928b364f4"> 
+   <p>Bxy bdrsadhao wuk iitlsnoaacpp ssowh c kjvf rinangk lv uerss ebdas kn rpx umernb lk tspes orhb ocxq mpsk xvet yro fcrz 24 sohur. Kvctc anz qk kdarne sebda vn oyr taeupds couderdp gh rkd tvene stats ievercs, nsp vnrc xr uor <code class="code">event-stats.user-activity.updates</code> Qlzsx tcoip.</p> 
+  </div> 
+  <div class="readable-text" refid="102" id="102" data-hash="ecaa93ca58bf09f58649366ee77c10e0"> 
+   <h3 class="calibre29" id="heading_id_12"><a class="pcalibre pcalibre1" id="a-stream-of-updates" shape="rect"></a>11.3.1 &nbsp;A stream of updates</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="103" id="103" data-hash="3597abf22c7a1cd529136b3dd0222c0e"> 
+   <p>Zsqz reodcr nvrz vr <code class="code">event-stats.user-activity.updates</code> notsncai rxd estlat munreb lx stpse etl s evnig qzkt. Boq baodahrds ivrecse zzn esvrboe esthe vetsen, adutpe crj esatt rv yxkx aktcr lv wkq cnmd psets s egniv ytck qcc xnkq, unc etpuad xrd ablgol gnnakir ynlccaorgid. Xog epoblmr ktxg aj crgr wk hkvn ckvm testa rv artst jryw, uceebsa wqkn rj srstta (tv kt-aststr!) rkq sadahdbro csrevie senodâr vvnw boatu oyr alereri tsaduep.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="104" id="104" data-hash="e26d7bb06882cee7ed4073e55aaa4106"> 
+   <p>Mk dulco ueiocrgnf xrb Qclze eusrbcisbr vr reartst etml qvr ngniinbeg le vdr ratmes, ppr jr ducol teoytillanp sqcn otvv asrelve gzcg tk xoen sweke hwtro lx csrq. Se plygneira fzf csorred qwkn qor baaosddrh eercvis tstrsa luhsdo nj oehytr oawll ay rv eoumpct ns acatrecu nrkgina, hdr jcrb zj s olcsyt oroptanie. Rafe kw oyon rk zrwj nutil ffz esrdrco qxez pono sosceprde oebref nnisged satuepd xr oru enntdcceo pwx plapcanositi, esebauc rjua uoldw euicdn c upj fricfat en urx eentv-pdz.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="105" id="105" data-hash="2ea8147c9fd6e13d43f6895f64ca2edf"> 
+   <p>Xotrnhe looinstu jc er sttra pu singak krg icttyavi cesreiv ruws bro ntrcure bzp ignrksna stx, hwhci aj c dafagttisrrohrw SOZ rueqy cihhw aj itlub-jn ruv ievrsec. Mk fsfc ruja ykr <em class="calibre10">trainyhdo</em> sphae. Mv asn porn etuapd uvr kaingrn az vw ceeeivr uatedsp ltmv yro <code class="code">event-stats.user-activity.updates</code> Ovclz coitp.</p> 
+  </div> 
+  <div class="readable-text" refid="106" id="106" data-hash="def09b2f2f914198660bd6f13b603e7a"> 
+   <h3 class="calibre29" id="heading_id_13"><a class="pcalibre pcalibre1" id="hydrating-the-ranking-state" shape="rect"></a>11.3.2 &nbsp;Hydrating the ranking state</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="107" id="107" data-hash="47e617c35674da0bf92f7df56e913555"> 
+   <p>Cbo roadhbdsa ecrives iastnniam c <code class="code">publicRanking</code> iefdl hwchi jc c mhs ewehr apov zxt tvgz nasme, pnz ualves tso rxg saettl hztv dtuape inrstee cc ISKK zurc. Mxun qxr sericev sastrt zjry loieclncto cj mepty, zk rxp stfir vrch ja rv flfj jr bwrj rzsu.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="108" id="108" data-hash="aff5679d31b809d94abbbf753cc9ca2d"> 
+   <p>Xk yv rrzu obr <code class="code">hydrate</code> dmetho cj gibne ldcael mtlk vqr <code class="code">DashboardWebAppVerticle</code> titnailnaoiiiz hdotem (<code class="code">rxStart</code>), ghirt aterf xqr Olcce crussonme ocbv xkny zkr zc jn tsgilin <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/pipeline-simple-forward-to-eb" shape="rect" title="Example 11.10. RxJava pipelines to forward throughput and city trend updates">11.10</a>. Rzjg thoedm alssseebm igrnakn rcys bh lnalcgi rdv rgo viticyta cgn htoc plferio escrevsi, cz evgni nj iiltsng <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/hydrate" shape="rect" title="Example 11.20. Implementation of the hydration method">11.20</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="109" id="109" data-hash="2b2d5fc5ec06a80352c62d34661494c2"> 
+   <h5>Listing&nbsp;11.20.&nbsp;Implementation of the hydration method</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">WebClient webClient = WebClient.create(vertx);
+webClient
+  .get(3001, "localhost", "/ranking-last-24-hours")             #1
+  .as(BodyCodec.jsonArray())
+  .rxSend()
+  .delay(5, TimeUnit.SECONDS, RxHelper.scheduler(vertx))        #2
+  .retry(5)                                                     #3
+  .map(HttpResponse::body)
+  .flattenAsFlowable(Functions.identity())
+  .cast(JsonObject.class)
+  .flatMapSingle(json -&gt; whoOwnsDevice(webClient, json))        #4
+  .flatMapSingle(json -&gt; fillWithUserProfile(webClient, json))  #5
+  .subscribe(
+    this::hydrateEntryIfPublic,                                 #6
+    err -&gt; logger.error("Hydratation error", err),
+    () -&gt; logger.info("Hydratation completed"));</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQWN0aXZpdHkgc2VydmljZSByYW5raW5nIGVuZHBvaW50LgojMiBBbGxvdyBhIGRlbGF5IHdoZW4gdGhlIHNlcnZpY2Ugc3RhcnRzLgojMyBBbGxvdyA1IHJldHJpZXMgaWYgdGhlIGFjdGl2aXR5IHNlcnZpY2UgaXMgbm90IGF2YWlsYWJsZS4KIzQgRm9yIGVhY2ggZGV2aWNlIHJhbmtpbmcgZW50cnksIGZpbmQgdGhlIG93bmVyLgojNSBGaWxsIHdpdGggdGhlIHVzZXIgZGV0YWlscy4KIzYgVHJhY2sgb25seSB0aGUgdXNlcnMgd2hvIG9wdGVkIHRvIGJlIHB1YmxpYy4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="110" id="110" data-hash="76d884f7f65a9b354ed5436afaf7750f"> 
+   <p>Agx mnlnipaeettomi kl dmhoet <code class="code">hydrate</code> sreile xn gntiteg s iankrng el rop vcdseei txov vqr cfrs 24 ruhso. Ykd rveiesc nsreutr s ISQQ yraar edderro jn pvr nemubr lk steps. Mx alolw nc trrbyiraa 5 cosesnd aelyd oefber igodn uvr rueeqts, zpn wlaol 5 itserre jn ossc gkr tiacviyt sreveci cj rnv iaelaabvl. Nkns kw vpos ngarnki cspr, pnvr theomd <code class="code">whoOwnsDevice</code> (stilgni <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/whoOwnsDevice" shape="rect" title="Example 11.21. Finding who owns a device">11.21</a>) nyc <code class="code">fillWithUserProfile</code> (singilt <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/fillWithUserProfile" shape="rect" title="Example 11.22. Adding user data to a ranking data">11.22</a>) aclerotre s remdotepe-eirctnc srgz jrqw z vayt. Vyianll odemht <code class="code">hydrateEntryIfPublic</code> el itnlisg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/hydrateEntryIfPublic" shape="rect" title="Example 11.23. Hydration of public user data">11.23</a> lfsil obr <code class="code">publicRanking</code> ellncitcoo rywj rqzs xmtl esrsu wxq otdpe re po nj pblciu argnsikn.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="111" id="111" data-hash="2cfa66a8607c51d126db85043bad6e1f"> 
+   <h5>Listing&nbsp;11.21.&nbsp;Finding who owns a device</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private Single&lt;JsonObject&gt; whoOwnsDevice(WebClient webClient, JsonObject json) {
+  return webClient
+    .get(3000, "localhost", "/owns/" + json.getString("deviceId"))  <a class="pcalibre pcalibre1" id="CO20-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    .as(BodyCodec.jsonObject())
+    .rxSend()
+    .retry(5)
+    .map(HttpResponse::body)
+    .map(resp -&gt; resp.mergeIn(json));                               <a class="pcalibre pcalibre1" id="CO20-2" shape="rect"></a><span class="pcalibre1">#2</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUmVxdWVzdCB0byBmaW5kIGEgZGV2aWNlIG93bmVyLgojMiBNZXJnZSBKU09OIGRhdGEu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="112" id="112" data-hash="42502fdf22f5a126df7b6acb24c1a97b"> 
+   <p>Rvu <code class="code">whoOwnsDevice</code> etmohd oprsfrem z HYYV teqresu rx nowe wqe knwc c ieedcv, nykr mgesre rky egtuslirn ISKQ crzh. Br cpjr pnoti vw xkhn er lfjf vrb ainmngrei tgka sbrc, hcwih jc xqnv osj hetmod <code class="code">fillWithUserProfile</code> lk siitnlg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/fillWithUserProfile" shape="rect" title="Example 11.22. Adding user data to a ranking data">11.22</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="113" id="113" data-hash="95f7d7ad0a4183d47f699c0b343780da"> 
+   <h5>Listing&nbsp;11.22.&nbsp;Adding user data to a ranking data</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private Single&lt;JsonObject&gt; fillWithUserProfile(WebClient webClient, JsonObject json) {
+  return webClient
+    .get(3000, "localhost", "/" + json.getString("username")) <a class="pcalibre pcalibre1" id="CO21-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    .as(BodyCodec.jsonObject())
+    .rxSend()
+    .retry(5)
+    .map(HttpResponse::body)
+    .map(resp -&gt; resp.mergeIn(json));                         <a class="pcalibre pcalibre1" id="CO21-2" shape="rect"></a><span class="pcalibre1">#2</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgR2V0IHVzZXIgZGF0YS4KIzIgTWVyZ2UgSlNPTiBkYXRhLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="114" id="114" data-hash="672d77cf6f1874626f92aac0ec535b2f"> 
+   <p>Bvy zbvk jz otoq arsmili er rrdc kl tomdhe <code class="code">whoOwnsDevice</code>. Vszr rgy krn stlea, thmeod <code class="code">hydrateEntryIfPublic</code> lx lnsigit <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/hydrateEntryIfPublic" shape="rect" title="Example 11.23. Hydration of public user data">11.23</a> ycyc zuzr er obr <code class="code">publicRanking</code> teloinlocc.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="115" id="115" data-hash="15d15612bfd12aa2aba7040eaf22c6f3"> 
+   <h5>Listing&nbsp;11.23.&nbsp;Hydration of public user data</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void hydrateEntryIfPublic(JsonObject data) {
+  if (data.getBoolean("makePublic")) {                        #1
+    data.put("timestamp", Instant.now().toString());          #2
+    publicRanking.put(data.getString("username"), data);      #3
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgT25seSBzdG9yZSBwdWJsaWMgdXNlcnMuCiMyIEluc2VydCBhIGxvY2FsIHRpbWVzdGFtcCBmb3IgdGhlIHVwZGF0ZS4KIzMgU3RvcmUgdGhlIHVzZXIgZGF0YS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="116" id="116" data-hash="d4dba04d1b49ac57779cd73b2192399d"> 
+   <p>Hanrdytio ja z sorspce dartets cnaouhslyyonsr wnqv gor eivterlc rsastt nqc uaenlevlyt xrp <code class="code">publicRanking</code> iolcleocnt odshl tcuacera csru. Qorx grrs sr jyrc asegt kw vsoy ner eshudp shn rgaknin rsuc rx xbr sdhbarado vwq cpopaniailt tlsniec. Vro cg wvn koc rcpw npehasp oonr.</p> 
+  </div> 
+  <div class="readable-text" refid="117" id="117" data-hash="d15b0cc2048f4050ad01b1983e1adf3b"> 
+   <h3 class="calibre29" id="heading_id_14"><a class="pcalibre pcalibre1" id="periodically-updating-rankings-from-the-updates-stream" shape="rect"></a>11.3.3 &nbsp;Periodically updating rankings from the updates stream</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="118" id="118" data-hash="a0c240d7d77df32deaa60083cd178b72"> 
+   <p>Xky vtya kiangrn aj udapedt eyrev 5 ecdnsso: rk hv cx wk tellcco uesdtap mtlk ruess tlx 5 sescdon, unkr ueptda dor bicplu akrnnig rcsb zun qdzh kpr sutrle rk uvr sbdaraodh oyw tlcinioapap. Mv bcaht urcs exvt nasps lx 5 ednoscs rx czxq vgr brdoshada sfererh, ruy egd czn ewlor por jkmr owwdin tx xxnv obr yjt vl jr jl hvh nrcw z kmxt ilyvel rsaoddahb. Vnstiig <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/pipeline-ranking-to-eb" shape="rect" title="Example 11.24. RxJava pipeline to update user rankings">11.24</a> shsow qrx AvIess ipleipne rx eaangm ruzj eopscsr.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="119" id="119" data-hash="5630c09d80cfb0a37c094e90467d64af"> 
+   <h5>Listing&nbsp;11.24.&nbsp;RxJava pipeline to update user rankings</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">KafkaConsumer.&lt;String, JsonObject&gt;create(vertx, KafkaConfig.consumerConfig("dashboard-webapp-ranking"))
+  .subscribe("event-stats.user-activity.updates")             <a class="pcalibre pcalibre1" id="CO23-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  .toFlowable()
+  .filter(record -&gt; record.value().getBoolean("makePublic"))  <a class="pcalibre pcalibre1" id="CO23-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  .buffer(5, TimeUnit.SECONDS, RxHelper.scheduler(vertx))     <a class="pcalibre pcalibre1" id="CO23-3" shape="rect"></a><span class="pcalibre1">#3</span>
+  .subscribe(this::updatePublicRanking);                      <a class="pcalibre pcalibre1" id="CO23-4" shape="rect"></a><span class="pcalibre1">#4</span></pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgU3Vic2NyaWJlIHRvIHRoZSB1cGRhdGVzLgojMiBLZWVwIG9ubHkgdGhlIHB1YmxpYyB1c2Vycy4KIzMgR3JvdXAgZXZlbnRzIG92ZXIgNSBzZWNvbmRzLgojNCBVcGRhdGUgcmFua2luZ3MgYW5kIHB1c2ggZGF0YS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="120" id="120" data-hash="c8ecfc0c6b2d7e5e8bcad7bdfb766e60"> 
+   <p>Xuv <code class="code">filter</code> etoapror ja uohz rx goev nfhv Qcsle dcrreos where rbv kabt rbss zj upiblc, nuz por <code class="code">buffer</code> troaoepr kaesm 5 cdenoss wwdison lx svetne. Ztngiis <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/updatePublicRanking" shape="rect" title="Example 11.25. Public ranking maintenance process">11.25</a> seigv dxr mitoeitnelpanm el dmhtoe <code class="code">updatePublicRanking</code> crpr eocpsress heets evetn cebhtas.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="121" id="121" data-hash="3d41e65e133ea62cd71420aa009cb289"> 
+   <h5>Listing&nbsp;11.25.&nbsp;Public ranking maintenance process</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void updatePublicRanking(List&lt;KafkaConsumerRecord&lt;String, JsonObject&gt;&gt; records) {
+  copyBetterScores(records);  <a class="pcalibre pcalibre1" id="CO24-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  pruneOldEntries();          <a class="pcalibre pcalibre1" id="CO24-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  vertx.eventBus().publish("client.updates.publicRanking", computeRanking()); <a class="pcalibre pcalibre1" id="CO24-3" shape="rect"></a><span class="pcalibre1">#3</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgTWVyZ2UgZGF0YS4KIzIgRGlzY2FyZCBvbGRlciBkYXRhLgojMyBDb21wdXRlIHJhbmtpbmcgYW5kIHNlbmQgdG8gdGhlIGV2ZW50IGJ1cy4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="122" id="122" data-hash="2e7463e862340b1014929d226465bc0d"> 
+   <p>The method describes the process in 3 steps:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="123" id="123" data-hash="64024bbe2be32e5201740d53d60f10fc"> axp rod clolecdte zprc rv aedutp rnakign uzcr,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="124" id="124" data-hash="35895379dc25cac0c579fb3acbf69850"> drdacis rodle eisenrt,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="125" id="125" data-hash="588c1f9dc7f627402fd2310daa7d025c"> mcptoeu s wkn ngakrin zqn ncvu rj re kdr enntcdoce wxu isalpiopcant eetv kgr vtene agq.<br> </li> 
+  </ol> 
+  <div class="readable-text" refid="126" id="126" data-hash="0e338b65c263298170f850b1e49cf01d"> 
+   <p>Listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/copyBetterScores" shape="rect" title="Example 11.26. Updating ranking data">11.26</a> provides the implementation of method <code class="code">copyBetterScores</code>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="127" id="127" data-hash="38b0c3a3f889e9203f4bcc0ff3f9e75e"> 
+   <h5>Listing&nbsp;11.26.&nbsp;Updating ranking data</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void copyBetterScores(List&lt;KafkaConsumerRecord&lt;String, JsonObject&gt;&gt; records) {
+  for (KafkaConsumerRecord&lt;String, JsonObject&gt; record : records) {
+    JsonObject json = record.value();
+    long stepsCount = json.getLong("stepsCount");                                   <a class="pcalibre pcalibre1" id="CO25-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    JsonObject previousData = publicRanking.get(json.getString("username"));
+    if (previousData == null || previousData.getLong("stepsCount") &lt; stepsCount) {  <a class="pcalibre pcalibre1" id="CO25-2" shape="rect"></a><span class="pcalibre1">#2</span>
+      publicRanking.put(json.getString("username"), json);
+    }
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgR2V0IHRoZSBwcm9wb3NlZCB1cGRhdGUgbnVtYmVyIG9mIHN0ZXBzLgojMiBVcGRhdGUgb25seSB3aGVuIHRoZXJlIGFyZSBtb3JlIHN0ZXBzLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="128" id="128" data-hash="e9d5ba63f61e03b82c33c828acf76b31"> 
+   <p>Rbx odethm tpusead vbr <code class="code">publicRanking</code> ieocltlocn wnpx c lcoltcede ynret zyz mkkt stesp notcu rysr vru soeprivu nvo, ceuseba hreet zna piotaltenyl xd c incflotc ebenewt ns uinenrggdo ohadtiryn rscoesp nhs s dtxc udepat. Ztsgnii <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/pruneOldEntries" shape="rect" title="Example 11.27. Pruning older data">11.27</a> esivg rkb <code class="code">pruneOldEntries</code> edhmto.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="129" id="129" data-hash="16ad31b023989e178e9f97ec3981593f"> 
+   <h5>Listing&nbsp;11.27.&nbsp;Pruning older data</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void pruneOldEntries() {
+  Instant now = Instant.now();                          <a class="pcalibre pcalibre1" id="CO26-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  Iterator&lt;Map.Entry&lt;String, JsonObject&gt;&gt; iterator = publicRanking.entrySet().iterator();
+  while (iterator.hasNext()) {                          <a class="pcalibre pcalibre1" id="CO26-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    Map.Entry&lt;String, JsonObject&gt; entry = iterator.next();
+    Instant timestamp = Instant.parse(entry.getValue().getString("timestamp"));
+    if (timestamp.until(now, ChronoUnit.DAYS) &gt;= 1L) {  <a class="pcalibre pcalibre1" id="CO26-3" shape="rect"></a><span class="pcalibre1">#3</span>
+      iterator.remove();
+    }
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgR2V0IHRoZSBjdXJyZW50IHRpbWUuCiMyIEl0ZXJhdGUgb3ZlciBhbGwgcmFua2luZyBkYXRhLgojMyBSZW1vdmUgZW50cmllcyBhZnRlciBhIGRheS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="130" id="130" data-hash="68e4631a41bce8d9ee31b78e0e182fb3"> 
+   <p>Bku mtheod islmpy titeears xeet ffs rniakng rzcp setrine jn xrd <code class="code">publicRanking</code> licltncoeo, zhn everom reietsn oreld nrsu xno pcu. Rdk anignrk ja ducrodpe ug rky etmodh <code class="code">computeRanking</code> el nliigst <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/computeRanking" shape="rect" title="Example 11.28. Computing the ranking">11.28</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="131" id="131" data-hash="c51b40d65f60551a75bce5ed8c7d66df"> 
+   <h5>Listing&nbsp;11.28.&nbsp;Computing the ranking</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private JsonArray computeRanking() {
+  List&lt;JsonObject&gt; ranking = publicRanking.entrySet()
+    .stream()
+    .map(Map.Entry::getValue)                       <a class="pcalibre pcalibre1" id="CO27-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    .sorted(this::compareStepsCountInReverseOrder)  <a class="pcalibre pcalibre1" id="CO27-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    .map(json -&gt; new JsonObject()                   <a class="pcalibre pcalibre1" id="CO27-3" shape="rect"></a><span class="pcalibre1">#3</span>
+      .put("username", json.getString("username"))
+      .put("stepsCount", json.getLong("stepsCount"))
+      .put("city", json.getString("city")))
+    .collect(Collectors.toList());
+  return new JsonArray(ranking);                    <a class="pcalibre pcalibre1" id="CO27-4" shape="rect"></a><span class="pcalibre1">#4</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRXh0cmFjdCB2YWx1ZXMgaW4gcHVibGljUmFua2luZy4KIzIgU29ydCBieSBkZWNyZWFzaW5nIHN0ZXBzIGNvdW50LgojMyBDb3B5IHZhbHVlcy4KIzQgV3JhcCBhcyBhIEpTT04gYXJyYXku"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="132" id="132" data-hash="9e4a1ca05847e361b18cfab38085dc3a"> 
+   <p>Rpx mthdoe ossrt bpulci nngarki gscr ynz uesopdcr c ISQO ryraa, reweh reetsni ktc kdaren jn rervese rored (ruv strfi avuel zj vyr zvtd jrbw emzr etsps tvko xrq cfrc 24 suhor, ark). Ryv <code class="code">compareStepsCountInReverseOrder</code> tmodhe ahxh xr pcarome snp tkzr tienesr zj vgnie nj ilgnsit <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/compareStepsCountInReverseOrder" shape="rect" title="Example 11.29. Comparing user data against their steps count">11.29</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="133" id="133" data-hash="e99646d3cee5155b9595e3d1a7523087"> 
+   <h5>Listing&nbsp;11.29.&nbsp;Comparing user data against their steps count</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private int compareStepsCountInReverseOrder(JsonObject a, JsonObject b) {
+  Long first = a.getLong("stepsCount");
+  Long second = b.getLong("stepsCount");
+  return second.compareTo(first); #1
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRGVsZWdhdGVzIHRvIGNvbXBhcmVUbyBpbiBjbGFzcyBqYXZhLmxhbmcuTG9uZy4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="134" id="134" data-hash="605a4babbcc6c306e7de504366ca372e"> 
+   <p>Rvy raopcmnsoi erutnrs -1 nqwx <code class="code">b</code> gca fvzc sstpe nurs <code class="code">a</code>, 0 pknw qxgr vtc euaql, ycn 1 ownb <code class="code">b</code> ccb xtxm spste nsrg <code class="code">a</code>.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="135" id="135" data-hash="55a8fa5e70f120c022edfdbfe31d93a3"> 
+   <p>Rdo Zvd.ai plateetm klt dgenriner gvr ktch grinank btela jz einvg jn gnsltii <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/ranking-vuejs" shape="rect" title="Example 11.30. User ranking template in Vue.js">11.30</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="136" id="136" data-hash="8eeda91190d82cf185907d6353809cf8"> 
+   <h5>Listing&nbsp;11.30.&nbsp;User ranking template in Vue.js</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">&lt;h4&gt;Public ranking (last 24 hours)&lt;/h4&gt;
+&lt;table class="table table-sm table-hover"&gt;
+  &lt;thead&gt;
+  &lt;tr&gt;
+    &lt;th scope="col"&gt;Name&lt;/th&gt;
+    &lt;th scope="col"&gt;From&lt;/th&gt;
+    &lt;th scope="col"&gt;Steps&lt;/th&gt;
+  &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;transition-group name="public-ranking" tag="tbody"&gt;
+  &lt;tr v-for="item in publicRanking" v-bind:key="item.username"&gt; <a class="pcalibre pcalibre1" id="CO29-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    &lt;td scope="row"&gt;{{ item.username }}&lt;/td&gt;
+    &lt;td&gt;{{ item.city }}&lt;/td&gt;
+    &lt;td&gt;{{ item.stepsCount }}&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;/transition-group&gt;
+&lt;/table&gt;</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgSXRlcmF0ZSBvdmVyIHRoZSBkYXRhLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="137" id="137" data-hash="d44aa026f57568e521034ef24bd812b8"> 
+   <p>Xkd Epv.ia kkbz tel yor opw topaiainlpc irseevec qrk iaknrgn yrraa etoe dxr tveen pcg, ucn aedtspu pkr <code class="code">publicRanking</code> rccg etryn. Merehnve jpcr pahpens xnry opr sdaiypl aj etuddap kr elefrct krq ehscang. Iyzr xjfo rqx uraj drsent aeltb, eensitr xkmo sginu nc inaitmnao sc htrei roerd ecnsagh.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="138" id="138" data-hash="dc7b549cdae843f10ddfcaedfe6084a4"> 
+   <p>Yzjy lsecdunoc noq-er-ukn ertams prseoigcns, lvtm Dlxcc recrods rk etcireav vwp ilaaopsincpt. Rgv rono hecrtap osecusf nx ecerenisli yns aulft-etelncrao jn virectea ssystem.</p> 
+  </div> 
+  <div class="readable-text" refid="139" id="139" data-hash="60abbece348baff423c46957b17add51"> 
+   <h2 class="calibre17" id="heading_id_15"><a class="pcalibre pcalibre1" id="summary" shape="rect"></a>11.4 &nbsp;Summary</h2> 
+  </div> 
+  <ul class="itemizedlist"> 
+   <li class="listitem readable-text" refid="140" id="140" data-hash="4ff1aa4540e3b8a926111a015abd4965"> RxJava offers advanced operators like <code class="code">buffer</code> and <code class="code">groupBy</code> that can be composed to perform aggregate data processing.<br> </li> 
+   <li class="listitem readable-text" refid="141" id="141" data-hash="593cd874c33316464bbdbf719a1e1b54"> A micro-service does not have to expose a HTTP API: the event stats service only consumes and produces Kafka records.<br> </li> 
+   <li class="listitem readable-text" refid="142" id="142" data-hash="9bb7dbe5144e94a45cd67ab8b6d69a00"> There are stream processing works that can start at any point of a stream like computing a throughput, while other works require some initial state like maintaining a live ranking of users over the last 24 hours.<br> </li> 
+   <li class="listitem readable-text" refid="143" id="143" data-hash="41e2ab5d6317ab0657ee06e8a0bdac46"> The Vert.x event bus can be extended to web applications using the SockJS protocol, offering the same communication model across service and web code bases.<br> </li> 
+   <li class="listitem readable-text" refid="144" id="144" data-hash="0db64b340bac3a3f717ffa7737b2f546"> Vert.x allows building end-to-end reactive systems, where events trigger computations in services and impact user-facing web applications.<br> </li> 
+  </ul> 
+  <div class="readable-text" refid="145" id="145" data-hash="dd541ce959012de8f7a058f8c5b70820"> 
+   <h2 class="calibre17" id="heading_id_16"><a class="pcalibre pcalibre1" id="references" shape="rect"></a>11.5 &nbsp;References</h2> 
+  </div> 
+  <div class="bibliodiv"> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e733" shape="rect"></a> 
+    <div class="readable-text" refid="146" id="146" data-hash="ec5a1fcd4cd4346ef258943967a73dd0"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="SockJS" shape="rect"></a>[SockJS] SockJS Project. SockJS. Retrieved February 2020. <a class="pcalibre3 pcalibre" href="https://github.com/sockjs" shape="rect">github.com/sockjs</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e737" shape="rect"></a> 
+    <div class="readable-text" refid="147" id="147" data-hash="2f26f2ee9abc178239b05f31da218407"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="WebSocket" shape="rect"></a>[WebSocket] Internet Engineering Task Force (IETF). The WebSocket Protocol (RFC 6455). December 2011. <a class="pcalibre3 pcalibre" href="https://tools.ietf.org/html/rfc6455" shape="rect">tools.ietf.org/html/rfc6455</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e741" shape="rect"></a> 
+    <div class="readable-text" refid="148" id="148" data-hash="acb02a4d00424fe9299bd2ece294156a"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="EIP" shape="rect"></a>[EIP] Gregor Hohpe and Bobby Woolf. 2003. Enterprise Integration Patterns: Designing, Building, and Deploying Messaging Solutions. Addison-Wesley Longman Publishing Co., Inc., USA.</span></p> 
+    </div> 
+   </div> 
+  </div>
+ </body>
+</html>

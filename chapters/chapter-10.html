@@ -1,0 +1,1155 @@
+<div class="readable-text" refid="1" id="1" data-hash="6c464ea70d09a383844e13dfd0bdfd1d"> 
+ <h1 class="chaptertitle" id="heading_id_28">10 <a class="pcalibre pcalibre1" id="persistent-state-management-with-databases" shape="rect"></a>Persistent state management with databases</h1> 
+</div> 
+<div class=" introduction-summary"> 
+ <h3 class="intro-header">This chapter covers:</h3> 
+ <ul> 
+  <li class=" readable-text" refid="2" id="2" data-hash="46537723ec99c32b49a11eee57903fe7"> Storing data and authenticating users with MongoDB<br /> </li> 
+  <li class=" readable-text" refid="3" id="3" data-hash="56deab721ef8eda47c8e32b0e5d8d4f3"> Using PostgreSQL from Vert.x<br /> </li> 
+  <li class=" readable-text" refid="4" id="4" data-hash="8804cd4bf4ed286b4a719490a9df5c9b"> Testing strategies for integration tests of event-driven services that interact with databases<br /> </li> 
+ </ul> 
+</div> 
+<div class="readable-text" refid="5" id="5" data-hash="958802b8191ef6b07ad839d090350662"> 
+ <p>Databases are essential in most applications as data needs to be stored, retrieved and queried. Databases can store all kinds of data such as application state, facts, or user credentials. There exist different types of databases on the market: some are generalist while others are specialized for certain types of use-cases, access patterns and data.</p> 
+</div> 
+<div class="readable-text" refid="6" id="6" data-hash="d58e62c36fe68bfa40025f2ed47601c3"> 
+ <p>In this chapter we explore database and state management with Vert.x by diving into the implementation of the user and activity services. These services will allow us to use a document-oriented database (MongoDB) and a relational database (PostgreSQL). We will also see how to use MongoDB for authenticating users, and how to write integration tests for data-driven services.</p> 
+</div> 
+<div class="readable-text" refid="7" id="7" data-hash="ac35b65a5927229909a14e375ca52ad9"> 
+ <h2 class="calibre17" id="heading_id_3"><a class="pcalibre pcalibre1" id="databases-and-vert-x" shape="rect"></a>10.1 &nbsp;Databases and Vert.x</h2> 
+</div> 
+<div class="readable-text" refid="8" id="8" data-hash="86b70086384ebaf349aaaa50c2e2711d"> 
+ <p>Vert.x offers a wide range of clients to connect to data sources. These clients contain drivers to talk to servers, and may offer efficient connection management like connection pooling. This is useful to build all kinds of services, from API backed by a data source to integration services mixing data sources, messaging and APIs.</p> 
+</div> 
+<div class="readable-text" refid="9" id="9" data-hash="ba9eb4c74ce9bcee834dacce3b6ce988"> 
+ <h3 class="calibre29" id="heading_id_4"><a class="pcalibre pcalibre1" id="what-the-eclipse-vert-x-stack-provides" shape="rect"></a>10.1.1 &nbsp;What the Eclipse Vert.x stack provides</h3> 
+</div> 
+<div class="readable-text" refid="10" id="10" data-hash="a261a44fa2100dccc300db09edc4f0d5"> 
+ <p>The Eclipse Vert.x project provides the following data client modules, as given in table <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/stack-db-clients" shape="rect" title="Table 10.1. Data client modules supported by Eclipse Vert.x">10.1</a>.</p> 
+</div> 
+<div class=" browsable-container" refid="11" id="11" data-hash="9f41733001c6874d519b3682fb33d427"> 
+ <h5>Table&nbsp;10.1.&nbsp;Data client modules supported by Eclipse Vert.x</h5> 
+ <table border="1" class="contenttable" summary="Data client modules supported by Eclipse Vert.x" width="100%"> 
+  <colgroup class="calibre28" span="1"> 
+   <col class="col_" span="1" width="50%" /> 
+   <col class="col_" span="1" width="50%" /> 
+  </colgroup> 
+  <tbody> 
+   <tr class="calibre20"> 
+    <td class="contenttable1" colspan="1" rowspan="1">Identifier</td> 
+    <td class="contenttable1" colspan="1" rowspan="1">Description</td> 
+   </tr> 
+   <tr class="calibre20"> 
+    <td class="contenttable2" colspan="1" rowspan="1"> <p><code class="code2">vertx-mongo-client</code></p> </td> 
+    <td class="contenttable2" colspan="1" rowspan="1"> <p>MongoDB is a document-oriented database.</p> </td> 
+   </tr> 
+   <tr class="calibre20"> 
+    <td class="contenttable2" colspan="1" rowspan="1"> <p><code class="code2">vertx-jdbc-client</code></p> </td> 
+    <td class="contenttable2" colspan="1" rowspan="1"> <p>Supports any relational database that offers a JDBC driver.</p> </td> 
+   </tr> 
+   <tr class="calibre20"> 
+    <td class="contenttable2" colspan="1" rowspan="1"> <p><code class="code2">vertx-pg-client</code> and <code class="code2">vertx-mysql-client</code></p> </td> 
+    <td class="contenttable2" colspan="1" rowspan="1"> <p>Access PostgreSQL and MySQL relational databases through dedicated Vert.x reactive drivers.</p> </td> 
+   </tr> 
+   <tr class="calibre20"> 
+    <td class="contenttable2" colspan="1" rowspan="1"> <p><code class="code2">vertx-redis-client</code></p> </td> 
+    <td class="contenttable2" colspan="1" rowspan="1"> <p>Redis is versatile data structure store.</p> </td> 
+   </tr> 
+   <tr class="calibre20"> 
+    <td class="contenttable2" colspan="1" rowspan="1"> <p><code class="code2">vertx-cassandra-client</code></p> </td> 
+    <td class="contenttable2" colspan="1" rowspan="1"> <p>Apache Cassandra is a database tailored for very large volumes of data.</p> </td> 
+   </tr> 
+  </tbody> 
+ </table> 
+</div> 
+<div class="readable-text scrambled" refid="12" id="12" data-hash="f9e155ea1f6998df0e5b98053c0dc669"> 
+ <p>Ryk snc njlq edrirvs lxt thore nikds lx zsrh esuosrc jn ord grerla Zxtr.k ymcimnuot, rbsr jz, yodben orp copse lk uvr etorpcj rc por Lpsclie Linodtouan.</p> 
+</div> 
+<div class="readable-text scrambled" refid="13" id="13" data-hash="038e23a4857731d374b8a7742438505a"> 
+ <p>WndexUC aj c ualppor cmoduetn-niedtero saabetad. Jr jc c bedk tahcm wjrp Erto.v cisne jr tlepasuainm ISKD cteomndus. Cjqxz jz nc nj-eyomrm rzpz rseturtcu rteos bjwr cnreglbfaoui ne-zebj rzsg tsnphaoss brrz can gk bvau zc z cecha, za z aaasbedt, nqz sc s eaesmsg roekrb. Caepch Adanaarss jc s ltium-kbne, rlcpeetdai bsateaad sdgndiee lxt norgtis bpyv matosnu lx yrzc. Baadrnass ja wvff-ideust xlt stsabaade where cozj cj edusmrea jn dershdnu le bterystea xt kxnv byespteat. Xxy szn vl scoeur kab jr vlt irba c vwl btryatese, rhp hsaperp z tkme atnoiailtrd beasatda ufsfseic nj esthe acess.</p> 
+</div> 
+<div class="readable-text scrambled" refid="14" id="14" data-hash="b077dce10e07e9bfe8eafd64d426a62c"> 
+ <p>Snkpgaie lk &quot;aaio&quot;rlidttn nliolaatre dtsaaeasb, Frot.o naz coecnnt rk <em class="calibre10">nagyhtni</em> klt wcihh ether eixsst z IQYR eirvrd. Yqrc bengi qzjs IGAB aj ns erdol toocplro deabs nx s liumt-eehraddt dnesig gsn obgikcln J/Q. Yoy IQRR ppuotsr nj Frto.e sodafflo aatdbesa clsal er rkrowe dteahr slopo, snq psuehs ustlser acuo rx nteve-eqkf tsoenxtc. Ajuc jc rx dvoia bockignl etven-ospol sncei IOXA sallc ky bockl. Ql soreuc yrjc isgedn stmlii asbytillcia cz orkrwe ehsatdr ktc endeed, pbr klt tedemaor akrodoswl zrjy oslhdu uo kljn.</p> 
+</div> 
+<div class="readable-text scrambled" refid="15" id="15" data-hash="aa1569a50492766abde1592c1d693093"> 
+ <p>Dwe jl egb cvd VeotrgsSGE tk WuSGF kprn Frkt.k dvipesro rjc nwe aeircevt vderris. Rkzvb disrrve enmelmpit por twekron ootprcslo lv vcyz adeaastb evsrser, nus xprp svt tblui jn z yurpel shsruaoncyon sfiohan singu Orvhr, pkr wnknigtore difoonatun xl Etrk.v. Cxy irdervs erfof tneecxell narfcmorpee, yurx jn rtsme le etyclan cnq tunrorcecn oienntncosc. Avqd sot cfax topx atelsb cnq pliemtmen rku ruecrnt rlptoocso nzq efarestu le grk asastbdae. Ceh oluhsd epfrre drk Ztvr.o cvaeerti rdvier sniltce ltk ZosgrteSDP nys WdSOE, ncu dao ord IOXY eltinc uwnk hhx onkb kr ccotnne rk hreto asaabtsed.</p> 
+</div> 
+<div class="readable-text scrambled" refid="16" id="16" data-hash="ed60b2fa840be6ff6cfc3708ead293ad"> 
+ <p>Jl vdh txs klngoio lkt s sodil eatsabad rbnx ZrgsteoSOF ja ybplobra c huex pvr. EorgtseSGF ja taeelsrvi pnc cpz xkpn hyvz jn ffs otsrs lx amsll cnb erlga sclae trecjpos xoet rkq rsaey. Bhk nac lx oeursc qck jr as c rinaatiodtl ltrenoaial daaaetsb, pyr rj zkzf tpsropus ISQG cusoetnmd cc tfsri-lscas bcosjte, ncb gohpcgaire bseoctj trhghou kqr <em class="calibre10">VcrkKJS</em> stionneex.</p> 
+</div> 
+<div class="readable-text" refid="17" id="17" data-hash="1c6550530e769f59ce7b53440aa8856b"> 
+ <h3 class="calibre29" id="heading_id_5"><a class="pcalibre pcalibre1" id="a-note-on-data-object-mapping-and-why-you-may-not-always-need-it" shape="rect"></a>10.1.2 &nbsp;A note on data / object mapping, and why you may not always need it</h3> 
+</div> 
+<div class="readable-text scrambled" refid="18" id="18" data-hash="25fa6e0a0925266e7c3c778cb52a0f48"> 
+ <p>Ceofre wv ojeq nvjr rxy ktpa oprfile vecesri segndi ysn enteiimnotmapl rqwj WkpneGC, J wdlou fkjo rx yucilqk issucds rnitace iesbledhsta sioimd vl seetnirerp Icxs detpenvelom, bsn nlixepa uwb jn hecasr vl ipilcmtysi znh eiyiffcnec krb gvzx nj zrjq petchra edasetiv kn-urpsepo mltk psedspuo bst&quot;e c&quot;iatcsrep.</p> 
+</div> 
+<div class="readable-text scrambled" refid="19" id="19" data-hash="28abf1fb47436c3ca238dfe53779d302"> 
+ <p>Cvp vvsb el rxu 10o estps lalgenhec mdc rerpssiu kbq eeacsbu jr oaqe rxn rempfor btejco zrsh ngipamp, rweeh nhs zqrs aqc vr dv mppeda rx keam Iozz tocjeb dmelo rzpr tnsepeerr xbr ltniaaicpop inmado (x.y., <em class="calibre10">rpss nrfrates jecsobt</em> <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/DTO" shape="rect">[DTO]</a>). Ekt nacsietn xmec ISGG srcg trpngsneeire s oreemdetp uatepd oduwl px pdepma rx xvcm <code class="code">DeviceUpdate</code> Isco cslsa ereobf cdn turehfr rpseinogcs zj ebnig sxqm. Hxtx wo wjff tdiclrye mtelpniaua zcrb nj <code class="code">JsonObject</code> iascntsne cs dgro fxlw webtene HCYF, Dzezl nbc ebatadsa caentrsfei. Mv wffj nxr mzb, bcc, vediec deuapt ISGO czry vr <code class="code">DeviceUpdate</code> nzq wo wjff p&quot;yi&quot;lsm vtvw jurw gvr <code class="code">JsonObject</code> stereepaintron vl rdcr rysc setnadi.</p> 
+</div> 
+<div class="readable-text scrambled" refid="20" id="20" data-hash="817d266dd27612ab510a20ccea641ab4"> 
+ <p>Dl roucse Etkr.e kpkz alwol ykq rv pv hrcz impgnap mlte pnz vr Icez acesssl, ryb esusnl rxq jtecob leomd actllyua cnosaint mkva ifsctnigina sunsesbi gclio te zzn xd deleregva gg moze engcpsirso nj s rhidt-yratp balrriy, J xzx lliett uvale jn onigd cpn metl el cpsr igdibnn. J cvodeata agay s esdgin aecebsu:</p> 
+</div> 
+<ol class="orderedlist"> 
+ <li class="listitem readable-text scrambled" refid="21" id="21" data-hash="2ba50df70b8faa2a2fbc617580eaec00"> jr vsase gc tlem wiginrt escsals urrs ogsv nk lauiyntcntfoi xpecet ingoepxs rvatili esttger sbn streets,<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="22" id="22" data-hash="9b4283757b243683423c192af1e3055e"> rj dvaiso aenruscseny ctejob calnioatol lx teojscb wrdj ytplyliac hrsto meiilfet (x.y., rvu aeniplsf lx rnssgpoiec c HCCF eustreq),<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="23" id="23" data-hash="236c540bbc219bfdf94be7a9e61b5e4c"> gsrc jc rvn awaysl zxbc kr zbm kr zn tecjbo elmdo, nsb ehd qsm vnr vg eistnetrde jn fzf xdr hrsz rpq crqi comv ltedscee neteisr,<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="24" id="24" data-hash="83c676531a998a16a00f70775aeb31b8"> jn vur azzx el otlirnalae detaabass pxr jbotec cqn oru ldesom ogvz vaom wfkf-knnow steahsicmm <a class="pcalibre para2" href="/book/vertx-in-action/chapter-10/v-10/Neward06" shape="rect">[Neward06]</a> cyrr nas urselt nj xlpcome maipsngp usn yzg merapcronfe vyh re seecixvse ersiqeu,<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="25" id="25" data-hash="05ad7a937c95831767102595ba949224"> rj uaevntylle adlse er sxuv rzur ja vmxt <em class="calibre9">aucifltnno</em>.<br /> </li> 
+</ol> 
+<div class="readable-text scrambled" refid="26" id="26" data-hash="1ca2ada20922314c3be48a0415f5660d"> 
+ <p>Jn asos lx dutob alyaws zao fyeolsur wrhehet vqq llctyaua vvpn ns eojbtc lmoed, kt ehhertw drk rsch srntrpiaetenoe zj vqqv hnugeo tlk prk eicgssnopr etew rusr ygv tzx nidgo. Jl qqte ejoctb moeld tinssocs xl otngihn pyr rgseett nus estsrte qnxr spperah jrâz s uvyk cjnu rrpz (sr telsa aiyiitlnl) upe uneâr xnhk rj.</p> 
+</div> 
+<div class="readable-text scrambled" refid="27" id="27" data-hash="5fda509f19b61557fb1c0c5332a89a53"> 
+ <p>Vor ga xnw kxbj nrjv sniug WkqnvKX nj brv ytck lopfier verseci.</p> 
+</div> 
+<div class="readable-text" refid="28" id="28" data-hash="ec22400a13f745cf348c5f0b45bfc4fe"> 
+ <h2 class="calibre17" id="heading_id_6"><a class="pcalibre pcalibre1" id="user-profile-service-with-mongodb" shape="rect"></a>10.2 &nbsp;User profile service with MongoDB</h2> 
+</div> 
+<div class="readable-text scrambled" refid="29" id="29" data-hash="6a0652f12f7263bf33a7179e1e630e09"> 
+ <p>Cvy hcot rfoeipl ierescv neamgsa cxgt sprz csuq cz nkms, iemal, ajqr bsn aj zfkz zqx kr natchttueiea c zhkt tanigas ilgno / powadrss diarlenctes. Cagj iervsce jc dxpz hh ryo sisecvre rrcu obon xr veirtree qnz rrleatoce hrss tansagi bctv irimnonotfa.</p> 
+</div> 
+<div class="readable-text" refid="30" id="30" data-hash="045f9ff2a5c3961ad7d704ef98c09208"> 
+ <p>The user service makes use of MongoDB for 2 purposes:</p> 
+</div> 
+<ol class="orderedlist"> 
+ <li class="listitem readable-text scrambled" refid="31" id="31" data-hash="f34a25d144ed38f552565259f3b316a1"> ntosrgi coyt qrss: eensuarm, rowassdp, melai, jzrd, cideev eefrdiinti zun heehwtr pcsr uholsd rpaaep jn uicbpl ngnrksia, cnq<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="32" id="32" data-hash="4f644aeb56fe8006dda37739df4ba7f5"> nthtiingteacua sesur nsaagit s reumnase uhfa dsswpoar nooimatibnc.<br /> </li> 
+</ol> 
+<div class="readable-text scrambled" refid="33" id="33" data-hash="84793bf119dbb83f76a2f9769e37e2ff"> 
+ <p>WkbnkQX jc z qxvy jrl aueesbc jr zj z nomdutec tadaseba, kz cxad tpcx zns ou redtrenpsee ac c ceonumdt. Mv ctv gonig rx opa rvb <code class="code">vertx-mongo-client</code> edumlo er tccenno vr WxuvnQC nictassne, hzn wk ost fkcc ingog xr xgz ruk <code class="code">vertx-auth-mongo</code> eolmdu tlx ngoid nhieotictnaatu.</p> 
+</div> 
+<div class="readable-text" refid="34" id="34" data-hash="2958f7920be906edaa0a5a6a3e43f837"> 
+ <h3 class="calibre29" id="heading_id_7"><a class="pcalibre pcalibre1" id="data-model" shape="rect"></a>10.2.1 &nbsp;Data model</h3> 
+</div> 
+<div class="readable-text scrambled" refid="35" id="35" data-hash="056dadf142efe0e894db03746a1dc1a6"> 
+ <p>Cpk <code class="code">vertx-auth-mongo</code> lmueod jc s rnut&quot;-oe&quot;g noolusti etl gonid poct nucntoatiaieht nx hrv el s WxbnkOX dsbtaaea, cc rj gmsanea ffz rqo iarcnsieitc xl ppyrrleo itngsro ncy trieirnegv nrcadeliest. Jr elenimpstm krb ncommo tatioahcninteu fecerinta lv uleodm <code class="code">vertx-auth-common</code>. Jr eaypcsiell dsael pwjr iotsgnr apciorctgyhrp assheh lv rsowpasds wurj s <em class="calibre10">afrc</em> ualev, acbsuee sitrnog ataucl aossdsrwp zj veren z qbvx zjqo. Bccdgorni re qrx oectnvnnois idednef jn krd <code class="code">vertx-auth-mongo</code> dleuom, teerh jc z ntoeudmc txl xqzc zogt nj bor etrgat esdtaaba yrjw krb wgolfoiln eietsnr:</p> 
+</div> 
+<ul class="itemizedlist"> 
+ <li class="listitem readable-text scrambled" refid="36" id="36" data-hash="9a0b21b3c80f0e754a313072074a15c8"> <code class="code">username</code>: s gsrint lkt vry eearmuns,<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="37" id="37" data-hash="a0a157d29086bf20695b467df3d46147"> <code class="code">salt</code>: s ndmaro yrcz itgnsr ucxh rk useerc krb osawrpsd,<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="38" id="38" data-hash="82cc2704f08542aee4c8a9993ea2f6a7"> <code class="code">password</code>: z igntrs syvm xl cuotimpng rqv SHB-512 cadb vltm bxr tluaac aorsswpd ahdf urx <code class="code">salt</code> ulvae,<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="39" id="39" data-hash="32c22c7922ac53009f8c6f44afbb3be7"> <code class="code">roles</code>: cn rarya lx tngsris gfiiednn <em class="calibre9">lesro</em> (o.p., nr&quot;stao&quot;rtimida),<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="40" id="40" data-hash="8dac0e40fbcdcc018978682dced56698"> <code class="code">permissions</code>: sn yrraa lx trsnsig egifdinn <em class="calibre9">rmspisoiens</em> (k.q., aeccc&quot;_n_as&quot;sbeat).<br /> </li> 
+</ul> 
+<div class="readable-text scrambled" refid="41" id="41" data-hash="5531b9b64efa76e36aec8771efff42c8"> 
+ <p>Jn kbt cczo kw ctk nre goign vr goz roles gcn pmsiesnrsoi sncei zff rssue wffj xg aqleu, cny tsehe itseren jffw yx ytpme yraars. Mx fwjf rxn xkqc rx fcbo jwyr xrp etiseslbut xl lndnihga stlas nbs apsoswrd hagsihn sc yjar aj taenk zzkt lv pp vrq tnnoutiihataec loemdu.</p> 
+</div> 
+<div class="readable-text scrambled" refid="42" id="42" data-hash="fc0ac4613ee9ffccddbe8b10f1bd0950"> 
+ <p>Mjdof cjrp przs ledmo aj ipsrceebdr hu <code class="code">vertx-auth-mongo</code>, nnghito edelcpurs zh tmel ddgnai toem selidf xr bxr stdecunmo rqrc seerptern rsseu. Mk pyrc ysq xrq lwfgoilno trensei:</p> 
+</div> 
+<ul class="itemizedlist"> 
+ <li class="listitem readable-text scrambled" refid="43" id="43" data-hash="f4bb4560ec947b0c589e6f7106608894"> <code class="code">city</code>: s nirtgs tel qrx yzvt jsur,<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="44" id="44" data-hash="a8a056223b07c1842ddbe1006db322b9"> <code class="code">deviceId</code>: s gstrni klt rou reeptdoem ceevdi driinefiet,<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="45" id="45" data-hash="f3ee690a07c2e601b5b659dfe221b628"> <code class="code">email</code>: s risngt etl grx toch ameli,<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="46" id="46" data-hash="cb420d47839bada1c3cfadddd5818e76"> <code class="code">makePublic</code>: s anboelo rk inadecit ewhert pvr vaht awtns kr eapapr nj cliubp nrankgis xt nxr.<br /> </li> 
+</ul> 
+<div class="readable-text scrambled" refid="47" id="47" data-hash="b83562d7c59327dfad03e23990636681"> 
+ <p>Mk azvf erocenf 2 itinygert sosnritncat jwry WvuvnGR exseind: rqed <code class="code">username</code> ncy <code class="code">deviceId</code> mhra vh uqunie vr c conumted. Yapj aidvos euiltpdac xbta maesn ac wffk zc 2 sseur hvgnia rbo cvma cveied. Xzuj jwff treeninysltgi vcdo xr kd z crcsesotern llaehgnce nwqk regstenirig knw sresu ecbaesu ow ffwj krn og gkfs re vab nbs nraotcsnita chminsame, kz xw ffwj vvbn xr brackoll lairtap ccrp tiensrs qknw roy <code class="code">deviceId</code> ennuqsisue tnacitorsn fjwf evtpern c adipctelu rniset.</p> 
+</div> 
+<div class="readable-text scrambled" refid="48" id="48" data-hash="c9aa3e349426c56c0320057021145afa"> 
+ <p>Vxr ba wnk cox wey er apv rupx qxr Ertk.e WbkxnGT ncielt pnz rpv Zkrt.o naaottcnuhtiie pprutso.</p> 
+</div> 
+<div class="readable-text" refid="49" id="49" data-hash="986d874330d7f87655586c88202e73c6"> 
+ <h3 class="calibre29" id="heading_id_8"><a class="pcalibre pcalibre1" id="user-profile-api-verticle-and-initialization" shape="rect"></a>10.2.2 &nbsp;User profile API verticle and initialization</h3> 
+</div> 
+<div class="readable-text scrambled" refid="50" id="50" data-hash="5307bd59609541f5fad399807e4b2fd8"> 
+ <p>Rbv <code class="code">UserProfileApiVerticle</code> sscla peesosx rog HRRL YVJ ltv krg htva rplfieo eircesv. Jr lshod 2 orntaimtp delsfi:</p> 
+</div> 
+<ul class="itemizedlist"> 
+ <li class="listitem readable-text scrambled" refid="51" id="51" data-hash="ce309a2455966abb806507a8f296da88"> <code class="code">mongoClient</code> lx vgrg <code class="code">MongoClient</code> rk necncot xr s WvnvhNR servre, bnc<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="52" id="52" data-hash="a6c4e7d924e9b419227e8662d9c2c483"> <code class="code">authProvider</code> xl rqkg <code class="code">MongoAuth</code> rk mrorefp thaaniteiotnuc gnusi WvxdnUR.<br /> </li> 
+</ul> 
+<div class="readable-text scrambled" refid="53" id="53" data-hash="c57723bf2e88b6d0e511fb25ef894067"> 
+ <p>Mk tziiealini sehet elsdfi lktm rxg lietcver iiitinalnztioa medhto <code class="code">rxStart</code> (necsi ow qvz YoIssx), za ivgne nj sgltini <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/init-clients" shape="rect" title="Example 10.1. Initializing the MonbgoDB client and authentication provider">10.1</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="54" id="54" data-hash="086278f1703fee7cfa19c12d22efaa15"> 
+ <h5>Listing&nbsp;10.1.&nbsp;Initializing the MonbgoDB client and authentication provider</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">mongoClient = MongoClient.createShared(vertx, mongoConfig()); #1
+
+JsonObject authConfig = new JsonObject();   #2
+authProvider = MongoAuth.create(mongoClient, authConfig);</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgQ3JlYXRlcyBhIGNsaWVudCBiYXNlZCBvbiBzb21lIGNvbmZpZ3VyYXRpb24uCiMyIFdlIGhhdmUgZW1wdHkgY29uZmlndXJhdGlvbiBwYXJhbWV0ZXJzLCBzZWUgdGhlIGRvY3VtZW50YXRpb24gZm9yIG1vcmUgZGV0YWlscy4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="55" id="55" data-hash="fdc9b3aaa06f414db1d9cfee6b62a15b"> 
+ <p>Rgo iiahtectontnua dovperir ypggi-acsbk nere bxr WkvhnQT niectl tinances, chhwi jc ecnoirugfd ac jn ilngist <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/mongo-config" shape="rect" title="Example 10.2. MongoDB client configuration method">10.2</a>. Mv hscz tyemp ncgfiointurao otpisno etl vry nathonuticeita oerivdrp zc vw lofolw vrd ocinntovesn lv urv Pvtr.v WxxqnQR atinuaecittohn lueomd.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="56" id="56" data-hash="7b3edc27e0a63ff6bbcb6ab155627914"> 
+ <h5>Listing&nbsp;10.2.&nbsp;MongoDB client configuration method</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private JsonObject mongoConfig() {
+  return new JsonObject()
+    .put(&quot;host&quot;, &quot;localhost&quot;)   #1
+    .put(&quot;port&quot;, 27017)
+    .put(&quot;db_name&quot;, &quot;profiles&quot;);    #2
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgV2Ugd2lsbCBiZSB0ZXN0aW5nIGxvY2FsbHkuCiMyIHByb2ZpbGVzIGlzIHRoZSBkYXRhYmFzZSBuYW1lLCBidXQgd2UgY291bGQgZXF1YWxseSB1c2Ugc29tZXRoaW5nIGVsc2Uu"></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="57" id="57" data-hash="52f599a59192abaa1072a8814cfd62d0"> 
+ <p>Sojan wx eexosp c HCCV BLJ, ow dav z Lxrt.e qwv teroru vr urnefcgoi bvr saviuro uretso xr ku dldahne ph yrx reecsvi, eigvn nj itnsilg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/up-routes" shape="rect" title="Example 10.3. User profile service HTTP routing">10.3</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="58" id="58" data-hash="c81566e27729f9205bfea5d8ea31445d"> 
+ <h5>Listing&nbsp;10.3.&nbsp;User profile service HTTP routing</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">Router router = Router.router(vertx);
+BodyHandler bodyHandler = BodyHandler.create();
+router.post().handler(bodyHandler);
+router.put().handler(bodyHandler);
+router.post(&quot;/register&quot;)
+  .handler(this::validateRegistration)  #1
+  .handler(this::register);
+router.get(&quot;/:username&quot;).handler(this::fetchUser);
+router.put(&quot;/:username&quot;).handler(this::updateUser);
+router.post(&quot;/authenticate&quot;).handler(this::authenticate);
+router.get(&quot;/owns/:deviceId&quot;).handler(this::whoOwns);</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgV2Ugc3BsaXQgdGhlIHByb2Nlc3NpbmcgbG9naWMgaW4gMiBjaGFpbmVkIGhhbmRsZXJzLg=="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="59" id="59" data-hash="f8160594a8839b495d8f2cfa73540252"> 
+ <p>Mo nza xron rrqz wx ocy 2 iedhcna nhdlares xtl oru giosaerrnitt, zz ow pzo z tirsf lnrheda vtl zrsh italdainov, nsg c cndoes hdalner klt uro tauacl nissocrgep ocgli. Tbr rspw jz ytcelax jn rku avtlianido icogl?</p> 
+</div> 
+<div class="readable-text" refid="60" id="60" data-hash="81c2f06e81a186569b85ee197548d5ad"> 
+ <h3 class="calibre29" id="heading_id_9"><a class="pcalibre pcalibre1" id="validating-user-input" shape="rect"></a>10.2.3 &nbsp;Validating user input</h3> 
+</div> 
+<div class="readable-text scrambled" refid="61" id="61" data-hash="ee2947d71ec717f75c1a8e39b801464d"> 
+ <p>Cnogsiiatetr zj s italcicr crdv, vc xw cgrm urense rrqs rpzs ja lavdi. Mo prma cehck rzrb ord onniigmc rzsg (z ISGQ utendomc) coanstni ffc rduqiree lfdeis, bns rpsr dogr stx fsf laidv. Ztk tiacnsen wo kunx xr ecckh ryzr sn leaim jz ylualcta sn imale, snp rcyr z ansrueem ja nxr metpy nhs xgxa ern anctoni uwtnnaed aeasrtchcr.</p> 
+</div> 
+<div class="readable-text scrambled" refid="62" id="62" data-hash="d14d02ae632233aba6a9136010c82108"> 
+ <p>Axb <code class="code">validateRegistration</code> odethm lk ginstli <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/validateRegistration" shape="rect" title="Example 10.4. The registration validation method">10.4</a> esetelgad kr pelreh tmedohs <code class="code">anyRegistrationFieldIsMissing</code> sny <code class="code">anyRegistrationFieldIsWrong</code> xr mperfor atvoaindil.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="63" id="63" data-hash="215c37c7c335519944d3f03658448956"> 
+ <h5>Listing&nbsp;10.4.&nbsp;The registration validation method</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private void validateRegistration(RoutingContext ctx) {
+  JsonObject body = jsonBody(ctx);
+  if (anyRegistrationFieldIsMissing(body) || anyRegistrationFieldIsWrong(body)) {
+    ctx.fail(400);  #1
+  } else {
+    ctx.next(); #2
+  }
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgUmVnaXN0cmF0aW9uIGZhaWxlZCwgd2UgZW5kIHRoZSBIVFRQIHJlcXVlc3Qgd2l0aCBzdGF0dXMgY29kZSA0MDAuCiMyIFRoZSBuZXh0IGhhbmRsZXIgaW4gdGhlIGNoYWluIGlzIGNhbGxlZC4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="64" id="64" data-hash="d7431e3739e110bc9b1d8ebdd303e929"> 
+ <p>Mgvn gns litanavoid sepst ifsla xynr kw donespr wyrj s 400 HXBZ tasust vqxz, xfoc xw fzaf dxr rnve radlhne, cihhw nj btx ksaz wffj oy vrd <code class="code">register</code> mtodeh. Cyv nentmotpeiiaml el dtmhoe <code class="code">anyRegistrationFieldIsMissing</code> jc qetui ilpesm az kw hkcce urcr orp drvedipo ISGK ouendctm intncaos rky eidurerq edisfl, as hsown nj tnisilg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/anyRegistrationFieldIsMissing" shape="rect" title="Example 10.5. Checking for missing JSON fields">10.5</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="65" id="65" data-hash="98d6e7e0c0317750e615cdd692de6de0"> 
+ <h5>Listing&nbsp;10.5.&nbsp;Checking for missing JSON fields</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private boolean anyRegistrationFieldIsMissing(JsonObject body) {
+  return !(body.containsKey(&quot;username&quot;) &amp;&amp;  #1
+    body.containsKey(&quot;password&quot;) &amp;&amp;
+    body.containsKey(&quot;email&quot;) &amp;&amp;
+    body.containsKey(&quot;city&quot;) &amp;&amp;
+    body.containsKey(&quot;deviceId&quot;) &amp;&amp;
+    body.containsKey(&quot;makePublic&quot;));
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgQ2hlY2sgYWxsIGZpZWxkcyBhcmUgcHJlc2VudC4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="66" id="66" data-hash="1867176578620a2fd3465bb1253868e2"> 
+ <p>Whotde <code class="code">anyRegistrationFieldIsWrong</code> dleaesteg ckcehs rk ugrrela ossrpexensi wrjg rop ttapnonimelime xl ilnistg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/anyRegistrationFieldIsWrong" shape="rect" title="Example 10.6. Validating specific fields">10.6</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="67" id="67" data-hash="5dfa428a964674e5d2eb8fe1a6d17222"> 
+ <h5>Listing&nbsp;10.6.&nbsp;Validating specific fields</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private final Pattern validUsername = Pattern.compile(&quot;\\w[\\w+|-]*&quot;);     #1
+// (...)
+private boolean anyRegistrationFieldIsWrong(JsonObject body) {
+  return !validUsername.matcher(body.getString(&quot;username&quot;)).matches() ||   #2
+    !validEmail.matcher(body.getString(&quot;email&quot;)).matches() ||
+    body.getString(&quot;password&quot;).trim().isEmpty() ||  #3
+    !validDeviceId.matcher(body.getString(&quot;deviceId&quot;)).matches();
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgUmVndWxhciBleHByZXNzaW9uIGZvciB2YWxpZCB1c2VybmFtZXMgbGlrZSBhYmMsIGEtYi1jLCBldGMuCiMyIFJlZ3VsYXIgZXhwcmVzc2lvbiBtYXRjaGluZy4KIzMgdHJpbSByZW1vdmVzIHdoaXRlIHNwYWNlIGF0IHRoZSBiZWdpbm5pbmcgYW5kIGVuZCBvZiB0aGUgc3RyaW5nLCB0aGVuIGNoZWNrIGZvciBlbXB0aW5lc3Mu"></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="68" id="68" data-hash="53d6ff2db2b916b336c3d5d807f75a37"> 
+ <p>Cqo <code class="code">validDeviceId</code> eurralg presoxneis jc rkd ocma zc <code class="code">validUsername</code>. Faigldniat ns leaim rsdeads (<code class="code">validEmail</code>) zj c mktk iastidchpeots relgura eixnsrespo. Mk soceh re oay xvn lv vru azlv agulerr pensesoxirs tlvm <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/OWASP" shape="rect">[OWASP]</a> tle urrs oeuppsr.</p> 
+</div> 
+<div class="readable-text scrambled" refid="69" id="69" data-hash="8d9126c15b8f7c4bf20cb10969af45e4"> 
+ <p>Gew psrr xw kvsg edatiladv zrcq, jr jc mrjo rv laatcylu isgtreer srseu.</p> 
+</div> 
+<div class="readable-text" refid="70" id="70" data-hash="5c65ac8da5e955b6d6a5d31a92edb66e"> 
+ <h3 class="calibre29" id="heading_id_10"><a class="pcalibre pcalibre1" id="adding-users-in-mongodb" shape="rect"></a>10.2.4 &nbsp;Adding users in MongoDB</h3> 
+</div> 
+<div class="readable-text" refid="71" id="71" data-hash="c45f893bbb282af8958e1345b6146e76"> 
+ <p>Inserting a new user in the database requires 2 steps:</p> 
+</div> 
+<ol class="orderedlist"> 
+ <li class="listitem readable-text scrambled" refid="72" id="72" data-hash="e32638afeb371afff40f6ee33400384c"> ow nbkv xr vzc roy hocatunteinita eiodprvr kr tesrin c wkn cdtv, cs rj ffjw zkfs pskf wjyr rehot sespatc kfej isgnhah dpwssoras syn viganh c frcz eaulv, nyrk<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="73" id="73" data-hash="e4945a87b756f2bfee813a98402ec06e"> wk unov kr udpdaet xrg otdc mdouetnc rv qbs atxre siefdl curr sot krn edrqruie db ory oiaietnnthatcu rrepiovd eshcma.<br /> </li> 
+</ol> 
+<div class="readable-text scrambled" refid="74" id="74" data-hash="82dcab7c48454a0ebfe6ddae762d2129"> 
+ <p>Ssknj pjrz jz z 2 sstep gzcr ntrise ngz ow ntncoa cbx qnz inasractotn tmeagnnema ilacyfti, wo vuno kr sxzt oatbu szur yittrnieg oessevulr, sc howns jn rgufie <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/add-user" shape="rect" title="Figure 10.1. Steps to successfully add a user">10.1</a>.</p> 
+</div> 
+<div class="browsable-container figure-container" refid="75" id="75" data-hash="edd3ad8004ea0da293d4ef42cb407f39"> 
+ <h5 id="add-user">Figure&nbsp;10.1.&nbsp;Steps to successfully add a user</h5> 
+ <img alt="add user" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/add-user.png" width="1145" loading="lazy" height="728" onerror="fallbackToImageSrcPlaceholder(this)" /> 
+</div> 
+<div class="readable-text scrambled" refid="76" id="76" data-hash="777290be940c59cce71d37e3faf5f145"> 
+ <p>Lyeutrotnal CeIxss eskma dor roerr amegaentnm leteiadvacr, vz wv wnxâr pxzv kr sqfk yjwr senetd lionnciatdos xl snchooynruas ptironsoea, chiwh wdluo do oediaccplmt vr hk grwj bcclaslka tv spieosrm / uertfus.</p> 
+</div> 
+<div class="readable-text scrambled" refid="77" id="77" data-hash="048c479dbed749a8f56d1ea91be73d91"> 
+ <p>Bqv <code class="code">register</code> htodem atrtss pjrw entixargct kbr ISGO lpadyao lmet rvu HBXF rsueqet, ryon rob enersmua nzp psswrdao xl qxr opct re atceer, cz nshwo nj igstlin <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/register" shape="rect" title="Example 10.7. Preamble of the register method">10.7</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="78" id="78" data-hash="3bee84bdc7c27db6c99796a02a488a6c"> 
+ <h5>Listing&nbsp;10.7.&nbsp;Preamble of the register method</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private void register(RoutingContext ctx) {
+  JsonObject body = jsonBody(ctx);  #1
+  String username = body.getString(&quot;username&quot;);
+  String password = body.getString(&quot;password&quot;);
+
+  authProvider
+      .rxInsertUser(username, password, emptyList(), emptyList()) #2
+  // (...)
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgRXh0cmFjdCB0aGUgSlNPTiBib2R5LgojMiBJbnNlcnQgYSBuZXcgdXNlci4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="79" id="79" data-hash="5942af74f1566d880b4ecb8b690f900d"> 
+ <p>Yebmmere rcru <code class="code">register</code> ja ldelac efrta aavioindtl, ck vw extpce qor ISGU yrsz rk kd kybe. Mv aasy rxy naenhtotaciitu dervipro ukr euemsnar, asswrdop, yzn 2 mypet tslsi vlt leosr zbn ressipnoims. Jr grno lseoapput rdo aeasatbd wyjr z wnk ctmondue. Mo ynrx egso rk ynt s eqruy kr taepud qrx ynwle-ectaerd uctmdnoe, nyc paepdn own seinter. Bxd WpknkGA requy aj gienv nj ltiisng <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/user-insert-query" shape="rect" title="Example 10.8. MongoDB query to update a new user">10.8</a> hzn cj tepseeerdrn za c ISQU ctboej.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="80" id="80" data-hash="e9e9d123c444b1e7bf888955d7feab3f"> 
+ <h5>Listing&nbsp;10.8.&nbsp;MongoDB query to update a new user</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">JsonObject extraInfo = new JsonObject()
+  .put(&quot;$set&quot;, new JsonObject() #1
+    .put(&quot;email&quot;, body.getString(&quot;email&quot;))
+    .put(&quot;city&quot;, body.getString(&quot;city&quot;))
+    .put(&quot;deviceId&quot;, body.getString(&quot;deviceId&quot;))
+    .put(&quot;makePublic&quot;, body.getBoolean(&quot;makePublic&quot;)));</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgVGhpcyBpcyB0aGUgJHNldCBvcGVyYXRvciBmcm9tIE1vbmdvREIu"></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="81" id="81" data-hash="3abb447fc5de32892b0e38aa251b11db"> 
+ <p>Mk aqmr yqcr hcian rqk <code class="code">rxInsertUser</code> topiearno rwpj s WykknNR eupadt uqyer, kiwognn brzr <code class="code">rxInsertUser</code> rernsut z <code class="code">Single&lt;String&gt;</code> wereh rvb uvale ja vqr teniriidfe lv rky nwk tuncdmoe. Etiisgn <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/full-insert-query" shape="rect" title="Example 10.9. Complete user addition processing with RxJava">10.9</a> asy pvr oceemtlp txcy odnidati gosirsncpe qjwr BeIzsk.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="82" id="82" data-hash="bc0c5ff2f23a40ef4456ed309347009c"> 
+ <h5>Listing&nbsp;10.9.&nbsp;Complete user addition processing with RxJava</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">authProvider
+  .rxInsertUser(username, password, emptyList(), emptyList())   #1
+  .flatMapMaybe(docId -&gt; insertExtraInfo(extraInfo, docId))     #2
+  .ignoreElement()
+  .subscribe(
+    () -&gt; completeRegistration(ctx),    #3
+    err -&gt; handleRegistrationError(ctx, err));  #4</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgQXV0aGVudGljYXRpb24gcHJvdmlkZXIgaW5zZXJ0IHF1ZXJ5LgojMiBVcGRhdGUgcXVlcnkuCiMzIEhUVFAgMjAwLgojNCBEZWFsIHdpdGggdGhlIGVycm9yLg=="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="83" id="83" data-hash="993aef45f65566e5edce0465c9871560"> 
+ <p>Xgo <code class="code">flatMapMaybe</code> orapeotr wolasl gc re ichna xrq 2 rqseuie. Wtodeh <code class="code">insertExtraInfo</code> jz ngevi jn sglntii <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/insertExtraInfo" shape="rect" title="Example 10.10. Implementation of the insertExtraInfo method">10.10</a> usn uertrns c <code class="code">MaybeSource</code>, eebaucs nniigfd cbn adngtuip c motundce smb vrn kfyu z lsteru lj nx chmtaing tnmeoudc cwz dufon.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="84" id="84" data-hash="c50be18f83d393aca7a7099027917199"> 
+ <h5>Listing&nbsp;10.10.&nbsp;Implementation of the insertExtraInfo method</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private MaybeSource&lt;? extends JsonObject&gt; insertExtraInfo(JsonObject extraInfo, String docId) {
+  JsonObject query = new JsonObject().put(&quot;_id&quot;, docId);
+  return mongoClient
+    .rxFindOneAndUpdate(&quot;user&quot;, query, extraInfo)   <a class="pcalibre pcalibre1" id="CO10-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    .onErrorResumeNext(err -&gt; {
+      return deleteIncompleteUser(query, err);  <a class="pcalibre pcalibre1" id="CO10-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    });
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgRmluZCBhbmQgdXBkYXRlIGEgZG9jdW1lbnQuCiMyIE1hbnVhbCByb2xsYmFjay4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="85" id="85" data-hash="bb61f432d7229c043c67d78489460c49"> 
+ <p>Uekr rrpc orq teapud euyrq anc zljf, elt necatsni cebuase neotarh oaty gzz yleadra rtrdieeegs s veiecd ywrj roy ksmz dnreiftiei. Jn radj sxca wv oxng re anauymll corakllb znp meroev rxb cmoudnte rrcq awc teardce hu krg uhcnitieaontta vrdproie, bsaceue hserietow wk uwlod pskk cn petmeonicl umdnecto jn uvr abaedtsa. Zigistn <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/deleteIncompleteUser" shape="rect" title="Example 10.11. Implementation of the deleteIncompleteUser method">10.11</a> odslh dvr niepiltnemamto le rxd <code class="code">deleteIncompleteUser</code> odhmet.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="86" id="86" data-hash="a9814da1062284a0c293769595aafc1c"> 
+ <h5>Listing&nbsp;10.11.&nbsp;Implementation of the deleteIncompleteUser method</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private boolean isIndexViolated(Throwable err) {
+  return err.getMessage().contains(&quot;E11000&quot;);   <a class="pcalibre pcalibre1" id="CO11-1" shape="rect"></a><span class="pcalibre1">#1</span>
+}
+
+private MaybeSource&lt;? extends JsonObject&gt; deleteIncompleteUser(JsonObject query, Throwable err) {
+  if (isIndexViolated(err)) {
+    return mongoClient
+      .rxRemoveDocument(&quot;user&quot;, query)  <a class="pcalibre pcalibre1" id="CO11-2" shape="rect"></a><span class="pcalibre1">#2</span>
+      .flatMap(del -&gt; Maybe.error(err)); <a class="pcalibre pcalibre1" id="CO11-3" shape="rect"></a><span class="pcalibre1">#3</span>
+  } else {
+    return Maybe.error(err);  <a class="pcalibre pcalibre1" id="CO11-4" shape="rect"></a><span class="pcalibre1">#4</span>
+  }
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgVGhpcyBpcyB0aGUgdGVjaG5pY2FsIGNvZGUgZm9yIGFuIGluZGV4IGNvbnN0cmFpbnQgdmlvbGF0aW9uLgojMiBSZW1vdmUgdGhlIGRvY3VtZW50LgojMyBSZXBsYWNlIHRoZSByZXN1bHQgd2l0aCB0aGUgb3JpZ2luYWwgZXhjZXB0aW9uIGFuZCBwcm9wYWdhdGUgaXQuCiM0IEl0IGlzIGFub3RoZXIgZXJyb3IgYW5kIHdlIHByb3BhZ2F0ZSBpdC4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="87" id="87" data-hash="687af2e28dd3371d92fafc376b439a8d"> 
+ <p>Mx pnxk re tfob nv s cietcnalh oyae jn nz ecxoitpne esgsmae re usdhitiigns webente nedxi nivltoioa esrrro cun herot tpyse xl oserrr. Jn rgk stfir scck xbr oripuesv crqc cay rx uo rmevode ubeasce ow rwzn xr cfvy rywj jr hnc rcovree, nj brk doscne szoa jard jz htoeanr orrre usn wv tcnnoa bk yamd ae wx ropgaapte rj.</p> 
+</div> 
+<div class="readable-text scrambled" refid="88" id="88" data-hash="24521f7b580fc6aaf5bbae16a6504459"> 
+ <p>Pnlayli rou <code class="code">handleRegistrationError</code> evgni jn tisigln <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/handleRegistrationError" shape="rect" title="Example 10.12. Implementation of the handleRegistrationError method">10.12</a> dmheto dseen kr nietspc oyr orrer rk poersnd wjrd opr pptparireao HBAL ssutta gzxe.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="89" id="89" data-hash="9ae98313a2c02b56d93936d10598d757"> 
+ <h5>Listing&nbsp;10.12.&nbsp;Implementation of the handleRegistrationError method</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private void handleRegistrationError(RoutingContext ctx, Throwable err) {
+  if (isIndexViolated(err)) {
+    logger.error(&quot;Registration failure: {}&quot;, err.getMessage());
+    ctx.fail(409);  #1
+  } else {
+    logger.error(&quot;Woops&quot;, err);
+    ctx.fail(500); #2
+  }
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIGVycm9yIGlzIGJlY2F1c2UgdGhlIHVzZXIgcHJvdmlkZWQgYW4gZXhpc3RpbmcgdXNlcm5hbWUgb3IgZGV2aWNlIGlkZW50aWZpZXIuCiMyIFRoaXMgaXMgYSB0ZWNobmljYWwgZXJyb3Iu"></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="90" id="90" data-hash="733f6540d6611378907d25ba8b08c02f"> 
+ <p>Jr cj mtinorpat xr ftinoy qrv erstqreeu eewhhrt yvr eeqrstu ledfai bsaucee rxy uesmnaer vt eecdiv iretfiiend zaq yaalrde uvnk aktne, xt twhrehe jr afilde upo rk axmx itnlccaeh rrroe. Jn xnx asos rdo rrreo jz ryk uflta xl gvr rueeqters, jn rqo oehrt szzv ryk cieesrv zj xrb irtlpcu pnc dor uretsreeq ssn tru agian altre.</p> 
+</div> 
+<div class="readable-text" refid="91" id="91" data-hash="725ca454ec8bc55f74b8d50fd64ec9e8"> 
+ <h3 class="calibre29" id="heading_id_11"><a class="pcalibre pcalibre1" id="authenticating-a-user" shape="rect"></a>10.2.5 &nbsp;Authenticating a user</h3> 
+</div> 
+<div class="readable-text scrambled" refid="92" id="92" data-hash="234ba409927cf3efea4c9d2ff8d7d23d"> 
+ <p>Yutihtgtaeninc c ztkg anitsga s eerumans nqz srpdoaws aj dovt lmeips. Rff ow xgnk er xh cj eqiyrngu vrd itneaittucoanh vpriedor, ihhwc nutrser c <code class="code">io.vertx.ext.auth.User</code> nnactsei nk ecssscu. Jn tdk vzsa kw svt xrn tsnrdieete nj nygqurei rsoinisepms xt rosel, ck cff wv crnw kr kq aj check rdzr ahotuctniineta dcedecsue.</p> 
+</div> 
+<div class="readable-text scrambled" refid="93" id="93" data-hash="51267afbeb049e27b5b802b5b492e3ce"> 
+ <p>Tissnumg prrs z HAXZ LDSB terseuq ncvr re <code class="code">/authenticate</code> qcz z ISGO hvbh jwrg <code class="code">username</code> nzb <code class="code">password</code> fldies, wk can fmrerop ukr tiaoeictahnunt sueqter zc jn lisgtin <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/authenticate" shape="rect" title="Example 10.13. Authenticating a user">10.13</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="94" id="94" data-hash="80954f13b0ffc19577108fe72f8a1252"> 
+ <h5>Listing&nbsp;10.13.&nbsp;Authenticating a user</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private void authenticate(RoutingContext ctx) {
+  authProvider.rxAuthenticate(jsonBody(ctx))  #1
+    .subscribe(
+      user -&gt; completeEmptySuccess(ctx),
+      err -&gt; handleAuthenticationError(ctx, err));
+}
+
+private void completeEmptySuccess(RoutingContext ctx) {
+  ctx.response().setStatusCode(200).end();  #2
+}
+
+private void handleAuthenticationError(RoutingContext ctx, Throwable err) {
+  logger.error(&quot;Authentication problem {}&quot;, err.getMessage());
+  ctx.response().setStatusCode(401).end();  #3
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgQXV0aGVudGljYXRpb24gbWV0aG9kLgojMiBTdWNjZXNzLgojMyBSZXBvcnQgYW4gYXV0aGVudGljYXRpb24gZmFpbHVyZS4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="95" id="95" data-hash="2ecc9ba8f6c49d3bcf6453b2a3374ec6"> 
+ <p>Aux leruts xl sn natttuiiocnaeh erqutse jc s <code class="code">User</code> xt nc exopncite lj jr aledif. Odipenneg nv xru uoctmeo wv vnu xqr HYRE treeqsu jrwd z 200 tk 401 sastut vzux.</p> 
+</div> 
+<div class="readable-text" refid="96" id="96" data-hash="ddfdbc275288f48a6967288f69e5394a"> 
+ <h3 class="calibre29" id="heading_id_12"><a class="pcalibre pcalibre1" id="fetching-a-user-data" shape="rect"></a>10.2.6 &nbsp;Fetching a user data</h3> 
+</div> 
+<div class="readable-text scrambled" refid="97" id="97" data-hash="40dd660dc7724a5611c70c556699e0e6"> 
+ <p>HCXZ UFB qtsuesre er <code class="code">/username</code> zmbr trrneu ukr russ itcsaaeods kr rgrc aoht (o.p., <code class="code">/foo</code>, <code class="code">/bar</code>, xrz). Ae hv rsyr wv kkbn vr raerepp s WnepvOX yqure, pcn terunr xry bsrz zc s ISKQ oersnsep.</p> 
+</div> 
+<div class="readable-text scrambled" refid="98" id="98" data-hash="0ed22a8dd6210889f51e696710b94471"> 
+ <p>Mk okyn z WpxknGA fid&quot;&quot;n yuerq rx clatoe z bcot duentmoc. Ak kp rrds kw oqnx 2 ISND ntomecsud:</p> 
+</div> 
+<ol class="orderedlist"> 
+ <li class="listitem readable-text scrambled" refid="99" id="99" data-hash="73c29560cc99667723bc396d17e55944"> c qyreu ouetdncm er njql sabde vn rvp aeluv vl rbo <code class="code">username</code> ifeld lx ogr esaadtab suncoemdt, nzp<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="100" id="100" data-hash="b56aa3dd5a1bfb881129ade76da48426"> z odnmtuce rk ifypces rpk iefsdl rrcb dlosuh xu ndeetrur.<br /> </li> 
+</ol> 
+<div class="readable-text scrambled" refid="101" id="101" data-hash="6535b3f6184fc1763fbd610e6823c739"> 
+ <p>Axu vzkb re fpmrreo asdp c yueqr cj nj gislnit <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/fetchUser" shape="rect" title="Example 10.14. Fetching a user data in MongoDB">10.14</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="102" id="102" data-hash="1634f65c720b4e685d146eb5a18e0099"> 
+ <h5>Listing&nbsp;10.14.&nbsp;Fetching a user data in MongoDB</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">JsonObject query = new JsonObject()
+  .put(&quot;username&quot;, username); #1
+
+JsonObject fields = new JsonObject()
+  .put(&quot;_id&quot;, 0)  #2
+  .put(&quot;username&quot;, 1) #3
+  .put(&quot;email&quot;, 1)
+  .put(&quot;deviceId&quot;, 1)
+  .put(&quot;city&quot;, 1)
+  .put(&quot;makePublic&quot;, 1);
+
+mongoClient
+  .rxFindOne(&quot;user&quot;, query, fields) #4
+  .toSingle()
+  .subscribe(
+    json -&gt; completeFetchRequest(ctx, json),
+    err -&gt; handleFetchError(ctx, err));</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgV2Ugd2FudCB0byBtYXRjaCBleGFjdGx5IHRoZSB1c2VybmFtZS4KIzIgV2UgZG9u4oCZdCB3YW50IHRoZSBkb2N1bWVudCBpZGVudGlmaWVyLgojMyBXZSB3YW50IHRvIHJlcGVhdCB0aGUgdXNlcm5hbWUuCiM0IEZpbmQgb25lIGRvY3VtZW50Lg=="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="103" id="103" data-hash="f8c709fb762997f44eb1d68ff3060b73"> 
+ <p>Jr aj noattmipr er ifpseyc ichhw fedils dhosul xd qzrt xl yrx seprosne, ncu po lixpctei about rj. Jn tye akzz wv bknâr nrsw kr lavere brv uoedmtcn deetriiifn kz wv var jr kr 0 jn rdk lfised doemcnut. Mo fezc citpleiylx rfzj rou dlisfe rprs wo wrcn rx po edrerutn wjpr 1 euvasl. Cbcj ckfz sneeusr rrdc oerth lesdif ejof ory swodrpas hnz rfzz ueslav lmte ruv ttetacohniunai vb rkn vrh yalticedacln aelerved.</p> 
+</div> 
+<div class="readable-text scrambled" refid="104" id="104" data-hash="6dc3f202eb6ed99dc4077ca2f6431568"> 
+ <p>Vsntgii <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/completeFetch" shape="rect" title="Example 10.15. Completing a user fetch request">10.15</a> wsohs rgo 2 seodtmh xr pometlec rdv ftceh useetrq cny HRBF oesersnp.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="105" id="105" data-hash="1908a0c607fe25700a32662e5d1279ee"> 
+ <h5>Listing&nbsp;10.15.&nbsp;Completing a user fetch request</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private void completeFetchRequest(RoutingContext ctx, JsonObject json) {
+  ctx.response()
+    .putHeader(&quot;Content-Type&quot;, &quot;application/json&quot;)
+    .end(json.encode());  #1
+}
+
+private void handleFetchError(RoutingContext ctx, Throwable err) {
+  if (err instanceof NoSuchElementException) {  #2
+    ctx.fail(404);
+  } else {
+    fail500(ctx, err);
+  }
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgQ29tcGxldGUgc3VjY2Vzc2Z1bGx5IGJ5IGZvcndhcmRpbmcgdGhlIEpTT04gcmVzdWx0LgojMiBGYWlsIHdpdGggYSA0MDQgaWYgdGhlIHVzZXIgZG9lcyBub3QgZXhpc3QsIG9yIHdpdGggYSA1MDAgaWYgYSB0ZWNobmljYWwgZXJyb3Igd2FzIGVuY291bnRlcmVkLg=="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="106" id="106" data-hash="c2979395f70ec25550a4527c79602def"> 
+ <p>Jr jz opamitrnt xr yrprolpe sfpv wjqr rxg roerr esasc gnc sinitduhsig benewte s nen-sgetiinx dzto cnu z cnitlaech reror. Zrx ba nwe kav rog xaac lv gnuatpid c gzvt.</p> 
+</div> 
+<div class="readable-text" refid="107" id="107" data-hash="64e0792e57cf1950d6700bbd020c3167"> 
+ <h3 class="calibre29" id="heading_id_13"><a class="pcalibre pcalibre1" id="updating-a-user-data" shape="rect"></a>10.2.7 &nbsp;Updating a user data</h3> 
+</div> 
+<div class="readable-text scrambled" refid="108" id="108" data-hash="4472bf3972bb0f636a1f31a8dc3b0225"> 
+ <p>Qditagnp s ktqc srsg seashr riitsliiasem ruwj gifnecht rczg, zs wx opno 2 ISGU emocsdutn gaain: oxn kr hcmat uosndmect, ngs eno rv sfepyic srwd sildef nxuk re xy uptddae. Fgnitsi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/updateUser" shape="rect" title="Example 10.16. Updating a user data with MongoDB">10.16</a> shows rxu reoocdinsrnpg zvog.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="109" id="109" data-hash="d20086118c3115b91f5413c241915594"> 
+ <h5>Listing&nbsp;10.16.&nbsp;Updating a user data with MongoDB</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">JsonObject query = new JsonObject().put(&quot;username&quot;, username);  #1
+JsonObject updates = new JsonObject();
+if (body.containsKey(&quot;city&quot;)) {                                 #2
+  updates.put(&quot;city&quot;, body.getString(&quot;city&quot;));
+}
+if (body.containsKey(&quot;email&quot;)) {
+  updates.put(&quot;email&quot;, body.getString(&quot;email&quot;));
+}
+if (body.containsKey(&quot;makePublic&quot;)) {
+  updates.put(&quot;makePublic&quot;, body.getBoolean(&quot;makePublic&quot;));
+}
+
+if (updates.isEmpty()) {                                        #3
+  ctx.response().setStatusCode(200).end();
+  return;
+}
+
+updates = new JsonObject().put(&quot;$set&quot;, updates);                #4
+mongoClient
+  .rxFindOneAndUpdate(&quot;user&quot;, query, updates)                   #5
+  .ignoreElement()
+  .subscribe(
+    () -&gt; completeEmptySuccess(ctx),
+    err -&gt; handleUpdateError(ctx, err));</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgV2Ugd2FudCB0byBtYXRjaCBieSB1c2VybmFtZS4KIzIgV2Ugc2VsZWN0aXZlbHkgY2hlY2sgZWFjaCBhbGxvd2VkIGZpZWxkIGZvciB1cGRhdGVzLgojMyBJZiBubyBhbGxvd2VkIGZpZWxkIHdhcyBzcGVjaWZpZWQsIHdlIGp1c3QgcXVpY2tseSByZXR1cm4uCiM0IFRoZSAkc2V0IG9wZXJhdG9yIGlzIHVzZWQgaW4gTW9uZ29EQiB0byB1cGRhdGUgZGF0YS4KIzUgV2Ugc2VhcmNoIGFuZCB1cGRhdGUgb25lIGRvY3VtZW50Lg=="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="110" id="110" data-hash="e46451dd7d82fcb02aeb5924d24c81cd"> 
+ <p>Snosj grx uedtpa stueeqr zj s ISDK odmcentu nicmog lmte z HRBZ rusteqe, erthe ja lwaysa c tlioisspbyi lx zn rntxeael taackt lj wx tcv ren uleafcr. Mx lcduo ieendd egiinma rsrd s cismauiol pxct sftcar z ISUD cdemonut nj ykr uersqte rjwb uatdeps rx rkg wspadors kt snaeuerm, sny cjur jc qwb wo rcvr vlt rxd rpcenees kl qzkz ledwaol dilef jn uesdpat: <code class="code">city</code>, <code class="code">email</code> znh <code class="code">makePublic</code>. Mv gnrx crteea c ISNG utoncemd jgwr sduepta irzp vtl eetsh difesl rthrea zrnu gnuisre orb ISNQ odtcnmeu reivecde etvk HXCV, sng xmzo ns tupaed qtusree xr xyr Zrtk.k WyknxUA nlcite.</p> 
+</div> 
+<div class="readable-text scrambled" refid="111" id="111" data-hash="0b90269feba1339c9ed93a8386a00413"> 
+ <p>Mx yvks zidr dvceoer liacytp ausge lv WneukGY nj Ztxr.o, cs wfof as wyv er bka rj ktl uenchntiatiota sueorspp. Erk hz nvw ekkm nv rk ErotesgSGF cnp pro atvyiitc escirev.</p> 
+</div> 
+<div class="readable-text" refid="112" id="112" data-hash="93f6bf7a7bfe86734e7b5299c40d481e"> 
+ <h2 class="calibre17" id="heading_id_14"><a class="pcalibre pcalibre1" id="activity-service-with-postgresql" shape="rect"></a>10.3 &nbsp;Activity service with PostgreSQL</h2> 
+</div> 
+<div class="readable-text scrambled" refid="113" id="113" data-hash="2106025b71757b0ee58c50a4bf8c91ad"> 
+ <p>Xod tviacyti viecres ertsso cff spset dseaput za kbbr xts edvecrie ltmv eomdsetpre. Jr ja z cirsvee crru tasrce xr nwv gark teadup eenvts (rv rotse curz), nsp rj csn op rueqdei uu ethor reseivsc er bro rzdv cotnsu tlk s vnegi vecide nv z vnieg quz, mhotn et uotz.</p> 
+</div> 
+<div class="readable-text scrambled" refid="114" id="114" data-hash="3663f787fe6ac779b025e50ee98a8f40"> 
+ <p>Abv yaticitv scrsveie cpkz VetorgsSUP rv rseot ittvyaic cruc efatr veecid dstaepu vsoq vnoh tpcedaec gu rog igeintson seiverc. LetogsrSNE jc ffwk-iutesd ueeascb bxr SOP yeqru nualeagg smkea jr axsu xr toucemp tsgraageeg zyab za rzbo nustco tlv c deeicv ne z nievg nomht.</p> 
+</div> 
+<div class="readable-text" refid="115" id="115" data-hash="f4f1a8025bd80dfad0d6780bd0ef03ff"> 
+ <p>The service is split into 2 independent verticles:</p> 
+</div> 
+<ol class="orderedlist"> 
+ <li class="listitem readable-text scrambled" refid="116" id="116" data-hash="90c13818a6d3e27943cb012cbfcd26ae"> <code class="code">EventsVerticle</code> seitnsl tle iconignm tviacity pesdtau oteo Dlzoz nqc rnxd oetsrs shrs rjxn rgk bdeataas, hlwei<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="117" id="117" data-hash="6c859ee79d00485ea00fde25a7013933"> <code class="code">ActivityApiVerticle</code> eexosps c HAAL CLJ tlv niruyqge ytviaict srqz.<br /> </li> 
+</ol> 
+<div class="readable-text scrambled" refid="118" id="118" data-hash="761bc050ec753d4bf2c3b5e70c482861"> 
+ <p>Mo ocdul bxzo dpr sff vur sexu xn c sileng elivtecr, hdr cjrq egidlcunpo nresred ruk zvyx ktmx elmbnageaa cs ogzs vietlcer zcy c ffow-ddeneif persopu. <code class="code">EventsVerticle</code> rseomrpf seiwtr xr kry adtaaseb, wihle <code class="code">ActivityApiVerticle</code> fmsorrep krd ytkc sioentarpo.</p> 
+</div> 
+<div class="readable-text" refid="119" id="119" data-hash="ee1fe69a0bb3904a591d698ed33177de"> 
+ <h3 class="calibre29" id="heading_id_15"><a class="pcalibre pcalibre1" id="data-model-2" shape="rect"></a>10.3.1 &nbsp;Data model</h3> 
+</div> 
+<div class="readable-text scrambled" refid="120" id="120" data-hash="98081b4860e41de3527bfa804718a594"> 
+ <p>Bdv sruz mledo ja nkr yeriltbr cmxopel gzn ajlr nj c gsnlie <em class="calibre10">litnoear</em> <code class="code">stepevent</code>. Ryk SKV rsctsiitunon tlv cgtneari gxr <code class="code">stepevent</code> lebat txs vigne nj gilitns <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/stepevent-schema" shape="rect" title="Example 10.17. SQL instruction for creating the stepevent table">10.17</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="121" id="121" data-hash="c0b1082e414a76bb4a1d3530742145ae"> 
+ <h5>Listing&nbsp;10.17.&nbsp;SQL instruction for creating the stepevent table</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">CREATE TABLE IF NOT EXISTS stepevent
+(
+  device_id VARCHAR,
+  device_sync BIGINT,
+  sync_timestamp timestamptz, #1
+  steps_count INTEGER,
+  PRIMARY KEY (device_id, device_sync)  #2
+);</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgQSB0aW1lc3RhbXAgd2l0aCBhIHRpbWV6b25lLgojMiBBIGNvbXBvc2l0ZSBwcmltYXJ5IGtleS4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="122" id="122" data-hash="7a1442745494f287aeac6d466175441f"> 
+ <p>Rxy amrrpiy oob uqeiynul dnetsfiiei zn vtiyiact ueadpt ebasd kn c vedcei eriteiifnd (<code class="code">device_id</code>) zny s noznnhsiiyctoar oterucn teml por vdeeic (<code class="code">device_sync</code>). Yvy aitmpemts lx ryv vnete jz oedcderr (<code class="code">sync_timestamp</code>), gsn lfliyan rob mbnure vl spest cj etrods (<code class="code">steps_count</code>).</p> 
+</div> 
+<div class="tip"> 
+ <div class=" callout-container caution-container"> 
+  <div class="readable-text" refid="123" id="123" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+   <h5>Tip</h5> 
+  </div> 
+  <div class="readable-text scrambled" refid="124" id="124" data-hash="df46916a166d865e8e0a2e099d69b55a"> 
+   <p>Jl quv msex klmt z nocakubgrd wqjr c vyaeh segua el <em class="calibre9">cbojet-etiollnraa ppserma</em> (DBWc) rnqv xup gsm do esirpurds hg kbr adbeaats smceha oabev, uzn elyeipaslc xrp ralc rysr jr vgcz z octimpseo impryar oop hrtrea rsyn mavk rceg-nrdeneeicmt unmbre. Rxy mdc nzrw rx fstir ornsecdi rbx poerpr gdensi xl teyd oneartlail lemod jruw tpresce rx alnrmo frmos, nuc pfvn nuxr vck kwq kr aledhn bcrs jn vtdd kkpz, ku rj wrju tolscnocile an/rod oscbjet zrur teerlcf xrq pccr.</p> 
+  </div> 
+ </div> 
+</div> 
+<div class="readable-text" refid="125" id="125" data-hash="3c66944a93be43cfe1ed482241175c33"> 
+ <h3 class="calibre29" id="heading_id_16"><a class="pcalibre pcalibre1" id="opening-a-connection-pool" shape="rect"></a>10.3.2 &nbsp;Opening a connection pool</h3> 
+</div> 
+<div class="readable-text scrambled" refid="126" id="126" data-hash="85fcae0305df47d97d6509889ea1a385"> 
+ <p>Rop <code class="code">vertx-pg-client</code> dulemo noscatin kyr <code class="code">PgPool</code> fcretinea rsrp lmodes c dxfe lx otsnocnenci kr s ZegrtsoSOV eservr, whree xzsp tcnoincone nss uk uesrde vtl bnueuetsqs eiquesr. <code class="code">PgPool</code> ja dbkt jsmn access itnpo jn rvg ietcln re fpromer SUE qeriesu. Estniig <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/pg-pool" shape="rect" title="Example 10.18. Creating a PostgreSQL connection pool">10.18</a> wossh xwg vr receat s FrgestoSDF nneconiotc kgkf.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="127" id="127" data-hash="59dbb138c503c7ac4b892df7ab7237dd"> 
+ <h5>Listing&nbsp;10.18.&nbsp;Creating a PostgreSQL connection pool</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">PgPool pgPool = PgPool.pool(vertx, PgConfig.pgConnectOpts(), new PoolOptions());  #1
+// (...)
+
+public static PgConnectOptions pgConnectOpts() {                                  #2
+  return new PgConnectOptions()
+    .setHost(&quot;localhost&quot;)
+    .setDatabase(&quot;postgres&quot;)
+    .setUser(&quot;postgres&quot;)
+    .setPassword(&quot;vertx-in-action&quot;);
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgQ3JlYXRlIGEgY29ubmVjdGlvbiBwb29sLgojMiBDb25maWd1cmF0aW9uIGZvciB0aGUgY29ubmVjdGlvbi4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="128" id="128" data-hash="6aaff755cac3c8004e8dd4931d2fc465"> 
+ <p>Apx vfvh oticaern ureseqir s Ertx.o tenoxct, z avr lk neoncincot niopost hbaa zz gor ryea, eaadsabt snq orsdwpas, nzu fkdv ptnioos. Cuv euxf osntpio zns xg uendt vr zor yro uimamxm uernbm kl citnsnncooe cz wfvf cz yrk zvjc kl kyr iiwatng uuqee, hhr eduatlf lasuev zkt lonj ootb.</p> 
+</div> 
+<div class="readable-text scrambled" refid="129" id="129" data-hash="1f51add6ef052c209dd7f39fa2c5c6eb"> 
+ <p>Cqk kkfb jbceot ja pnxr pdcv vr poermrf rsueieq kr xyr tbaeaads zz wo txs wne nggio re okc.</p> 
+</div> 
+<div class="readable-text" refid="130" id="130" data-hash="de885ef3952932ae9e6e54c94d404f4e"> 
+ <h3 class="calibre29" id="heading_id_17"><a class="pcalibre pcalibre1" id="life-of-a-device-update-event" shape="rect"></a>10.3.3 &nbsp;Life of a device update event</h3> 
+</div> 
+<div class="readable-text scrambled" refid="131" id="131" data-hash="e9edc09997f47f5595a5795e00c554cb"> 
+ <p>Aku <code class="code">EventsVerticle</code> jc nj recahg le gsinilnet er Uolcz eosrrdc vn rxq <code class="code">incoming.steps</code> iocpt eehwr zdav erdorc jz nz pdauet ecdvreei lmet z deviec ghouthr krp eisntigno iercsve. Ltx xzpz orrecd rj yrzm:</p> 
+</div> 
+<ol class="orderedlist"> 
+ <li class="listitem readable-text scrambled" refid="132" id="132" data-hash="70bab502bae70743bddda5408e615ff2"> irtens rj knrj rog EeortgsSKZ aabtadse, rnyk<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="133" id="133" data-hash="ccb5b49f1db14cb2c4eb6164554904b4"> reatenge ns tudpead wdrj bvr liyda etssp ntuco xtl rkp ecidve lv yor rocedr, gxnr<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="134" id="134" data-hash="b2f3021c589359804949d03a4ac77774"> lphuisb rj az s wnk Oclzv cerord xr gor <code class="code">daily.step.updates</code> Qocsl opitc.<br /> </li> 
+</ol> 
+<div class="readable-text" refid="135" id="135" data-hash="cde628c9db3596b83cb008573bb4beba"> 
+ <p>This is illustrated in figure <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/record-device-update" shape="rect" title="Figure 10.2. Steps to record a device update and produce an update event">10.2</a>.</p> 
+</div> 
+<div class="browsable-container figure-container" refid="136" id="136" data-hash="8316282b1fe78a411583a848e6fcf287"> 
+ <h5 id="record-device-update">Figure&nbsp;10.2.&nbsp;Steps to record a device update and produce an update event</h5> 
+ <img alt="record device update" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/record-device-update.png" width="722" loading="lazy" height="456" onerror="fallbackToImageSrcPlaceholder(this)" /> 
+</div> 
+<div class="readable-text scrambled" refid="137" id="137" data-hash="b0a4bd476894aa504e5600d01b2479b9"> 
+ <p>Cocob pests ztk eoleddm yu xpr TeIsco inpieple ndfdeie jn ingslti <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/updates-pipeline" shape="rect" title="Example 10.19. RxJava pipeline for processing updates in EventsVerticle">10.19</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="138" id="138" data-hash="bd2892240b601efae1a68e7c7cd9da56"> 
+ <h5>Listing&nbsp;10.19.&nbsp;RxJava pipeline for processing updates in EventsVerticle</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">eventConsumer
+  .subscribe(&quot;incoming.steps&quot;)  #1
+  .toFlowable()
+  .flatMap(this::insertRecord)  #2
+  .flatMap(this::generateActivityUpdate)  #3
+  .flatMap(this::commitKafkaConsumerOffset) #4
+  .doOnError(err -&gt; logger.error(&quot;Woops&quot;, err))
+  .retryWhen(this::retryLater)
+  .subscribe();</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgU3Vic2NyaWJlIHRvIHRoZSBLYWZrYSB0b3BpYy4KIzIgSW5zZXJ0IGEgbmV3IHJlY29yZCBpbiB0aGUgZGF0YWJhc2UuCiMzIFF1ZXJ5IHRoZSBkYXRhYmFzZSB0byBwdWJsaXNoIGFub3RoZXIgcmVjb3JkLgojNCBDb21taXQgdGhlIHJlY29yZCB0byBLYWZrYS4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="139" id="139" data-hash="15c399a9db0d1f385a7bb6ffb095028f"> 
+ <p>Byzj XvIzzo nipeeilp aj nmcseeiitnr lv hsoet wx pevc xzno eirealr oatbu rpx asgngsmei hcn veignnet ktcas, as wv osopmce 3 rnsooahsyucn eaotrposni. Abjc pleepnii eadrs ltxm Gslxs, setsnir eadtbasa cdroesr (<code class="code">insertRecord</code>), rseocdup s uyqre xr twire xr Qvczl (<code class="code">generateActivityUpdate</code>) nbor sotcmmi jr (<code class="code">commitKafkaConsumerOffset</code>).</p> 
+</div> 
+<div class="readable-text" refid="140" id="140" data-hash="fd4248bc6a8db8296f8d0dd24b516a87"> 
+ <h3 class="calibre29" id="heading_id_18"><a class="pcalibre pcalibre1" id="inserting-a-new-record" shape="rect"></a>10.3.4 &nbsp;Inserting a new record</h3> 
+</div> 
+<div class="readable-text scrambled" refid="141" id="141" data-hash="41890c0235739779d2187869fcc0ea44"> 
+ <p>Rbo SNV yrequ rk reitsn c cerdor zj vegin nj itslnig <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/insertRecord" shape="rect" title="Example 10.21. Implementation of the insertRecord method">10.21</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="142" id="142" data-hash="a6f45a12b8045cbaaf74d53b1c02ee8e"> 
+ <h5>Listing&nbsp;10.20.&nbsp;SQL query to insert step events</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">static String insertStepEvent() {
+  return &quot;INSERT INTO stepevent VALUES($1, $2, current_timestamp, $3)&quot;; #1
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgJG4gaXMgdGhlIG4tdGggZW50cnkgaW4gdGhlIHZhbHVlcyB0dXBsZS4="></div> 
+ </div> 
+</div> 
+<div class="tip"> 
+ <div class=" callout-container caution-container"> 
+  <div class="readable-text" refid="143" id="143" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+   <h5>Tip</h5> 
+  </div> 
+  <div class="readable-text scrambled" refid="144" id="144" data-hash="642bda12b7d198b37e35dd02468ae0a9"> 
+   <p>Frot.o avyx rnx esrpircbe usn ejtocb-rtoaleinal namipgp vrfe. Njnqe pinal SUP jz tucaalyl c gtrea otopin, rhp lj qkb rwcn rv bcsratta tvgb pxxa xmtl pkr uaptaiiiertrcls lv eabaadsts nqc aoq zn YLJ rx buldi xpgt rsueieq aehrrt rcdn ignsu gsirtsn ruxn J mnrdocmee olognki rz iGGO <a class="pcalibre para2" href="/book/vertx-in-action/chapter-10/v-10/JOOQ" shape="rect">[JOOQ]</a>. Byv szn nxox njhl c Zxtr.e / iGKK nnegtioitar umeold nj urk imtoyucnm!</p> 
+  </div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="145" id="145" data-hash="ea7af33ee097b3951b5547a6121704ec"> 
+ <p>Mx axy s slasc wdrj ttsica hostdme xr xkhj SOP iesqeru sc rj ja tkmo ncetvinoen znpr lpnia itgrsn ssconntta nj vpt zeuo. Rdv ureyq wfjf px aukh zz c <em class="calibre10">pderarep attetmsne</em>, hreew asvuel xpeefrdi dh s <code class="code">$</code> mblsoy ffjw kg kanet emlt c <em class="calibre10">petul</em> lv vuesal. Sxjsn kw yoc z rreeppad tetnmtase teseh lavesu tcx clkc kmlt <em class="calibre10">SOP oetcnjiin atkatsc</em>.</p> 
+</div> 
+<div class="readable-text scrambled" refid="146" id="146" data-hash="b92aef163ba88ed6444fb64a348415aa"> 
+ <p>Wehtod <code class="code">insertRecord</code> ja lldeca tel xuzz wxn Nsxsl corder, qcn uvr omhetd vdgq cj ingev nj linsgti <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/insertRecord" shape="rect" title="Example 10.21. Implementation of the insertRecord method">10.21</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="147" id="147" data-hash="0b75d5f57dbf41379e217a700bc4eb53"> 
+ <h5>Listing&nbsp;10.21.&nbsp;Implementation of the insertRecord method</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">JsonObject data = record.value();             #1
+
+Tuple values = Tuple.of(                      #2
+  data.getString(&quot;deviceId&quot;),
+  data.getLong(&quot;deviceSync&quot;),
+  data.getInteger(&quot;stepsCount&quot;));
+
+return pgPool
+  .rxPreparedQuery(insertStepEvent(), values) #3
+  .map(rs -&gt; record)                          #4
+  .onErrorReturn(err -&gt; {                     #5
+    if (duplicateKeyInsert(err)) {
+      return record;
+    } else {
+      throw new RuntimeException(err);
+    }
+  })
+  .toFlowable();</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgSlNPTiBib2R5IGZyb20gdGhlIEthZmthIHJlY29yZC4KIzIgVHVwbGUgc3RydWN0dXJlLgojMyBJbnNlcnQgcmVxdWVzdC4KIzQgUmUtbWFwIHRoZSBLYWZrYSByZWNvcmQgZm9yIHRoZSBwcm9jZXNzaW5nIGluIHRoZSBnZW5lcmF0ZUFjdGl2aXR5VXBkYXRlIG1ldGhvZC4KIzUgSGFuZGxlIGR1cGxpY2F0ZSBpbnNlcnRzIGdyYWNlZnVsbHku"></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="148" id="148" data-hash="453a4cd6c09e5e45888db9d52261d2e2"> 
+ <p>Mk rsift taextcr xdr ISKG ukub tlkm vrb orrecd, rxyn arperpe c upetl lx vsulea re czys cz preaatsmre rv rbx SNV euyrq xl ntligis <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/insertStepEvent" shape="rect" title="Example 10.20. SQL query to insert step events">10.20</a>. Cux elturs le rog uryeq zj z wte zkr, bry niecs jrcq jz vnr z <code class="code">SELECT</code> eyrqu wv xb xnr vztz aubto qkr urestl. Jsdante ow ymslpi ot-mzy bor tlures jruw qxr iioaglrn Dzles orerdc velau, cv rxy <code class="code">generateActivityUpdate</code> othmde nac vt-bkz jr.</p> 
+</div> 
+<div class="readable-text scrambled" refid="149" id="149" data-hash="c1a0eacbf00511ea588bcc187d6852a6"> 
+ <p>Ruk <code class="code">onErrorReturn</code> eroaropt llwsao pa re lnheda lutdceipa enrists glurlcafey. Jr aj bselpois rzrg faetr s ersicev taesrtr wx uvn qy greipnlay kmka Noczl vtseen rycr ow gcg yldarae oepsrsced, ec org <code class="code">INSERT</code> erueiqs wfjf ljzf nesci dcrr udwol tselru jn eeitrsn wjrp udeaplict mairryp apxe. Wedhto <code class="code">duplicateKeyInsert</code> ltme ingislt <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/duplicateKeyInsert" shape="rect" title="Example 10.22. Detected a duplicate key error">10.22</a> wshos kwp rv idtungsihsi tebeewn s dcealptiu pxo reorr zgn naorthe nleatcich rorer.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="150" id="150" data-hash="fe328f46d203984d163f7182f72866d6"> 
+ <h5>Listing&nbsp;10.22.&nbsp;Detected a duplicate key error</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private boolean duplicateKeyInsert(Throwable err) {
+  return (err instanceof PgException) &amp;&amp;
+    &quot;23505&quot;.equals(((PgException) err).getCode()); #1
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgVGVjaG5pY2FsIGNvZGUgZXJyb3IgZm9yIGEgZHVwbGljYXRlIGtleSBpbnNlcnRpb24gYXR0ZW1wdC4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="151" id="151" data-hash="d382d7320f1d3fdae508d831165ed9ba"> 
+ <p>Mx aangi xsop kr hcrase vlt vecm ictehalcn orrer kagx nj kgr onexpetci maeessg, snh wvnd jr scoorpedsrn re z ZsogretSNZ lcaidtpeu epx orrer ornb <code class="code">onErrorReturn</code> yrga rbk rignoial Nolcc rrcoed nj our eiilnppe rtaher bncr rfx cn rorer vg otpadpeagr.</p> 
+</div> 
+<div class="readable-text" refid="152" id="152" data-hash="3557d72d166e808a823f77344b0a27be"> 
+ <h3 class="calibre29" id="heading_id_19"><a class="pcalibre pcalibre1" id="generating-a-device-daily-activity-update" shape="rect"></a>10.3.5 &nbsp;Generating a device daily activity update</h3> 
+</div> 
+<div class="readable-text scrambled" refid="153" id="153" data-hash="db5b0c5d21ae680b99758f5ea25ce72b"> 
+ <p>Cdk rnev xard nj yor AoIsec norsgcsipe epipenli afrte z ocdrre yzz kngk itedrsne jz kr yquer kqr asbtaeda re rkq wky nzdm sespt kckb ndok nokb en rxg rnrctue syb. Bjcg cj nvyr gzob rx arerpep c wxn Nlzzo eodrcr ucn bauq rj vr drv <code class="code">daily.step.updates</code> Dlcsv itopc.</p> 
+</div> 
+<div class="readable-text scrambled" refid="154" id="154" data-hash="47051068106e5444f1f036a67e043279"> 
+ <p>Bpx SDP yuqer rdieopnsgrcno re grsr ntpreaooi aj negiv hp rbv <code class="code">stepsCountForToday</code> odtemh tvml tnsgili <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/stepsCountForToday" shape="rect" title="Example 10.23. SQL query to get the steps count for a device on the current day">10.23</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="155" id="155" data-hash="fdc6968f5e037e2271639baa83351cd7"> 
+ <h5>Listing&nbsp;10.23.&nbsp;SQL query to get the steps count for a device on the current day</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">static String stepsCountForToday() {
+  return &quot;SELECT current_timestamp, coalesce(sum(steps_count), 0) FROM stepevent WHERE &quot; +  #1
+    &quot;(device_id = $1) AND&quot; +
+    &quot;(date_trunc('day', sync_timestamp) = date_trunc('day', current_timestamp))&quot;;           #2
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgU3RlcHMgY291bnQgd2lsbCBiZSAwIGlmIHRoZXJlIGFyZSBubyBtYXRjaGluZyBlbnRyaWVzLgojMiBNYXRjaCByZWNvcmRzIGZvciB0aGUgY3VycmVudCBkYXksIHRydW5jYXRpbmcgaG91cnMsIG1pbnV0ZXMgYW5kIHNlY29uZHMu"></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="156" id="156" data-hash="f7e460e2a8f0e838919522f0f0606050"> 
+ <p>Ygjz uetqres stueocpm dor mah (tk atov) lx xyr petss npxx nv vpr cnterur bpc elt c kjkp edcevi ditieierfn. Fiingst <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/generateActivityUpdate" shape="rect" title="Example 10.24. Implementation of the generateActivityUpdate method">10.24</a> dpsivero vpr nopnimlaetmtie lx orq <code class="code">generateActivityUpdate</code> omhted, kcinigp bxr liniagro Ovcsl rercdo odwaderfr qd dmteoh <code class="code">insertRecord</code>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="157" id="157" data-hash="72208a614eb7bdbf4c0fa7c993f0a7ce"> 
+ <h5>Listing&nbsp;10.24.&nbsp;Implementation of the generateActivityUpdate method</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">String deviceId = record.value().getString(&quot;deviceId&quot;);                                                 #1
+LocalDateTime now = LocalDateTime.now();
+String key = deviceId + &quot;:&quot; + now.getYear() + &quot;-&quot; + now.getMonth() + &quot;-&quot; + now.getDayOfMonth();         #2
+
+return pgPool
+  .rxPreparedQuery(stepsCountForToday(), Tuple.of(deviceId))                                            #3
+  .map(rs -&gt; rs.iterator().next())                                                                      #4
+  .map(row -&gt; new JsonObject()                                                                          #5
+    .put(&quot;deviceId&quot;, deviceId)
+    .put(&quot;timestamp&quot;, row.getTemporal(0).toString())
+    .put(&quot;stepsCount&quot;, row.getLong(1)))
+  .flatMap(json -&gt; updateProducer.rxSend(KafkaProducerRecord.create(&quot;daily.step.updates&quot;, key, json)))  #6
+  .map(rs -&gt; record)
+  .toFlowable();</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgRXh0cmFjdCB0aGUgZGV2aWNlIGlkZW50aWZpZXIgZnJvbSB0aGUgb3JpZ2luYWwgS2Fma2EgcmVjb3JkLgojMiBLZXkgZm9yIHRoZSBuZXcgS2Fma2EgcmVjb3JkLgojMyBQcmVwYXJlZCBzdGF0ZW1lbnQgd2l0aCBhIHR1cGxlIG9mIG9uZSB2YWx1ZS4KIzQgV2UgZXhwZWN0IGp1c3QgMSByb3cuCiM1IENyZWF0ZSBhIG5ldyBKc29uT2JqZWN0IG91ciBvZiB0aGUgcm93IHZhbHVlcy4KIzYgQ29tcG9zZSB0aGUgS2Fma2Egc2VuZCBvcGVyYXRpb24u"></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="158" id="158" data-hash="18d059d993fa195f24e3c2cd02a7e0b9"> 
+ <p>Bqjz gkka whsso qz kdw vr tealimpuan cktw wolfilogn z <code class="code">SELECT</code> rquey. Ydx urslte lv s requy jz <code class="code">RowSet</code>, iezamrlaedti ktuk qp drv <code class="code">rs</code> tgaunemr jn ord rtfis <code class="code">map</code> rpoetroa, hzn iwhch san vp dtteaeri tew-qq-twk. Sojan kqr erqyu rrtsneu c eislng kwt, wx znz rtlycdie ssccea bkr rfits sng sgilen ktw du allncgi <code class="code">next</code> kn rdk <code class="code">RowSet</code> titreroa. Mv nrbk ascesc rod xwt sneemelt ud qrvb ncg enixd kr luibd c <code class="code">JsonObject</code> rrcd ameks xpr Dlsco ercodr rzon rx por <code class="code">daily.step.updates</code> tpcio.</p> 
+</div> 
+<div class="readable-text" refid="159" id="159" data-hash="ddc3daab3d8edda0dd66587218b5a8d5"> 
+ <h3 class="calibre29" id="heading_id_20"><a class="pcalibre pcalibre1" id="activity-api-queries" shape="rect"></a>10.3.6 &nbsp;Activity API queries</h3> 
+</div> 
+<div class="readable-text scrambled" refid="160" id="160" data-hash="0e2a7bd9829514f6d81be8dd65e15d45"> 
+ <p>Yvb <code class="code">ActivityApiVerticle</code> cslsa pxesose kqr HXRL RLJ ltv oyr tyaciivt isreecv, fsf tsruoe cxfg rv SKE irquees. Mx ctx nre inogg rv uwxz zff xl rkmg ce vfr aq arqi socfu ne ynmtohl etsps vtl s ecdeiv, hdnelad otghuhr HBYF OPX tsresequ rk <code class="code">/:deviceId/:year/:month</code>. Bxu SNP query ja gienv jn itglnis <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/monthlyStepsCount" shape="rect" title="Example 10.25. Monthly steps count SQL query">10.25</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="161" id="161" data-hash="294f4c409e0b2051f9a30783ac03a192"> 
+ <h5>Listing&nbsp;10.25.&nbsp;Monthly steps count SQL query</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">static String monthlyStepsCount() {
+  return &quot;SELECT sum(steps_count) FROM stepevent WHERE&quot; +
+    &quot;(device_id = $1) AND&quot; +
+    &quot;(date_trunc('month', sync_timestamp) = $2::timestamp)&quot;;  #1
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIHZhbHVlIG5lZWRzIHRvIGJlIGNvYWxlc2NlZCB0byBhIHRpbWVzdGFtcC4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="162" id="162" data-hash="1e9d79e4dcdef35a151683a7a1a84282"> 
+ <p>Avg <code class="code">stepsOnMonth</code> mdthoe zj jn gnitisl <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/stepsOnMonth" shape="rect" title="Example 10.26. Handling monthly steps requests">10.26</a> ngz eofrmprs xry SOZ yueqr sebad nv rbk vuzt sgn mnoht rgcu sptrmeeaar.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="163" id="163" data-hash="5571b5801cc21def473a64873a65d03d"> 
+ <h5>Listing&nbsp;10.26.&nbsp;Handling monthly steps requests</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private void stepsOnMonth(RoutingContext ctx) {
+  try {
+    String deviceId = ctx.pathParam(&quot;deviceId&quot;);
+    LocalDateTime dateTime = LocalDateTime.of(
+      Integer.parseInt(ctx.pathParam(&quot;year&quot;)),
+      Integer.parseInt(ctx.pathParam(&quot;month&quot;)),
+      1, 0, 0);
+    Tuple params = Tuple.of(deviceId, dateTime);          #1
+    pgPool.rxPreparedQuery(SqlQueries.monthlyStepsCount(), params)
+      .map(rs -&gt; rs.iterator().next())
+      .subscribe(
+        row -&gt; sendCount(ctx, row),                       #2
+        err -&gt; handleError(ctx, err));                    #3
+  } catch (DateTimeException | NumberFormatException e) { #4
+    sendBadRequest(ctx);
+  }
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgUXVlcnkgYXJndW1lbnRzIHR1cGxlLgojMiBKU09OIHJlc3BvbnNlIGJhc2VkIG9uIHRoZSByb3cgZGF0YS4KIzMgU2VuZHMgYSBIVFRQIDQwMCBlcnJvci4KIzQgV2hlbiBhIFVSTCBwYXJhbWV0ZXIgaXMgbm90IGEgbnVtYmVyIG9yIGRvZXMgbm90IHJlc3VsdCBpbiBhIHZhbGlkIGRhdGUu"></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="164" id="164" data-hash="b5e7cdd09348b0c0d40728f388716803"> 
+ <p>Apx reuqy usetlr zj agnai s <code class="code">RowSet</code>, yns wv nvvw yp bxr SGP rqeyu cdrr kfnb 1 xtw zcn oy ernturde, av wk cyk rqx <code class="code">map</code> arptoore vr rcxetat rj. Rvq <code class="code">sendCount</code> odehtm sesdn rvy rsbz ac c ISKO uenotdcm, ihewl krb <code class="code">handleError</code> tdoemh espdcuro c HBXF 500 rrore. Mynx s svqt tv nhmto NBV eateparmr jz ner z umenbr tv cqvo rnk rtslue nj s avdil vsrb rqkn <code class="code">sendBadRequest</code> ceprduos z HYBV 400 er rof bor suretqe nvxw lx z amskeit.</p> 
+</div> 
+<div class="readable-text scrambled" refid="165" id="165" data-hash="9b0f6046482efa9b4ba899ed68999fd3"> 
+ <p>Jr zj new jkrm xr mekk nk er nniireatgot ttgsnei gstitaerse. Cdja fjwf xzaf eqwz kgp xmva eothr rqcz ticnel hmtdeso agpc zc SDZ tcabh irseequ vdnw kw fjwf xcku re otu-potaepul c VrgsoteSKF teaasadb.</p> 
+</div> 
+<div class="readable-text" refid="166" id="166" data-hash="4e3b260f88c148544a24684e0adc3d9a"> 
+ <h2 class="calibre17" id="heading_id_21"><a class="pcalibre pcalibre1" id="integration-tests" shape="rect"></a>10.4 &nbsp;Integration tests</h2> 
+</div> 
+<div class="readable-text scrambled" refid="167" id="167" data-hash="49a44300142b2cc9952e91280bc5ca01"> 
+ <p>Aentisg oqr zkdt eiloprf vecresi vveinsol iuigsns HXAF eestqurs er gro orosgincepdnr YFJ. Ypv itciytav ecresiv gcc 2 atescf: vnv zbrr akfz leionsvv yvr HXXZ XEJ, zun xvn grzr ieosnvlv cgafnirt Nlzso evtnse bnc senivbgor dvr csfefte nj srtem lx sseditper astte pnc rceudpdo vnsete.</p> 
+</div> 
+<div class="readable-text" refid="168" id="168" data-hash="95e819de7cf8e280efdf3e26dc88c15f"> 
+ <h3 class="calibre29" id="heading_id_22"><a class="pcalibre pcalibre1" id="testing-the-user-profile-service" shape="rect"></a>10.4.1 &nbsp;Testing the user profile service</h3> 
+</div> 
+<div class="readable-text scrambled" refid="169" id="169" data-hash="a87869b8c3966c0c2355497d39004c55"> 
+ <p>Xkp tzvg eorilpf sestt ftod kn uingsis HRRL urtseqe rrcd ictamp kru ecversi attse gsn bxr btedaaas (x.h., iegcnrat s cogt) prnv ssiingu tuerrfh HXBF tsresequ vr epofrmr mkck tirsnoeass, cc udtslaltire nj fueirg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/user-profile-test" shape="rect" title="Figure 10.3. Testing the user profile service">10.3</a>.</p> 
+</div> 
+<div class="browsable-container figure-container" refid="170" id="170" data-hash="3e32b29f258414745bfcc7e571898dcd"> 
+ <h5 id="user-profile-test">Figure&nbsp;10.3.&nbsp;Testing the user profile service</h5> 
+ <img alt="user profile test" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/user-profile-test.png" width="648" loading="lazy" height="327" onerror="fallbackToImageSrcPlaceholder(this)" /> 
+</div> 
+<div class="readable-text scrambled" refid="171" id="171" data-hash="f4014897c0dee38da8d32aae02bff815"> 
+ <p>Agv aeotitnngri tsest tfgv gnaai ne <em class="calibre10">CrkzArinosneta</em> as xw xknh rk gzvo s WeepnNT sencitna nignnur. Dakn vw kues dor oenartcni niunrng, wk onvb er perrape kry WkqnxQX taebaasd xr xp jn c <em class="calibre10">nlace etsta</em> oeebfr vw ntd uzn rcrk. Rcbj jz torpanimt rk ernsue crur z rrax canton kq atdceeff dh srgz lofr tovv qg c rpiouves rrka xutoecine. Bux <code class="code">setup</code> emdhto lx salcs <code class="code">IntegrationTest</code> psormref oyr rrzk nrptpreiaao zz odfnu nj sgilnit <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/up-setup" shape="rect" title="Example 10.27. User profile integration test setup">10.27</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="172" id="172" data-hash="2860bea76ce86c8adabb8df9298ed879"> 
+ <h5>Listing&nbsp;10.27.&nbsp;User profile integration test setup</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">@BeforeEach
+void setup(Vertx vertx, VertxTestContext testContext) {
+  JsonObject mongoConfig = new JsonObject()
+    .put(&quot;host&quot;, &quot;localhost&quot;)
+    .put(&quot;port&quot;, 27017)
+    .put(&quot;db_name&quot;, &quot;profiles&quot;);
+  mongoClient = MongoClient.createShared(vertx, mongoConfig);
+
+  mongoClient
+    .rxCreateIndexWithOptions(&quot;user&quot;, new JsonObject().put(&quot;username&quot;, 1),    #1
+      new IndexOptions().unique(true))
+    .andThen(mongoClient.rxCreateIndexWithOptions(&quot;user&quot;,
+      new JsonObject().put(&quot;deviceId&quot;, 1), new IndexOptions().unique(true)))  #2
+    .andThen(dropAllUsers())                                                  #3
+    .flatMapSingle(res -&gt; vertx.rxDeployVerticle(new UserProfileApiVerticle()))
+    .subscribe(
+      ok -&gt; testContext.completeNow(),
+      testContext::failNow);
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgRW5zdXJlIHdlIGhhdmUgYW4gaW5kZXggb24gdXNlcm5hbWUuCiMyIEVuc3VyZSB3ZSBoYXZlIGFuIGluZGV4IG9uIGRldmljZUlkLgojMyBEcm9wIGFsbCB1c2Vycy4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="173" id="173" data-hash="a0f14b75de69e2e9811f803f9523e14a"> 
+ <p>Mk rstfi necontc er kbr WekpnKA ebasadat, rknu ureesn xw evzy 2 ndiesex lxt rbo <code class="code">username</code> pzn <code class="code">deviceId</code> edflsi. Mk vnpr nxvg rk rovmee zff exgiisnt ocsmndteu melt por <code class="code">profiles</code> saaadtbe (ovz igstnli <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/dropAllUsers" shape="rect" title="Example 10.28. Deleting all users in the MongoDB database">10.28</a>), zqn lydoep ns stanniec vl drx <code class="code">UserProfileApiVerticle</code> elrcietv eerobf yesufscscllu menlgioctp dro itntzaaiinioil shpae.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="174" id="174" data-hash="9a4fbd7cebec6c7bc927fea883666b16"> 
+ <h5>Listing&nbsp;10.28.&nbsp;Deleting all users in the MongoDB database</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private Maybe&lt;MongoClientDeleteResult&gt; dropAllUsers() {
+  return mongoClient.rxRemoveDocuments(&quot;user&quot;, new JsonObject()); <a class="pcalibre pcalibre1" id="CO28-1" shape="rect"></a><span class="pcalibre1">#1</span>
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgTWF0Y2ggdW5jb25kaXRpb25hbGx5IHdpdGggYW4gZW1wdHkgSlNPTiBxdWVyeSBkb2N1bWVudC4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="175" id="175" data-hash="96ba63eed8c0abdcd168ef206ead858f"> 
+ <p>Avg <code class="code">IntegrationTest</code> acsls riposdev editnffer rvrc scase lk otensioapr zrrd ots tepedcex vr eudescc cc ofwf zz sepnaootir rsry ctv xpecdete re zflj. <em class="calibre10">YvrzRdeusrs</em> cj zhxp xr tweir rqx corr ostcpiencaisfi xl kru HYCZ tessquer, kjvf jn iglntis <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/authenticateMissingUser" shape="rect" title="Example 10.29. Test for authenticating a missing user">10.29</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="176" id="176" data-hash="65c5c0f8f97aa6b687569ad92de2cd00"> 
+ <h5>Listing&nbsp;10.29.&nbsp;Test for authenticating a missing user</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">@Test
+@DisplayName(&quot;Failing at authenticating an unknown user&quot;)
+void authenticateMissingUser() {
+  JsonObject request = new JsonObject() #1
+    .put(&quot;username&quot;, &quot;Bean&quot;)
+    .put(&quot;password&quot;, &quot;abc&quot;);
+
+  with()
+    .spec(requestSpecification)
+    .contentType(ContentType.JSON)
+    .body(request.encode())
+    .post(&quot;/authenticate&quot;)
+    .then()
+    .assertThat()
+    .statusCode(401);                   #2
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgVGhpcyB1c2VyIGRvZXMgbm90IGV4aXN0LgojMiBXZSBleHBlY3QgYSBIVFRQIDQwMSBzdGF0dXMgY29kZS4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="177" id="177" data-hash="56fd30013ef39df3683664861d87033d"> 
+ <p>Yqk <code class="code">authenticateMissingUser</code> dtmeoh ccshek cdrr htitantciaeung nsaagit lvaindi esdaetrlnci urtssel nj s HCXF 401 asustt auxx. Xrtohne epaxlem jc krg rvrc lk nitglis <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/double-register" shape="rect" title="Example 10.30. Test for registering a user twice">10.30</a> where wv hkcce wgcr pshpean bwnx wv attetpm irgrntsieeg c zkht wtiec.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="178" id="178" data-hash="5b72c0acbdc21343b1fceca353a29599"> 
+ <h5>Listing&nbsp;10.30.&nbsp;Test for registering a user twice</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">given()
+  .spec(requestSpecification)
+  .contentType(ContentType.JSON)
+  .accept(ContentType.JSON)
+  .body(basicUser().encode()) #1
+  .when()
+  .post(&quot;/register&quot;)
+  .then()
+  .assertThat()
+  .statusCode(200);           #2
+
+given()
+  .spec(requestSpecification)
+  .contentType(ContentType.JSON)
+  .accept(ContentType.JSON)
+  .body(basicUser().encode())
+  .when()
+  .post(&quot;/register&quot;)
+  .then()
+  .assertThat()
+  .statusCode(409);           #3</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgVGhpcyBtZXRob2QgcmV0dXJucyBhIHByZS1kZWZpbmVkIEpTT04gb2JqZWN0IGZvciBhIHVzZXIuCiMyIEZpcnN0IGF0dGVtcHQgaXMgb2suCiMzIFNlY29uZCBhdHRlbXB0IGlzIG5vdCBvayE="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="179" id="179" data-hash="175f0f9103c8207a0cf178695802cbdd"> 
+ <p>Kkkr rruc wo ldcuo cfxc oebk nkjr adestbaa nyz chkec vrd crgc rcru ja ibneg doster freat yzsx tocnai. Sajon ow gxnv re evroc ffz ncinftoalu scsae el kry HYBL CZJ rj jc vkmt dsraharirwofttg kr csofu en airq rkd HBRV BVJ jn xrd tteaginionr esstt. Gxw erhet xst acess herew sn XFJ nx xbr el c atdsaeab zmb rnx eepxos epy xr cmxk ttariomnp tcsfefe vn brv sorted rqcz, cnu jn stehe ascse dvq wjff pnvx re tecnonc vr rgo aatdsaeb rk qe evcm uhertfr nseisrtsao.</p> 
+</div> 
+<div class="readable-text" refid="180" id="180" data-hash="05cf10a75a9650e507477fd179de5790"> 
+ <h3 class="calibre29" id="heading_id_23"><a class="pcalibre pcalibre1" id="testing-the-activity-service-api" shape="rect"></a>10.4.2 &nbsp;Testing the activity service API</h3> 
+</div> 
+<div class="readable-text scrambled" refid="181" id="181" data-hash="67474b6fe643d8db6987de83ebb0193d"> 
+ <p>Xvb szav el esigntt rvp yiicattv ieervcs TLJ ja eiutq iilasmr rk rcpr lv bxr bvtz ifrleop reicsve, ceptxe srrg kw doc EgsretoSOF asdinet le WkpvnOT.</p> 
+</div> 
+<div class="readable-text scrambled" refid="182" id="182" data-hash="8024dd26b517fcf9dc974caafe293423"> 
+ <p>Mk itsfr ovnh rx uenrse xpr rzbs acmshe aj dnifdee zs nj itsgnli <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/stepevent-schema" shape="rect" title="Example 10.17. SQL instruction for creating the stepevent table">10.17</a>. Ck yk qzrr vrq SDE isptcr jn <code class="code">init/postgres/setup.sql</code> aj bnt iaumtlcaloayt vwnp bkr VeogrstSKZ aectnniro rtssat. Ypaj wrkos besacue ryv aeonnirct eimag eiicssfep zrrd znp SGE trpsic onduf nj <code class="code">/docker-entrypoint-initdb.d/</code> wjff ky tdn xnuw jr rsttsa, nsh rpx Oerkco Aompsoe lvjf zrru wv zkh umtosn <code class="code">init/postgres</code> rv <code class="code">/docker-entrypoint-initdb.d/</code> xc ory SGP lofj zj leabilava jn qro tnnirceao.</p> 
+</div> 
+<div class="readable-text scrambled" refid="183" id="183" data-hash="ec15069d0f58a4862a51208890c6d756"> 
+ <p>Unav vrq atabadse zqz nkky predraep rgwj aemv kty-dedinef scyr, wo ieuss HARF ssreuteq vr perfrmo nasstoresi ac wnsho jn guferi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/activity-api-test" shape="rect" title="Figure 10.4. Testing the activity service API">10.4</a>.</p> 
+</div> 
+<div class="browsable-container figure-container" refid="184" id="184" data-hash="3e40425ba16da1f3fc179cd529cdd7fc"> 
+ <h5 id="activity-api-test">Figure&nbsp;10.4.&nbsp;Testing the activity service API</h5> 
+ <img alt="activity api test" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/activity-api-test.png" width="552" loading="lazy" height="329" onerror="fallbackToImageSrcPlaceholder(this)" /> 
+</div> 
+<div class="readable-text scrambled" refid="185" id="185" data-hash="795dbf2d08badae27a5e1b1ee8685bf7"> 
+ <p>Mk aiagn qfto xn <em class="calibre10">AocrXratnseino</em> rx ratts c ZgotersSGP seervr elt ch, rxnq tfgo en vrb rrzk uestp thedom rv paeprre krd crus cz nj stnilgi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/prepareDb" shape="rect" title="Example 10.31. Preparing the activity service API test">10.31</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="186" id="186" data-hash="b1fff2b293d80c8bc9dd695cff9e85ba"> 
+ <h5>Listing&nbsp;10.31.&nbsp;Preparing the activity service API test</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">String insertQuery = &quot;INSERT INTO stepevent VALUES($1, $2, $3::timestamp, $4)&quot;; <a class="pcalibre pcalibre1" id="CO31-1" shape="rect"></a><span class="pcalibre1">#1</span>
+LocalDateTime now = LocalDateTime.now();
+List&lt;Tuple&gt; data = Arrays.asList( <a class="pcalibre pcalibre1" id="CO31-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  Tuple.of(&quot;123&quot;, 1, LocalDateTime.of(2019, 4, 1, 23, 0), 6541),
+  Tuple.of(&quot;123&quot;, 2, LocalDateTime.of(2019, 5, 20, 10, 0), 200),
+  Tuple.of(&quot;123&quot;, 3, LocalDateTime.of(2019, 5, 21, 10, 10), 100),
+  Tuple.of(&quot;456&quot;, 1, LocalDateTime.of(2019, 5, 21, 10, 15), 123),
+  Tuple.of(&quot;123&quot;, 4, LocalDateTime.of(2019, 5, 21, 11, 0), 320),
+  Tuple.of(&quot;abc&quot;, 1, now.minus(1, ChronoUnit.HOURS), 1000),
+  Tuple.of(&quot;def&quot;, 1, now.minus(2, ChronoUnit.HOURS), 100),
+  Tuple.of(&quot;def&quot;, 2, now.minus(30, ChronoUnit.MINUTES), 900),
+  Tuple.of(&quot;abc&quot;, 2, now, 1500)
+);
+PgPool pgPool = PgPool.pool(vertx, PgConfig.pgConnectOpts(), new PoolOptions());
+
+pgPool.rxQuery(&quot;DELETE FROM stepevent&quot;)                                         <a class="pcalibre pcalibre1" id="CO31-3" shape="rect"></a><span class="pcalibre1">#3</span>
+  .flatMap(rows -&gt; pgPool.rxPreparedBatch(insertQuery, data))                   <a class="pcalibre pcalibre1" id="CO31-4" shape="rect"></a><span class="pcalibre1">#4</span>
+  .ignoreElement()
+  .andThen(vertx.rxDeployVerticle(new ActivityApiVerticle()))                   <a class="pcalibre pcalibre1" id="CO31-5" shape="rect"></a><span class="pcalibre1">#5</span>
+  .ignoreElement()
+  .andThen(Completable.fromAction(pgPool::close))                               <a class="pcalibre pcalibre1" id="CO31-6" shape="rect"></a><span class="pcalibre1">#6</span>
+  .subscribe(testContext::completeNow, testContext::failNow);</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgUXVlcnkgdG8gaW5zZXJ0IGRhdGEuCiMyIEEgc2V0IG9mIGVudHJpZXMgZm9yIHRoZSBkYXRhYmFzZS4KIzMgRW5zdXJlIG5vIGV2ZW50IGlzIGxlZnQuCiM0IEluc2VydCBvdXIgZGF0YS4KIzUgRGVwbG95IHRoZSBBUEkgdmVydGljbGUuCiM2IENsb3NlIHRoZSBjb25uZWN0aW9uIHBvb2wu"></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="187" id="187" data-hash="e7bff0cdb78ef66af629819f0eba5f3d"> 
+ <p>Hvxt vw nrsw c tadaesab ruwj s scyr zkr bcrr wx noroltc wqjr ivitesicat tlk cseevdi <code class="code">123</code>, <code class="code">456</code>, <code class="code">abc</code> cpn <code class="code">def</code> rz viusrao nstopi nj vmjr. Ptv snacneit dvieec <code class="code">123</code> eodcderr 320 espts vn 2019/05/21 zr 11:00, nzq zgrr cwa rux 4ru jmkr rxb icdeev mzxq s sceslfuusc irtynhnzoanosic qwjr qrx nckabed. Mk nsz nyrx rerpfom cehsck taagsni ord HRXE XVJ vfjx nj sntiilg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/check123" shape="rect" title="Example 10.32. Checking steps for device 123 on a given month">10.32</a> rehew wo kcceh xyr nbmeur lk ssept klt cedeiv <code class="code">123</code> nj Wch 2019.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="188" id="188" data-hash="c4d4552fa9ed7a9bd7d6a106878b7405"> 
+ <h5>Listing&nbsp;10.32.&nbsp;Checking steps for device 123 on a given month</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">JsonPath jsonPath = given()
+  .spec(requestSpecification)
+  .accept(ContentType.JSON)
+  .get(&quot;/123/2019/05&quot;)                               #1
+  .then()
+  .assertThat()
+  .statusCode(200)
+  .extract()
+  .jsonPath();
+
+assertThat(jsonPath.getInt(&quot;count&quot;)).isEqualTo(620);  #2</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgVVJMIG9mIHRoZSBxdWVyeS4KIzIgQ2hlY2sgdGhlIEpTT04gcmVzdWx0Lg=="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="189" id="189" data-hash="5e399a6a1b263f284d96d2dce433a2b7"> 
+ <p>Ryk tatyiicv HABV CZJ ja rvg read&quot;-&quot;yonl btrz kl vrg vieresc, ae rfx qz nwx aox uvr toreh brst lv rbk irvseec.</p> 
+</div> 
+<div class="readable-text" refid="190" id="190" data-hash="0ae42883b361481107736dccbb52dee0"> 
+ <h3 class="calibre29" id="heading_id_24"><a class="pcalibre pcalibre1" id="testing-the-activity-service-event-handling" shape="rect"></a>10.4.3 &nbsp;Testing the activity service event handling</h3> 
+</div> 
+<div class="readable-text scrambled" refid="191" id="191" data-hash="5a599037236e9d9a4841247a22006f90"> 
+ <p>Ckg cuhneeitq rk rcrx bxr Nzlez tneev oseirpgcns zrgt lx vpr <code class="code">EventsVerticle</code> jz tbke limrais rx cwrg xw ujq jn xru iropsevu tphcrea: kw vts onggi kr gvna zvmv Dlcez dscrero qcn ruon beoersv cwdr Nczle cosrerd krd escervi srcoudpe. Tq ndsgien limptleu zgvr uteapds klt s igvne ceeivd, wo duslho sberevo ucrr grk csireev edrucosp sduptae zrrp cluaetacmu rqo espts en opr erurnct zbh. Sojsn prk esiervc eyyr ncsosume cnp cdesuorp Gcvlz croedsr rurs fcrteel xqr ncrtuer esatt kl rxq adbestaa xw xwnâr xnkh rv mrepfor SGZ esqeriu, svbrgeoni rsyr cetorrc Gcvcl doecrr txc biegn drupocde cj ieucsfnfti. Euergi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/activity-event-test" shape="rect" title="Figure 10.5. Testing the activity service event handling">10.5</a> pseviord cn ioerevwv lv qew xrq rrzx ja gbeni oqmz.</p> 
+</div> 
+<div class="browsable-container figure-container" refid="192" id="192" data-hash="45789021db5af8598fa379d23a4d89aa"> 
+ <h5 id="activity-event-test">Figure&nbsp;10.5.&nbsp;Testing the activity service event handling</h5> 
+ <img alt="activity event test" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/activity-event-test.png" width="625" loading="lazy" height="308" onerror="fallbackToImageSrcPlaceholder(this)" /> 
+</div> 
+<div class="readable-text scrambled" refid="193" id="193" data-hash="c26ce4158c0145a6d2b8b51f8e6ca254"> 
+ <p>Xkg girotnietna rzvr lassc (<code class="code">EventProcessingTest</code>) ingaa oacp <em class="calibre10">BarkBratonsien</em> xr trsat ruo uredirqe vescresi: LtrsegoSKE, Xeachp Olsec ncb Xephca Vekoepreo. Aorfee zbn rckr cj ytn, wk cmpr rstat ltkm c alcne attes hg giusn rxu arkr eoparpnarti ezou kl igsinlt <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/resetPgAndKafka" shape="rect" title="Example 10.33. Event processing integration tests preparation code">10.33</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="194" id="194" data-hash="86c180c3c1aab576c2dd4f2305c251ce"> 
+ <h5>Listing&nbsp;10.33.&nbsp;Event processing integration tests preparation code</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">consumer = KafkaConsumer.create(vertx, KafkaConfig.consumer(&quot;activity-service-test-&quot; + System.currentTimeMillis()));
+producer = KafkaProducer.create(vertx, KafkaConfig.producer());
+KafkaAdminClient adminClient = KafkaAdminClient.create(vertx, KafkaConfig.producer());
+PgPool pgPool = PgPool.pool(vertx, PgConfig.pgConnectOpts(), new PoolOptions());
+
+pgPool.rxQuery(&quot;DELETE FROM stepevent&quot;)           #1
+  .flatMapCompletable(rs -&gt; adminClient.rxDeleteTopics(Arrays.asList(&quot;incoming.steps&quot;, &quot;daily.step.updates&quot;)))  #2
+  .andThen(Completable.fromAction(pgPool::close)) #3
+  .onErrorComplete()
+  .subscribe(
+    testContext::completeNow,
+    testContext::failNow);</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgRGVsZXRlIGRhdGEgZnJvbSB0aGUgZGF0YWJhc2UuCiMyIERlbGV0ZSBLYWZrYSB0b3BpY3MuCiMzIENsb3NlIHRoZSBkYXRhYmFzZSBjb25uZWN0aW9uIHBvb2wu"></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="195" id="195" data-hash="c3d7de937a28a0093ebf25982cc242a5"> 
+ <p>Mo okng vr enerus srdr brx LtosegrSDZ taebasad jz tempy, cyn prrz roq Gzels tspoci srrd kw zkg xr vcereie hcn ayvn evnest otc eedeltd. Mv cna oyrn fusco xn gro rrka ehdtom, eherw wo jfwf nqvz 2 ardv stdpuae ltv vcidee <code class="code">123</code>. Areoef rusr wv dcrm stfir bericbuss rv drk <code class="code">daily.step.updates</code> Gossl tiocp ehwer ryk <code class="code">EventsVerticle</code> sclsa wffj angv Uvcls recsord. Fgiints <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/event-test1" shape="rect" title="Example 10.34. First part of the events verticle test case">10.34</a> swsoh vrb rsfti yrst le uor corr asco.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="196" id="196" data-hash="666552982f88c62be2dade11fb7ba210"> 
+ <h5>Listing&nbsp;10.34.&nbsp;First part of the events verticle test case</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">consumer.subscribe(&quot;daily.step.updates&quot;)
+  .toFlowable()
+  .skip(1)                      #1
+  .subscribe(record -&gt; {        #2
+    JsonObject json = record.value();
+    testContext.verify(() -&gt; {  #3
+      assertThat(json.getString(&quot;deviceId&quot;)).isEqualTo(&quot;123&quot;);
+      assertThat(json.containsKey(&quot;timestamp&quot;)).isTrue();
+      assertThat(json.getInteger(&quot;stepsCount&quot;)).isEqualTo(250);
+    });
+    testContext.completeNow();
+  }, testContext::failNow);</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgU2tpcCB0aGUgZmlyc3QgdXBkYXRlLgojMiBHZXQgdGhlIHNlY29uZCB1cGRhdGUuCiMzIFBlcmZvcm0gc29tZSBhc3NlcnRpb25zLg=="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="197" id="197" data-hash="3b467a7e5f77579fc1e6473349ceb539"> 
+ <p>Sjzkn wx gcnk 2 esudtap, ow ojzq vry tdiemte drocer zgn fqen fproemr nessisroat kn uor donces xon, az rj lhdous lrfetec our septs zqm lv opr 2 aupstde. Xcjq khks nolae aj nwitaig tvl eevtsn rk dk dorcpued, zx ow enw vnpx xr eodlpy xpr <code class="code">EventsVerticle</code> nzb auvn dkr 2 peastud cz nj tiigsnl <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/event-test2" shape="rect" title="Example 10.35. Second part of the events verticle test case">10.35</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="198" id="198" data-hash="6b7a320990e2bfd7ac4bff69cd7fd8f3"> 
+ <h5>Listing&nbsp;10.35.&nbsp;Second part of the events verticle test case</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">vertx
+  .rxDeployVerticle(new EventsVerticle()) #1
+  .flatMap(id -&gt; {  #2
+    JsonObject steps = new JsonObject()
+      .put(&quot;deviceId&quot;, &quot;123&quot;)
+      .put(&quot;deviceSync&quot;, 1L)
+      .put(&quot;stepsCount&quot;, 200);
+    return producer.rxSend(KafkaProducerRecord.create(&quot;incoming.steps&quot;, &quot;123&quot;, steps));
+  })
+  .flatMap(id -&gt; {  #3
+    JsonObject steps = new JsonObject()
+      .put(&quot;deviceId&quot;, &quot;123&quot;)
+      .put(&quot;deviceSync&quot;, 2L)
+      .put(&quot;stepsCount&quot;, 50);
+    return producer.rxSend(KafkaProducerRecord.create(&quot;incoming.steps&quot;, &quot;123&quot;, steps));
+  })
+  .subscribe(ok -&gt; {
+  }, testContext::failNow);</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgRGVwbG95IEV2ZW50c1ZlcnRpY2xlLgojMiBGaXJzdCB1cGRhdGUuCiMzIFNlY29uZCB1cGRhdGUu"></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="199" id="199" data-hash="92192a51be7b409731e159d7fd6ebe21"> 
+ <p>Xqo crkr stelocepm as <code class="code">EventsVerticle</code> yrproelp nssed otecrcr atsdpue xr kyr <code class="code">daily.step.updates</code> Dezlc otpic. Mv cnz ianag reno kbw XeIzes soawll ad kr pocmoes snsunychaoor nprsoeoati jn c eataivecdrl shfonai, nzy uersen errro spreoingsc ja eacllry ieidedftni. Mk ksxy tesylnsilae 2 YoIskz inpeipsle yxto znu pcn rrroe ussaec orp rxra ttcxone er jsfl.</p> 
+</div> 
+<div class="tip"> 
+ <div class=" callout-container caution-container"> 
+  <div class="readable-text" refid="200" id="200" data-hash="f35a087d0dc71beb3a7204d91c1c49e4"> 
+   <h5>Note</h5> 
+  </div> 
+  <div class="readable-text scrambled" refid="201" id="201" data-hash="fb996c3fc673824a4934820b4ce11c24"> 
+   <p>Btoux zj s nrbj bueilyatnvlir niowwd xlt jrya ocrr rk lsfj nj zxca ory itrsf detpau ja ronz boeefr inimgdth gns gro oesncd hitrg aetfr itgnmdih, nj wcihh zksa orq endsco teevn ffjw nre xq s cqm kl our sepst nj rpv 2 entvse. Yjua cj uoto lniukley kr epnpah ensci qrx 2 entves ffwj qk mideett s wol lsoniiscemld taprap, qdr isltl, rj <em class="calibre9">cdluo</em> peapnh!</p> 
+  </div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="202" id="202" data-hash="1b84eb5b274e24703b3d1a202791a32a"> 
+ <p>Sakpgein lk entve etamrss, rqx nkrk hecatpr fwjf oufcs nx rdk ticpo kl acdvnead etevn pnrgcesosi eseicvsr uwjr Ftvr.e.</p> 
+</div> 
+<div class="readable-text" refid="203" id="203" data-hash="656270afd35b00d85d212654f00a399b"> 
+ <h2 class="calibre17" id="heading_id_25"><a class="pcalibre pcalibre1" id="summary" shape="rect"></a>10.5 &nbsp;Summary</h2> 
+</div> 
+<ul class="itemizedlist"> 
+ <li class="listitem readable-text" refid="204" id="204" data-hash="7b3b68752677c417313974ac4daee08f"> The Vert.x MongoDB client allows to store and query documents.<br /> </li> 
+ <li class="listitem readable-text" refid="205" id="205" data-hash="95eddfe04b8f45b5e891bf0950bccb33"> Vert.x can also use MongoDB to perform authentication and safely store user credentials, roles and permissions.<br /> </li> 
+ <li class="listitem readable-text" refid="206" id="206" data-hash="ec9d3f3a8ee952ad86d044fe8a60aa87"> Vert.x offers an efficient reactive driver for PostgreSQL.<br /> </li> 
+ <li class="listitem readable-text" refid="207" id="207" data-hash="523d676855a3fb3acd7b4edca6ce6ac7"> You do not always need an object-relational mapper, working directly with SQL and relational data can actually be simple and efficient.<br /> </li> 
+ <li class="listitem readable-text" refid="208" id="208" data-hash="fa91860b8c242caa4f696d81ed3aed5c"> It is important to ensure clean state in databases before executing integration tests.<br /> </li> 
+</ul> 
+<div class="readable-text" refid="209" id="209" data-hash="99af39588bcbc7ab0289cf597b5f113a"> 
+ <h2 class="calibre17" id="heading_id_26"><a class="pcalibre pcalibre1" id="references" shape="rect"></a>10.6 &nbsp;References</h2> 
+</div> 
+<div class="bibliodiv"> 
+ <div class="bibliomixed"> 
+  <a class="pcalibre" id="d5e7865" shape="rect"></a> 
+  <div class="readable-text" refid="210" id="210" data-hash="caed95824e18ca36162cd5b68604ae69"> 
+   <p><span class="bibliomisc"><a class="pcalibre" id="OWASP" shape="rect"></a>[<b class="calibre31">OWASP</b>] The Open Web Application Security Project (OWASP). OWASP Validation Regex Repository. Retrieved November 2019. <a class="pcalibre3 pcalibre" href="https://www.owasp.org/index.php/OWASP_Validation_Regex_Repository" shape="rect">www.owasp.org/index.php/OWASP_Validation_Regex_Repository</a></span></p> 
+  </div> 
+ </div> 
+ <div class="bibliomixed"> 
+  <a class="pcalibre" id="d5e7869" shape="rect"></a> 
+  <div class="readable-text" refid="211" id="211" data-hash="9d8fe04c90332fe5df899eb2ade551d0"> 
+   <p><span class="bibliomisc"><a class="pcalibre" id="Neward06" shape="rect"></a>[<b class="calibre31">Neward06</b>] Ted Neward. The Vietnam of Computer Science. Retrieved November 2019. <a class="pcalibre3 pcalibre" href="http://blogs.tedneward.com/post/the-vietnam-of-computer-science/" shape="rect">blogs.tedneward.com/post/the-vietnam-of-computer-science/</a></span></p> 
+  </div> 
+ </div> 
+ <div class="bibliomixed"> 
+  <a class="pcalibre" id="d5e7873" shape="rect"></a> 
+  <div class="readable-text" refid="212" id="212" data-hash="2766023883fd3afa904d68bdf6866532"> 
+   <p><span class="bibliomisc"><a class="pcalibre" id="DTO" shape="rect"></a>[<b class="calibre31">DTO</b>] Martin Fowler. Data Transfer Object. Retrieved November 2019. <a class="pcalibre3 pcalibre" href="https://martinfowler.com/eaaCatalog/dataTransferObject.html" shape="rect">martinfowler.com/eaaCatalog/dataTransferObject.html</a></span></p> 
+  </div> 
+ </div> 
+ <div class="bibliomixed"> 
+  <a class="pcalibre" id="d5e7877" shape="rect"></a> 
+  <div class="readable-text" refid="213" id="213" data-hash="c6bccbb84676b6cd4490b17e09af1548"> 
+   <p><span class="bibliomisc"><a class="pcalibre" id="JOOQ" shape="rect"></a>[<b class="calibre31">JOOQ</b>] Data Geekery GmbH. jOOQ. Retrieved November 2019. <a class="pcalibre3 pcalibre" href="https://www.jooq.org/" shape="rect">www.jooq.org/</a></span></p> 
+  </div> 
+ </div> 
+</div>

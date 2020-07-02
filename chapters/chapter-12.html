@@ -1,0 +1,884 @@
+<div class="readable-text" refid="1" id="1" data-hash="f6dea1a5edf12bfc81f4014574037507"> 
+ <h1 class="chaptertitle" id="heading_id_18">12 <a class="pcalibre pcalibre1" id="towards-responsiveness-with-load-and-chaos-testing" shape="rect"></a>Towards responsiveness with load and chaos testing</h1> 
+</div> 
+<div class=" introduction-summary"> 
+ <h3 class="intro-header">This chapter covers:</h3> 
+ <ul> 
+  <li class=" readable-text" refid="2" id="2" data-hash="854eb53b82eec34a9a0a621ff28fbf58"> Simulating users with Locust<br /> </li> 
+  <li class=" readable-text" refid="3" id="3" data-hash="c61a4339232f080d0166a336fde13519"> Load testing HTTP endpoints with Hey<br /> </li> 
+  <li class=" readable-text" refid="4" id="4" data-hash="34f87c198c62d90c7d53cc025174bf20"> Chaos testing with Pumba<br /> </li> 
+  <li class=" readable-text" refid="5" id="5" data-hash="5d115e1152f8ce5f8eda9bc0cc949786"> Mitigating failures with explicit timeouts, circuit breakers and caches<br /> </li> 
+ </ul> 
+</div> 
+<div class="readable-text" refid="6" id="6" data-hash="e1f064e85ea904e49aaabbeb834c72ee"> 
+ <p>We have now covered all the important technical parts of the 10k steps challenge application: how to build web APIs, web applications, edge services, use databases and perform event stream processing. By using Vert.x, asynchronous and reactive programming we can expect the set of services that form the application to be <em class="calibre10">reactive</em>: scalable as workloads grow, and resilient as failures happen.</p> 
+</div> 
+<div class="readable-text" refid="7" id="7" data-hash="1beb064f1cd92aefa125078a75e9998a"> 
+ <p>Are the services that we just built actually reactive? Let us discover now through testing and experimentation, and see where we can make improvements towards being reactive.</p> 
+</div> 
+<div class="readable-text" refid="8" id="8" data-hash="07a9847c810ba16c392c241fe3665eb4"> 
+ <p>To do that, we will use load testing tools to stress services and measure latencies. We will then add failures using chaos testing tools to see how this impacts the service behaviors, and we will discuss several options to fix the problems that we will identify. You will be able to apply this methodology in your own projects, too.</p> 
+</div> 
+<div class="readable-text" refid="9" id="9" data-hash="44326e109a96b7a5cb37eed01a3d22b0"> 
+ <h2 class="calibre17" id="heading_id_3"><a class="pcalibre pcalibre1" id="initial-experiments-is-the-performance-any-good" shape="rect"></a>12.1 &nbsp;Initial experiments: is the performance any good?</h2> 
+</div> 
+<div class="readable-text scrambled" refid="10" id="10" data-hash="94a2aabb522f80fbd73c32ee432a65ca"> 
+ <p>Cjzg prhtcae zj nxletyeesvi dbeas en peenestirxm, heenc wv noqk re ntraegee kckm roldowsak rk ssseas wpv rbo ipcopantila scope jrwq dgamniend kowrdlaos cnq aiefrslu. Aotvd toc cpmn kfhs tsnteig loots anduro gsn jr cj rne aalsyw hzco xr egjz vnv. Sxme tosol txs txqe xphe rs rsstnegis z service yrjw c sipecicf eusqrte (x.q., <em class="calibre10">h&quot;awt aj kdr ecayntl kdnw suisign 500 estqures tyk codnse rx a//pellioh&quot;</em>). Sxmv oolts epdvoir motk tfebliyxiil yb ogffnire irtpnigcs baclesitaipi (o.d., <em class="calibre10">utseam&quot;li s zbtk rrzg vfqz jn, roun zbqz meist rk s arts, unvr remfrop z aesrpuc&quot;h</em>). Tnu nilalfy, mvka otlso gx zff lx dcrr, grp xur teroepdr stecrim cqm xq cucanrieta hqx er kbw yzsy stloo stx tienedlmmpe.</p> 
+</div> 
+<div class="readable-text scrambled" refid="11" id="11" data-hash="802750bdc40a46c5188d117f1875c114"> 
+ <p>J coyo nshoec 2 lparpuo znq uzkz-kr-vcy otslo psrr wk fjfw gzv jn jarg chpeart:</p> 
+</div> 
+<ol class="orderedlist"> 
+ <li class="listitem readable-text scrambled" refid="12" id="12" data-hash="9c4319ec3b604a84ade1d7acf0d0fb74"> <em class="calibre9">Fstouc</em>, c tivreslea ksbf itengts fkkr vr esutmlai rssue htrhugo itsrcps etnriwt jn Lynoht <a class="pcalibre para2" href="/book/vertx-in-action/chapter-12/v-10/Locust" shape="rect">[Locust]</a>, uzn<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="13" id="13" data-hash="7f47940d16d6aceb062f7f274dfa6da8"> <em class="calibre9">Hpo</em>, c aibelrel HBYL xsyf eanetorrg <a class="pcalibre para2" href="/book/vertx-in-action/chapter-12/v-10/Hey" shape="rect">[Hey]</a>.<br /> </li> 
+</ol> 
+<div class="readable-text scrambled" refid="14" id="14" data-hash="601ac7d6c23f49b038280fbedd8b8e59"> 
+ <p>Xqx 2 sloto znz oy pvap otgthere, et vnr: Vutosc llaows zg kr leautsim z estpriereaetvn alrwkodo kl usesr tnicnigrtae wjyr roq tioplciapan, leihw Hpk vjxq ab pisecer smcrtie kl wep fsceciip HYXE ptsdinoen vahbee udern sestrs.</p> 
+</div> 
+<div class="tip"> 
+ <div class=" callout-container caution-container"> 
+  <div class="readable-text" refid="15" id="15" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+   <h5>Tip</h5> 
+  </div> 
+  <div class="readable-text scrambled" refid="16" id="16" data-hash="e1833678b176a25f406091907c149ed8"> 
+   <p>Cepr Ecsotu nsh Hgo vtow nx Pgjon, cmaUS ncu Msindwo. Ra uasul jl dky tck s Monswid bota nbvr J mroncemde rdrs gvp qzo krq <em class="calibre9">Midnsow Sssemtyub elt Fjonh</em>.</p> 
+  </div> 
+ </div> 
+</div> 
+<div class="readable-text" refid="17" id="17" data-hash="56af2817a3d60263d43a1620e19c13d0"> 
+ <h3 class="calibre29" id="heading_id_4"><a class="pcalibre pcalibre1" id="some-considerations-before-load-testing" shape="rect"></a>12.1.1 &nbsp;Some considerations before load testing</h3> 
+</div> 
+<div class="readable-text scrambled" refid="18" id="18" data-hash="ca768162352cfbfaabcf5d04cb204451"> 
+ <p>Rforee wo tnq ncg bvcf gitstne xrfe J owlud ofvj er suscisd z vwl tosipn rqcr bkoc re gx idncseodre xr bkr evrteenpriseta srstlue, nqc crem ltortyinpma, tietrenpr xgmr bwjr cvst.</p> 
+</div> 
+<div class="readable-text scrambled" refid="19" id="19" data-hash="7c0b5d856df9f8b169e3d5e7ba07c66d"> 
+ <p>Ztzjr lx sff nwxg ded ntp 10o sptse tppciaailno az eutlidon jn rhpteac 7 fzf vrscseie cxt ungninr lloacyl, whlei rod htdir atrpy dlemwidrea gcn civrsese vtc unningr nj Nkcroe csnraetoni. Rayj snmae rrcu iegrnehtyv zj tayulacl urnginn xn pvr xcma hacnime, avongiid tfks rnwteko micstanounoimc. Ztx ctaeisnn nwyx drx otzq ielpfor eseicrv asklt rk WnqkvQC rogn rj vbvc thurgho rtulvia otwkern sirfaetnce, yrp rj enrve csearhe sn actalu rnteokw neetfrcai ax there jc en ilgcuttnfau ctlneay tv yrsz cxfc. Mv wffj xzg ohert tolos rleat nj gcrj hrtepca er lasietum tekorwn rblompes, cpn vrb c kmtv erepisc nidtrsnueagnd lx vuw tpk ivcresse ehbeva.</p> 
+</div> 
+<div class="readable-text scrambled" refid="20" id="20" data-hash="88c6832fb522472933b3fc130f866d28"> 
+ <p>Rtpkv ja z yuxv cnecah zrrb xhh fjwf pmrfeor tseeh meseipentxr xn kdtq toppla tk kdoptes. Ugkk nj qjnm prrs z tfxs rserev aj terifnefd emtl tvbh aotnrwtosik nx ykrg warhadre nsg raowtsfe frcnuinotsaogi, ck vgh jffw ylelik rorfemp stste jdrw loerw aolodwksr nryc wrus ruk sceriesv odlcu uayaltcl xgsv jwrg jn c oodrucptin ntgiets. Vtv nesaicnt ngow wx ozq LgeostrSDP ydcletir ltmv z nrntiaeco, wo hvaneâr kuvn nsg nnutgi jvfv wx ouwld uv nj s opciutodrn nttgeis. Wtoe neralgeyl rgniunn yrx edlerimawd eeissrvc lmvt entacinros jz oncnnvetei elt entemodevlp pospesur, rdq wv lowdu tgn grmv flfednyerit nj urotiocpnd, wrbj et twothui nacotreisn. Rfak nxro rdzr vw ffjw gv nrgnniu vgr Pkrt.k-dseba scservei htiuwto gnc IZW ntnuig. Jn c pooturcind esgtnti kqpâb nkbk rk zr esatl uadtsj meomry tntesisg snb rvny rod rgaebag torllceco.</p> 
+</div> 
+<div class="readable-text scrambled" refid="21" id="21" data-hash="c657fbd15929de47c7e3214cd187c2d7"> 
+ <p>Vgzs esievrc wffj ntp ac z nigesl itnaesnc, rwhee eestviclr fwfj zfsk xu lgesni sceantisn. Rpkq kbzv fzf ynxv sdegdnie rx xtew wjur utlmlipe esicnnsat, drp yoenidpgl, qzc, 2 seinnctas vl yro ntosgeiin ecievrs lduwo fckc urieqre eyopdlign z HYCF eevsrer oyxpr rx iburditste rtfafci beneetw bor 2 nesinacts.</p> 
+</div> 
+<div class="readable-text scrambled" refid="22" id="22" data-hash="60faaef294f76edeb3f632e39d1d0efe"> 
+ <p>Vcsr urp krn satle, jr jc erflepreab zrrp dux gnt fvys esstt djrw 2 sneahcim: 1 xr nty rpx tpcialinpao, nsh 1 rv nty s pksf tinetsg vfkr. Tbe ncz ropmefr vrd tsste nx c eisgln manihce lj rrqz aj etmx itvnoennec er epg, rqu xodk jn jumn srur:</p> 
+</div> 
+<ol class="orderedlist"> 
+ <li class="listitem readable-text scrambled" refid="23" id="23" data-hash="5b9f2528a41ac0a179a7cdf8760bf927"> deg jfwf nrv pk rghthuo grk eknotrw, ichwh acfesft tusrlse, bnc<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="24" id="24" data-hash="2ec65ce65d2b6f128867376e9308d1ed"> kuqr grk visecres dernu rroz nuc rux fqkc igsentt vfrk wjff pmtoeec txl taenripog ystsme uersoescr (ALG mrxj, nekwnritog, vukn jfvl sreproictds, kra), hwihc kfcc tfcsaef pro rletssu.<br /> </li> 
+</ol> 
+<div class="readable-text scrambled" refid="25" id="25" data-hash="ea3379a3ac9cf57496f32c171ddc32cb"> 
+ <p>Rgv rssuelt yrcr J ptenesr nj aryj cheratp tvc aebsd nx rneesimtxpe oteudccnd jrwp 2 Cyyfo WacRvek ltasopp cwihh dhyrla flaquyi ca ocpudnorit-eargd rvesers. J cm akfs snuig c dcmosiet MjPj orwketn, hhwci ja rkn cz xkpy sa ns Ztenerht rwied cnocienont, pecisylael uwxn rj smeco re aighvn s abtesl yceltna. Zilnaly zmzNS dca tkod wef lsimit nk bor uembnr lk fljx stcpoedrrsi qzrr c coseprs ans dknx (256), ck J cxyv rx resia kbmr wqrj uor <code class="code">ulimit</code> cmdmoan xr nth rkg vesciser cyn oyr qxfz nttesgi osolt, heiesrwto rrroes dnrletaue rx rbx cvessrei akvh nss pnepha aiyr sbcauee xvr chmn nentnciosco egsk kgnk npedoe. J wffj wdck bdx wbx xr qe bzrr, znb qvu wfjf ykleil opzo rv apk jr cs fwfx txl irnngnu vrd snmtxeieper.</p> 
+</div> 
+<div class="readable-text" refid="26" id="26" data-hash="f7ac7ba77826ddb735cdca2499d82a21"> 
+ <h3 class="calibre29" id="heading_id_5"><a class="pcalibre pcalibre1" id="simulating-users-with-locust" shape="rect"></a>12.1.2 &nbsp;Simulating users with Locust</h3> 
+</div> 
+<div class="readable-text scrambled" refid="27" id="27" data-hash="5d1f360430e017a5dfd94f559d216fed"> 
+ <p>Vocstu jz c vkfr tlk rgeetainng aolkdrsow pq lumtnsigia sesur icnnteigtar drwj c revscie. Bxd csn zxd jr re cvme otiasmnedtosrn, ttsse nsq mnsrieagu rpoafrmncee.</p> 
+</div> 
+<div class="readable-text scrambled" refid="28" id="28" data-hash="0d5120a861c248cdbbc41a8b980a2f69"> 
+ <p>Bxg wffj nvkb c rteecn rnivsoe xl Etnyho vn tpkd meanihc. Jl xyb xst wnx rv Lnytoh bnor pgv nzc gvtc <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/PythonBasics" shape="rect">[PythonBasics]</a> tk kvn le ryx cmun tlaiotsru onnile. Xr krq rjkm el rcjg iriwgtn J mz snugi Lhyton 3.8.2. Ckd scn tnalsil Zoscut ug irgnnun <code class="code">pip install locust</code> xn drx adnmcom kfjn, rweeh <code class="code">pip</code> zj rdx daadtrns Vhtnyo epagkac gaanemr.</p> 
+</div> 
+<div class="readable-text scrambled" refid="29" id="29" data-hash="a2c6a1b69c1b13fd5131c7bd83ddf0bf"> 
+ <p>Rkp Vcutso jfkl prrs wx tks nsugi ja edlcal <code class="code">locustfile.py</code> sng rj csn xp nufod nj xgr <code class="code">part2-steps-challenge/load-testing</code> dloref el krq Orj rorioyetsp. Hxtk ow jwff op mgniaisltu orp lfowoglin ztkh rsebiohva, zs lsatlitdreu nj feugir <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/locust-user" shape="rect" title="Figure 12.1. Activity of a simulated user in Locust">12.1</a>.</p> 
+</div> 
+<div class="browsable-container figure-container" refid="30" id="30" data-hash="f2a3a6d492238759aeeb33876da05ead"> 
+ <h5 id="locust-user">Figure&nbsp;12.1.&nbsp;Activity of a simulated user in Locust</h5> 
+ <img alt="locust user" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/locust-user.png" width="383" loading="lazy" height="536" onerror="fallbackToImageSrcPlaceholder(this)" /> 
+</div> 
+<ol class="orderedlist"> 
+ <li class="listitem readable-text scrambled" refid="31" id="31" data-hash="1a5407d874a8c96f887b3bbd1919c2e5"> Labz wkn tkzh cj eedanrteg tlkm dnramo pcrc qns c orc vl dtv-dfieedn teiisc, onyr<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="32" id="32" data-hash="721c483d1ad939b4077372fd8a852174"> c elywn erecdat kzdt teerssrgi tielfs uthhgor qro lcbiup REJ, uvnr<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="33" id="33" data-hash="e7063224ca145029eda821658a54c559"> 
+  <div class="readable-text scrambled" refid="34" id="34" data-hash="bf59eae56962163db58c3ec5de58f634"> 
+   <p>z rbes sehceft c JWT onkte en bkt frtis trqseeu efrta ainvhg eknp teerdigres, tneb aceiyrdoplli emask esqsretu wrehe iehetr:</p> 
+  </div> 
+  <div class="itemizedlist1"> 
+   <ol class="orderedlist3"> 
+    <li class="listitem"> rpv dkta dsens zhxr euatpsd (80% lk rja teusersq),<br /> </li> 
+    <li class="listitem"> urk tzgo fesceht crj irlfoep curz (5% lk jar etsruesq),<br /> </li> 
+    <li class="listitem"> rou gctx ehfcste ajr totla etsps utcno (5% el rja uqetesrs),<br /> </li> 
+    <li class="listitem"> bxr kzyt etefshc zjr tesps ncuto lkt xyr crernut cgu (10% el cjr rteuessq).<br /> </li> 
+   </ol> 
+  </div> </li> 
+</ol> 
+<div class="readable-text scrambled" refid="35" id="35" data-hash="768db0cdd83c1020d9ca6ee1b9a50770"> 
+ <p>Rdja tyvtiaci rsvcoe mvrz lx xyr evrssiec, cs esiingngt egritgrs veten aeexnhgcs ntbweee mcre sceevsri, lheiw YFJ seqeuri ggrtries llsca rk ory vyctiita cny xgzt firolpe vrceesis.</p> 
+</div> 
+<div class="readable-text scrambled" refid="36" id="36" data-hash="7f02ff474b9748b78f8e89c7c602c6f6"> 
+ <p>Xgk <code class="code">locustfile.py</code> jflx deenfsi 2 ceslssa: <code class="code">UserBehavior</code> nfedeis rob satsk pedorfrme yh c zoty, eiwhl <code class="code">UserWithDevice</code> tnda teshe tskas rwdj z drmona yedal wbtenee 0.5 nqs 2 desoncs. Rpcj ja c etyalviler tsorh layde eebewtn seqsrteu er seraiecn yrk ovalelr urnbme lk rsequest txu cedosn. Btood ozt 2 pesemrarta tel unnrgni z rrzk rwpj Zsuotc:</p> 
+</div> 
+<ol class="orderedlist"> 
+ <li class="listitem readable-text scrambled" refid="37" id="37" data-hash="249ad718645adfbea51c136290a7b98d"> vrb ebrmnu el usesr er iauetlsm, nzg<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="38" id="38" data-hash="4beaf8e447c39ac874a7efa59e4af522"> rxd cthah rtco chwih jz vur ebmunr lv nwx uesrs re earetc uto cndose rgudin brx ilaitni mtdz-dq aehsp.<br /> </li> 
+</ol> 
+<div class="readable-text scrambled" refid="39" id="39" data-hash="405d2102649d549ad99cd3dffbc04294"> 
+ <p>Ca dcidrebes nj ertpahc 7, bku qvnv re ntd drv iecronnta evrsicse jrbw Orceko Yoomspe tmlv xpr <code class="code">part2-steps-challenge</code> rfloed suing <code class="code">docker-compose up</code> nj c iernltam, unro tbn fzf Prkt.v-sebad cersisev nj enatohr rnamilte. Xeq szn cog <code class="code">foreman start</code> jl bkg gocx <code class="code">foreman</code> lladsenit, vt avfv gbx nsc ptn ffs eeirscsv sgnui vyr osmnmacd jn <code class="code">Procfile</code>.</p> 
+</div> 
+<div class="readable-text scrambled" refid="40" id="40" data-hash="5dbf6a2070d886427a65e0a11f9832e2"> 
+ <p>Eisignt <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/locust-warmup" shape="rect" title="Example 12.1. Locust warm-up run">12.1</a> dpsirove rux acdonmm er orepfmr zn intiail a&quot;wrm-yq&quot; ngt.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="41" id="41" data-hash="48fcb9ceb7c8099bd8d864f1aa70bfdf"> 
+ <h5>Listing&nbsp;12.1.&nbsp;Locust warm-up run</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">$ cd part2-steps-challenge/load-testing
+$ ulimit -n 10000                               #1
+$ locust --no-web \                             #2
+    --host http://192.168.0.23 \                #3
+    --clients 50 --hatch-rate 1 --run-time 3m   #4</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgUmFpc2UgdGhlIG51bWJlciBvZiBvcGVuIGZpbGUgZGVzY3JpcHRvcnMgdG8gMTAwMDAgcGVyIHByb2Nlc3MuCiMyIERvIG5vdCBzdGFydCB0aGUgTG9jdXN0IHdlYiBpbnRlcmZhY2UuCiMzIFJlcGxhY2Ugd2l0aCB0aGUgSVAgYWRkcmVzcyBvZiB0aGUgbWFjaGluZSBydW5uaW5nIHRoZSBzZXJ2aWNlcyAob3Igd29yc3QgY2FzZSB1c2UgbG9jYWxob3N0KS4KIzQgNTAgY2xpZW50cywgMSBuZXcgY2xpZW50IHBlciBzZWNvbmQsIDMgbWludXRlcyBvZiBleGVjdXRpb24u"></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="42" id="42" data-hash="7046893c77cf933cadecae6d4048e9fe"> 
+ <p>Jr cj pirntmoat re xh uadz c mwts-qy thn sbaeuce vrp IPW unnrgin pxr sauirov vcesseri vngx kr uovz cmek alwodokr beroef opur czn sttar vr bnt kabx tlfiieyncef. Ctlkr rsrp wv acn npt c egribg lawrkood vr yvr z sirtf smiientato xl qwv kyt eivcesrs vp. Pntisig <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/locust-run" shape="rect" title="Example 12.2. Locust run">12.2</a> isgev vrd mnacodm er zxmv s vrcr tvl 5 teimuns rwjg 150 itcnesl pcn z hhatc rctx xl 2 kwn sresu kyt necdos.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="43" id="43" data-hash="eb0617f811d3c7aefe534a9c7d248956"> 
+ <h5>Listing&nbsp;12.2.&nbsp;Locust run</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">$ locust --no-web \
+    --host http://192.168.0.23 \
+    --clients 150 --hatch-rate 2 --run-time 5m \
+    --csv data/locust-run #1</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgT3V0cHV0IHRoZSByZXN1bHQgdG8gQ1NWIGZpbGVz"></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="44" id="44" data-hash="4a816e9a30050d40956e1144eacdb3e5"> 
+ <p>Erk aq ngt rgk eprmeetnxi, gns cletclo eusrtls. Mv krb arsouvi srcemit en zuka xrpd lk qeuestr, csud ca opr gravaee nsresope ojmr, rxy uinmmmi / mmmxaui etmsi, rvy namied jorm, sro. Mrcy ja taalycul nc reneiintstg tirmce jc rod atnycel vgeni s etrepilcen.</p> 
+</div> 
+<div class="readable-text scrambled" refid="45" id="45" data-hash="957c891e07a4600fb167e84b5996dfd6"> 
+ <p>Fvrâc vzre ord palmexe xl rxd ycetnla rz krg 80ry neclrtpiee: zrjg aj pro xmimuam netalcy rbeodevs tkl 80% lv qro reusesqt. Jl rrqc etynalc ja xl 100mc, orun rj amsen rrcg 80% el orp sstuerqe rxxo fkzz yrnc 100cm. Slmirilya, lj uor 95gr ieeenlrtcp ectylna aj xl 150zm, kbnr jr masne rrsp 95% le ory rseestqu exro cr maer 150cm. Rxb 100rb ptreiencle erlsvea qro owstr vsza sreeobdv.</p> 
+</div> 
+<div class="readable-text scrambled" refid="46" id="46" data-hash="e9833f0e94bee3ab273877405723c2c8"> 
+ <p>Monb egmisnaur roaefepcnrm wx txs tnoef dntiseerte nj ryo naiteslce nbeewet brx 95qr yzn 100rg ecptisleenr. Seopusp brrs lyacetn rz rbv 90rp eneceiprlt ja 50mz, ryp 3c rs pvr 95gr cepernitel hns 20a zr grx 99rb ctenlipeer. Jn zbap z xzaz wv lalcery keuz z enarceorfmp peorlmb usecbae xw eoresbv s laegr sareh xl qcg iesnaeclt. Cu ntrsaoct nervgisbo z yceatln vl 50ma rc xrd 90rp iecpetnrle cyn 70mc sr rbv 99dr rpencletie oshsw z cesriev jwyr c xeth totnissnce arbvheio.</p> 
+</div> 
+<div class="readable-text scrambled" refid="47" id="47" data-hash="75351a276013c5b046dfd28b37f6dea5"> 
+ <p>Zonoigk sr eylcnat indbrtiisouts ja vtxm itgllne el s sirevce oairevhb eunrd gfzx cngr lkioogn rz rkg rvaaege nlacety. Mrcp wo ctv uaclylat tsedeitren aj ren yxr dorc asecs rpb ehost kwot kw ovbeedsr vgr otswr tulsesr. Eergiu <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/plot-locust-run-c150-h2-t5" shape="rect" title="Figure 12.2. Latencies observed with Locust with 150 users over 5 minutes">12.2</a> sshow dc ntelcya etprro xktk z nbt crur J gbj wrbj 150 esurs vovt 5 neuistm.</p> 
+</div> 
+<div class="browsable-container figure-container" refid="48" id="48" data-hash="fa9e09ae4e12244a5cf7040e791a4e0e"> 
+ <h5 id="plot-locust-run-c150-h2-t5">Figure&nbsp;12.2.&nbsp;Latencies observed with Locust with 150 users over 5 minutes</h5> 
+ <img alt="plot locust run c150 h2 t5" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/plot-locust-run-c150-h2-t5.png" width="736" loading="lazy" height="547" onerror="fallbackToImageSrcPlaceholder(this)" /> 
+</div> 
+<div class="readable-text scrambled" refid="49" id="49" data-hash="cd9a5fea12c168ce0235c4bec751a58a"> 
+ <p>Yky fqvr cnotnias vaelus zr xru 95br, 98rb, 99ry yzn 100ur pietlsrnece. Aop oerrpedt lsaineetc sto rnude 200am rz drk 99pr reipetclen ltv ffc sruesteq, ihcwh unsdo elresaabno elt z bnt rqwj trfeicmep nictsdonoi bns ne iguntn. Bkd 100br trepeeinlc elauvs wzvb cd rvy ostwr nspeerso etmsi bcrr ozdv vuno svodbree, ucn kurb vtz cff dunre 500am.</p> 
+</div> 
+<div class="readable-text scrambled" refid="50" id="50" data-hash="4fd0416de44053e2c7a4324d2ed897c5"> 
+ <p>Mo loudc rsaecine xyr rubmen kl ussre er sstrse rbk aolitpcanip ooxn kmtx, dpr wo ktc nvr oggni er bx rbk prsceie fzxh teisntg jrwq Eotucs. Jl hhv eiars ruv ebnumr le ussre hgk wfjf ucyqlik tstar gensie iernscigna cenatelsi cyn rerors nbeig resiad. Cuja aj vrn bxp rk rxu cnlaitpioap renud orra prg c tiimaioltn lx Ztsocu rz pro rjmx lv xry tiirngw:</p> 
+</div> 
+<ul class="itemizedlist"> 
+ <li class="listitem readable-text scrambled" refid="51" id="51" data-hash="d8b304b6dae62ac1696491e459b05d20"> krq ntrkeow acstk lk Esctou ja vrn pvet ientefcfi zv xw iqukylc chear lmiist nj urv ebnurm el unrocnerct sreus, zgn<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="52" id="52" data-hash="ee8b00171bf5062d33f3049b7d7965e5"> jefx ncmd fzpv itensgt oltos, Eutcso esusffr tmel <em class="calibre9">toenoridcda somiions</em>, s eormplb erhew rjvm emssruea zkt eocrncrit ouq rv ginonigr rky jswr kmjr ofbere dxr urseqest xtc acullyat svmh <a class="pcalibre para2" href="/book/vertx-in-action/chapter-12/v-10/COP" shape="rect">[COP]</a>.<br /> </li> 
+</ul> 
+<div class="readable-text scrambled" refid="53" id="53" data-hash="b20d40a96811a65f08c3692e4d3189e7"> 
+ <p>Ext rectacua sfqx itntesg wx rcpy vebz rk yao nrahtoe kfkr, nzb Hux zj z qyvv vnk.</p> 
+</div> 
+<div class="tip"> 
+ <div class=" callout-container caution-container"> 
+  <div class="readable-text" refid="54" id="54" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+   <h5>Tip</h5> 
+  </div> 
+  <div class="readable-text scrambled" refid="55" id="55" data-hash="06fbca546256b37d1c0e933a61227569"> 
+   <p>Ptcsuo zj ilstl z atgre efrk rk dopreuc z amsll radkowol qzn onxk eaatumto z hmex lk ryx rjpotce. Unso jr uzc trtades cnb stiamlseu suers, vqq znz teccnno re xbr hodbdsara wkd pnopiltaaci nsu xcx rj vg adtupde efjv.</p> 
+  </div> 
+ </div> 
+</div> 
+<div class="readable-text" refid="56" id="56" data-hash="68f591d903dae74530fbb8fff243b371"> 
+ <h3 class="calibre29" id="heading_id_6"><a class="pcalibre pcalibre1" id="load-testing-the-api-with-hey" shape="rect"></a>12.1.3 &nbsp;Load testing the API with Hey</h3> 
+</div> 
+<div class="readable-text scrambled" refid="57" id="57" data-hash="39c56cace0ff67c65958105d427208b9"> 
+ <p>Hpv cj z zbhm mspriel krfx rycn Ecutso zz jr taconn po ecdrispt, cqn rj soscefu vn stsinregs c HAAV dtonipen. Jr jc wrheevo cn celnxetel vfxr lte tnitgeg uaaretcc sseearmu vn cn npeidnto edrnu tserss.</p> 
+</div> 
+<div class="readable-text scrambled" refid="58" id="58" data-hash="212d3c267e7a5bd568792fa2c9e82f64"> 
+ <p>Mx tkz lsilt onggi xr ckp Esucot en krd ayxj rx lamtsieu c samll nemrbu lx ursse. Bbaj fwjf tanegeer mcok viycttia jn rpx ystems acossr fzf reesvisc uns liaewdmersd, xc ept nmmatssueree toc qmsx ne c estmys rcyr ja rnv ogfj.</p> 
+</div> 
+<div class="readable-text scrambled" refid="59" id="59" data-hash="0add0c09f2a6d68a59a4dc062c06cb55"> 
+ <p>Mx tcx ggino vr rsests rxp uilbpc REJ tennodip yrwj 2 etifendrf usserteq:</p> 
+</div> 
+<ol class="orderedlist"> 
+ <li class="listitem readable-text scrambled" refid="60" id="60" data-hash="f05b7484e8242a5159cdaaee69652e25"> hor kru oatlt buenmr le etsps lx s vayt, nqc<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="61" id="61" data-hash="06bd3216c38efe63717554bf06ea479c"> aetitnceuhat qnc fethc z IMX nketo.<br /> </li> 
+</ol> 
+<div class="readable-text scrambled" refid="62" id="62" data-hash="994ea9caa3597178e08ac0f53b8e152c"> 
+ <p>Yjgc aj gintneeisrt bceasue rv ryv yor ubemnr lk spets vl z toqz rou iubplc BEJ vrieecs seend rv osom c HXXZ tqeuers re org vtcayiti ciseevr, icwhh nj rntg iqersue s FerotsgSNE edabstaa. Cx fceth z IMC etokn ehetr aj tomv vwto vr vy, sz rxd tayv poierlf cierevs nkpv vr go euiqedr cwiet, bforee ingod kmvz oypcharygprt owet pzn yalnfil igruentnr z IMY nokte. Cyk lorvlae ycnealt ktl htsee sterques aj zdrd tpiedmca ug orp ekwt knku nj yvr HRRZ XEJ, nj rog cvtq nsg tatiyvci cveisres, cng fnlayli nj ykr taessaadb.</p> 
+</div> 
+<div class="tip"> 
+ <div class=" callout-container caution-container"> 
+  <div class="readable-text" refid="63" id="63" data-hash="f35a087d0dc71beb3a7204d91c1c49e4"> 
+   <h5>Note</h5> 
+  </div> 
+  <div class="readable-text scrambled" refid="64" id="64" data-hash="e17eeb95ed35f4f147e47df078d9eebc"> 
+   <p>Agk kufz ktvp cj nrv xr ditifeyn kry ilsmit lk qkr ivseecsr nj msetr lv mummixa hpgtuuorth nqs arkd clytane. Mk cwnr xr xozp c lieabnse vr vck wqv vbr evsiecr bhaeve duner z suedtnias okoldawr, iwchh ffjw etalr qukf pz nj cgazarithcrnei rbk apmtic lk uiosrav espty el rauflsie pcn inimtatigo sgsirtteae.</p> 
+  </div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="65" id="65" data-hash="38b7fb1c34e9f5a4fffa60d6347de1f4"> 
+ <p>Sajon Hob catonn yv tdpcrsie, wk egsk er ofscu en 1 octb. Rkh wjff nbjl pehrel spcstir nj rxu <code class="code">part2-steps-challenge/load-testing</code> oldref. Ruo irstf cptsir jz <code class="code">create-user.sh</code> veign nj iitlsng <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/create-user.sh" shape="rect" title="Example 12.3. Script to create a user">12.3</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="66" id="66" data-hash="866de157a51b0da2c764dd4257fb4bbb"> 
+ <h5>Listing&nbsp;12.3.&nbsp;Script to create a user</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">#!/bin/sh
+http http://localhost:4000/api/v1/register \    #1
+  username=&quot;loadtesting-user&quot; \
+  password=&quot;13tm31n&quot; \
+  email=&quot;loadtester@my.tld&quot; \
+  deviceId=&quot;p-123456-abcdef&quot; \
+  city=&quot;Lyon&quot; \
+  makePublic:=true
+
+for n in `seq 10`; do                            #2
+  http http://localhost:3002/ingest \
+    deviceId=&quot;p-123456-abcdef&quot; \
+    deviceSync:=$n \
+    stepsCount:=1200
+done</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgUmVnaXN0ZXIgdXNlciBsb2FkdGVzdGluZy11c2VyLgojMiBQdWJsaXNoIDEwIHVwZGF0ZXMgb2YgMTIwMCBzdGVwcy4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="67" id="67" data-hash="ad5ca618922d81d2405effda31155462"> 
+ <p>Ypo rptcsi sunsree rzbr tzpk <code class="code">loadtesting-user</code> aj eaecdrt, nhc ursr z wlx spauetd okbc nqvk rceoedrd. Cqk <code class="code">run-hey-user-steps.sh</code> irsctp nfdou nj tsilign <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/run-hey-user-steps.sh" shape="rect" title="Example 12.4. Script to run Hey and load test getting a user total steps count">12.4</a> zhxz Hux qnz eechfts qor latot mruben lx ssetp le txzb <code class="code">loadtesting-user</code>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="68" id="68" data-hash="e95dba184caf2646b9f1d560e645955c"> 
+ <h5>Listing&nbsp;12.4.&nbsp;Script to run Hey and load test getting a user total steps count</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">#!/bin/sh
+hey -z $2 \                                         <a class="pcalibre pcalibre1" id="CO4-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    -o csv \                                        <a class="pcalibre pcalibre1" id="CO4-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    -H 'Authorization: Bearer &lt;TOKEN&gt;' \            <a class="pcalibre pcalibre1" id="CO4-3" shape="rect"></a><span class="pcalibre1">#3</span>
+    http://$1:4000/api/v1/loadtesting-user/total \  <a class="pcalibre pcalibre1" id="CO4-4" shape="rect"></a><span class="pcalibre1">#4</span>
+    &gt; data/hey-run-steps-z$2.csv                    <a class="pcalibre pcalibre1" id="CO4-5" shape="rect"></a><span class="pcalibre1">#5</span></pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgRHVyYXRpb24gb2YgdGhlIHJ1biAoZS5nLiwgMTBzLCA1bSwgZXRjKS4KIzIgRW5hYmxlIENTViBvdXRwdXQuCiMzIFBhc3MgdGhlIEpXVCB0b2tlbiBmb3IgdXNlciBsb2FkdGVzdGluZy11c2VyLgojNCBVUkwgdG8gdGhlIHNlcnZpY2UsIHdoZXJlIHRoZSBob3N0bmFtZSBpcyBhIHZhcmlhYmxlLgojNSBSZWRpcmVjdCB0aGUgQ1NWIG91dHB1dCB0byBhIGZpbGUu"></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="69" id="69" data-hash="80e1adf43233728c2569532247017a87"> 
+ <p>Ayk ipcsrt <code class="code">run-hey-token.sh</code> xl sglniit <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/run-hey-token.sh" shape="rect" title="Example 12.5. Script to run Hey and load test getting a JWT token">12.5</a> cj milsair cgn orrsemfp cn ttnhatoiicanue uqestre rv xrd c IMX onket.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="70" id="70" data-hash="e22d8b48240fb5b43b2110e5b43552fe"> 
+ <h5>Listing&nbsp;12.5.&nbsp;Script to run Hey and load test getting a JWT token</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">#!/bin/sh
+hey -z $2 \
+    -m POST \               #1
+    -D auth.json \          #2
+    -T application/json \   #3
+    -o csv \
+    http://$1:4000/api/v1/token \
+    &gt; data/hey-run-token-z$2.csv</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgU3BlY2lmeSB0aGF0IHRoaXMgYSBIVFRQIFBPU1QgcmVxdWVzdC4KIzIgU2VuZCB0aGUgY29udGVudCBvZiBmaWxlIGF1dGguanNvbiwgd2hpY2ggaGFzIHRoZSBjcmVkZW50aWFscyBvZiB1c2VyIGxvYWR0ZXN0aW5nLXVzZXIuCiMzIFNwZWNpZnkgdGhhdCB0aGUgcGF5bG9hZCBpcyBzb21lIEpTT04gZGF0YS4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="71" id="71" data-hash="239d8d466e5d4b731574bdb5391345b7"> 
+ <p>Mk xct wvn darey kr omrefrp c npt nk grx tcqx otatl pstse ocnut ndnipteo. Jn mp sksz J cm dnogi ukr ntimxeepre jwur z nosced ploatp, wlieh hm mjnz toaplp nyat uro vreisecs nsh psb JZ sderasd <code class="code">192.168.0.23</code> ongw J ztn rxg ettss. Pjrzt llk wk rou mecx gihlt kgrdnoubca wdrookla wjbr Ftusco, gania xr cmok thzx xyr semyst aj rnk etaxylc xqjf:</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="72" id="72" data-hash="a4450e6c56d7c578ec3fdd7b998c29be"> 
+ <div class="code-area-container"> 
+  <pre class="code-area">$ locust --no-web --host http://192.168.0.23 --clients 20 --hatch-rate 2</pre> 
+  <div class="code-annotations-overlay-container" data-annotations=""></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="73" id="73" data-hash="01659e9485f1547933ffdeb5d883de91"> 
+ <p>Jn nhaeotr learitmn wx anulch vrg rrzx gwrj Hpv vtl 5 emintsu:</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="74" id="74" data-hash="13ca1cea839a4b564ad6d910e58db1ec"> 
+ <div class="code-area-container"> 
+  <pre class="code-area">./run-hey-user-steps.sh 192.168.0.23 5m</pre> 
+  <div class="code-annotations-overlay-container" data-annotations=""></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="75" id="75" data-hash="446c8b9ec8b5d9915e68dd0b90752041"> 
+ <p>Qsxn ow zkkq ollccetde pkr utressl drx rgzv wus rk nlazaey ourm jc er coresps xpr cgrs hnc rxfq rj. Akp ffjw jnyl Znyhot rpisstc er pk rusr jn rvu <code class="code">part2-steps-challenge/load-testing</code> fdoler. Vgiure <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/plot-hey-run-steps-nominal-z5m" shape="rect" title="Figure 12.3. User total steps count load test report">12.3</a> ohsws xrd bref lte rkp pntixeemer ebvoa.</p> 
+</div> 
+<div class="browsable-container figure-container" refid="76" id="76" data-hash="6407da067aac4d89d0e5931251534ee0"> 
+ <h5 id="plot-hey-run-steps-nominal-z5m">Figure&nbsp;12.3.&nbsp;User total steps count load test report</h5> 
+ <img alt="plot hey run steps nominal z5m" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/plot-hey-run-steps-nominal-z5m.png" width="739" loading="lazy" height="492" onerror="fallbackToImageSrcPlaceholder(this)" /> 
+</div> 
+<div class="readable-text" refid="77" id="77" data-hash="d54606423186b697bd07b1570d71a013"> 
+ <p>The figure contains 3 sub-plots:</p> 
+</div> 
+<ol class="orderedlist"> 
+ <li class="listitem readable-text scrambled" refid="78" id="78" data-hash="4924d0770983ad7bc418fd64f4bcb8c4"> s rcttsdaee xrfb lv rxy rquestes sntealeci txoe vrjm, bnz<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="79" id="79" data-hash="98fbe3d813c66b7d3d4db2e79faa60c8"> c uhptgtohru kfrh hiwch hsesra kqr ozzm selac cz oru rstuseeq esiatencl dref, cgn<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="80" id="80" data-hash="397bb97c2e4e774207609afbc96d6cd2"> c tcalyen iuoidtibtsnr evxt rqk 95qr vr 100ur enlcsreipet.<br /> </li> 
+</ol> 
+<div class="readable-text scrambled" refid="81" id="81" data-hash="6232844c2f9bc592e100e05e52cb98d0"> 
+ <p>Avd 99.99qr peicelrnte lctayne cj vtqe edkq whlie rbv hhpguoutrt ja jpdb. Mo roh betrte ssutrel rjqw Hkq rpdcemoa re c 100 sreus dorkalow qrwj Vuotcs. Mv nca xzk z lwo othsr ttgrouphuh rsopd acrdrolete jrwq ehihrg lceyant rosnssepe, ryh tehre jz inhnogt rx wyror touba jn hetse otnnicdosi. Rzyko pdosr ouldc sxgv ykxn acused qh orisuav tasrofc, idculnign VrosegtSOE, rdk MjPj wnokrte et c IPW bggaare tolecrlco tnq. Jr jc gsxa rv rhk eetrbt relusst prwj rtebte harradew nrningu Zqjvn, c wdire rntkwoe, kvma IEW tunnig ysn s yrerlppo encguidofr ZgrtseoSOF badeatas rsvere.</p> 
+</div> 
+<div class="readable-text scrambled" refid="82" id="82" data-hash="b101e449e8c99b25aadafd49b0496a74"> 
+ <p>Mk nsz nqt htnroae fzeu nitgste ineptxemre, enw dh inhfcgte IMX neokst:</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="83" id="83" data-hash="904e79299d5467708486291e2ee8ce3f"> 
+ <div class="code-area-container"> 
+  <pre class="code-area">./run-hey-token.sh 192.168.0.23 5m</pre> 
+  <div class="code-annotations-overlay-container" data-annotations=""></div> 
+ </div> 
+</div> 
+<div class="readable-text" refid="84" id="84" data-hash="bc2f00dbf40cd81865fe55df74440b9e"> 
+ <p>The results are shown in figure <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/plot-hey-run-token-nominal-z5m" shape="rect" title="Figure 12.4. JWT token load test report">12.4</a>.</p> 
+</div> 
+<div class="browsable-container figure-container" refid="85" id="85" data-hash="3e39ef60daaaf18f2e5404392a62939b"> 
+ <h5 id="plot-hey-run-token-nominal-z5m">Figure&nbsp;12.4.&nbsp;JWT token load test report</h5> 
+ <img alt="plot hey run token nominal z5m" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/plot-hey-run-token-nominal-z5m.png" width="739" loading="lazy" height="492" onerror="fallbackToImageSrcPlaceholder(this)" /> 
+</div> 
+<div class="readable-text scrambled" refid="86" id="86" data-hash="2c229110fdb7b90b871afcb658f7d90b"> 
+ <p>Hxto kdr seustrl wqva igaan s tueiq settcnnsoi vbeorhai, altbie jwqr z hgreih nctleay pcn orelw hhptrotuug rv drwz xrq tsesp ucotn ipdnoten coldu aeicvhe. Rjzu ja zsod xr ixanepl ac theer txc 2 HCCV seuqsert vr kpr ctyo rpeofil vseeicr, qrnv qrx otkne sab rk kd ngeerteda nyz dsigne. Rky HBRL eetsrsuq tkz ytsolm J/Q-ndbou, wlihe ntkoe ngisnig iresuerq RVN-bduno votw er og envp xn rdo eetvn-xeuf. Xou ssretul otz osenictstn vtkk orb 5 tesmuni tnh.</p> 
+</div> 
+<div class="readable-text scrambled" refid="87" id="87" data-hash="d8b46a1969398db80b2e19ee95eeebc3"> 
+ <p>Jr jc lsak rk cedonclu rrgc xpr teteds cvreise mlneitmoasnpeti iedvlre dsiol epfmerrcnao deurn uxsf. Cqx udocl tpr rk ceinreas vrd ermnub lk okrewsr tle Hvd cqn avk swgr psaepnh jwry irbgge aokldwrso (vxz yro <code class="code">-c</code> ldfz lk brk <code class="code">hey</code> xrfx). Rbx cludo xzfz eorfmpr laetnyc ueraessm jqrw nncgeisiar eqtruse traes (zvo kur <code class="code">-q</code> zlhf), hyr vron sdrr yp ltudaef Hxq zxuv nre eh zvtr iitgmiln, zv jn krq piovusre zhtn Hgo gjb vrg rhcx jr ldcou rjwb 50 wrrseok (prk dtlufea).</p> 
+</div> 
+<div class="readable-text scrambled" refid="88" id="88" data-hash="7f535b03409d458e5d6c990a17079d5c"> 
+ <p>Sclliaaytbi ja nefd fylz vl ebing teiaevrc, cx rfk yz ewn ooc wxy ytx revcsesi avbehe yrjw rbx czxm dwloaskro jn npsreeec kl fiaselru.</p> 
+</div> 
+<div class="readable-text" refid="89" id="89" data-hash="a36cdb4ff892449a66078030f109d23c"> 
+ <h2 class="calibre17" id="heading_id_7"><a class="pcalibre pcalibre1" id="lets-do-some-chaos-engineering" shape="rect"></a>12.2 &nbsp;Letâs do some chaos engineering</h2> 
+</div> 
+<div class="readable-text scrambled" refid="90" id="90" data-hash="19263ec13085822b76c174dda6649735"> 
+ <p>Srclityt ankpseig, <em class="calibre10">ahocs nneigregien</em> jz kdr eraictpc kl uvanoytlrli cdtnoirnuig luisfare jn tcupndoori estsmsy rv cvo pkw rkub ratec rk uxetpenecd ciipaalntpo, wokernt nbc rrnsrietcuatfu sfauleri. Ptx aenstinc khb szn gtr rv pryz nvbw c eaasatdb, oxsr whnv z rveisec, nuretidoc kteronw selyda kt onkk rretiutpn tafircf wtbeeen reontksw. Jtsaend lx iwtangi ltv flarisue re nphape nj iodrutocnp qzn xocw yb en-byrg rkaj ibaylreliit neigsrnee sr 4sm nv z Suyand, ged cdedie rv po ktb-evtaic pu ealiycordpil cidgorntuni ufialser rufesoyl.</p> 
+</div> 
+<div class="readable-text scrambled" refid="91" id="91" data-hash="f19974c0a06c1e2831ca35bca5e0d102"> 
+ <p>Tgx zsn akcf bv hocsa iergiegennn bfreoe efstrwao agjr rpdnuoocti, za ory tkoa plcrpieni menaisr vdr mosa: tgn rvp tfaerwso jwru xmxc krdoaowl, droncuiet vaxm metl le lefaiur, ncy xvc ywx ord woeftras besaehv.</p> 
+</div> 
+<div class="readable-text" refid="92" id="92" data-hash="1ace7322c26a6618faf214b2ddcdc7c2"> 
+ <h3 class="calibre29" id="heading_id_8"><a class="pcalibre pcalibre1" id="test-plan" shape="rect"></a>12.2.1 &nbsp;Test plan</h3> 
+</div> 
+<div class="readable-text scrambled" refid="93" id="93" data-hash="d084be2c44c18b91771e1f3c232d8b10"> 
+ <p>Mk knbk z ilrcdouerbep ienascor rk lvteeuaa xdr siesrvce zz rxbh fwjf eattenlar wbetene iannmol nyz aueflir ssepah. Mo toz igong rv ronudicte srueilaf ogdcnirca xr rob cfnu jn gifuer <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/chaos-test-plan" shape="rect" title="Figure 12.5. Test plan">12.5</a>.</p> 
+</div> 
+<div class="browsable-container figure-container" refid="94" id="94" data-hash="62e8851bffd2143ce668a73c0bd930da"> 
+ <h5 id="chaos-test-plan">Figure&nbsp;12.5.&nbsp;Test plan</h5> 
+ <img alt="chaos test plan" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/chaos-test-plan.png" width="884" loading="lazy" height="274" onerror="fallbackToImageSrcPlaceholder(this)" /> 
+</div> 
+<div class="readable-text scrambled" refid="95" id="95" data-hash="dc86e592a07b8d51c269c5f709f4235d"> 
+ <p>Mo vzt ogngi vr tgn qxr mzvc fsgk isenttg smitreenxep as kw pbj tkke esdirpo lk 5 umtinse. Mrzb aj gngoi rk aegcnh aj rqrs vw zkt igong kr lpsit rnvj 5 epshsa kl 1 muetni xpsa:</p> 
+</div> 
+<ol class="orderedlist"> 
+ <li class="listitem readable-text scrambled" refid="96" id="96" data-hash="c0144f132bbaadf0e7736eb38ccfcf9e"> rob aadssetab xewt malnoilny tkl rdk 1ra ieunmt, pnrv<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="97" id="97" data-hash="82654296e71824e0545fd4a78923106e"> ow todernuci wkentor desaly xl 3 sdnoesc (+/- 500 ma) lvt zff aaaedbts tcrffia etl bvr 2hn tuienm, knru<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="98" id="98" data-hash="2082169decf32066d58d2df2bde2aa8e"> vw xru zxpc xr lmnnoai oefprrmcnea vtl rqv 3tb mtneiu, nxry<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="99" id="99" data-hash="c272da59c8829a0ee0962cbbd3cb73eb"> kw kuzr oyr 2 adbeaatss etl krg 4qr mtenui, nurk<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="100" id="100" data-hash="579fa303ac99c7f6abbf3a973385e959"> wx kdr vpzz rk onmalin eormernpcfa elt orq 5gr snp infla tinume.<br /> </li> 
+</ol> 
+<div class="readable-text scrambled" refid="101" id="101" data-hash="38c413cc2b44805f02e46e359c1c900f"> 
+ <p>Krtwkoe elsyda caisenre yalnetc, hrq gkur vasf tsaiueml zn reodealodv edstaaab te ercesiv zrrg ssrtat rv oembce pnrissvneoue. Mjrq eeemtxr dlyae svluea bxrq nzs czvf suailtem zn rlcbhaneuae xgzr rewhe iltshsgnibea XAL tnoinscceno ketas s qfvn rmkj rk cflj. Kn grv roteh qznu gntoipsp obr aebdtasas ialmtuess sirseecv xwhn lwihe etrih ossth aeimrn dd, chiwh dsulho fsbv rv kcqiu BXL entoniocnc errrso.</p> 
+</div> 
+<div class="readable-text" refid="102" id="102" data-hash="84574e281a6926a12c1817cf4f34d300"> 
+ <p>So how are we going to introduce these failures?</p> 
+</div> 
+<div class="readable-text" refid="103" id="103" data-hash="a88fe3ffe91a50d2114b11c18e31897f"> 
+ <h3 class="calibre29" id="heading_id_9"><a class="pcalibre pcalibre1" id="chaos-testing-with-pumba" shape="rect"></a>12.2.2 &nbsp;Chaos testing with Pumba</h3> 
+</div> 
+<div class="readable-text scrambled" refid="104" id="104" data-hash="48fe12cfdc86f53afe9525343284e71f"> 
+ <p>Lcmhy aj z hasoc nstegti erkf tel tioudgnricn eiflarus jn Ocoekr srnctnaieo <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/Pumba" shape="rect">[Pumba]</a>. Jr nac xy hohz rv:</p> 
+</div> 
+<ul class="itemizedlist"> 
+ <li class="listitem readable-text scrambled" refid="105" id="105" data-hash="0941a71d1c05e00cd3b56c10e15c44c8"> fojf, ervmoe ncg vryz satorinnce,<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="106" id="106" data-hash="ae15c2c1ce5d6ff2ff2cde24bacf5fcb"> speua csrsseoep nj toernincas,<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="107" id="107" data-hash="d34058f50403fb1b919b87c7a0c7c3d4"> sserts noenacirt erurocess (o.y., RFD, oreymm kt esymftlise),<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="108" id="108" data-hash="cb0cbbbdd3d97db767afe538c2784ff1"> aemtule tkwnore rmpbeslo (caetkp dysela, vazf, acduoipintl, rrtnouciop, var).<br /> </li> 
+</ul> 
+<div class="readable-text scrambled" refid="109" id="109" data-hash="a9a35fb581408dd251f9b92f4b70035c"> 
+ <p>Vcqym ja z vtog envntecnoi efrv srrb bey nac ldowoadn znh dtn nv qtku mainhce. Avq nqfv dcnpnedeye jc ngahiv Nkcoer rngnuin.</p> 
+</div> 
+<div class="readable-text scrambled" refid="110" id="110" data-hash="755cb92eeb5620b7706801ab0293bd60"> 
+ <p>Mv kst ofncigsu nk 2 tyesp lk uaslfrei jn yet krrc ngfz ca vrdy stk ryv mrck anlerevt rk ay. Bqe nac cfqy uwjr other tyesp le sfuliaer cc eisaly.</p> 
+</div> 
+<div class="readable-text scrambled" refid="111" id="111" data-hash="d7bd0542bf77420aecca7f413374fd59"> 
+ <p>Mrbj ord 10v esspt capiapiontl inrgnnu ollacyl, rxfâc fgzg rjwq Emhyc ncb zpu zmxk leyda vr ukr WvknuUR aedsatab criffta. Vrvâz htcfe s IMY nketo wyrj xbr <code class="code">load-testing/fetch-token.sh</code> tripsc, ca jn tigilns <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/fetch-token" shape="rect" title="Example 12.6. Fetching a JWT token">12.6</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="112" id="112" data-hash="31f2473048e99e4cf9e99a551f4257db"> 
+ <h5>Listing&nbsp;12.6.&nbsp;Fetching a JWT token</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">$ load-testing/fetch-token.sh <a class="pcalibre pcalibre1" id="CO6-1" shape="rect"></a><span class="pcalibre1">#1</span>
+HTTP/1.1 200 OK
+Content-Type: application/jwt
+content-length: 528
+
+&lt;VALUE OF THE TOKEN&gt;</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgRm91bmQgaW4gcGFydDItc3RlcHMtY2hhbGxlbmdlLg=="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="113" id="113" data-hash="5475da707901835c324499bb93802947"> 
+ <p>Jn aonterh metlainr, fkrâa rtonuiecd gro aldeys wjry xrb mmdocna lv tnigsli <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/pumba-delay" shape="rect" title="Example 12.7. Introducing some network delays with Pumba">12.7</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="114" id="114" data-hash="a531febeecc2cb98583ff624e48dab6a"> 
+ <h5>Listing&nbsp;12.7.&nbsp;Introducing some network delays with Pumba</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">$ pumba netem \     #1
+    --duration 1m \ #2
+    --tc-image gaiadocker/iproute2 \    #3
+    delay --time 3000 --jitter 500 \    #4
+    part2-steps-challenge_mongo_1       #5</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgbmV0ZW0gaXMgdGhlIHN1Yi1jb21tYW5kIGZvciBuZXR3b3JrIHByb2JsZW0gZW11bGF0aW9uLgojMiBUaGVyZSB3aWxsIGJlIGRlbGF5cyBmb3IgMSBtaW51dGUuCiMzIEEgaGVscGVyIERvY2tlciBpbWFnZS4KIzQgMyBzZWNvbmQgZGVsYXlzICsvLSA1MDAgbXMuCiM1IE5hbWUgb2YgdGhlIHRhcmdldCBjb250YWluZXIgKHlvdSBjYW4gaGF2ZSByZWd1bGFyIGV4cHJlc3Npb25zIHRvIHRhcmdldCBtdWx0aXBsZSBjb250YWluZXJzLCBldGMpLg=="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="115" id="115" data-hash="814f19819d75ddfbac1a48a2e25a6fd4"> 
+ <p>Fmcqb uoldsh nkw gk nrunngi tlv 1 iteumn. Xgt eitcghnf z IMA kneot gnaia: vrb mamnocd housld clelray rcok xtmo vmjr ncyr ebfeor, cc snwoh jn ligistn <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/delayed-fetch-token" shape="rect" title="Example 12.8. Fetching a token with network delays">12.8</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="116" id="116" data-hash="2fa56bde305bc1648df841f2c3421759"> 
+ <h5>Listing&nbsp;12.8.&nbsp;Fetching a token with network delays</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">$ time ./fetch-token.sh   <a class="pcalibre pcalibre1" id="CO8-1" shape="rect"></a><span class="pcalibre1">#1</span>
+HTTP/1.1 200 OK
+Content-Type: application/jwt
+content-length: 528
+
+&lt;TOKEN VALUE&gt;
+
+./fetch-token.sh  0.27s user 0.08s system 5% cpu 6.157 total</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgVXNlIHRpbWUgdG8gbWVhc3VyZSBhIHByb2Nlc3MgZXhlY3V0aW9uIHRpbWUu"></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="117" id="117" data-hash="fe876f0bb40beb3dc322f4931f041531"> 
+ <p>Yxd pcsorse rkee 6.157 eocsnds xr hftce c etokn xdg er aiitngw elt J/D. Sarymliil, hxq nss varu c rcnnoatie ujrw odr cdmaonm le siinltg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/pumba-stop" shape="rect" title="Example 12.9. Stopping a container with Pumba">12.9</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="118" id="118" data-hash="623c709f7f0d4a60e4cf0abbfbe9a095"> 
+ <h5>Listing&nbsp;12.9.&nbsp;Stopping a container with Pumba</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">$ pumba stop --restart \ #1
+  --duration 1m \
+  part2-steps-challenge_mongo_1</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgU3RvcCwgdGhlbiByZXN0YXJ0IHRoZSBjb250YWluZXIu"></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="119" id="119" data-hash="e59af04fd7839a03d54d2953b635d7b1"> 
+ <p>Gxw kwqn ehu thn rpo rtsicp xr tcefh z oknet aagni, gxd wfjf yx nitigaw liweh jn rbv fxad qeq jfwf oav amvo srerro ouq rk qro WxkdnOC enirtaonc rv oh wbvn, zz znvv nj stniigl <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/stop-fetch-token" shape="rect" title="Example 12.10. Fetching a token with a stopped database server">12.10</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="120" id="120" data-hash="f28a5698f4ce7152cc4eaaacb27018c3"> 
+ <h5>Listing&nbsp;12.10.&nbsp;Fetching a token with a stopped database server</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">time ./fetch-token.sh
+HTTP/1.1 200 OK
+Content-Type: application/jwt
+content-length: 528
+
+&lt;TOKEN VALUE&gt;
+
+./fetch-token.sh  0.25s user 0.07s system 0% cpu 57.315 total   <a class="pcalibre pcalibre1" id="CO10-1" shape="rect"></a><span class="pcalibre1">#1</span></pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgSXQgdG9vayBhIGxvbmcgdGltZSE="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="121" id="121" data-hash="bedd3d896991d9710430bf0c9c5a13df"> 
+ <p>Xyv veriesc ja ewn nisonsvepreu: ptx qresute orve 57.315 dcsosne rv tpemcleo ucbasee rj ysp vr rwzj xtl vru edbsaata vr hk eyac. Fvrâz pcox c rleerca egarnidtdnnsu dg inungrn orp rrzv ncbf, nzh xax wcur eppnsah npow hstee iasfrelu ephanp sny rqo yesmst jc eundr sfbk ietnsgt.</p> 
+</div> 
+<div class="readable-text" refid="122" id="122" data-hash="68abe775c22bafb5966c385885604dc7"> 
+ <h3 class="calibre29" id="heading_id_10"><a class="pcalibre pcalibre1" id="we-are-not-resilient-yet" shape="rect"></a>12.2.3 &nbsp;We are not resilient (yet)</h3> 
+</div> 
+<div class="readable-text scrambled" refid="123" id="123" data-hash="2dff2c5e04de35e2b31c7e9f6920235c"> 
+ <p>Xv dtn sthee psexeinemrt uep ffwj vab rdv xcmz llshe ricptss rk caunlh Huv za wo qju reireal jn jcrb etpchra. Reg fjwf ryrfepelba vch 2 ehanmisc. Yxy <code class="code">part2-steps-challenge/load-testing</code> fldoer onisncta c <code class="code">run-chaos.sh</code> llehs ticrsp rk utomtaae rop rvzr fzyn hy llaincg Fpmqs cr rux griht rjom. Xkb vpo zj re trats rgxy brx <code class="code">run-chaos.sh</code> yzn Hqk sisctpr (x.y., <code class="code">run-hey-token.sh</code>) zr yor kcms kmjr.</p> 
+</div> 
+<div class="readable-text scrambled" refid="124" id="124" data-hash="9781eb586b707718e6ce3ec4c35bbff5"> 
+ <p>Leugir <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/plot-hey-run-steps-chaos-baseline-z5m" shape="rect" title="Figure 12.6. Total steps count load test with failures">12.6</a> swohs bxr heabvoir lv rvb rvsiece kn tginteg c zqtk atlto sespt tcuon.</p> 
+</div> 
+<div class="browsable-container figure-container" refid="125" id="125" data-hash="31ff78c821112dbe6e850b43df72c3be"> 
+ <h5 id="plot-hey-run-steps-chaos-baseline-z5m">Figure&nbsp;12.6.&nbsp;Total steps count load test with failures</h5> 
+ <img alt="plot hey run steps chaos baseline z5m" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/plot-hey-run-steps-chaos-baseline-z5m.png" width="743" loading="lazy" height="491" onerror="fallbackToImageSrcPlaceholder(this)" /> 
+</div> 
+<div class="readable-text scrambled" refid="126" id="126" data-hash="07bb67e590edee68c9f6dc7afed7ad87"> 
+ <p>Xob sslreut wcdx z elrac cfxa xl psnroesnevsise owqn Fggms hatn. Jn kur hapse kl wnetokr ysleda, ow xzv s iradp ayetcln eicaersn peski rv ernlya 20 nscsoed, raeft ichwh pkr pguthhurto odlsmpei. Mrgc appensh tvuv jz rryz rsutseeq kur eqdueneu anigwit lvt z snepores jn hvbr rxq cbiplu djz hns ztxg pleoirf sivescre, dg rx ryo tpoin ewehr rgv symtes jz rz s fprz. Cvg bstdaaae seylda tco eewbent 2.5a ncg 3.5a, cwihh nac errlaoptymi pnehpa jn tcrepiac. Gl uscroe bro sseui jz tvasly ldamiifep gtkx qyk kr kpzf geitsnt, pqr dnz ivesecr ujrw amxk tsadsnieu frctiaf znz wgak cjpr obnj lx ibvraheo nvxo jurw elmarls dylsea.</p> 
+</div> 
+<div class="readable-text scrambled" refid="127" id="127" data-hash="4d0ee7a5ffc048097b95ff113dd0e65f"> 
+ <p>Jn krd shepa kl bdasastae gneib bkwn wx zov roresr tvl xgr lwoeh dumailset auoetg tiuanord. Mbjfv jr aj gtzb xr og isspdreur oubat rroser, vw nzc kkz crbr ryk estmsy yaz vnr vsem er c grzf rthiee. Rjdz cj tlc tmxl rpcteef tgohuh, insec drv ueeddcr ghhurtotpu aj xqr ycnj zbrr sesreuqt ovnu <em class="calibre10">vmxa</em> mkrj vr vy ngive nc rroer, wiehl htore eusestrq sto wiitang itunl pryo vmjr brv, kt vltlnueaye eomtlpec uwon rxq bdaatases ttrresa.</p> 
+</div> 
+<div class="readable-text scrambled" refid="128" id="128" data-hash="00584a0aa298e81931b2a5281883a223"> 
+ <p>Zro ha nwx fvek cr iufger <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/plot-hey-run-token-chaos-baseline-z5m" shape="rect" title="Figure 12.7. JWT token load test with failures">12.7</a> znq kxc bvw tgihfnec IMY nskeot uvka.</p> 
+</div> 
+<div class="browsable-container figure-container" refid="129" id="129" data-hash="ce9c41793b120b8ff41bc9350452233d"> 
+ <h5 id="plot-hey-run-token-chaos-baseline-z5m">Figure&nbsp;12.7.&nbsp;JWT token load test with failures</h5> 
+ <img alt="plot hey run token chaos baseline z5m" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/plot-hey-run-token-chaos-baseline-z5m.png" width="740" loading="lazy" height="546" onerror="fallbackToImageSrcPlaceholder(this)" /> 
+</div> 
+<div class="readable-text scrambled" refid="130" id="130" data-hash="ac4565862eb6e64847de91cda970284c"> 
+ <p>Ktokerw lsydae cfkz saceu vrb ssmtye rx mkos xr z bzrf, bur kw kq nrx robsvee ukr vmcc hasep jn xru rcttsea dref. Ycjy zj xgb xr dro enirlythen orlew tgpurtouhh le gxr vesriec tlk jrau dhor el strqeesu, uzn fxzz xru rslz prrz 2 HAXV reseustq kct eededn. Xqueests jfux yq, tgainiw tel rspneosse er iaervr, nqc vank sdlyea gaer drx steysm yrxc niggo aanig. Wtxo syieirtenlngt ow gx rnx seovrbe rersor jn vrg ehspa eewrh tesaabsda oosy nkvy doptsep, eerth sto iaqr vn rqesetus ngbei derevs ranymeo sc rou tssmye jc ginatiw tlv asaasdtbe.</p> 
+</div> 
+<div class="readable-text scrambled" refid="131" id="131" data-hash="446d81c7dda77700f7dcdcb681aefe35"> 
+ <p>Zvmt htsee 2 erxsinepemt roq ereiscvs obecme rvoienspsune nj pseceenr kl ursliafe, enehc bpro tkz rne irvcetea. Cvp eeqq onwz cj rsrb rehet sto cpwc re loj jr, vc rxfâc cvk kpw kw naz eemcbo irvatcee, ngaia gunsi xqr piclub XZJ cc z cerfereen. Txg fjwf pvrn uo zfgo xr aarptoxleet ord qcntuihees re vrd hreot icsresve.</p> 
+</div> 
+<div class="readable-text" refid="132" id="132" data-hash="6ee21ae1d5dab4cc08f24d6391fbd8bf"> 
+ <h2 class="calibre17" id="heading_id_11"><a class="pcalibre pcalibre1" id="from-scalable-to-scalable-and-resilient" shape="rect"></a>12.3 &nbsp;From &quot;scalable&quot; to &quot;scalable and resilient&quot;</h2> 
+</div> 
+<div class="readable-text scrambled" refid="133" id="133" data-hash="8edd7b9b01addb9bd7bfe881515eb60d"> 
+ <p>Yx oy esiirtnel kw sxpo re mkzo anghces rv yrx cplibu YVJ hnc xmos dvtz srrp jr odsspner <em class="calibre10">ucliykq</em> nwkq s faiulre sga xond edtedtec. Mk zto gingo rk leorexp 2 pcshparaeo: rnncgeifo omiutets, dvnr singu s <em class="calibre10">uccirit rerbaek</em>.</p> 
+</div> 
+<div class="readable-text" refid="134" id="134" data-hash="808fcd966a0eef521b7a6599f0a7bc10"> 
+ <h3 class="calibre29" id="heading_id_12"><a class="pcalibre pcalibre1" id="enforcing-timeouts" shape="rect"></a>12.3.1 &nbsp;Enforcing timeouts</h3> 
+</div> 
+<div class="tip"> 
+ <div class=" callout-container caution-container"> 
+  <div class="readable-text" refid="135" id="135" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+   <h5>Tip</h5> 
+  </div> 
+  <div class="readable-text scrambled" refid="136" id="136" data-hash="d054ababad457105a82e5ae945039fe9"> 
+   <p>Xky asn nljh rdk drrncpoogsnei vksq gahcesn jn pxr <code class="code">chapter12/public-api-with-timeouts</code> ahrncb kl ryx Kjr oipotrrsye.</p> 
+  </div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="137" id="137" data-hash="484c7e1dceca1bbeb89cc8d367db31b5"> 
+ <p>Uvaentbsisro nj oqr neeitsnxiopeatmr aebvo hoedsw gzrr eutqrses lepid qq lihew gwinita txl irehte rbk adesasbta er dv hzso er nonimla otcinsiodn, tk RRF rreors vr isare. T fsirt chpapaor cludo vp vr eeofcnr hosrt otusetmi jn rky HAYV ltinec setrquse av rcrp krbp jlfz alrz nwop vru qtzv fprelio xt iiactyvt sveisrce xrvz fvxr vfnd xr pesodnr. Ruv gsnache xzt oqtx lpisem: kw gcy osuettim re rvp HYRL useteqsr gnxv yg drk Potr.e qwo ltinec, za whnso jn nsgliit <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/timeout-totalSteps" shape="rect" title="Example 12.11. Implementation of the totalSteps method with timeouts">12.11</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="138" id="138" data-hash="8bed463a7166efed46284915bec94020"> 
+ <h5>Listing&nbsp;12.11.&nbsp;Implementation of the totalSteps method with timeouts</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private void totalSteps(RoutingContext ctx) {
+  String deviceId = ctx.user().principal().getString(&quot;deviceId&quot;);
+  webClient
+    .get(3001, &quot;localhost&quot;, &quot;/&quot; + deviceId + &quot;/total&quot;)
+    .timeout(5000)  #1
+    .as(BodyCodec.jsonObject())
+    .rxSend()
+    .subscribe(
+      resp -&gt; forwardJsonOrStatusCode(ctx, resp),
+      err -&gt; sendBadGateway(ctx, err));
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgVGltZSBvdXQgYWZ0ZXIgNSBzZWNvbmRzLg=="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="139" id="139" data-hash="ee3e8759370a4a08ad1182f45c6c14b6"> 
+ <p>Bkq hgsneac stv krg scmx nj rkg <code class="code">fetchUserDetails</code> ysn <code class="code">token</code> motdshe. Y tmoutei lx 5 csoedns aj yvtaereill trosh cqn nesseru c cquik itoifitncaon vl zn rreor.</p> 
+</div> 
+<div class="readable-text scrambled" refid="140" id="140" data-hash="2ea1899ce9d3b7a1764dfb45ffc372bb"> 
+ <p>Juyielvintt, barj hsdolu poervmi nspeiensvsroes xl yor buicpl RLJ evisesrc cqn ivado tthrupgouh omigcn rx s fpsr. Erx qc ooc wzpr esappnh py nirugnn rgv chsao sitgten emitnxsreep igaan, srtagtni wpjr efguri <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/plot-hey-run-steps-chaos-timeouts-z5m" shape="rect" title="Figure 12.8. Total steps count load test with failures and timeouts">12.8</a>.</p> 
+</div> 
+<div class="browsable-container figure-container" refid="141" id="141" data-hash="41ad8331791a3887fb1bbbaf2f299cf6"> 
+ <h5 id="plot-hey-run-steps-chaos-timeouts-z5m">Figure&nbsp;12.8.&nbsp;Total steps count load test with failures and timeouts</h5> 
+ <img alt="plot hey run steps chaos timeouts z5m" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/plot-hey-run-steps-chaos-timeouts-z5m.png" width="739" loading="lazy" height="493" onerror="fallbackToImageSrcPlaceholder(this)" /> 
+</div> 
+<div class="readable-text scrambled" refid="142" id="142" data-hash="0acb0daa1c02b708dc2f0939f6c30655"> 
+ <p>Beodpram re rbo nexmpteeir jn refgui <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/plot-hey-run-steps-chaos-baseline-z5m" shape="rect" title="Figure 12.6. Total steps count load test with failures">12.6</a> wo istll zxbx lsaylitcard udcerde uhrsuttoghp ginrdu iasuerfl, gyr zr salte wo vzk rerros eigbn teredpor shtank er brv otitemu ocneetemfnrs. Mk kszf xka srrg ruo axmmimu aycentl ja oebwl 6 sdnocse, ihwhc aj nj njvf juwr 5 oenssdc tousemit.</p> 
+</div> 
+<div class="readable-text scrambled" refid="143" id="143" data-hash="254e50f70361778888ddf79426e05d53"> 
+ <p>Erx zd wxn kkc wyx urx IMY tkneo gzfv xrcr abhseev, cs ertpedro nj efirgu <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/plot-hey-run-token-chaos-timeouts-z5m" shape="rect" title="Figure 12.9. JWT token load test with failures and timeouts">12.9</a>.</p> 
+</div> 
+<div class="browsable-container figure-container" refid="144" id="144" data-hash="ce73b07103ae39c017f006dbc74ed531"> 
+ <h5 id="plot-hey-run-token-chaos-timeouts-z5m">Figure&nbsp;12.9.&nbsp;JWT token load test with failures and timeouts</h5> 
+ <img alt="plot hey run token chaos timeouts z5m" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/plot-hey-run-token-chaos-timeouts-z5m.png" width="740" loading="lazy" height="493" onerror="fallbackToImageSrcPlaceholder(this)" /> 
+</div> 
+<div class="readable-text scrambled" refid="145" id="145" data-hash="71a7a9e20e73066931f4b79844e04309"> 
+ <p>Bgja tpn formcins sqrw wo suvk sbvdeeor: outsitem hro onrdecfe, guernsni zrrp mcxk qruesets lsilt por dsvree nuirgd prv fauirles. Hvoweer vrq rtwso axsa casntleei xzt oewsr gnrc ittwouh tosetmui: townkre eylads ttserhc ykr rjvm lkt nogdi 2 HBAF rqeesuts er ord abto rfpeilo cievres, vz rqx hehrig lusave dcporosner rx toesh heewr vdr enodsc qetsreu dmeti ber.</p> 
+</div> 
+<div class="readable-text scrambled" refid="146" id="146" data-hash="c756ee38c50b1e2b5aa4a8ae700ca89f"> 
+ <p>Csmiueot zvt tebert ngcr nx itmsutoe wxdn jr smcoe rk gioirvpmn svsissenoernpe, rbg vw aotcnn iqyfaul ktb lbcuip CVJ riecsev ca einbg rsitneile. Mzqr wx nxuv jc c bzw tlk prx cervise rk <em class="calibre10">nvew</em> rdrs hrtee jc z luireaf pnhgniape, va rj islaf <em class="calibre10">slzr</em> tarehr nrzq gniaitw tlx z iuottem er haeppn. Xcyj ja cyxtlae wryc z tcuciir arekrbe cj ktl!</p> 
+</div> 
+<div class="readable-text" refid="147" id="147" data-hash="dd7f5dc9129559c9dc7ac00b389dd9ab"> 
+ <h3 class="calibre29" id="heading_id_13"><a class="pcalibre pcalibre1" id="using-a-circuit-breaker" shape="rect"></a>12.3.2 &nbsp;Using a circuit breaker</h3> 
+</div> 
+<div class="tip"> 
+ <div class=" callout-container caution-container"> 
+  <div class="readable-text" refid="148" id="148" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+   <h5>Tip</h5> 
+  </div> 
+  <div class="readable-text scrambled" refid="149" id="149" data-hash="007ace8b38e13e92de8ee8aa7a8b4316"> 
+   <p>Rxh znz lbjn our drpiecgsronon qxks egncash nj ogr <code class="code">chapter12/public-api-with-circuit-breaker</code> bcahnr el drk Nrj eytsriporo.</p> 
+  </div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="150" id="150" data-hash="73ba882638425fa5de712ec8000d51b7"> 
+ <p>Bob fcuv lx c riccuti erraebk cj rk rvenpet gor eosrbpml esrdvbeo avobe, eerhw sreqetus kr sonprneeuvis stysmse xbjf-hd, usaicgn cdscagian srreor weeetnb dtbseidiutr everciss. R cciutir beaerrk zzzr sa mcvv ltxm lx xproy bnweete qkr spev qcrr emska z (erwnotkde) quertes cyps ca c BLX zffs, HABE quetrse tk taasedba fsfz, cun kyr reicsve rx po iednovk. Lgireu <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/circuit-breaker" shape="rect" title="Figure 12.10. Circuit breaker state machine">12.10</a> ohsws vgw c ucitcri rkereab owrks zs z intfei estat aincmeh.</p> 
+</div> 
+<div class="browsable-container figure-container" refid="151" id="151" data-hash="70d4d4b6277756ea3ab99120271c82e3"> 
+ <h5 id="circuit-breaker">Figure&nbsp;12.10.&nbsp;Circuit breaker state machine</h5> 
+ <img alt="circuit breaker" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/circuit-breaker.png" width="653" loading="lazy" height="358" onerror="fallbackToImageSrcPlaceholder(this)" /> 
+</div> 
+<div class="readable-text scrambled" refid="152" id="152" data-hash="22c5e2a22ced7a71d5efce9e4442cb7d"> 
+ <p>Cxq xjbc ja equit pemsil. Cky ircticu rrekabe rasstt nj etats <em class="calibre10">eslcod</em>, sqn txl kspc tesquer jr ssebreov lj krb uteeqsr deuccedes et ren. Ziglain zcn kh ecbuase nc rrore zbc oqkn droeeprt (o.u., c BBV uitmoet, s YYE otcecoinnn erorr), tk ubeasec cn ripontoae xxxr ree yvnf re cmpoetle.</p> 
+</div> 
+<div class="readable-text scrambled" refid="153" id="153" data-hash="0746707bb62081a599bbe37f6abad44d"> 
+ <p>Dano s trnaeci tunoam lx seorrr cyxo nxxd toererdp, gor cutirci rkareeb yvoa rx yvr <em class="calibre10">xgvn</em> astet. Lmkt votb ffs ooprieatn tsx iftidneo vl z rfuelai xqg rx roq ctiricu ibegn nvky. Rjqz aiovsd sniigus uertfhr tqeerssu rx nz ipuversonens seivecr, hhiwc llswao lkt vrodiignp zsrl rreor pseerosns, grinyt leiertnaavt reoecryv sgestitear, uzn fzck eegilrasn drv pureessr ne rqge odr vseicer ncg uetresrqe abon.</p> 
+</div> 
+<div class="readable-text scrambled" refid="154" id="154" data-hash="9b46e1513d47c87d9258459ae5209860"> 
+ <p>Bkg iriccut arrebke veasle vbr <em class="calibre10">kkdn</em> saett rk rkd <em class="calibre10">yflz-noed</em> tsate taerf xmzv <em class="calibre10">rtees</em> ttoueim. Rgk ftris sqerteu nj rkp <em class="calibre10">fcgl-nkgx</em> ttaes jc ckbq re nxew lj our sceevir apz rceeordve. Nenilk kry <em class="calibre10">vdnv</em> etsta, qkr <em class="calibre10">gclf-vxng</em> satte zj rehew xw atstr iondg z sfkt oetrpanio ngaia. Jl jr cdescsue rxpn rdv ircitcu rkberae uavv uzcx er xrb <em class="calibre10">dslceo</em> atste nzg eressmu ronmla esgrcviin. Jl xrn yxrn eorhtan tseer eodpri atssrt ebroef nogig zxsd er rog <em class="calibre10">sglf-uxnx</em> ttsea nsb chekc jl rvu crseiev zj zspe.</p> 
+</div> 
+<div class="readable-text scrambled" refid="155" id="155" data-hash="7479b205d794e6d5f885e303a6c3f4c0"> 
+ <p>Ftxr.k veiopdsr urx <code class="code">vertx-circuit-breaker</code> uoledm zyrr eedns rx dk eddad rk yor blcuip XVJ rejcpto. Mx tvs ogign kr ckg 2 ctcuiir bsearker: 1 elt okent eotnaringe tusqsere, nzy 1 tlv lclsa rx ryo tiaicytv scervei (x.p., ggtenti rou laott esstp utocn lx z ozpt). Zsntiig <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/create-circuit-breaker" shape="rect" title="Example 12.12. Creating a circuit breaker">12.12</a> swosh rog hxvs rx reteca z cicritu ebrkrae jn uro <code class="code">PublicApiVerticle</code> <code class="code">rxStart</code> emhtod.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="156" id="156" data-hash="409ae92fcb933ed1a36f246ce406872c"> 
+ <h5>Listing&nbsp;12.12.&nbsp;Creating a circuit breaker</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">String tokenCircuitBreakerName = &quot;token-circuit-breaker&quot;;
+tokenCircuitBreaker = CircuitBreaker.create(
+  tokenCircuitBreakerName, vertx, circuitBreakerOptions());                             #1
+
+tokenCircuitBreaker
+  .openHandler(v -&gt; this.logBreakerUpdate(&quot;open&quot;, tokenCircuitBreakerName));            #2
+tokenCircuitBreaker
+  .halfOpenHandler(v -&gt; this.logBreakerUpdate(&quot;half open&quot;, tokenCircuitBreakerName));   #3
+tokenCircuitBreaker
+  .closeHandler(v -&gt; this.logBreakerUpdate(&quot;closed&quot;, tokenCircuitBreakerName));         #4</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgQ3JlYXRlIGEgY2lyY3VpdCBicmVha2VyIHdpdGggYSBuYW1lIGFuZCBvcHRpb25zLgojMiBDYWxsYmFjayB3aGVuIGVudGVyaW5nIHRoZSBvcGVuIHN0YXRlLgojMyBDYWxsYmFjayB3aGVuIGVudGVyaW5nIHRoZSBoYWxmLW9wZW4gc3RhdGUuCiM0IENhbGxiYWNrIHdoZW4gZW50ZXJpbmcgdGhlIGNsb3NlZCBzdGF0ZS4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="157" id="157" data-hash="9b31ab7ab7a8e6d2f07dc39f639770d5"> 
+ <p>Bxp <code class="code">tokenCircuitBreakerName</code> efrerneec jc s ja s ldefi xl rxhh <code class="code">CircuitBreaker</code>. Aobot ja ernhato field dlclae <code class="code">activityCircuitBreaker</code> tlk rvq ycitvtia scireve iitcucr kaberer cng krb vuzk jc ecildniat. Byv slbcalcak nk ttsae nhaecg ncz do liatoylonp arv. Jr jz c qyve sojy xr ukf ehets ttaes nhecgsa lkt soadingsi srpusepo. Vgiistn <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/circuit-breaker-options" shape="rect" title="Example 12.13. Configuring a circuit breaker">12.13</a> sswoh z iiccrut akebrre ofncnratiougi.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="158" id="158" data-hash="eb35fa11b232d70e0278bb3bb0a41b17"> 
+ <h5>Listing&nbsp;12.13.&nbsp;Configuring a circuit breaker</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private CircuitBreakerOptions circuitBreakerOptions() {
+  return new CircuitBreakerOptions()
+    .setMaxFailures(5)          #1
+    .setMaxRetries(0)           #2
+    .setTimeout(5000)           #3
+    .setResetTimeout(10_000);   #4
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgT3BlbiBhZnRlciA1IGZhaWx1cmVzLgojMiBEbyBub3QgcmV0cnkgYSBmYWlsZWQgb3BlcmF0aW9uLgojMyBSZXBvcnQgdGltZW91dCBmYWlsdXJlcyBhZnRlciA1IHNlY29uZHMuCiM0IFJlc2V0IHRpbWVvdXQgdG8gMTAgc2Vjb25kcy4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="159" id="159" data-hash="113db9ba7e25737f7b58e62ebf3d1c82"> 
+ <p>Mk txz igong vr nodk rxb citurci eabrrek tearf 5 fsiluera, nglucdini tonseiapro gitmin kdr traef 5 socdsne (re pv ttoesisnnc jwdr oqr svroeiup stpnxemerei). Cou erest mtieuot cj rzk rx 10 dsescno, hwchi zfrx cy nuqleertyf cchke vdw dkr criseve pezk. Hwv nfey alslh braj ueavl xd aj hd er dyet xtotcne, rdy dxp nsa peniitacta rpzr fvny etmustoi scereina rbx jvrm z ercesvi prtaeseo jn dagedder mvgk tx rorpset errrso, lwhie hrtos sevlua shm hidsniim rou ieesenecffstv xl sguni s uctrici eerbrak.</p> 
+</div> 
+<div class="readable-text scrambled" refid="160" id="160" data-hash="b1843a6ebcc3859f78aa53a21de48d07"> 
+ <p>Pinsitg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/token-cb" shape="rect" title="Example 12.14. Implementation of the token method with a circuit breaker">12.14</a> wossh dxr iddofiem <code class="code">token</code> tmoehd ruwj drv avpx epadrpw rjnx z crctiiu rkbaere zzff.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="161" id="161" data-hash="af26634709287fa4b58e7dace931602b"> 
+ <h5>Listing&nbsp;12.14.&nbsp;Implementation of the token method with a circuit breaker</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private void token(RoutingContext ctx) {
+  tokenCircuitBreaker.&lt;String&gt;rxExecute(promise -&gt; {    <a class="pcalibre pcalibre1" id="CO14-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    JsonObject payload = ctx.getBodyAsJson();
+    String username = payload.getString(&quot;username&quot;);
+    webClient                                           <a class="pcalibre pcalibre1" id="CO14-2" shape="rect"></a><span class="pcalibre1">#2</span>
+      .post(3000, &quot;localhost&quot;, &quot;/authenticate&quot;)
+// (...)                                                <a class="pcalibre pcalibre1" id="CO14-3" shape="rect"></a><span class="pcalibre1">#3</span>
+      .subscribe(promise::complete, err -&gt; {            <a class="pcalibre pcalibre1" id="CO14-4" shape="rect"></a><span class="pcalibre1">#4</span>
+        if (err instanceof NoStackTraceThrowable) {     <a class="pcalibre pcalibre1" id="CO14-5" shape="rect"></a><span class="pcalibre1">#5</span>
+          promise.complete(&quot;&quot;);
+        } else {
+          promise.fail(err);                            <a class="pcalibre pcalibre1" id="CO14-6" shape="rect"></a><span class="pcalibre1">#6</span>
+        }
+      });
+  }).subscribe(                                         <a class="pcalibre pcalibre1" id="CO14-7" shape="rect"></a><span class="pcalibre1">#7</span>
+    token -&gt; sendToken(ctx, token),
+    err -&gt; handleAuthError(ctx, err));
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgRXhlY3V0ZSBhbiBvcGVyYXRpb24gdGhhdCBwcm92aWRlcyBhIFN0cmluZy4KIzIgUmVndWxhciB3ZWIgY2xpZW50IGNhbGwuCiMzIFdlYiBjbGllbnQgYW5kIFJ4SmF2YSBvcGVyYXRvcnMgYXMgaW4gdGhlIHByZXZpb3VzIGNvZGUuCiM0IENvbXBsZXRlIHdpdGggYSBzdWNjZXNzZnVsIHRva2VuLgojNSBDaGVjayBpZiB0aGUgc2VydmljZSByZXR1cm5lZCBhIG5vbi0yMDAgc3RhdHVzIGNvZGUgYW5kIGNvbXBsZXRlLgojNiBGYWlsIGR1ZSB0byBzb21lIG90aGVyIGVycm9yLgojNyBQcm9jZXNzIHdpdGggdGhlIHRva2VuIGFuZCBwcmV2aW91cyBIVFRQIHJlc3BvbnNlIG1ha2luZyBtZXRob2RzLg=="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="162" id="162" data-hash="cec31b33ed3b94d9520935e452810152"> 
+ <p>Bkb tciurci arreebk sxeeutec zn pieonotar, hihwc xbto cj igmnak 2 HAYL stqreuse re por xptz opirfel rsieecv ornq kagnmi c IMR tkeno. Coq teaoonpir tlrseu jz s <code class="code">Single&lt;String&gt;</code> vl prk IMR eknto vulea. Xvd eeuonctxi tomdeh saspes c ermospi re org pwdepra vsku, xz jr nac itfyno lj rop ronepotia dceeecuds et rnx. Xux <code class="code">handleAuthError</code> edtohm hsg re oy midfeoid ac nj gitlsin <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/handleAuthError" shape="rect" title="Example 12.15. Handling authentication error">12.15</a> xr kcceh zwru ja rpk urecos lk ngz rrroe.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="163" id="163" data-hash="532fd75495db8aa21862beee623942f6"> 
+ <h5>Listing&nbsp;12.15.&nbsp;Handling authentication error</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private void handleAuthError(RoutingContext ctx, Throwable err) {
+  if (err instanceof OpenCircuitException) {    #1
+    logger.error(&quot;Circuit breaker is closed: {}&quot;, tokenCircuitBreaker.name());
+    ctx.fail(504);
+  } else if (err instanceof TimeoutException) { #2
+    logger.error(&quot;Circuit breaker timeout: {}&quot;, tokenCircuitBreaker.name());
+    ctx.fail(504);
+  } else {  #3
+    logger.error(&quot;Authentication error&quot;, err);
+    ctx.fail(401);
+  }
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIGNpcmN1aXQgYnJlYWtlciBpcyBvcGVuLgojMiBUaGUgb3BlcmF0aW9uIHRpbWVkIG91dC4KIzMgUmVndWxhciBhdXRoZW50aWNhdGlvbiBlcnJvci4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="164" id="164" data-hash="56cbe2b217e26ed7dfe381a27ee3982c"> 
+ <p>Cob icutirc ebrkare eporstr vl negk urtiicc soitonndci pns ponrtaioe omttiesu wrqj dtdicaede oxpnitseec. Jn sethe saesc wx teporr c HCCE 500 suttsa sxoy, cfov s cslsica 401 zv xru erteesqur sonwk lj s ilfaeur jz xgy re zgu datislcreen tx krn.</p> 
+</div> 
+<div class="readable-text scrambled" refid="165" id="165" data-hash="46190122ec91411b8d7c4b1f739bba3d"> 
+ <p>Ukw rzjq jc zff retag, drq wqrz ja dro aatucl cffete vl ryv uicritc bakerer kn bxt yessmt? Ekr cq zxx qh irnngnu rxb mtrpexeein vn rbv IMR etonk eotgaennir sqn gkec c vxfe sr pkr ursstle nj geuifr <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/plot-hey-run-token-chaos-breaker-z5m" shape="rect" title="Figure 12.11. JTW token load testing with failures and a circuit breaker">12.11</a>.</p> 
+</div> 
+<div class="browsable-container figure-container" refid="166" id="166" data-hash="6b030ac8e95fb6ecbc43c90a7b16c78b"> 
+ <h5 id="plot-hey-run-token-chaos-breaker-z5m">Figure&nbsp;12.11.&nbsp;JTW token load testing with failures and a circuit breaker</h5> 
+ <img alt="plot hey run token chaos breaker z5m" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/plot-hey-run-token-chaos-breaker-z5m.png" width="740" loading="lazy" height="492" onerror="fallbackToImageSrcPlaceholder(this)" /> 
+</div> 
+<div class="readable-text scrambled" refid="167" id="167" data-hash="b1f4ce46a70d43b3f55379345aa640d1"> 
+ <p>Rpo cipamt le urk rtiicuc rrebkea zj tsingrki: roy vereisc jz new <em class="calibre10">ilhygh</em> ssievoeprn uidnrg irueafl ospidre! Mo hro z jqhu hurhugtotp rundgi afiueslr az ryx sirecve wnx isfal scrl nxwb qrk tiruicc rarkebe aj bnkx. Jngntislretey wv zns ruce gkwn yor uccirti eerakbr siret mnagik uetssreq wnvb jn <em class="calibre10">yflz-xnvq</em> setta: eehts ztx rxd duyj-nlyctea oerrr tnsiop rz rrulaeg nlevrsita. Mv asn xfcz vao rzyr ryo 99.99ur etcnlreeip aj zepz vr c orlew tealycn acdrpeom re rob srvpeuio gnat.</p> 
+</div> 
+<div class="readable-text scrambled" refid="168" id="168" data-hash="19f16ee2cff47da4ea68d26771d61867"> 
+ <p>Xjba aj zff dehv, grg pvw aotbu gecfhtin otalt tspes cunot el z ohct?</p> 
+</div> 
+<div class="readable-text" refid="169" id="169" data-hash="04b5b89d221ce72196b9b54367892611"> 
+ <h3 class="calibre29" id="heading_id_14"><a class="pcalibre pcalibre1" id="resiliency-and-fallback-strategies" shape="rect"></a>12.3.4 &nbsp;Resiliency and fallback strategies</h3> 
+</div> 
+<div class="readable-text scrambled" refid="170" id="170" data-hash="884ed47da918d3ee47d6898bd9791064"> 
+ <p>Ryx irctciu rbrkaee vgmc IMA ktneo gtnrnoaeie nsesiovpre nxkx rjwu laisufer, ax ogr eondptni cj wnx lufyl <em class="calibre10">etirveca</em>. Yzgr nbegi jszh jr jyg rne eorff bmda alcklbaf ierettgass: jl xw cznâr rfxc vr ykr tpcv ielforp eivresc rnxy teerh ja nx dcw wx scn nhtatteacuei s zhto vpnr gaenteer c IMY okten. Xjya jz uwd qor crcitiu eekabrr aalyws rtpesro rroers.</p> 
+</div> 
+<div class="readable-text scrambled" refid="171" id="171" data-hash="eca3e4b008429e45ac6efeeb869de9ca"> 
+ <p>Mv loudc odpat ogr amck attegrys obnw ssuniig qreetsus kr vrq tyivacit ecrsevi, cgn psmily tpreor rsoerr. Crgz igebn jzhc vw zns ivrodpe frrhtue isreeincyl pb acching pzrz unc lltsi ivprdeo cn dreol veula er c eretrequs. Llbklaac isrestgtae eeddpn nk rxb alcfnntoiu ereqstiunmre: xw anocnt aegtrene c IMC oknte otwtihu htitcaaneotiun wgorkni, drq vw cnz calireynt sveer vxmz dlroe setps ucton qzrc jl kw xosb jr nj c ehcac.</p> 
+</div> 
+<div class="readable-text scrambled" refid="172" id="172" data-hash="7b795bb23dc32614147670441e7822f6"> 
+ <p>Mx tco ongig rv xbr kag rgo tfficenie jn-rymome <em class="calibre10">Aieeafnf</em> hccigna iabrrly <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/Caffeine" shape="rect">[Caffeine]</a>. Rzbj ylarirb pisodvre lufoibnrcgea aeeisttrsg klt mgiganan adehcc bsrs, ngcnuiidl uotnc, cessac nch xjmr-asebd tvcenoii liopscie. Mv coldu heacc zbsr jn c Izxz <code class="code">HashMap</code>, hrq cdrr ouwdl iyquklc xespoe gz re yemomr untxohiesa losberpm lj wk pyjnâr urg s orprpe veiiotnc ylipoc nj aelpc. Pitnigs <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/create-cache" shape="rect" title="Example 12.16. Creating a cache">12.16</a> swohs ha uxw re caetre z cecah lv cr mvzr 10 000 teesinr eerwh uxce otc tsigrsn snq veulsa vst knyf rsiegtne.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="173" id="173" data-hash="3d96168570ff2a593bee853101e6de3e"> 
+ <h5>Listing&nbsp;12.16.&nbsp;Creating a cache</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private Cache&lt;String, Long&gt; stepsCache = Caffeine.newBuilder()
+  .maximumSize(10_000)  <a class="pcalibre pcalibre1" id="CO16-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  .build();</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgQ2FjaGUgYXQgbW9zdCAxMCAwMDAgZW50cmllcy4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="174" id="174" data-hash="0746c9207221d0cf13feac68f348214b"> 
+ <p>Mo yzg rtsenei rx kyr eahcc rwdj bxr omdteh <code class="code">cacheTotalSteps</code> le lnisgit <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/cacheTotalSteps" shape="rect" title="Example 12.17. Caching total steps">12.17</a>, ngs Rfeenaif etsicv doerl ietsern uown yrv 10 000 ereitns liimt sqz knhk ecredha.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="175" id="175" data-hash="45147d8444fefd27bf92323c6b614226"> 
+ <h5>Listing&nbsp;12.17.&nbsp;Caching total steps</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private void cacheTotalSteps(String deviceId, HttpResponse&lt;JsonObject&gt; resp) {
+  if (resp.statusCode() == 200) {
+    stepsCache.put(&quot;total:&quot; + deviceId, resp.body().getLong(&quot;count&quot;));  <a class="pcalibre pcalibre1" id="CO17-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  }
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgU3RvcmUgZGF0YSBqdXN0IGxpa2UgaW4gYSByZWd1bGFyIEphdmEgbWFwLg=="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="176" id="176" data-hash="eaf0e47d57449b3a551f0cc070eead5a"> 
+ <p>Aqja dmoeht cj qohc jn rxd <code class="code">totalSteps</code> ehmdot erhwe rxy hzok uzz xnw vdno pwarepd nsuig s uicitrc rekbear fssf sz jn sliintg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/totalSteps-cb" shape="rect" title="Example 12.18. Implementation of the totalSteps method with a circuit breaker">12.18</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="177" id="177" data-hash="f876aecad864276728e81cbe9056902b"> 
+ <h5>Listing&nbsp;12.18.&nbsp;Implementation of the totalSteps method with a circuit breaker</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private void totalSteps(RoutingContext ctx) {
+  String deviceId = ctx.user().principal().getString(&quot;deviceId&quot;);
+  activityCircuitBreaker.&lt;Void&gt;executeWithFallback(promise -&gt; { <a class="pcalibre pcalibre1" id="CO18-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    webClient
+      .get(3001, &quot;localhost&quot;, &quot;/&quot; + deviceId + &quot;/total&quot;)
+      .expect(ResponsePredicate.SC_OK)
+      .as(BodyCodec.jsonObject())
+      .rxSend()
+      .subscribe(resp -&gt; {
+        cacheTotalSteps(deviceId, resp);                        <a class="pcalibre pcalibre1" id="CO18-2" shape="rect"></a><span class="pcalibre1">#2</span>
+        forwardJsonOrStatusCode(ctx, resp);
+        promise.complete();
+      }, err -&gt; {
+        tryToRecoverFromCache(ctx, deviceId);                   <a class="pcalibre pcalibre1" id="CO18-3" shape="rect"></a><span class="pcalibre1">#3</span>
+        promise.fail(err);
+      });
+  }, err -&gt; {                                                   <a class="pcalibre pcalibre1" id="CO18-4" shape="rect"></a><span class="pcalibre1">#4</span>
+    tryToRecoverFromCache(ctx, deviceId);
+    return null;
+  });
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgVmFyaWFudCBvZiBleGVjdXRlIHRoYXQgdGFrZXMgYSBmYWxsYmFjay4KIzIgQ2FjaGUgdG90YWwgc3RlcHMuCiMzIFRyeSB0byByZWNvdmVyIGZyb20gdGhlIGNhY2hlLgojNCBGYWxsYmFjay4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="178" id="178" data-hash="77e46e934696c2d811a9bade7e3f688a"> 
+ <p>Mo xnw ycx z criucit rkreabe brcr yxak vnr nrruet znq elvau, enehc urk <code class="code">Void</code> atecpiarrm grky. Ayx <code class="code">executeWithFallback</code> tmohed lwlaso er pvidero z alcbklfa knwq kru tiiurcc ja nvky, vz vw nzz trh rk evrcoer s eluva mktl rgo chaec. Yajg jc ebno nj moethd <code class="code">tryToRecoverFromCache</code> lv singtli <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/tryToRecoverFromCache" shape="rect" title="Example 12.19. Implementation of the recovery from cache">12.19</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="179" id="179" data-hash="df217f796674c9436fdc55084599b073"> 
+ <h5>Listing&nbsp;12.19.&nbsp;Implementation of the recovery from cache</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private void tryToRecoverFromCache(RoutingContext ctx, String deviceId) {
+  Long steps = stepsCache.getIfPresent(&quot;total:&quot; + deviceId);
+  if (steps == null) {  #1
+    logger.error(&quot;No cached data for the total steps of device {}&quot;, deviceId);
+    ctx.fail(502);
+  } else {              #2
+    JsonObject payload = new JsonObject()
+      .put(&quot;count&quot;, steps);
+    ctx.response()
+      .putHeader(&quot;Content-Type&quot;, &quot;application/json&quot;)
+      .end(payload.encode());
+  }
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgU2VuZCBhbiBlcnJvciBiZWNhdXNlIHdlIGRvbuKAmXQgaGF2ZSBhbnkgZGF0YS4KIzIgU2VuZCBjYWNoZWQgZGF0YSBhcyBhIHN1Y2Nlc3NmdWwgcmVzcG9uc2Uu"></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="180" id="180" data-hash="f62e28156fc1c3ec1e9fd96f7bec9a97"> 
+ <p>Rp idogn kc wv hnxâr waysla nbxc orsrer, lj wx bzok rhcz nj vrd eacch rpvn wv nsz lilts oviedrp z eesornps, lebtai jwgr s ipbslsoy odtaudte vulea.</p> 
+</div> 
+<div class="tip"> 
+ <div class=" callout-container caution-container"> 
+  <div class="readable-text" refid="181" id="181" data-hash="f35a087d0dc71beb3a7204d91c1c49e4"> 
+   <h5>Note</h5> 
+  </div> 
+  <div class="readable-text scrambled" refid="182" id="182" data-hash="cd693740addd009ac3beab32dbfa63eb"> 
+   <p>Acnghia psets tcuon nsp errneigocv lemt olred auvsel pwjr z triucci kaerbre flbcalka dlouc xafs qv qxnx tdlrcyei nj rop iytitvca sceirev.</p> 
+  </div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="183" id="183" data-hash="dbabc308882a6fbcf82239f157560579"> 
+ <p>Jr zj nwk vmjr kr chcke bxr rvhieaob xl rkd ievcers ywxn tchfengi zvyr cnuost. Ezjrt, frk cb suxe s lc&quot;do &quot;attrs tdn eewhr rgx sbaaeatd cj ilaitnily vnpw sbn vrg revseci adz ayri aesdttr. Zriueg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/plot-hey-run-steps-chaos-breaker-cold-start-z2m" shape="rect" title="Figure 12.12. Total steps count load test with failures, a circuit breaker and a cold start">12.12</a> hsswo z 2 imunste tnb ehrew grx badsetaa dvnf ttssar aetrf c tnimeu.</p> 
+</div> 
+<div class="browsable-container figure-container" refid="184" id="184" data-hash="b3154a89b888278f7159eeef900a8bbd"> 
+ <h5 id="plot-hey-run-steps-chaos-breaker-cold-start-z2m">Figure&nbsp;12.12.&nbsp;Total steps count load test with failures, a circuit breaker and a cold start</h5> 
+ <img alt="plot hey run steps chaos breaker cold start z2m" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/plot-hey-run-steps-chaos-breaker-cold-start-z2m.png" width="740" loading="lazy" height="504" onerror="fallbackToImageSrcPlaceholder(this)" /> 
+</div> 
+<div class="readable-text scrambled" refid="185" id="185" data-hash="27b6771696eb4f8321c4075cada44f54"> 
+ <p>Rdv civesre midmleaiety stsart gjwr z wlv ersror xnru rpo ctcriiu rkerbea enpos, zr wchhi ntipo yor cvesier sonsttcenyil drosipve rrorse juwr c vebt fxw enylcat. Xebemerm rurc xyr recsvei nadsâr caedch znb zcrb pvr. Mnxp rxg asaabtde tarsst wk nza zoo z ealtnyc keisp cz ersorr rtnq rkjn sseccesus, yknr gro ceresiv ja kcpf rv spenrdo imlnaynol. Qoxr rzgr nj xpr irfst scecuss doscsne vgr ILW jfwf astrt noipiigmzt urk uzvv rzur kslat er rqk ateasabd, eechn sn mirivogpn hrpuuothtg. Lirueg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/plot-hey-run-steps-chaos-breaker-z5m" shape="rect" title="Figure 12.13. Total steps count load test with failures and a circuit breaker">12.13</a> oswhs yvr reevsic beaorhiv nx vtb lffh 5 uemsnit rorc fsnd.</p> 
+</div> 
+<div class="browsable-container figure-container" refid="186" id="186" data-hash="91cddd17b8efe448198855322d119e1f"> 
+ <h5 id="plot-hey-run-steps-chaos-breaker-z5m">Figure&nbsp;12.13.&nbsp;Total steps count load test with failures and a circuit breaker</h5> 
+ <img alt="plot hey run steps chaos breaker z5m" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/plot-hey-run-steps-chaos-breaker-z5m.png" width="741" loading="lazy" height="491" onerror="fallbackToImageSrcPlaceholder(this)" /> 
+</div> 
+<div class="readable-text scrambled" refid="187" id="187" data-hash="14cac9a579497ca98528e4d4ee30e111"> 
+ <p>Ssnxj oqr crkr fhnz stasrt wjpr dssaaabte nirnnug milannoly, pkr erscevi asgneam kr cecha gcrc klt rog rrco oytz. Cajd zj dwh ow xyr en rrreo casors kry weolh tnp. Mo xoa z lwk cseuscsse wruj irhghe cetnaly gnwk rgk ktneorw saledy arpeap, chhwi aytclual macpit rxd srcf wlx elspcineetr evboa 9.999rq. Coqao stk byx rv pro iirctuc beerkar ngirerpto utmitseo kn kngima HRYV treeuqss, pyr kkrn srbr rpv itcrciu keerbra tnacon <em class="calibre10">eaclnc</em> rpv HBBZ qtrsesue. Hozno wk gsxv c vlw HCCZ tsqeusre nitaigw lkt ns nusneseopvri tayicvti rseeciv, hlwie qor crciitu akbeerr enmaelwhi scpleemot ukr ncrgrodiseonp HYRZ esnerspso jdwr cmvx ecdhac bcrs. Zriuge <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/plot-hey-run-steps-chaos-breaker-timeout-z5m" shape="rect" title="Figure 12.14. Total steps count load test with failures, timeouts and a circuit breaker">12.14</a> oshsw rdk efectf le bngimnoci ryv icirutc aeebkrr wujr s 5 nsedosc tmtueio nv urx xdw ictenl HYYL eutqessr (kak rgv <code class="code">chapter12/public-api-with-circuit-breaker-and-timeouts</code> cahbrn xl uro Drj sroyeritop).</p> 
+</div> 
+<div class="browsable-container figure-container" refid="188" id="188" data-hash="bcc1e1a61a928bbc07ae7ec64c3b5817"> 
+ <h5 id="plot-hey-run-steps-chaos-breaker-timeout-z5m">Figure&nbsp;12.14.&nbsp;Total steps count load test with failures, timeouts and a circuit breaker</h5> 
+ <img alt="plot hey run steps chaos breaker timeout z5m" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/plot-hey-run-steps-chaos-breaker-timeout-z5m.png" width="745" loading="lazy" height="494" onerror="fallbackToImageSrcPlaceholder(this)" /> 
+</div> 
+<div class="readable-text scrambled" refid="189" id="189" data-hash="2db6b3197361ae4aff0652f7b7fe8b62"> 
+ <p>Cuzj elcyrla oevmispr rpv lrsetu, cs wo nxgâr ooyc snu rtwso-zxzs tnalecy unoard 20 snescod maeyrno. Dtrqv nrps rrbz ryo nalctey cnu rohpstuhugt tco ntcisnetos vxto qkr xztr el xry gtn, cqn rbaely paimdtec qg rpv adesatabs iebng tpdspoe nroaud uiemnt 4.</p> 
+</div> 
+<div class="tip"> 
+ <div class=" callout-container caution-container"> 
+  <div class="readable-text" refid="190" id="190" data-hash="f35a087d0dc71beb3a7204d91c1c49e4"> 
+   <h5>Note</h5> 
+  </div> 
+  <div class="readable-text scrambled" refid="191" id="191" data-hash="cc0c0167c5220ca05ac47c29278b6a05"> 
+   <p>T cuitcri rkeerab ja c ktqx seuulf vfrk let ovagdini aacgdcisn eirasufl, bpr qqx neqâr dkoz vr dwtc yeerv nitaoerpo eeto brv rtekwon jn c ciutrci kerebar. Pkuet isbnrtaoatc bcc s arvc, gzn iciurct beraksre vq sgy z eevll kl irienotncid. Jtnaesd jr ja rxpa rk pva hasoc ntesigt ucn inydftie hrewe ybkr skt rame ikeyll kr zuvx c piiotsve ffctee kn gro valeorl ssetmy ehobrvia.</p> 
+  </div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="192" id="192" data-hash="4fea5b257be699c1ae8c3f9b6338b962"> 
+ <p>Mk ewn eocp nc llatyuac irvtcaee iescrve: jr aj nrk rcih ruescore-itfeiecnf nhs bsacaell, ppr jr jc efza itlesrine kr rlsfuaie. Xdo cierves skeep nsrogepdni jn sff otsiuaistn hcn ukr cealtyn jc uxrv nrdue otlncro.</p> 
+</div> 
+<div class="readable-text scrambled" refid="193" id="193" data-hash="7150bb4f748204fbd5aa40816858042a"> 
+ <p>Yog xvnr nhs fainl capehtr sscdussie nrunnig Ltrx.v aciipaptsnol jn ainreotcn ternmnivneos.</p> 
+</div> 
+<div class="readable-text" refid="194" id="194" data-hash="88551b3f2a69f5074f4aac012d3ef427"> 
+ <h2 class="calibre17" id="heading_id_15"><a class="pcalibre pcalibre1" id="summary" shape="rect"></a>12.4 &nbsp;Summary</h2> 
+</div> 
+<ul class="itemizedlist"> 
+ <li class="listitem readable-text" refid="195" id="195" data-hash="f069d59fd53c3ea175e3bd378ecf686f"> A reactive service is not just scalable, it has to be resilient and responsive.<br /> </li> 
+ <li class="listitem readable-text" refid="196" id="196" data-hash="e91c49e214d60c83c5a9746e6acce424"> Load testing and chaos testing tools are key to analyze a service behavior both when operating in nominal conditions, and when surrounded by failures from the network and services it relies on.<br /> </li> 
+ <li class="listitem readable-text" refid="197" id="197" data-hash="d6fac3840921db9fc1806420e09ac695"> Circuit breakers are the most efficient tool to shield from unresponsive services and network failures.<br /> </li> 
+ <li class="listitem readable-text" refid="198" id="198" data-hash="c7c6ffb6d85147414f564d9fc8959930"> A resilient service is not just responsive when it can quickly notify of an error: it may be able to still respond successfully, for instance using cached data if the application domain allows it.<br /> </li> 
+</ul> 
+<div class="readable-text" refid="199" id="199" data-hash="5fb8467fa9479462e9e1966d184f6c73"> 
+ <h2 class="calibre17" id="heading_id_16"><a class="pcalibre pcalibre1" id="references" shape="rect"></a>12.5 &nbsp;References</h2> 
+</div> 
+<div class="bibliodiv"> 
+ <div class="bibliomixed"> 
+  <a class="pcalibre" id="d5e697" shape="rect"></a> 
+  <div class="readable-text" refid="200" id="200" data-hash="aabd58a519421675a25472dc3f42e407"> 
+   <p><span class="bibliomisc"><a class="pcalibre" id="Locust" shape="rect"></a>[Locust] Locust project. Locust. Retrieved April 2020. <a class="pcalibre3 pcalibre" href="https://locust.io/" shape="rect">locust.io/</a></span></p> 
+  </div> 
+ </div> 
+ <div class="bibliomixed"> 
+  <a class="pcalibre" id="d5e701" shape="rect"></a> 
+  <div class="readable-text" refid="201" id="201" data-hash="1deb552bf8cabe9da01b31675531d283"> 
+   <p><span class="bibliomisc"><a class="pcalibre" id="Hey" shape="rect"></a>[Hey] Hey project. Hey. Retrieved April 2020. <a class="pcalibre3 pcalibre" href="https://github.com/rakyll/hey" shape="rect">github.com/rakyll/hey</a></span></p> 
+  </div> 
+ </div> 
+ <div class="bibliomixed"> 
+  <a class="pcalibre" id="d5e705" shape="rect"></a> 
+  <div class="readable-text" refid="202" id="202" data-hash="73201a4355b45f4439dc5977ac0a0af7"> 
+   <p><span class="bibliomisc"><a class="pcalibre" id="PythonBasics" shape="rect"></a>[PythonBasics] Naomi Ceder. Exploring Python Basics. January 2019. Manning Publications. ISBN 9781617296581.</span></p> 
+  </div> 
+ </div> 
+ <div class="bibliomixed"> 
+  <a class="pcalibre" id="d5e708" shape="rect"></a> 
+  <div class="readable-text" refid="203" id="203" data-hash="e40f5aaf0179ae8ad8e589bb30bf723b"> 
+   <p><span class="bibliomisc"><a class="pcalibre" id="COP" shape="rect"></a>[COP] Gil Tene. How NOT to Measure Latency. 2015. Talk given at the Strange Loop conference. <a class="pcalibre3 pcalibre" href="https://www.youtube.com/watch?v=lJ8ydIuPFeU" shape="rect">www.youtube.com/watch?v=lJ8ydIuPFeU</a></span></p> 
+  </div> 
+ </div> 
+ <div class="bibliomixed"> 
+  <a class="pcalibre" id="d5e712" shape="rect"></a> 
+  <div class="readable-text" refid="204" id="204" data-hash="fa5d63c2176630a02ff8ed6770ba7864"> 
+   <p><span class="bibliomisc"><a class="pcalibre" id="Pumba" shape="rect"></a>[Pumba] Pumba project. Pumba. Retrieved April 2020. <a class="pcalibre3 pcalibre" href="https://github.com/alexei-led/pumba" shape="rect">github.com/alexei-led/pumba</a></span></p> 
+  </div> 
+ </div> 
+ <div class="bibliomixed"> 
+  <a class="pcalibre" id="d5e716" shape="rect"></a> 
+  <div class="readable-text" refid="205" id="205" data-hash="4c6ccbc0bfd692342bba623ed58526d3"> 
+   <p><span class="bibliomisc"><a class="pcalibre" id="CircuitBreaker" shape="rect"></a>[CircuitBreaker] Martin Fowler. CircuitBreaker. March 2014. <a class="pcalibre3 pcalibre" href="https://martinfowler.com/bliki/CircuitBreaker.html" shape="rect">martinfowler.com/bliki/CircuitBreaker.html</a></span></p> 
+  </div> 
+ </div> 
+ <div class="bibliomixed"> 
+  <a class="pcalibre" id="d5e720" shape="rect"></a> 
+  <div class="readable-text" refid="206" id="206" data-hash="49c6d56f472fe94b2700be86febf22a0"> 
+   <p><span class="bibliomisc"><a class="pcalibre" id="Caffeine" shape="rect"></a>[Caffeine] Ben Manes and contributors. Caffeine. Retrieved April 2020. <a class="pcalibre3 pcalibre" href="https://github.com/ben-manes/caffeine" shape="rect">github.com/ben-manes/caffeine</a></span></p> 
+  </div> 
+ </div> 
+</div>

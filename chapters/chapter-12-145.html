@@ -1,0 +1,1 @@
+<p>This run confirms what we have observed: timeouts get enforced, ensuring that some requests still get served during the failures. However the worst case latencies are worse than without timeouts: network delays stretch the time for doing 2 HTTP requests to the user profile service, so the higher values correspond to those where the second request timed out.</p>

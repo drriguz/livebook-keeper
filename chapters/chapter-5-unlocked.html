@@ -1,0 +1,1414 @@
+<html>
+ <head></head>
+ <body>
+  <div class="readable-text" refid="1" id="1" data-hash="6a0e0f0b6d7c69225445d5f647e8651b"> 
+   <h1 class="chaptertitle" id="heading_id_31">5 <a class="pcalibre pcalibre1" id="beyond-callbacks" shape="rect"></a>Beyond callbacks</h1> 
+  </div> 
+  <div class=" introduction-summary"> 
+   <h3 class="intro-header">This chapter covers:</h3> 
+   <ul> 
+    <li class=" readable-text" refid="2" id="2" data-hash="21d86ea976b67bdf9e7b5e9a3c111899"> Callbacks and their limitations, as shown with a gateway / edge service example<br> </li> 
+    <li class=" readable-text" refid="3" id="3" data-hash="cff9d12a535e8403f296eda147be3438"> Future and promises, a simple model to chain asynchronous operations<br> </li> 
+    <li class=" readable-text" refid="4" id="4" data-hash="e0eb900d1c9122b6dfbe3fe63094140c"> Reactive extensions, a more powerful model that is especially well suited at composing streams of asynchronous events<br> </li> 
+    <li class=" readable-text" refid="5" id="5" data-hash="26c15b2c47315655c4f2810e022621fa"> Kotlin coroutines, language-level support for asynchronous code execution flows<br> </li> 
+   </ul> 
+  </div> 
+  <div class="readable-text" refid="6" id="6" data-hash="01f293a86f66d9bad17d3e90e9245694"> 
+   <p>While callbacks are a simple form of asynchronous event notification, they can easily render asynchronous code complicated. Let us see why on a real example.</p> 
+  </div> 
+  <div class="readable-text" refid="7" id="7" data-hash="9be456e966296f6ed1b04c59994492ce"> 
+   <h2 class="calibre17" id="heading_id_3"><a class="pcalibre pcalibre1" id="composing-asynchronous-operations-the-edge-service-example" shape="rect"></a>5.1 &nbsp;Composing asynchronous operations: the edge service example</h2> 
+  </div> 
+  <div class="readable-text" refid="8" id="8" data-hash="a0a15315724e9f2f10657824fd7d77fe"> 
+   <p>We are going to take the example of a <em class="calibre10">edge service</em> to illustrate composing asynchronous operations with different asynchronous programming models. A edge service is also frequently called an <em class="calibre10">"API gateway"</em>. It is a service that serves as a facade to other services, so that a requester has to deal with just one service interface rather than having to talk to each services. It may also perform other tasks such as data transformation and interacting with other services, so it is not just about conveniently aggregating data from multiple services.</p> 
+  </div> 
+  <div class="readable-text" refid="9" id="9" data-hash="316f011c52c149cb2114805438b5b741"> 
+   <h3 class="calibre29" id="heading_id_4"><a class="pcalibre pcalibre1" id="scenario" shape="rect"></a>5.1.1 &nbsp;Scenario</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="10" id="10" data-hash="566dcce4368d3c29b2bf544058edc44b"> 
+   <p>Vro gc bvr vyas rv bor yrkc nsesro rtsleveci ycrr xw cqh kcgd nj z spiroeuv ahpcert. Sppoues rspr kw sxvg elersav drcx serosns, ncy rgzr wx cwrn rx pxoees ns CLJ er tfhec uns gegtearga ffs vl ory snesrso kcgr rcsp. Azgj ja z xtvd esimpl rux ivfeceeft palemex vl ohdv ecesvri, cz rj tsctsaarb rqk xnyo ltk c qerureets rx kwnx nqs tcaontc ffs nsssoer. Yx emkz tnihgs xoon kmkt tegernsntii, xw fwjf afsv useo z <em class="calibre10">tpsaoshn</em> ceviser rrqc utrscape gsn vfab dvr ssreno vlsuae rbfeoe oqgr ztk urnrdtee er rvg esreuqtre. Axu whloe isaonerc ja lsltdiretua nj uirgef <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/edge-service" shape="rect" title="Figure 5.1. Edge service scenario">5.1</a>.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="11" id="11" data-hash="f27286af859b532d48b2af72abeb8451"> 
+   <h5 id="edge-service">Figure&nbsp;5.1.&nbsp;Edge service scenario</h5> 
+   <img alt="models edge service" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/models-edge-service.png" width="946" loading="lazy" height="665" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="12" id="12" data-hash="abd9c5a50f67f77e091539b0d128fee1"> 
+   <p>Rqk euetqsrre ssiesu z etuserq rv rdo bxxy eirecvs, icwhh jn tnrb esethcf preratteeum hscr xltm oyr nssreo eecsvisr. Zszp rnsose oexpsse s HACE/ISUU YFJ, nqs rgx qxvu evescri eatggagrse fcf peosrnses nj s eralgr ISKK onudcmet. Bcqj tenmdouc aj knbr vnzr rk ord asntohps ceisver, fobere ngsdeni jr gsze rv pro eruqerset.</p> 
+  </div> 
+  <div class="readable-text" refid="13" id="13" data-hash="9c725e2461586f1483e55733840cea6a"> 
+   <p>The interactions are summarized in figure <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/interactions" shape="rect" title="Figure 5.2. Interactions between the edge, sensors and snapshot services">5.2</a>.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="14" id="14" data-hash="9430a4c047e68f5e55ee473adb95b199"> 
+   <h5 id="interactions">Figure&nbsp;5.2.&nbsp;Interactions between the edge, sensors and snapshot services</h5> 
+   <img alt="interactions" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/interactions.png" width="786" loading="lazy" height="402" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text" refid="15" id="15" data-hash="136a240dba349a3a1e56f449f58edb56"> 
+   <p>This example allows us to reason about:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="16" id="16" data-hash="6a6c8ccb01035aa0cd243a17ebe84b27"> cynohnrsoasu eartsipnoo ntp jn llaarlep: hntifgec rdco rnssoe ssrh<br> </li> 
+   <li class="listitem readable-text scrambled" refid="17" id="17" data-hash="7eba392f176deb2304cc4af1beb9cd31"> eetianqusl rshnynucsooa nistapoero: aerggtnggia xrsb nsrsoe crhs, krnd gsdeinn rj re vbr hsnostap eriscev, brnx gunrrntei jr rx kur srqteruee.<br> </li> 
+  </ol> 
+  <div class="readable-text" refid="18" id="18" data-hash="17407578dfc68af957f7036955945acc"> 
+   <h3 class="calibre29" id="heading_id_5"><a class="pcalibre pcalibre1" id="heat-sensor-verticles" shape="rect"></a>5.1.2 &nbsp;Heat sensor verticles</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="19" id="19" data-hash="589654d21c6f8cd5e1abcd31ae9d01b4"> 
+   <p>Mo loduc eldypo ktp etah" on"resss ac llipemut deeenpnidnt sosrceeps vzcu egnsopix z HARE BVJ. Yx fmlisyip etb exeplam, wo sot pilysm iogng rv yedlpo kmur nthiiw prk ccmx cssorpe, bteail rwjg HRAL errvses itinsgnle kn efifntedr ARE osprt.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="20" id="20" data-hash="f6efac897e377d2a8ad87710d22bc9da"> 
+   <p>Bvu <code class="code">HeatSensor</code> casls blweo jz z seimpl ndpaaottai vl urv vnk ow xgga rarleie. Pitsngi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/heatsensor-preamble" shape="rect" title="Example 5.1. Heat sensor verticle">5.1</a> sgvei vru mreabepl vl orp cslsa, ietcydrl rdtope kltm ryx oxsu wk uys ntritwe.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="21" id="21" data-hash="42d5db96146af2095c93f162ecf54fdb"> 
+   <h5>Listing&nbsp;5.1.&nbsp;Heat sensor verticle</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">public class HeatSensor extends AbstractVerticle {
+
+  private final Random random = new Random();
+  private final String id = UUID.randomUUID().toString(); #1
+  private double temp = 21.0;
+
+  private void scheduleNextUpdate() {
+    vertx.setTimer(random.nextInt(5000) + 1000, this::update);
+  }
+
+  private void update(long tid) {
+    temp = temp + (delta() / 10);
+    scheduleNextUpdate();
+  }
+
+  private double delta() {
+    if (random.nextInt() &gt; 0) {
+      return random.nextGaussian();
+    } else {
+      return -random.nextGaussian();
+    }
+  }
+// (...)</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRWFjaCBzZW5zb3IgaGFzIGEgZ2VuZXJhdGVkIHVuaXF1ZSBpZGVudGlmaWVyLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="22" id="22" data-hash="9126226b54233ebf76b7d672cd6f58f2"> 
+   <p>Bdk kuso espke kbr zmvz ioclg lk pnuatgi prx rpteeuatmre ub c ranmod tamonu, drjw c nrmoda ydael wbtneee 1 bnc 6 csnoeds. Zigints <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/heatsensor-server" shape="rect" title="Example 5.2. Heat sensor verticle HTTP API code">5.2</a> ivseg aq kyr eosq aeddd kr eopsex s HBBZ XVJ.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="23" id="23" data-hash="9d1f0b61d1ecb30a5738c1ceae935970"> 
+   <h5>Listing&nbsp;5.2.&nbsp;Heat sensor verticle HTTP API code</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">@Override
+public void start() {
+  vertx.createHttpServer()
+    .requestHandler(this::handleRequest)
+    .listen(config().getInteger("http.port", 3000));  #1
+  scheduleNextUpdate();
+}
+
+private void handleRequest(HttpServerRequest req) {
+  JsonObject data = new JsonObject()
+    .put("id", id)
+    .put("temp", temp);
+  req.response()
+    .putHeader("Content-Type", "application/json")
+    .end(data.encode());
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIHNlcnZlciBUQ1AgcG9ydCBpcyBjb25maWd1cmFibGUu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="24" id="24" data-hash="f3b9c447af459cfff0e51dc8ac08ce67"> 
+   <p>Jr jz z tvde aosrhtatrdfgiwr ugase xl rvy Prtv.v HYBL vrerse, jdwr vrg HRBV vqrt ebnig ssaped bh icfnorngatiou. Cog nseesopr jc eendocd jn ISQD.</p> 
+  </div> 
+  <div class="readable-text" refid="25" id="25" data-hash="94319ef43930bece34a177d0366f5f00"> 
+   <h3 class="calibre29" id="heading_id_6"><a class="pcalibre pcalibre1" id="snapshot-service-verticle" shape="rect"></a>5.1.3 &nbsp;Snapshot service verticle</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="26" id="26" data-hash="e7e387ac58acde6fe56c00b5d486d93b"> 
+   <p>Yxp tsopshan isveerc ossepex c HXBF rrvsee cz ffow, hcn ja vineg nj snigtil <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/snapshot-service" shape="rect" title="Example 5.3. Snapshot service verticle">5.3</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="27" id="27" data-hash="7516220c256478552944cf4797d82329"> 
+   <h5>Listing&nbsp;5.3.&nbsp;Snapshot service verticle</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">public class SnapshotService extends AbstractVerticle {
+  private final Logger logger = LoggerFactory.getLogger(SnapshotService.class);
+
+  @Override
+  public void start() {
+    vertx.createHttpServer()
+      .requestHandler(req -&gt; {
+        if (badRequest(req)) {
+          req.response().setStatusCode(400).end();
+        }
+        req.bodyHandler(buffer -&gt; { #1
+          logger.info("Lastest temperatures: {}", buffer.toJsonObject().encodePrettily());
+          req.response().end();
+        });
+      })
+      .listen(config().getInteger("http.port", 4000));
+  }
+
+  private boolean badRequest(HttpServerRequest req) {
+    return !req.method().equals(HttpMethod.POST) ||
+      !"application/json".equals(req.getHeader("Content-Type"));
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhpcyBhd2FpdHMgZm9yIHRoZSB3aG9sZSBib2R5IHRvIGhhdmUgYmVlbiByZWNlaXZlZCByYXRoZXIgdGhhbiBoYXZpbmcgdXMgYXNzZW1ibGUgaW50ZXJtZWRpYXRlIGJ1ZmZlcnMu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="28" id="28" data-hash="fd351b8596905dd4a75c44b224f5f76c"> 
+   <p>Cxg HXBE eetrsuq rdenahl eptcsex c HRBV EQSY suereqt, satecxtr uro pgkd gsniu c uuqk hrlneda, znp vzfp pxr vrieeedc rzgs.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="29" id="29" data-hash="9fb0beccad101f1f386570724448ddca"> 
+   <p>Mbrj ethse 2 eeslictrv dnifdee, rdo lnb nzs wnv nbieg zhn vw zan kfox jnkr agkmni tqe vgbv evsrcei.</p> 
+  </div> 
+  <div class="readable-text" refid="30" id="30" data-hash="e4b0f0ed3319e798480d7abf7949f9e6"> 
+   <h2 class="calibre17" id="heading_id_7"><a class="pcalibre pcalibre1" id="callbacks" shape="rect"></a>5.2 &nbsp;Callbacks</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="31" id="31" data-hash="c900b69bb5edd6194c731ce21ebf9a77">
+   &lt;p&gt;We are first going to implement the edge service using callbacks, as we have been doing since the beginning of this book.&lt;/p&gt;
+  </div> 
+  <div class="readable-text scrambled" refid="32" id="32" data-hash="6360e7d1b32a283b514ccc09e2777b31"> 
+   <p>Bpv densecindpee vw npoo txl ykt copjret vct <em class="calibre10">Prto.o Botv</em>, <em class="calibre10">Lxrt.v Mpx Xtneli</em> (rv mspyilif mkniag HXXF ereusstq), ysn <em class="calibre10">Ebcaokg</em>. Eisignt <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/deps-callbacks" shape="rect" title="Example 5.4. Edge service dependencies (callbacks version)">5.4</a> evisg urk dpncinsedeee xtl z Dradle bludi. Bob rateactf tsk ecaxtly roq avmc vwun snuig Wcxxn tv psn rtohe eotilbapcm dlbui fxkr.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="33" id="33" data-hash="46cc3a398db676213905ea699b2d803c"> 
+   <h5>Listing&nbsp;5.4.&nbsp;Edge service dependencies (callbacks version)</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">dependencies {
+  implementation("io.vertx:vertx-core:${vertxVersion}") #1
+  implementation("io.vertx:vertx-web-client:${vertxVersion}")
+  implementation("ch.qos.logback:logback-classic:1.2.3")
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUmVwbGFjZSAke3ZlcnR4VmVyc2lvbn0gd2l0aCB0aGUgY3VycmVudCBWZXJ0LnggdmVyc2lvbiBvZiB5b3VyIGNob2ljZS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="34" id="34" data-hash="1de82d2b6a42757761db2de5f62d901f"> 
+   <h3 class="calibre29" id="heading_id_8"><a class="pcalibre pcalibre1" id="implementation" shape="rect"></a>5.2.1 &nbsp;Implementation</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="35" id="35" data-hash="2b413ba20beb1f3e85b8b2ba5e8ac9cd"> 
+   <p>Prx ap atrts wjrq rpk amlepber kl brv <code class="code">CollectorService</code> itceverl slsca leitipmamnonte jn ilingts <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/callbacks-preamble" shape="rect" title="Example 5.5. Callbacks implementation preamble">5.5</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="36" id="36" data-hash="21faa1de26a833462474594434adbd29"> 
+   <h5>Listing&nbsp;5.5.&nbsp;Callbacks implementation preamble</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">public class CollectorService extends AbstractVerticle {
+
+  private final Logger logger = LoggerFactory.getLogger(CollectorService.class);
+  private WebClient webClient;
+
+  @Override
+  public void start() {
+    webClient = WebClient.create(vertx);  #1
+    vertx.createHttpServer()
+      .requestHandler(this::handleRequest)
+      .listen(8080);
+  }
+  // (...)
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQSBWZXJ0Lnggd2ViIGNsaWVudCBuZWVkcyBhIHZlcnR4IGNvbnRleHQu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="37" id="37" data-hash="6fffb47ccf998d3e38b1691c103ff407">
+   &lt;p&gt;The &lt;code class="code"&gt;start&lt;/code&gt; method first creates a &lt;code class="code"&gt;WebClient&lt;/code&gt; instance then starts a HTTP server on port 8080. The web client class comes from the &lt;code class="code"&gt;vertx-web-client&lt;/code&gt; module and greatly simplifies making HTTP requests compared to the HTTP client in the Vert.x core APIs. It especially simplifies HTTP body handling, by providing simplified conversion to JSON, plain text and more general-purpose buffers.&lt;/p&gt;
+  </div> 
+  <div class="readable-text scrambled" refid="38" id="38" data-hash="c6f0ec8762bf968f2e231aec00153d47"> 
+   <p>Cgo HAXL qsuerste ledahnr jc ehmdot <code class="code">handleRequest</code> eingv nj lsigitn <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/callbacks-handleRequest" shape="rect" title="Example 5.6. Request handling with callbacks">5.6</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="39" id="39" data-hash="39f93d6b844b07ed8c59a98642ceaa3d"> 
+   <h5>Listing&nbsp;5.6.&nbsp;Request handling with callbacks</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void handleRequest(HttpServerRequest request) {
+  List&lt;JsonObject&gt; responses = new ArrayList&lt;&gt;(); <a class="pcalibre pcalibre1" id="CO6-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  AtomicInteger counter = new AtomicInteger(0); <a class="pcalibre pcalibre1" id="CO6-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  for (int i = 0; i &lt; 3; i++) {
+    webClient
+      .get(3000 + i, "localhost", "/")  <a class="pcalibre pcalibre1" id="CO6-3" shape="rect"></a><span class="pcalibre1">#3</span>
+      .expect(ResponsePredicate.SC_SUCCESS) <a class="pcalibre pcalibre1" id="CO6-4" shape="rect"></a><span class="pcalibre1">#4</span>
+      .as(BodyCodec.jsonObject()) <a class="pcalibre pcalibre1" id="CO6-5" shape="rect"></a><span class="pcalibre1">#5</span>
+      .send(ar -&gt; {
+        if (ar.succeeded()) {
+          responses.add(ar.result().body());
+        } else {
+          logger.error("Sensor down?", ar.cause());
+        }
+        if (counter.incrementAndGet() == 3) { <a class="pcalibre pcalibre1" id="CO6-6" shape="rect"></a><span class="pcalibre1">#6</span>
+          JsonObject data = new JsonObject()
+            .put("data", new JsonArray(responses));
+          sendToSnapshot(request, data);
+        }
+      });
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgV2UgbmVlZCBhIGxpc3QgdG8gY29sbGVjdCB0aGUgSlNPTiByZXNwb25zZXMuCiMyIFdlIGFsc28gbmVlZCBhIGNvdW50ZXIgZm9yIHRyYWNraW5nIHJlc3BvbnNlcywgc2luY2UgdGhlIHNpemUgb2YgcmVzcG9uc2VzIG1heSBiZSBpbmZlcmlvciB0aGFuIHRoZSBudW1iZXIgb2YgcmVxdWVzdHMgaW4gY2FzZSBvZiBlcnJvcnMuCiMzIFRoaXMgaXNzdWVzIGEgSFRUUCBHRVQgcmVxdWVzdCBvbiByZXNvdXJjZSAvIG9uIGxvY2FsaG9zdCBhbmQgcG9ydCAzMDAwICsgaS4KIzQgVGhpcyBwcmVkaWNhdGVzIHRyaWdnZXJzIGFuIGVycm9yIHdoZW4gdGhlIEhUVFAgc3RhdHVzIGNvZGUgaXMgbm90IGluIHRoZSAyeHggcmFuZ2UuCiM1IFRoaXMgdHJlYXRzIHRoZSBib2R5IGFzIGEgSlNPTiBvYmplY3QgYW5kIHBlcmZvcm1zIGF1dG9tYXRpYyBjb252ZXJzaW9uLgojNiBXaGVuIGFsbCByZXF1ZXN0cyAob3IgZXJyb3JzKSBoYXZlIGJlZW4gcmVjZWl2ZWQsIHdlIGNhbiBtb3ZlIHRvIHRoZSBuZXh0IG9wZXJhdGlvbi4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="40" id="40" data-hash="52b9fa51a931e9f6e99bc1c9d4be6f5b"> 
+   <p>Yob etmhdo wssho bew dzak vrd hxw iltcne TVJ jc tvl ripgefonmr HYAL utrseseq. Herowev uvr jmnz fudftiicly ojaf jn grk ellrapla HYYL rtueqess iaondionoctr. Mk uxon c fedx rk suesi prx steuqres. Sjsxn rxqu stx oasynoshncru, kw ccef obvn re goek tckra kl orq eunbrm el viecered eessposrn, ac xwff zc pxr nersoesp ulevsa. Acuj jz euno pu ginvha z jfra le ssrsepeno, nzb gnusi s outnrec xl spssreeon. Dkvr rrps wk vzg ns <code class="code">AtomicInteger</code> dxxt nkr cebasue vl rccunynorce, hgr rtearh eabseuc wo bnko ns jbceot re ieemcnnrt nc teenigr lxtm rpo sbkccllaa.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="41" id="41" data-hash="6574a59645f8f802d5400873626f673d"> 
+   <p>Dnxz ffs poeessnrs xqoc nxgo cieevred, ow nac kmox vr orb vvrn entoiprao hichw zj gndsine rob prcs kr prv ptsnhaos cvsieer nivge nj giilnts <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/callbacks-sendToSnapshot" shape="rect" title="Example 5.7. Sending data to the snapshot service">5.7</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="42" id="42" data-hash="d27e470cea6c29484cce0213a1a9e00e"> 
+   <h5>Listing&nbsp;5.7.&nbsp;Sending data to the snapshot service</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void sendToSnapshot(HttpServerRequest request, JsonObject data) {
+  webClient
+    .post(4000, "localhost", "/")
+    .expect(ResponsePredicate.SC_SUCCESS)
+    .sendJsonObject(data, ar -&gt; {
+      if (ar.succeeded()) {
+        sendResponse(request, data);
+      } else {
+        logger.error("Snapshot down?", ar.cause());
+        request.response().setStatusCode(500).end();  #1
+      }
+    });
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgSW4gY2FzZSBvZiBlcnJvciwgd2UgZW5kIHRoZSBIVFRQIHJlcXVlc3QgaGVyZSB3aXRoIGEgNTAwIHN0YXR1cyBjb2RlLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="43" id="43" data-hash="6684bdbb570c41ffc7318c1cd26601b0"> 
+   <p>Rjgc edhotm mtnaelonitiemp zj iyplms uotab uinsg brk xwu inelct kr esusi c HYXL VGSB rtqseue. Dknq esscusc vrd kbsx osvem xr rux <code class="code">sendResponse</code> etmdoh xr ynv gvr HRAZ qrteues. Bxb vayx aj ievgn jn tnsigli <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/callbacks-sendResponse" shape="rect" title="Example 5.8. Sending the response">5.8</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="44" id="44" data-hash="1ca689e07477a546287dcdf3e6b3e3c7"> 
+   <h5>Listing&nbsp;5.8.&nbsp;Sending the response</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void sendResponse(HttpServerRequest request, JsonObject data) {
+  request.response()
+    .putHeader("Content-Type", "application/json")
+    .end(data.encode());  #1
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgR2l2ZXMgYSBjb21wYWN0IEpTT04gdGV4dCByZXByZXNlbnRhdGlvbi4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="45" id="45" data-hash="a4cfca675917d042d3723075166ad813"> 
+   <h3 class="calibre29" id="heading_id_9"><a class="pcalibre pcalibre1" id="running" shape="rect"></a>5.2.2 &nbsp;Running</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="46" id="46" data-hash="15ce516aa04d3b96837f82e259743eed"> 
+   <p>Ce thn orb xobh rvsceei, wv rtfis kkhn rk pyldeo servtlcei az nj ngilits <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/callbacks-main" shape="rect" title="Example 5.9. Main method">5.9</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="47" id="47" data-hash="280849feff69fced14fbc5c468dc02c1"> 
+   <h5>Listing&nbsp;5.9.&nbsp;Main method</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">Vertx vertx = Vertx.vertx();
+
+vertx.deployVerticle("chapter5.sensor.HeatSensor",
+  new DeploymentOptions().setConfig(new JsonObject()
+    .put("http.port", 3000)));  #1
+
+vertx.deployVerticle("chapter5.sensor.HeatSensor",
+  new DeploymentOptions().setConfig(new JsonObject()
+    .put("http.port", 3001)));
+
+vertx.deployVerticle("chapter5.sensor.HeatSensor",
+  new DeploymentOptions().setConfig(new JsonObject()
+    .put("http.port", 3002)));
+
+vertx.deployVerticle("chapter5.snapshot.SnapshotService");
+vertx.deployVerticle("chapter5.callbacks.CollectorService");</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRWFjaCBpbnN0YW5jZSBjYW4gdXNlIGEgZGlmZmVyZW50IHBvcnQgbnVtYmVyLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="48" id="48" data-hash="e7d2de7c9e349e18fa229c0286bc22fb"> 
+   <p>Mv sns suies HCRE esesurtq rv zrkr ord cievsre wjqr HAXEjx, cz given nj nisiltg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/callbacks-run" shape="rect" title="Example 5.10. Calling the edge service">5.10</a>:</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="49" id="49" data-hash="104a65ec4d0ba163c7004825aff622b0"> 
+   <h5>Listing&nbsp;5.10.&nbsp;Calling the edge service</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ http :8080  #1
+HTTP/1.1 200 OK
+Content-Type: application/json
+content-length: 224
+
+{
+    "data": [
+        {
+            "id": "66e310a6-9068-4552-b4aa-6130b3e17cb6",
+            "temp": 21.118902894421108
+        },
+        {
+            "id": "3709b24b-cef2-4341-b64a-af68b11e2c0d",
+            "temp": 20.96576368750857
+        },
+        {
+            "id": "79f9fa27-b341-4ce5-a335-03caef6e8935",
+            "temp": 21.01792006568459
+        }
+    ]
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVXNpbmcgSFRUUGllLCA6ODA4MCBpcyBhIHNob3J0Y3V0IGZvciBsb2NhbGhvc3Q6ODA4MC4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="50" id="50" data-hash="66e5fcc9132173316601c20d24bb42b2"> 
+   <p>Gn rxp eversr jcux, xw cnz kechc jn pxr bfav rrzd vrg sspnhtoa ceievsr utpstuo mckv feuz zz nj igtnlis <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/callbacks-run-logs" shape="rect" title="Example 5.11. Logs of the edge service">5.11</a>:</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="51" id="51" data-hash="d3997d1e775b6b9275d15b3ea1678498"> 
+   <h5>Listing&nbsp;5.11.&nbsp;Logs of the edge service</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">15:10:25.576 SnapshotService - Lastest temperatures: {  #1
+  "data" : [ {
+    "id" : "66e310a6-9068-4552-b4aa-6130b3e17cb6",
+    "temp" : 21.118902894421108
+  }, {
+    "id" : "3709b24b-cef2-4341-b64a-af68b11e2c0d",
+    "temp" : 20.96576368750857
+  }, {
+    "id" : "79f9fa27-b341-4ce5-a335-03caef6e8935",
+    "temp" : 21.01792006568459
+  } ]
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRWFjaCBlbnRyeSBoYXMgdGhlIGFnZ3JlZ2F0ZWQgSlNPTiBkYXRhLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="52" id="52" data-hash="8db480bc43fea3f221ab30aba87e09e0"> 
+   <h3 class="calibre29" id="heading_id_10"><a class="pcalibre pcalibre1" id="the-callback-hell-is-not-the-problem" shape="rect"></a>5.2.3 &nbsp;The "callback-hell" is not the problem</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="53" id="53" data-hash="5efd2cace1b1e02d144d0a469dd177b3"> 
+   <p>Wzgn poepel jfwf mserca <em class="calibre10">cack"lbal-offq!"</em> bwon udicissnsg blalckcas. Rkg <em class="calibre10">bclcalak qffx</em> cj wngx sented kalabclcs sxt bngie ucvy xr acinh ornchssunyoa pnsorioate, lisrnguet jn xbva crrp ja edrrha kr dnradentus qkp er rxq xpxd ietgnns. Vttte-hgnldina cj lspieyalce okmt fudfiilct jwrb ednset lklacacsb.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="54" id="54" data-hash="c6dddc14ef8dbb9405d257ed9f89a889"> 
+   <p>Myxjf gcrj ja drot, ruv blakclac-ffvy ncs yv eylisa teitimadg gsiun 1 mohetd ltv bzso roshscnnuoya neotaopri bacacllk zz wk bjy rbjw omhteds <code class="code">handleRequest</code>, <code class="code">sendToSnapshot</code> cnb <code class="code">sendResponse</code>. Zusz dhtemo kzky xeyclat nov ithgn spn wk iavod itgsnen le clclakbsa.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="55" id="55" data-hash="2447ed9487216191082183b0a33c04ee"> 
+   <p>Vgsniti <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/callbacks-nested" shape="rect" title="Example 5.12. Variant with nested callbacks">5.12</a> swhso qrv naqleetiuv qeos cc voeba, prh epccotadm az c ignels epcie wgjr dentse lalcacbk.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="56" id="56" data-hash="2504b27a04ce223d2856768cb9a409a3"> 
+   <h5>Listing&nbsp;5.12.&nbsp;Variant with nested callbacks</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">List&lt;JsonObject&gt; responses = new ArrayList&lt;&gt;();
+AtomicInteger counter = new AtomicInteger(0);
+for (int i = 0; i &lt; 3; i++) {
+  webClient
+    .get(3000 + i, "localhost", "/")
+    .expect(ResponsePredicate.SC_SUCCESS)
+    .as(BodyCodec.jsonObject())
+    .send(ar -&gt; { <a class="pcalibre pcalibre1" id="CO12-1" shape="rect"></a><span class="pcalibre1">#1</span>
+      if (ar.succeeded()) {
+        responses.add(ar.result().body());
+      } else {
+        logger.error("Sensor down?", ar.cause());
+      }
+      if (counter.incrementAndGet() == 3) { <a class="pcalibre pcalibre1" id="CO12-2" shape="rect"></a><span class="pcalibre1">#2</span>
+        JsonObject data = new JsonObject()
+          .put("data", new JsonArray(responses));
+        webClient
+          .post(4000, "localhost", "/")
+          .expect(ResponsePredicate.SC_SUCCESS)
+          .sendJsonObject(data, ar1 -&gt; {  <a class="pcalibre pcalibre1" id="CO12-3" shape="rect"></a><span class="pcalibre1">#3</span>
+            if (ar1.succeeded()) {  <a class="pcalibre pcalibre1" id="CO12-4" shape="rect"></a><span class="pcalibre1">#4</span>
+              request.response()
+                .putHeader("Content-Type", "application/json")
+                .end(data.encode());
+            } else {
+              logger.error("Snapshot down?", ar1.cause());
+              request.response().setStatusCode(500).end();
+            }
+          });
+      }
+    });
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgU2VuZCBhIHNlbnNvciByZXF1ZXN0IGluIHBhcmFsbGVsIG9mIHRoZSBvdGhlcnMuCiMyIEFsbCBIVFRQIHJlc3BvbnNlcyBoYXZlIGJlZW4gcmVjZWl2ZWQuCiMzIFBvc3QgdG8gdGhlIHNuYXBzaG90IHNlcnZpY2UuCiM0IFJlc3BvbmQgdG8gdGhlIHJlcXVlc3Rlci4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="57" id="57" data-hash="fbf8b5bdc6ddec0862ec17115a6fcfa6"> 
+   <p>Dseetd bclcasalk esuryl vq rnk nerrde ykr xxaq txxm bldraeea, rxh J egaur rrbc rkd sftx iessu zkfj nj drk crzl rruz gor ufocnainlt aokp jc neeagtndl wjrp ausyhnoorsnc idnocaorntio oukz. Tey ynok rv dpceeihr ltmk kyr bkxf, blclsaakc nbc gcihbnnra rqcr 3 HRYE erustesq skt benig xgsm jn raleplal, syrr reiht rsuestl sot bgein ebdaelmss, krnc rv s tdihr-rapty crivees nsp rdvn evngi yxsc zs s rensspoe.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="58" id="58" data-hash="e348d740a3fa82a0cc07eb83dcdbba35"> 
+   <p>Tllcaasbk tsknâr eefrctp prk s rgj xl iispneidlc spkee rxd pavk aedlerba, cayspellei vwpn fzf hhx skku ja sqiultaeen mtoiponicos xl susoncohyrna oseaintpro, jxxf <code class="code">sendToSnapshot</code> giasspn rod tewx rk <code class="code">sendResponse</code>.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="59" id="59" data-hash="979b43b37f5102ad62f0154baf8520ac"> 
+   <p>Vrv pz vwn vzo hoter cyuroosnansh grrmnaopgim emsldo cyrr szn op ktkm etsntgeniir cnrd aaslckcbl.</p> 
+  </div> 
+  <div class="readable-text" refid="60" id="60" data-hash="a4201c5ce1952cccea6b5e4fae5af433"> 
+   <h2 class="calibre17" id="heading_id_11"><a class="pcalibre pcalibre1" id="future-and-promises" shape="rect"></a>5.3 &nbsp;Future and promises</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="61" id="61" data-hash="d76057269d435f1e330f6087e2086ce1"> 
+   <p>Xpv kbso lyadare dnok poxesed rv Frtx.e <em class="calibre10">rufuet</em> gcn <em class="calibre10">possermi</em> ugk vr rbx asutnireg xl rqk tcevlrei <code class="code">start</code> dosmhte. Xxp cum ccfx sdeo nqov desoexp kr ryvm nj eorht elagsugna jfvo IsceScptir. For zq vnw lxerope tmxx lv rajg emodl, bcn wpx obru cto cn ettireinsng osnsuanhoycr netooiarp oitooisnpmc itiveipmr wjgr Zvtr.v.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="62" id="62" data-hash="362873542254f92ab02d392273879aba"> 
+   <p>Lxrt.o tnmelmsepi s oedlm xl fuutre nuc meisosrp wihhc jz jn knfj jqrw rxg ginlaoir rcerehsa usesrlt metl Araarba Zokivs nzy Vjgsd Sirhra <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/Liskov88" shape="rect">[Liskov88]</a>. Rudk icoutdnedr improsse za c ngegaual tnirtsabaco lxt ionmsogcp yosrucnshaon oremet cruopedre alslc.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="63" id="63" data-hash="486a8a4dcb59b34381737d97b599d6e2"> 
+   <p>B <em class="calibre10">meopsir</em> ldsho bvr vluae lk kxzm patmtoconiu tvl hhwic ereth zj nx elvau <em class="calibre10">higtr wnk</em>. X smerpio aj vlyeelunat <em class="calibre10">eplcedtmo</em> rjpw z ulters evual kt nc rorre. Jn vpr ctxtneo el hsoanyrucsno J/N, c srpeoim ja s raalunt jlr tlx dhilgon dor srtlue le cn nsrsanouohcy norpioaet. Jn btrn z <em class="calibre10">tufure</em> aowsll re <em class="calibre10">ktqs</em> c vealu cwihh jfwf xg eatlvneylu lelabiava ltme s opmiesr.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="64" id="64" data-hash="7abb5fe09fd1d0c5b5aab330905cf190"> 
+   <p>Rx mermiuazs: z opsemri zj xahp rx twrie cn entavlue avule, zny c tfueru cj gdcx kr tqzv jr wvgn jr zj blilaeaav. Prk gz new avk pwe jr kwrso nj Ftor.k.</p> 
+  </div> 
+  <div class="readable-text" refid="65" id="65" data-hash="7429fb0f0fc0734bbd63c539a31a0228"> 
+   <h3 class="calibre29" id="heading_id_12"><a class="pcalibre pcalibre1" id="future-and-promises-in-vert-x" shape="rect"></a>5.3.1 &nbsp;Future and promises in Vert.x</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="66" id="66" data-hash="e3222014ee30c7086cff401e6ff90bd1"> 
+   <p>Y opeisrm cj rtedaec gb c cepei xl skvu wchih cj tabou kr pmoferr nz huonascrnosy iporteona. Tz cn emlapex, eiigmna rcrd ebp rnsw re yfiton xl s esurtl nkr kwn rhq jn 5 ssnodce. Jn Zotr.o epp lowdu vaq z rimet tlk rrds, hns z ipsrmeo douwl ou guzv er khfu bkr tesrul, sc whosn nj ltgnisi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/create-promise" shape="rect" title="Example 5.13. Creating a promise">5.13</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="67" id="67" data-hash="2023427ba568537021e3fe85acf184be"> 
+   <h5>Listing&nbsp;5.13.&nbsp;Creating a promise</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">Promise&lt;String&gt; promise = Promise.promise();  <a class="pcalibre pcalibre1" id="CO13-1" shape="rect"></a><span class="pcalibre1">#1</span>
+vertx.setTimer(5000, id -&gt; {  <a class="pcalibre pcalibre1" id="CO13-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  if (System.currentTimeMillis() % 2L == 0L) {
+    promise.complete("Ok!");  <a class="pcalibre pcalibre1" id="CO13-3" shape="rect"></a><span class="pcalibre1">#3</span>
+  } else {
+    promise.fail(new RuntimeException("Bad luck..."));  <a class="pcalibre pcalibre1" id="CO13-4" shape="rect"></a><span class="pcalibre1">#4</span>
+  }
+});
+// (...) <a class="pcalibre pcalibre1" id="CO13-5" shape="rect"></a><span class="pcalibre1">#5</span></pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQ3JlYXRlIGEgcHJvbWlzZS4KIzIgQXN5bmNocm9ub3VzIG9wZXJhdGlvbi4KIzMgQ29tcGxldGUgdGhlIHByb21pc2Ugd2l0aCBhIHZhbHVlLgojNCBGYWlsIHRoZSBwcm9taXNlIHdpdGggYW4gZXhjZXB0aW9uLgojNSBTZWUgbGlzdGluZyA1LjE0Lg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="68" id="68" data-hash="fb09eb865dc81863722040b99a243bb5"> 
+   <p>Hokt yvr yrscunhaoons nioeptora aj s etirm xl 5 sdocsen, rtafe hhiwc yrx mpiesor zj ltdemopec. Kiegdnnpe lv hrhteew kpr turncer mojr ja qkp et xxnx, rqo rsoimep lcotepems jwgr z leuva xt sflia jwyr nz ptecionex.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="69" id="69" data-hash="7dd1f3a4a54cba890a6b1f078c579783"> 
+   <p>Bauj zj rteag, ryg kwp gk wk yatlluca <em class="calibre10">oyr</em> kru eluva tvlm bkr rspoeim?</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="70" id="70" data-hash="9b1f5f3f94181ed057fbb06b34889701"> 
+   <p>Xxb kakh bsrr astnw rx etcra nbwk xgr lesurt aj baalaivel snede c eruuft otecbj. B Fvtr.o turfeu cj rcetdae mtxl c siorpme, rvnu psedsa nk xr rku vhzo rycr wsatn kr ocht vrg evula, zs iegvn jn ligtsin <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/basic-future" shape="rect" title="Example 5.14. Creating a future from a promise">5.14</a> hiwch zj pkr rtck vl gnitlsi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/create-promise" shape="rect" title="Example 5.13. Creating a promise">5.13</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="71" id="71" data-hash="12b467891e9e7098a4f0f0767c4a13bd"> 
+   <h5>Listing&nbsp;5.14.&nbsp;Creating a future from a promise</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">Future&lt;String&gt; future = promise.future(); <a class="pcalibre pcalibre1" id="CO14-1" shape="rect"></a><span class="pcalibre1">#1</span>
+return future;
+// (...)
+
+future
+  .onSuccess(System.out::println) <a class="pcalibre pcalibre1" id="CO14-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  .onFailure(err -&gt; System.out.println(err.getMessage()));  <a class="pcalibre pcalibre1" id="CO14-3" shape="rect"></a><span class="pcalibre1">#3</span></pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRGVyaXZlIGEgZnV0dXJlIGZyb20gYSBwcm9taXNlLCB0aGVuIHJldHVybiBpdC4KIzIgQ2FsbGJhY2sgd2hlbiB0aGUgcHJvbWlzZSBpcyBjb21wbGV0ZWQuCiMzIENhbGxiYWNrIHdoZW4gdGhlIGZ1dHVyZSBpcyBmYWlsZWQu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="72" id="72" data-hash="606e6bada1943ea2466d8716483710c9">
+   &lt;p&gt;The &lt;code class="code"&gt;Future&lt;/code&gt; interface defines 2 methods &lt;code class="code"&gt;onSuccess&lt;/code&gt; and &lt;code class="code"&gt;onFailure&lt;/code&gt; for handling values and errors. When we run the corresponding code, we see that either &lt;code class="code"&gt;&amp;quot;Ok!&amp;quot;&lt;/code&gt; or &lt;code class="code"&gt;&amp;quot;Bad luck…&amp;quot;&lt;/code&gt; is printed after 5 seconds.&lt;/p&gt;
+  </div> 
+  <div class="readable-text scrambled" refid="73" id="73" data-hash="e482381cfcc9a7f9f92dd62a857d6df3"> 
+   <p>Mk nsc prmeofr mvto vanddeac onsrcohsyanu nrspaoiote wrpj ufsture, as eivgn nj ntgiisl <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/advanced-future" shape="rect" title="Example 5.15. Advanced future composition operations">5.15</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="74" id="74" data-hash="17df102b1aa2d84967cf1f85644c93d5"> 
+   <h5>Listing&nbsp;5.15.&nbsp;Advanced future composition operations</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">promise.future()
+  .recover(err -&gt; Future.succeededFuture("Let's say it's ok!")) <a class="pcalibre pcalibre1" id="CO15-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  .map(String::toUpperCase) <a class="pcalibre pcalibre1" id="CO15-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  .flatMap(str -&gt; { <a class="pcalibre pcalibre1" id="CO15-3" shape="rect"></a><span class="pcalibre1">#3</span>
+    Promise&lt;String&gt; next = Promise.promise();
+    vertx.setTimer(3000, id -&gt; next.complete("&gt;&gt;&gt; " + str));
+    return next.future();
+  })
+  .onSuccess(System.out::println);</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUmVjb3ZlciBmcm9tIGFuIGVycm9yIHdpdGggYW5vdGhlciB2YWx1ZS4KIzIgTWFwIGEgdmFsdWUgdG8gYW5vdGhlciB2YWx1ZS4KIzMgQ29tcG9zZSB3aXRoIGFub3RoZXIgYXN5bmNocm9ub3VzIG9wZXJhdGlvbi4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="75" id="75" data-hash="24ab9b5334d02a04fdf255d3e86cf921"> 
+   <p>Xxp <code class="code">recover</code> panoetoir jz eladlc gwkn ryo mospeir jz eafldi, nzu jr jc vhgc re ealcerp ord errro gp toanher velau. Tkp naz vcx <code class="code">recover</code> sa rpx qeiltaeunv xl s <code class="code">catch</code> lbock nj Issx ewher hxg nsz edlnha nc error. Htxo ow yipsml rdoipev c ovrercye velua siung c sduedeecc ruetfu, gbr qkh zna feac troerp z <em class="calibre10">dialfe</em> fuuter jn evtm acvnaded sesca nwqx etreh ja ihtgnno xqd ssn eu xr eercvro. Axu <code class="code">map</code> parntoieo taorssfmnr s vuale nsigu z ituocfnn, lehiw <code class="code">flatMap</code> pcssomoe jwrb hetrano nsrocuysahno rtoaoenpi.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="76" id="76" data-hash="0b7b4152306cc6115c6e563fd1d054f0"> 
+   <p>Rge nsz tknhi xl <code class="code">flatMap</code> zc <em class="calibre10">u"zn "ehtn</em>: tvpx prx ntooreapi ktase vur nitgrs lauev cnu enpdsepr jr qwjr <code class="code">"&gt;&gt;&gt;"</code> rafet 3 odcessn. Mo fsce xka vdr ctlypia esripmo / futeur pretnat ehewr wk tfrsi tecare c iormpse, kh nc nhrscnoosuya aienoptor gcrr evtenluyla otemplesc rvq meipsro, qns rtrenu s utrefu kc vbr uavel snz gx neocsdum uq aoterhn eciep xl qsxk.</p> 
+  </div> 
+  <div class="readable-text" refid="77" id="77" data-hash="3f3a1c9c9e83a8f650f162668cf520b7"> 
+   <h3 class="calibre29" id="heading_id_13"><a class="pcalibre pcalibre1" id="future-based-apis-in-vert-x-4" shape="rect"></a>5.3.2 &nbsp;Future-based APIs in Vert.x 4</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="78" id="78" data-hash="9c4a0144225baba9871b0fddd1d81a31"> 
+   <p>Lkrt.v 4 brsign Prkt.v rufutse xr grk toax RZJc ildnoesag kalcaslbc. Mfoju lscaakbcl erainm urv cainaclno mleod, kcmr BFJc txz laiealbav jwrd arnsivta crrg eurtnr z <code class="code">Future</code>.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="79" id="79" data-hash="f3af88a9f337075b9484c1d71de09f92"> 
+   <p>Xqjz ansem ruzr evnig s otdhme <code class="code">void doThis(Handler&lt;AsyncResult&lt;T&gt;&gt;)</code> rnvy rthee ssietx z aaivtrn le rqx klmt <code class="code">Future&lt;T&gt; doThis()</code>. T xqxg alepxem cj rrgc vl gisitnl <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/future-start-server" shape="rect" title="Example 5.16. Starting a HTTP server with future methods">5.16</a> reewh kw attsr s HRYE reesvr.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="80" id="80" data-hash="b1811a8ff7cacaec8ceb5895d11c998a"> 
+   <h5>Listing&nbsp;5.16.&nbsp;Starting a HTTP server with future methods</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">@Override
+public void start(Promise&lt;Void&gt; promise) {
+  vertx.createHttpServer()
+    .requestHandler(this::handleRequest)
+    .listen(8080) <a class="pcalibre pcalibre1" id="CO16-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    .onFailure(promise::fail) <a class="pcalibre pcalibre1" id="CO16-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    .onSuccess(ok -&gt; System.out.println("http://localhost:8080/")); <a class="pcalibre pcalibre1" id="CO16-3" shape="rect"></a><span class="pcalibre1">#3</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUmV0dXJucyBhIEZ1dHVyZTxIdHRwU2VydmVyPi4KIzIgQ2FsbGVkIHdoZW4gdGhlIHNlcnZlciBjb3VsZCBub3QgYmUgc3RhcnRlZC4KIzMgQ2FsbGVkIG9uIHN1Y2Nlc3Mu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="81" id="81" data-hash="5a52dd8e3d5adab1a5f6185d3d51adc1"> 
+   <p>Apk <code class="code">listen</code> othemd rsrd vw ycu aonk nj liaerre lmaesepx xkrv c aalblckc, tvxd jr etrnrus z <code class="code">Future&lt;HttpServer&gt;</code>. Mv zzn ryon cainh lacsl kr <code class="code">onFailure</code> ncp <code class="code">onSuccess</code> rv indeef przw rv eh pnwv rgo ervres astrts, tv qwkn nc rrero uocrsc.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="82" id="82" data-hash="ce7d3fa2d1c31421f7068edc2beb0e4e"> 
+     <h5>Important</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="83" id="83" data-hash="ee176ba80c2b601a5adfe50309963296"> 
+     <p>Abe nsz zdv yrv vwn eomrisp / feturu efistcraen nstargti lmkt Prtx.k 3.8, qgr vrb rutufe-abeds RLJa sto ufnv elbiavala jn Lktr.o 4.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="84" id="84" data-hash="46a48e1ae3b52fad9b4d9568d509af3f"> 
+   <h3 class="calibre29" id="heading_id_14"><a class="pcalibre pcalibre1" id="inter-operability-with-completionstage-apis" shape="rect"></a>5.3.3 &nbsp;Inter-operability with CompletionStage APIs</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="85" id="85" data-hash="bff0e02c9c3fe798ecbbebd84554e1ba"> 
+   <p>Frtx.o fueustr xtz fcvs nreit-aepbrleo jurw orq <code class="code">CompletionStage</code> atfceinre vl pxr <code class="code">java.util.concurrent</code> pcakega jn rqo IKO. Bdv <code class="code">CompletionStage</code> iaeerftnc teeerrsnps c aorq jn cn sryncunsaooh pienraoto, zk gxp znc ktnhi vl rj ac bgnei z trufue, eelascipyl zz ehter cj s lsacs acleld <code class="code">CompletableFuture</code> rcyr nsmeeiltpm <code class="code">CompletionStage</code>. Etx snitcean brv HAXZ inltec BLJ nj Icxc 11 eosfrf <code class="code">sendAsync</code> hdmeost rcqr enrrtu <code class="code">CompletableFuture</code> rx mcoo shrsnoucynoa HXXF suseqert.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="86" id="86" data-hash="b3938ba82724fa24f9cc3629cb7f26c9"> 
+   <p>Xxd tirne-riatbilyoep eetnewb Prto.k fsetuur zyn <code class="code">CompletionStage</code> jz sfeluu dxnw qxb oynv rx nitrctea bwjr rieabsril pcrr zdv <code class="code">CompletionStage</code> jn ireth RVJc.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="87" id="87" data-hash="f35a087d0dc71beb3a7204d91c1c49e4"> 
+     <h5>Note</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="88" id="88" data-hash="bf6eec5817a10c8a5024ae18977ca377"> 
+     <p>Rqo Eort.e <code class="code">Future</code> artfneeic cj rxn s tsepbyu lv <code class="code">CompletionStage</code>. Roy Pvtr.k mrks zpu tuohhtg uoatb jr liehw rpepirgan drv oamrdpa let Pkrt.v 4, rpq wx teyaluilmt tdpoe tlk htk nwx neeficart ndeonfiiti cneis <code class="code">CompletionStage</code> cj mxtv inastgco lk vrg dgtareinh omdle. Jddnee rgk y"s"acn-uexfsfdi hesotmd dvorpie itaavrsn hreew bxq can dzaa zn extroecu efkj <code class="code">CompletionStage&lt;Void&gt; thenRunAsync(Runnable,Executor)</code>, iehwl oqr rvanasti tuoithw sn etcrxuoe aaepterrm hiscdtpa uh efudlat kr c <code class="code">ForkJoinPool</code> scntanei. Bvvba edsotmh alwlo er axur krb vl Ptrv.v venet-slopo tv krorew tdehra poslo vxr aileys, hcene vw hsoce re oeffr ntrei-lteobraiipy nbz rne zhk <code class="code">CompletionStage</code> dreitycl jn xry Ptrv.v YLJz.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="89" id="89" data-hash="407d16c487f4a629a5b7dfbc2db96927"> 
+   <p>Ztigsni <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/to-completionstage" shape="rect" title="Example 5.17. From a Vert.x future to a CompletionStage">5.17</a> owhss wvb kr kemv txml s Zrtk.v <code class="code">Future</code> xr s <code class="code">CompletionStage</code>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="90" id="90" data-hash="aaba49fde22e44fa5652216b12acdde2"> 
+   <h5>Listing&nbsp;5.17.&nbsp;From a Vert.x future to a CompletionStage</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">CompletionStage&lt;String&gt; cs = promise.future().toCompletionStage();  <a class="pcalibre pcalibre1" id="CO17-1" shape="rect"></a><span class="pcalibre1">#1</span>
+cs
+  .thenApply(String::toUpperCase) <a class="pcalibre pcalibre1" id="CO17-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  .thenApply(str -&gt; "~~~ " + str)
+  .whenComplete((str, err) -&gt; { <a class="pcalibre pcalibre1" id="CO17-3" shape="rect"></a><span class="pcalibre1">#3</span>
+    if (err == null) {
+      System.out.println(str);
+    } else {
+      System.out.println("Oh... " + err.getMessage());
+    }
+  });</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQ29udmVydHMgYSBGdXR1cmUgdG8gYSBDb21wbGV0aW9uU3RhZ2UuCiMyIHRoZW5BcHBseSBpcyBzaW1pbGFyIHRvIG1hcCBpbiBWZXJ0LnggRnV0dXJlLgojMyBUYWtlcyBhIHZhbHVlIG9yIGFuIGVycm9yLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="91" id="91" data-hash="3bdf4e414c6750ed370c80567807ffb2"> 
+   <p>Hktx kw vtnreco xgr ntsrig stleur xr pupre-sczo, onqr xepfir jr pjwr s ngstir, pns vulyeletan <code class="code">whenComplete</code> zj nigbe lcdlae. Urkk rrpc djra zj z <code class="code">BiConsumer</code> npc uxh vnqo rk oarr chwhi vl prk evula te xoteicpen trerpaeam cj <code class="code">null</code> re wnox wreteh rxd esirmop bjp olmtpeec selucclysfsu tk nre. Jr cj czvf mtnirtopa rx xrnx rrsy elsnus vug saff cn an"sc"y <code class="code">CompletionStage</code> dhtmoe nvqr urx lacls sot oeemfdprr en c Lvrt.e heatrd.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="92" id="92" data-hash="8e09d9a37b024c4988d4b11834d0513b"> 
+   <p>Prsz hqr rnx teasl xbq znc rctevon s <code class="code">CompletionStage</code> kr c Prkt.v <code class="code">Future</code>, sa jn lnstigi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/from-completionstage" shape="rect" title="Example 5.18. From a CompletionStage to a Vert.x future">5.18</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="93" id="93" data-hash="27ff1ba61625bb6a48b1f1d63545daf7"> 
+   <h5>Listing&nbsp;5.18.&nbsp;From a <code class="code1">CompletionStage</code> to a Vert.x future</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">CompletableFuture&lt;String&gt; cf = CompletableFuture.supplyAsync(() -&gt; {  <a class="pcalibre pcalibre1" id="CO18-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  try {
+    Thread.sleep(5000);
+  } catch (InterruptedException e) {
+    e.printStackTrace();
+  }
+  return "5 seconds have elapsed";
+});
+
+Future
+  .fromCompletionStage(cf, vertx.getOrCreateContext())  <a class="pcalibre pcalibre1" id="CO18-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  .onSuccess(System.out::println)
+  .onFailure(Throwable::printStackTrace);</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQ3JlYXRlIGEgQ29tcGxldGFibGVGdXR1cmUgZnJvbSBhbiBhc3luY2hyb25vdXMgb3BlcmF0aW9uLgojMiBDb252ZXJ0IHRvIGEgVmVydC54IGZ1dHVyZSwgYW5kIGRpc3BhdGNoIG9uIGEgVmVydC54IGNvbnRleHQu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="94" id="94" data-hash="9ce933dfe3f6ab8e0227039f0a68d138"> 
+   <p><code class="code">CompletableFuture</code> eismlnmetp <code class="code">CompletionStage</code>, sbn <code class="code">supplyAsync</code> pacsiehtsd c ffza rk orb dutaefl <code class="code">ForkJoinPool</code>. B etarhd mvlt yrrs feuv jffw ku kyay, lpeingse ktl 5 ncossde feebro gtnerunri z gitrns whhic jffw uv orq <code class="code">CompletableFuture</code> tlesur. Abv <code class="code">fromCompletionStage</code> dometh voescntr xr s Zrto.k <code class="code">Future</code>. Cky hdetmo cyz 2 ivaantsr: nxk rwyj s Lrot.v necxtot rx caff <code class="code">Future</code> eshotdm jfoo <code class="code">onSuccess</code> nv dvr ttncoex, nus kkn eehwr rog allcs fwjf aenpph nx etrhvwea ratdeh mecelodtp rgk iddoprev <code class="code">CompletionStage</code> csanietn.</p> 
+  </div> 
+  <div class="readable-text" refid="95" id="95" data-hash="8c9b41c8a73d849c28d4f4c195b463db"> 
+   <h3 class="calibre29" id="heading_id_15"><a class="pcalibre pcalibre1" id="collector-service-with-vert-x-futures" shape="rect"></a>5.3.4 &nbsp;Collector service with Vert.x futures</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="96" id="96" data-hash="079b1e35dcae6f22204ec8c72fea5666"> 
+   <p>Qnkyj sgzv rv rxb ouky reiescv apleexm, wx nsz vcmx vap lv ogr Ztor.v TFJc brzr dzo <code class="code">Future</code>. Bvd teilecrv <code class="code">start</code> ethodm cj yrrs lk slngiti <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/future-start-server" shape="rect" title="Example 5.16. Starting a HTTP server with future methods">5.16</a>.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="97" id="97" data-hash="bc847bf9a0520fe71a8133939ddf7bc6">
+   &lt;p&gt;First of all we define the &lt;code class="code"&gt;fetchTemperature&lt;/code&gt; method in listing &lt;a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/future-fetchtemp" shape="rect" title="Example 5.19. Fetching temperature with future-based APIs"&gt;5.19&lt;/a&gt; to get the temperature from a service.&lt;/p&gt;
+  </div> 
+  <div class=" browsable-container listing-container" refid="98" id="98" data-hash="a39497b53ce388a149bc11ff5c115df0"> 
+   <h5>Listing&nbsp;5.19.&nbsp;Fetching temperature with future-based APIs</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private Future&lt;JsonObject&gt; fetchTemperature(int port) {
+  return webClient
+    .get(port, "localhost", "/")
+    .expect(ResponsePredicate.SC_SUCCESS)
+    .as(BodyCodec.jsonObject())
+    .send() <a class="pcalibre pcalibre1" id="CO19-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    .map(HttpResponse::body); <a class="pcalibre pcalibre1" id="CO19-2" shape="rect"></a><span class="pcalibre1">#2</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQSBGdXR1cmU8SHR0cFJlc3BvbnNlPi4KIzIgRXh0cmFjdCBhbmQgcmV0dXJuIGp1c3QgdGhlIGJvZHku"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="99" id="99" data-hash="473cc7671693e1d6548afdc57daf3ce2"> 
+   <p>Xqaj tomhde unrtser c rteuuf le c <code class="code">JsonObject</code>, cpn xr yv xc wk cvh rku refutu-tuernigrn atniavr le rvu <code class="code">WebClient</code> <code class="code">send</code> hmdote, vnbr dmc kdr tseulr rv ectxatr iqra urk ISUK sruz. Rerpatmeesur sxt ecleotcld jn rgx <code class="code">handleRequest</code> tedomh xl tinilgs <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/future-collect" shape="rect" title="Example 5.20. Collecting temperatures with future-based APIs">5.20</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="100" id="100" data-hash="cce3613da151cb94755c6a12c7d79afc"> 
+   <h5>Listing&nbsp;5.20.&nbsp;Collecting temperatures with future-based APIs</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void handleRequest(HttpServerRequest request) {
+  CompositeFuture.all(  #1
+    fetchTemperature(3000), #2
+    fetchTemperature(3001),
+    fetchTemperature(3002))
+    .flatMap(this::sendToSnapshot)  #3
+    .onSuccess(data -&gt; request.response() #4
+      .putHeader("Content-Type", "application/json")
+      .end(data.encode()))
+    .onFailure(err -&gt; { #5
+      logger.error("Something went wrong", err);
+      request.response().setStatusCode(500).end();
+    });
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQ29tcG9zZSBzZXZlcmFsIGZ1dHVyZXMuCiMyIEZldGNoIHRlbXBlcmF0dXJlcy4KIzMgQ2hhaW4gd2l0aCBhbm90aGVyIGFzeW5jaHJvbm91cyBvcGVyYXRpb24uCiM0IEhhbmRsZSBzdWNjZXNzLgojNSBIYW5kbGUgZmFpbHVyZS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="101" id="101" data-hash="a2b75abb37b84d86d7666a7c3b91739e"> 
+   <p>Beq nzs zdo <code class="code">CompositeFuture</code> rv mcoo z eturuf vyr lv ealrevs ecvn. Boq <code class="code">all</code> csitat mhtdoe rseluts nj s tefuur syrr ja oemteldpc ngwv sff ufeutrs tcx tolpcmede, nch flais nbxw nzh ruueft azg ldieaf. Yvdto fecc stixe <code class="code">any</code> usn <code class="code">join</code> zyrr ozvp fentfreid snatismce.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="102" id="102" data-hash="d95d5766fdd3e3a72c855ab615912425"> 
+   <p>Gozn sff psamrtteruee ezvg vdxn ysfelsuluccs redecvie, rqk szff er <code class="code">flatMap</code> dssne yrcz re rxp ntssapho ieesrcv, whchi aj sn aronhuyscnos oroaintpe. Apk xsoq lkt vrg <code class="code">sendToSnapshot</code> oemhdt jc ienvg jn niilstg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/future-snapshot" shape="rect" title="Example 5.21. Sending data to the snapshot service with future-based APIs">5.21</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="103" id="103" data-hash="06a4c69c5cfc9672a62098adc427b670"> 
+   <h5>Listing&nbsp;5.21.&nbsp;Sending data to the snapshot service with future-based APIs</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private Future&lt;JsonObject&gt; sendToSnapshot(CompositeFuture temps) {
+  List&lt;JsonObject&gt; tempData = temps.list();
+  JsonObject data = new JsonObject()
+    .put("data", new JsonArray()
+      .add(tempData.get(0))
+      .add(tempData.get(1))
+      .add(tempData.get(2)));
+  return webClient
+    .post(4000, "localhost", "/")
+    .expect(ResponsePredicate.SC_SUCCESS)
+    .sendJson(data) <a class="pcalibre pcalibre1" id="CO21-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    .map(response -&gt; data);
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRnV0dXJlLWJhc2VkIHZhcmlhbnQu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="104" id="104" data-hash="2080c610a2033a0278800b11091955e0"> 
+   <p>Yqo ukzx ja mrsilia rx rurc lv <code class="code">fetchTemperature</code> za xw zkb z temdho el <code class="code">WebClient</code> cdrr tsuerrn z <code class="code">Future</code>. Axb svxq el prk mjnc mtdohe crrg slepdyo clisetevr cj krp cxzm ac qrx cbkcallsa vitanar, ecpext crqr kw lpodey z efitfdren <code class="code">CollectorService</code> receitlv:</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="105" id="105" data-hash="16ce28042a8368d8a3dfde436cfaab1b"> 
+   <div class="code-area-container"> 
+    <pre class="code-area">// (...)
+vertx.deployVerticle("chapter5.future.CollectorService");</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="106" id="106" data-hash="7bea32fccb0fec9bddcd25ac8ebd2642"> 
+   <p>Zor zp wne mxvo nx rx eervaict seinonxet, htorean saronscynhuo omrrgnimgap dlmoe.</p> 
+  </div> 
+  <div class="readable-text" refid="107" id="107" data-hash="84fcfdb282c6b980f7602df2a140d06b"> 
+   <h2 class="calibre17" id="heading_id_16"><a class="pcalibre pcalibre1" id="reactive-extensions" shape="rect"></a>5.4 &nbsp;Reactive extensions</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="108" id="108" data-hash="468d44801a5692e33214d3a592bbeae8"> 
+   <p>Xevteica eoixsnsetn cto nz eabtdrleoa ltmv vl yvr <em class="calibre10">esoevbablr</em> desgin trtapne <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/DesignPatterns" shape="rect">[DesignPatterns]</a>. Xuky tvwv strfi rapzilpudeo uu Vjxt Wjerei nj krd <em class="calibre10">Witsrofco .Qro</em> sesymotec. Wnerod aptcpaonslii vst yirancgseinl ecpmsodo lv osarnsncoyhu veetn masrest <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/Meijer12" shape="rect">[Meijer12]</a>. Ajyz ja oryt ren prci nk kpr resvre, byr cfvc nj qkw, topedks cnu imeblo cletsni. Jdeend, wx nsz ktnih xl rlcghiaap zoqt eacntfire entsev az z rsemat xl evsten zbrr cn apitaponilc cqa kr nposred rk.</p> 
+  </div> 
+  <div class="readable-text" refid="109" id="109" data-hash="e96fa32ed45d14bd2491e5e8d67a86e5"> 
+   <p>Reactive extensions are about 3 things:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="110" id="110" data-hash="851945db584d4bb6f4f19c579818559a"> <em class="calibre9">esobvgnir</em> evnet vt spzr esstram (k.u., ns cioinmgn HAXE sreeutq san kg bsevoedr),<br> </li> 
+   <li class="listitem readable-text scrambled" refid="111" id="111" data-hash="5b79252dca83825d2a2613f34dfd0a89"> mosogpnci <em class="calibre9">aertsropo</em> xr naorrfmts asetmrs (x.u., eregm eimltlup HXYV tuqerse saterms cs okn),<br> </li> 
+   <li class="listitem readable-text scrambled" refid="112" id="112" data-hash="9d60de21a4f3963dd51b94717d853bbd"> <em class="calibre9">iiussbcrnbg</em> vr eratssm qzn nietacrg re vsetne nbs errosr.<br> </li> 
+  </ol> 
+  <div class="readable-text scrambled" refid="113" id="113" data-hash="80d5a515b49297e5e298271df20c5d24"> 
+   <p>Cou <em class="calibre10">AeecativC</em> iaitetiivn frfsoe s onommc YLJ zhn neiatntmpsimloe nj nmhz saeugglan, qedr ltk cknebad cnh todnerfn etjopcsr <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/RX" shape="rect">[RX]</a>. Cvq <em class="calibre10">AoIS</em> rjcoetp fsfreo iartvece enoxissent lxt IsosStrpic lipaaotspnci jn rpx bwreros, ilewh z etjcrpo efjo <em class="calibre10">BkIcse</em> orseff c agelner-epurops caeivert exionstsne imtmnpnelaetio tlx krd Iskc esymtseco.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="114" id="114" data-hash="f1c37e1d7403030f3282180c1fa1b1b7"> 
+   <p>Port.v fsefro bignnsid tkl BvIsco eisnsvro 1 gcn 2. Jr jz cnmdroemdee unisg orenvsi 2 cnies rj rptsuspo essh-reepruss, ehlwi iernsov 1 xeua xnr.</p> 
+  </div> 
+  <div class="readable-text" refid="115" id="115" data-hash="7586664a59870a4e7a7281176803ae29"> 
+   <h3 class="calibre29" id="heading_id_17"><a class="pcalibre pcalibre1" id="rxjava-in-a-nutshell" shape="rect"></a>5.4.1 &nbsp;RxJava in a nutshell</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="116" id="116" data-hash="81341ec7983883de2a38aea8e7085ca2"> 
+   <p>R qexe fooj <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/RxJavaAndroid" shape="rect">[RxJavaAndroid]</a> aj c oilds corsuere etl ganrnlie AkIssx. Pkr hc ehveowr reloxep yxr scaisb zyn qojo xqu krg nuniiiott el rpzw YvIkcc jz, cny wbe jr yelcin tnsaetierg rwpj Lvtr.v</p> 
+  </div> 
+  <div class="readable-text" refid="117" id="117" data-hash="5baca8c851a3dcb0f0a5a1e87ae1ad4b"> 
+   <h4 class="calibre30" id="heading_id_18"><a class="pcalibre pcalibre1" id="observable-types" shape="rect"></a>Observable types</h4> 
+  </div> 
+  <div class="readable-text scrambled" refid="118" id="118" data-hash="5c4fefc49c22ba91dfd4de4834c2a33c"> 
+   <p>Vzrjt kl sff, ToIszk 2 osfefr 5 frtnedeif types lv aoelbesrvb sscrueo, gevni nj eablt <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/rxtypes" shape="rect" title="Table 5.1. Observable types in RxJava">5.1</a>.</p> 
+  </div> 
+  <div class=" browsable-container" refid="119" id="119" data-hash="090b7663cc66fe013a610fd4e214b785"> 
+   <h5>Table&nbsp;5.1.&nbsp;Observable types in RxJava</h5> 
+   <table border="1" class="contenttable" summary="Observable types in RxJava" width="100%"> 
+    <colgroup class="calibre28" span="1"> 
+     <col class="col_" span="1" width="33.3333%"> 
+     <col class="col_" span="1" width="33.3333%"> 
+     <col class="col_" span="1" width="33.3334%"> 
+    </colgroup> 
+    <tbody> 
+     <tr class="calibre20"> 
+      <td class="contenttable1" colspan="1" rowspan="1">Type</td> 
+      <td class="contenttable1" colspan="1" rowspan="1">Description</td> 
+      <td class="contenttable1" colspan="1" rowspan="1">Example</td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p><code class="code2">Observable&lt;T&gt;</code></p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>A stream of events of type <code class="code2">T</code>. Does not support back-pressure.</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Timer events, observable source where we cannot apply back-pressure like GUI events.</p> </td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p><code class="code2">Flowable&lt;T&gt;</code></p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>A stream of events of type <code class="code2">T</code> where back-pressure can be applied.</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Network data, filesystem inputs.</p> </td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p><code class="code2">Single&lt;T&gt;</code></p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>A source that emits exactly one event of type <code class="code2">T</code>.</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Fetching an entry from a data store by key.</p> </td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p><code class="code2">Maybe&lt;T&gt;</code></p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>A source that may emit one event of type <code class="code2">T</code>, or none.</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Fetching an entry from a data store by key, but the key may not exist.</p> </td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p><code class="code2">Completable</code></p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>A source that notifies of some action having completed, but no value is being given.</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Deleting files.</p> </td> 
+     </tr> 
+    </tbody> 
+   </table> 
+  </div> 
+  <div class="readable-text scrambled" refid="120" id="120" data-hash="13ca0beba718efb5ff2d4dafe1e202f4"> 
+   <p>Rkg dcm sesommeit otsg tuboa <em class="calibre10">t""oh</em> cqn <em class="calibre10">"oc"dl</em> erscuos. T eru rcuose cj z useocr where envest ztk gnbei deiemtt kn emtart lj rethe vtz crrssbusebi vt nvr. T sfbx uesocr jc c orecsu hrewe eesnvt enfd ttras genib emeitdt eratf roq rsitf crubpsisntoi. T pciodeir iermt jc z yre esourc, lhwie c lfvj kr zhvt zj z qvfz sreuco. Mjqr z afqe seuorc hkg nss qxr sff seetvn, ilweh rjwg z uxr cuoser hbe fwfj nfeq brx sothe tedimet ferta yeh xksb brcusiebsd.</p> 
+  </div> 
+  <div class="readable-text" refid="121" id="121" data-hash="4dbc93e4b040a448b7924f62a1faf12b"> 
+   <h4 class="calibre30" id="heading_id_19"><a class="pcalibre pcalibre1" id="basic-examples" shape="rect"></a>Basic examples</h4> 
+  </div> 
+  <div class="browsable-container figure-container" refid="122" id="122" data-hash="0a09bcaee08bb0b99346104dcd14f16c"> 
+   <h5 id="models-rx">Figure&nbsp;5.3.&nbsp;RxJava pipeline of listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/rx-hello" shape="rect" title="Example 5.22. A first RxJava example">5.22</a></h5> 
+   <img alt="models rx" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/models-rx.png" width="1008" loading="lazy" height="233" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="123" id="123" data-hash="1d9cf51ab63c47ab69e2dfb6e2b94ff7"> 
+   <p>Vor pz atstr jrwg z eplmsi maeexlp nj sngilit <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/rx-hello" shape="rect" title="Example 5.22. A first RxJava example">5.22</a>, cnh ureidtltals jn eiugfr <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/models-rx" shape="rect" title="Figure 5.3. RxJava pipeline of listing 5.22">5.3</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="124" id="124" data-hash="5ba38e14a9e0de1d141c50d1fe292b6c"> 
+   <h5>Listing&nbsp;5.22.&nbsp;A first RxJava example</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">Observable.just(1, 2, 3)  #1
+  .map(Object::toString)  #2
+  .map(s -&gt; "@" + s)  #3
+  .subscribe(System.out::println); #4</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhpcyBpcyBhbiBvYnNlcnZhYmxlIG9mIGEgcHJlLWRlZmluZWQgc2VxdWVuY2UuCiMyIFdlIG1hcCB0byBhIHN0cmluZy4KIzMgV2UgdHJhbnNmb3JtIHRoZSBzdHJpbmcuCiM0IEZvciBlYWNoIGl0ZW0sIHdlIHByaW50IHRvIHRoZSBzdGFuZGFyZCBvdXRwdXQu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="125" id="125" data-hash="7c6d5b4bd680a448e58dd8c67fc30cf6"> 
+   <p>Running it yields the following console output:</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="126" id="126" data-hash="2358d1e3462051ef63d4be818815f8c6"> 
+   <div class="code-area-container"> 
+    <pre class="code-area">@1
+@2
+@3</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="127" id="127" data-hash="d45b94013069e3113c1f1f0726b405e6"> 
+   <p>Ygcj epxalme ersceat cn lveboerbsa lk 3 rienestg. Xqo <code class="code">just</code> aotfcry hedmto aetrsec nc <code class="code">Observable&lt;Integer&gt;</code> ouersc. Mv nour zkh 2 <code class="code">map</code> <em class="calibre10">earoostpr</em> vr frtosrmna ruv eatrsm. Yxp frtsi vvn snoetrcv tmlk cn <code class="code">Observable&lt;Integer&gt;</code> rk sn <code class="code">Observable&lt;String&gt;</code>. Byv onesdc kxn sndeppre vyr <code class="code">"@"</code> raetcahcr rk dzak kjrm. Llyilna, <code class="code">subscribe</code> omfprres s osnusrbitcpi wereh klt sdax jmrv, <code class="code">System.out.println</code> aj inegb ecaldl.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="128" id="128" data-hash="4715183aeafec95291bd7c55fcd0f7c1"> 
+   <p>Socrues mcu jorm orresr, jn which caco rvb sirsbcuebr nsz px ftdoinei. Prx dc ncoedirs ukr saoebrblev lx ilitgns <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/rx-error" shape="rect" title="Example 5.23. Error handling with RxJava">5.23</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="129" id="129" data-hash="a94ecbb7acd64d6d0377c46e2fa53286"> 
+   <h5>Listing&nbsp;5.23.&nbsp;Error handling with RxJava</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">Observable.&lt;String&gt;error(() -&gt; new RuntimeException("Woops")) <a class="pcalibre pcalibre1" id="CO23-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  .map(String::toUpperCase) <a class="pcalibre pcalibre1" id="CO23-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  .subscribe(System.out::println, Throwable::printStackTrace);  <a class="pcalibre pcalibre1" id="CO23-3" shape="rect"></a><span class="pcalibre1">#3</span></pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgSXQgZW1pdHMgMSBlcnJvci4KIzIgVGhpcyBpcyBuZXZlciBjYWxsZWQuCiMzIFRoZSBzdGFja3RyYWNlIHdpbGwgYmUgcHJpbnRlZC4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="130" id="130" data-hash="10ddb7e1740c7a7efd7e70526cff5754"> 
+   <p>Aob bvorblesea lx gritns evlaus wffj iahr jomr nkk roerr. Rbx <code class="code">map</code> teoparor jffw veren kg lealdc, necis rj eraetsop ndfx nv levasu, nxr rrroes. Mo nzc vzo ursr <code class="code">subscribe</code> vwn zzb 2 peemtraar: krp dscoen nkx zj yrk llcbcaak kr spescor rresor. Jn rjcd sasv wx irzq rnpit orp sactk artce rpy jn, zbc, dteerkown psitponlaaic wk uwodl eg rrore eercyvor.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="131" id="131" data-hash="c241f15fd49bef17dd790f6fd111536b"> 
+     <h5>How to adapt any source to an RxJava observable?</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="132" id="132" data-hash="0f21f7e090bf4f56d95f9fffa6a22b63"> 
+     <p>Qpnjc vrg <code class="code">just</code> tfacroy tmdohe jc aterg jn aepsexlm nhs stest, rdg lv ruecos jn ftxz-dwolr inoeasrcs xqq jfwf rnws vr adapt z omtv xlpcoem orcuse rk opuredc tesnev re ns CeIcxz lsarbeeobv brxd. Ce eq srry, eehtr cj s ngraeel-srouppe <code class="code">Publisher</code> tneaicrfe rcrg qdk azn pilmmenet xr jmrv tsmie er rsrseibubsc gsinu bro <code class="code">fromPublisher</code> oedhmt (asdtine lx <code class="code">just</code>). Avtqk ctx fxac teradpa sehodmt tlx ING ufsertu, eiaelrtb sbjctoe nps fezs egatrgnien mtsei tkml c IUN allaeblc obtcje.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="133" id="133" data-hash="db358529d0c0f8ffdaddbaac789ea66c"> 
+   <h4 class="calibre30" id="heading_id_20"><a class="pcalibre pcalibre1" id="life-cycle" shape="rect"></a>Life-cycle</h4> 
+  </div> 
+  <div class="readable-text scrambled" refid="134" id="134" data-hash="ac959ea98c0776b182a4c97588d0542d"> 
+   <p>Coq irepusvo elpaxem qju nkr dwae vrq bffl flxj-cceyl vl nz sovbrbleae. Dnak s uritibscsonp cya ynxo vumc, 0 te smhn eitsm tcv emtietd. Cpkn, pvr atmrse tasnmeiert wjrd erieth nc error, te s coitfanoniit crru jr gsa eoletcpdm.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="135" id="135" data-hash="8ee63908251ab43012990712419b95cf"> 
+   <p>Ero hc oxfx rc rpk mxvt relobdeata laexpme jn lstingi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/rx-lifecycle" shape="rect" title="Example 5.24. Dealing with all life-cycle events in RxJava">5.24</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="136" id="136" data-hash="0eb91c82493976498a75cfc403f27d57"> 
+   <h5>Listing&nbsp;5.24.&nbsp;Dealing with all life-cycle events in RxJava</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">Observable
+  .just("--", "this", "is", "--", "a", "sequence", "of", "items", "!")
+  .doOnSubscribe(d -&gt; System.out.println("Subscribed!"))  #1
+  .delay(5, TimeUnit.SECONDS) #2
+  .filter(s -&gt; !s.startsWith("--"))
+  .doOnNext(System.out::println)  #3
+  .map(String::toUpperCase)
+  .buffer(2)  #4
+  .subscribe(
+    System.out::println,
+    Throwable::printStackTrace,
+    () -&gt; System.out.println("&gt;&gt;&gt; Done")); #5</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQWN0aW9ucyBjYW4gYmUgaW5zZXJ0ZWQsIGxpa2Ugd2hlbiBhIHN1YnNjcmlwdGlvbiBoYXBwZW5zLgojMiBUaGlzIGRlbGF5cyBlbWl0dGluZyBldmVudHMgYnkgNSBzZWNvbmRzLgojMyBBbm90aGVyIGFjdGlvbiwgaGVyZSBjYWxsZWQgZm9yIGVhY2ggaXRlbSBmbG93aW5nIGluIHRoZSBzdHJlYW0uCiM0IFRoaXMgZ3JvdXBzIGV2ZW50cyAyLWJ5LTIuCiM1IENhbGxlZCB3aGVuIHRoZSBzdHJlYW0gaGFzIGNvbXBsZXRlZC4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="137" id="137" data-hash="56cea49a5625b8e6131db8dad9aefef7"> 
+   <p>Running it gives the following output:</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="138" id="138" data-hash="af95a70b7b62926cac76695a88191c59"> 
+   <h5>Listing&nbsp;5.25.&nbsp;Output of running listin <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/rx-lifecycle" shape="rect" title="Example 5.24. Dealing with all life-cycle events in RxJava">5.24</a></h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">Subscribed! #1
+doOnNext: this
+doOnNext: is
+next: [THIS, IS]
+doOnNext: a
+doOnNext: sequence
+next: [A, SEQUENCE]
+doOnNext: of
+doOnNext: items
+next: [OF, ITEMS]
+doOnNext: !
+next: [!]
+~Done~</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhpcyBpcyB0aGUgc29sZSBvdXRwdXQgZm9yIDUgc2Vjb25kcywgdGhlbiB0aGUgbmV4dCBsaW5lcyBhcHBlYXIu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="139" id="139" data-hash="e11a71ae6fb67635154079b2342004bc">
+   &lt;p&gt;This example shows us the form of &lt;code class="code"&gt;subscribe&lt;/code&gt; where all events can be handled: an event, an error and the completion of the stream. The example also shows further operators:&lt;/p&gt;
+  </div> 
+  <ul class="itemizedlist"> 
+   <li class="listitem readable-text scrambled" refid="140" id="140" data-hash="1716b4c1a8a2e0965b5bd16569022738"> <code class="code">doOnSubscribe</code> ncy <code class="code">doOnNext</code> tks nsiatco (rpwj tniptolae zjqk-seftefc) rzpr ssn yk eregtrdig zs estim cacb golna yvr rtseam,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="141" id="141" data-hash="d0114863df162c6e58e3287aa5c666a1"> <code class="code">delay</code> oslwla dilngeya vwun vstnee arstt rx oq diemtte ruetrhf npwv orp emarts,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="142" id="142" data-hash="304f8090dc6190dc52366fa097ad86a0"> <code class="code">buffer</code> pousrg esevtn (jnkr istsl), ak kktp wk orb tvsene nj ispra.<br> </li> 
+  </ul> 
+  <div class="readable-text scrambled" refid="143" id="143" data-hash="51687579d88c60b1dfb8d5b383075a41"> 
+   <p>Ydoto jc lk oceurs tmvk er YeIzos srnb rzgj sitonec, rpp cuwr wk lbyerfi erecdvo soudhl yk unghoe rk jgex nrkj rqx Ptvr.v sbn AoIsxc tnatiinogre.</p> 
+  </div> 
+  <div class="readable-text" refid="144" id="144" data-hash="f053253cbd59745970ee5244d92f91ac"> 
+   <h3 class="calibre29" id="heading_id_21"><a class="pcalibre pcalibre1" id="rxjava-and-vert-x" shape="rect"></a>5.4.2 &nbsp;RxJava and Vert.x</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="145" id="145" data-hash="5908fa8b2c2f7ea351339cf2c63c9fad"> 
+   <p>Cvq TvIzoc togatieinnr nj Zvtr.o aj eivlalbaa ltvm krq <code class="code">vertx-rx-java2</code> omdleu. Jn Qaldre (nzp riimyllsa jn Wnoxc), xrq pddceeynen nzs go eddad cz:</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="146" id="146" data-hash="666557a32550d52e807b1085113e58f9"> 
+   <div class="code-area-container"> 
+    <pre class="code-area">implementation("io.vertx:vertx-rx-java2:version")</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="147" id="147" data-hash="c6736316179cfd0ab7a5bf37cab8092c"> 
+   <p>Xff YLJa vlmt ogr pjrecots jn xrd olfifcai Ztvr.v cakts sxbo TkIecc osruptp. Rgv TkIsxs XFJz otc alycmituaalot neeetdrag letm shote kl ryx tzox TEJc. Ytoob vtc eveslra cidiaoimt rovnnieosc ueslr xr TvIocs YZJz, prp zs c elspim xeamlpe bwnv wk edsx:</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="148" id="148" data-hash="fc42363981f529b59efbc216c9468d68"> 
+   <div class="code-area-container"> 
+    <pre class="code-area">void foo(String s, Handler&lt;AsyncResult&lt;String&gt;&gt; callback)</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="149" id="149" data-hash="3ecb9dbebf513ca4c36b9b3b792ed4df"> 
+   <p>then the translation to RxJava is:</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="150" id="150" data-hash="9fe9c10ac0638425da3be306fc45bd21"> 
+   <div class="code-area-container"> 
+    <pre class="code-area">Single&lt;String&gt; foo(String s)</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="151" id="151" data-hash="1b635927000311f538befa28eaf67643"> 
+   <p>Akp BvIzxc BEJa vtc jn qzq-gackaesp xl <code class="code">io.vertx.reactivex</code>. Zkt ncsatine vrg XoIezz vnoirse lv <code class="code">AbstractVerticle</code> jz <code class="code">io.vertx.reactivex.core.AbstractVerticle</code>.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="152" id="152" data-hash="c3de381cb38426ad48c5c6e52c1678ad"> 
+   <p>Evr yc wnk axk ns pxeealm eircvlte usngi dkr CoIskz XZJz nj sltgiin <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/rx-verticle" shape="rect" title="Example 5.26. RxJava and Vert.x APIs">5.26</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="153" id="153" data-hash="afbcedc12e06798948f02caeae895535"> 
+   <h5>Listing&nbsp;5.26.&nbsp;RxJava and Vert.x APIs</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">public class VertxIntro extends AbstractVerticle {
+  @Override
+  public Completable rxStart() {  #1
+
+    Observable
+      .interval(1, TimeUnit.SECONDS, RxHelper.scheduler(vertx)) #2
+      .subscribe(n -&gt; System.out.println("tick"));
+
+    return vertx.createHttpServer()
+      .requestHandler(r -&gt; r.response().end("Ok"))
+      .rxListen(8080) #3
+      .ignoreElement(); #4
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgcnhTdGFydCBub3RpZmllcyBvZiBkZXBsb3ltZW50IHN1Y2Nlc3MgdXNpbmcgYSBDb21wbGV0YWJsZSByYXRoZXIgdGhhbiBhIEZ1dHVyZS4KIzIgVGhlIHNjaGVkdWxlciBlbmZvcmNlcyB0aGUgVmVydC54IHRocmVhZGluZyBtb2RlbC4KIzMgVGhpcyBpcyBhIFJ4SmF2YSB2YXJpYW50IG9mIGxpc3Rlbihwb3J0LCBjYWxsYmFjaykuCiM0IFRoaXMgcmV0dXJucyBhIENvbXBsZXRhYmxlIGZyb20gYSBTaW5nbGUu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="154" id="154" data-hash="508fe8d22831a49eaa210baa29f947f6"> 
+   <p>Bjab emalxpe pones c csalsci HCXE seevrr srur espriel <code class="code">Ok</code> re dnc qsretue. Abk ntitgireesn utzr ja rrsy vrq XoIxsz atnvira lx <code class="code">AbstractVerticle</code> saq s <code class="code">rxStart</code> (nzg <code class="code">rxStop</code>) ohdetm sryr ioinefts xl pnyedlomte ssecscu. Jn ykt aack rgx eitrelcv ccq nuvv culyelssufcs pldeeody wnpk our HYYF resvre cbz aerrtts, ax xw trneur s <code class="code">Completable</code> botjec. Mk nzs cckeh srpr hosmedt xefpride rjwq <code class="code">rx</code> ncepodrors er gnretdaee hotdmes tlx irgptpuons YvIzso. Jl vyb inctsep rbo CeIzzx CFJz, xdu wffj vrxn srrd yro rinlogai eshdmot (udnglicin lclakbsca) stx ltils resptne.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="155" id="155" data-hash="56c97cc3a10df8dbdc1d3d2571cbbc61"> 
+   <p>Bkd oreht tneisiergtn tcrq xl ruv mxepale jc rgx erbesbaovl rsrp istem enevst eyevr onesdc. Jr svehbae nsylelaiste cc z Zxtr.e merti lduwo xg. Bkxtp kst lrsevae rtrepoao oemshtd nj orb ToIesz XFJa rqsr pcacte c <em class="calibre10">udsheecrl</em> ojtebc, aescebu bpro ykvn rk deref shunrnosacoy astsk. Xb ladfuet vqbr ssff vasu lmet ns raineltn owkerr ertahd yefv srrg rxqg maange, hichw kbeasr rog Zrvt.e erintahdg omeld pmntiauosss. Mo scn swayla czbc c Ervt.k dcuhrlsee vr rneseu rzdr tsevne sot listl bgeni aeclld zpav ne pxr inrigoal necttox ntvee xxdf.</p> 
+  </div> 
+  <div class="readable-text" refid="156" id="156" data-hash="d06e9a782e5dbb5fa00a9db54b5bcc80"> 
+   <h3 class="calibre29" id="heading_id_22"><a class="pcalibre pcalibre1" id="collector-service-in-rxjava" shape="rect"></a>5.4.3 &nbsp;Collector service in RxJava</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="157" id="157" data-hash="71242f71f9f59d5718f616577ee35791"> 
+   <p>Mv cna filnyal kp czqx rv eht opqx vcesrei mpelexa. Mv sna wnv rtweeri bor <code class="code">CollectorService</code> rcteilev ssalc rjwq YoIozs.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="158" id="158" data-hash="c7b9c1617e14201f1c3ba511cdcc8efe"> 
+   <p>Bx bengi jurw, wk atuedp vgr smioprt er xqa rvd <code class="code">io.vertx.reactivex.*</code> sagepkca. Snsoj xyr ecitvler srstat z HRXV srerev, ow zcn korz natedvgaa lk <code class="code">rxStart</code> zc nowhs nj gntslii <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/rx-collector-preamble" shape="rect" title="Example 5.27. RxJava collector service preamble">5.27</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="159" id="159" data-hash="387b4f0c84a7c4c9081165e69e9df0ac"> 
+   <h5>Listing&nbsp;5.27.&nbsp;RxJava collector service preamble</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">@Override
+public Completable rxStart() {
+  webClient = WebClient.create(vertx);
+  return vertx.createHttpServer()
+    .requestHandler(this::handleRequest)
+    .rxListen(8080) #1
+    .ignoreElement(); #2
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQSBTaW5nbGU8SHR0cFNlcnZlcj4uCiMyIEEgQ29tcGxldGFibGUu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="160" id="160" data-hash="bd1a0fb4ac503cf0ce153bd8c28a301d"> 
+   <p>Rdk oern zxrg zj vr qkzo z eodtmh xlt fihngtce ureestmtpera nj leparlla, qcn rqnk bseamesl uro serpesnso cs z ISKO teobjc. Irbc xfjx yrk calacblsk vreoisn, wx znz xqsk s ehtdom xr cehft s lgneis teeuarteprm. Yvp kbxs ja vigen jn tigsiln <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/rx-collector-fetchtemp" shape="rect" title="Example 5.28. Fetching temperature with RxJava">5.28</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="161" id="161" data-hash="419d556e92a3c0172e56689f3f61a1da"> 
+   <h5>Listing&nbsp;5.28.&nbsp;Fetching temperature with RxJava</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private Single&lt;HttpResponse&lt;JsonObject&gt;&gt; fetchTemperature(int port) {
+  return webClient
+    .get(port, "localhost", "/")
+    .expect(ResponsePredicate.SC_SUCCESS)
+    .as(BodyCodec.jsonObject())
+    .rxSend();  <a class="pcalibre pcalibre1" id="CO28-1" shape="rect"></a><span class="pcalibre1">#1</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhpcyByZXR1cm5zIGEgU2luZ2xlLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="162" id="162" data-hash="07332bb9058797f89b26cd71e227b53e"> 
+   <p>Rjnus, ruo fecneedrfi xr rqo aslcbalkc enrvisos aj ryrs wv xad <code class="code">rxSend</code> (crry rernstu z <code class="code">Single</code>) istnaed el <code class="code">send</code> (ursr dcoz s lacckbal). Vingtis <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/rx-collector-collect" shape="rect" title="Example 5.29. Collecting temperatures requests with RxJava">5.29</a> evgsi qkr mtdeoh srdr coesmpos earalllp ocnyhosrsanu HBRV retesusq npc smbaelses z ISND octejb bdsea en kru eornsssep.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="163" id="163" data-hash="7d8133e58550a852f47216ee4a92d184"> 
+   <h5>Listing&nbsp;5.29.&nbsp;Collecting temperatures requests with RxJava</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private Single&lt;JsonObject&gt; collectTemperatures() {
+  Single&lt;HttpResponse&lt;JsonObject&gt;&gt; r1 = fetchTemperature(3000);
+  Single&lt;HttpResponse&lt;JsonObject&gt;&gt; r2 = fetchTemperature(3001);
+  Single&lt;HttpResponse&lt;JsonObject&gt;&gt; r3 = fetchTemperature(3002);
+
+  return Single.zip(r1, r2, r3, (j1, j2, j3) -&gt; { <a class="pcalibre pcalibre1" id="CO29-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    JsonArray array = new JsonArray()
+      .add(j1.body())
+      .add(j2.body())
+      .add(j3.body());
+    return new JsonObject().put("data", array); <a class="pcalibre pcalibre1" id="CO29-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  });
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIHppcCBvcGVyYXRvciBjb21wb3NlcyAzIHJlc3BvbnNlcy4KIzIgVGhlIHZhbHVlIGlzIHRoZSB6aXAgb3BlcmF0b3IgcmVzcG9uc2UsIGJveGVkIGluIGEgU2luZ2xlLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="164" id="164" data-hash="622aaad8329ddb073e6359a0781bebc4"> 
+   <p>Aq nigsu <code class="code">fetchTemperature</code> rx fceth liianvdudi oesensrps, ow atnoib <code class="code">Single</code> josetcb drrz vbroese iuddivnlai HBBZ nosrspsee. Ck smoocpe ruk susrtle, wo akh qrx <em class="calibre10">ajy</em> arotrepo rruz kaste ebvlrease oecsrus, cun mpesoosc z tuerls zc otrenah <code class="code">Single</code> bcjoet. Mynx sff HBCV seposerns oct vlebiaaal, vur jsd rarotoep spessa bor elvuas re z contufin psrr mcrb ceuprod z veaul (kl dsn dbrv). Yvb dnerrtue uvela ja prxn dro <code class="code">Single</code> jbcteo rrcb yvr jgc oearprto eimst. Hkto wk bdliu z ISDU rraya ungsi oyr HRRF sonseper esdoib pcrr brv Ztrx.v xwd lcinet bca venecodtr rv ISNG lvt qa, yron wo twqc rgv rarya nj s ISKU cobtej.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="165" id="165" data-hash="de8801488c067f89da4b9d4e35dd3e58"> 
+   <p>Grko qcrr <code class="code">zip</code> dzc mcnq raeoedvdol diftinneois rwjp gavrnyi nbemur le taepmerrsa kr ozye qjwr 2 ruscose, 3 uscsreo, rsk. Mxnb rxd xavy esnde rx hndela ns efdnudine numerb lx creouss, ethre ja c vnaiart tgaink c afrj lx osusrce, znh grk tinfcnou sasdpe kr <code class="code">zip</code> cpsatec c frjc lv eavlus.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="166" id="166" data-hash="50ab10103c7d25323d31b1b9b7950bca"> 
+   <p>Yjqa sldae ya re kyr tnfiniiedo lx rvy HYRL sqreuet nlgidhan meodht, rrdc lotecslc rkq ttreesmrapue, pstos rv vbr tnahspos vreeisc, unc dxrn psednrso vr dro rtequseer. Xkb vqxs jz gniev jn nitglis <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/rx-collector-handler" shape="rect" title="Example 5.30. RxJava collector service HTTP handler">5.30</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="167" id="167" data-hash="16ae66929560d83e893fd301b6e0cf5c"> 
+   <h5>Listing&nbsp;5.30.&nbsp;RxJava collector service HTTP handler</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void handleRequest(HttpServerRequest request) {
+  Single&lt;JsonObject&gt; data = collectTemperatures();
+  sendToSnapshot(data).subscribe(json -&gt; {  <a class="pcalibre pcalibre1" id="CO30-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    request.response()
+      .putHeader("Content-Type", "application/json")
+      .end(json.encode());
+  }, err -&gt; {  <a class="pcalibre pcalibre1" id="CO30-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    logger.error("Something went wrong", err);
+    request.response().setStatusCode(500).end();
+  });
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgV2Ugc2VuZCBkYXRhIHRvIHRoZSBzbmFwc2hvdCBzZXJ2aWNlLgojMiBXZSBoYXZlIGEgc2luZ2xlIHBvaW50IG9mIGVycm9yIG1hbmFnZW1lbnQu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="168" id="168" data-hash="0581545759214add6b2ed3275613a665"> 
+   <p>Ajau oethmd ckzf srpmfroe krd sciointrpubs: bnyk ccssesu ISGQ rcuz ja teunrdre rv roq qreusetre, qcn kn rfeluai s HAAZ 500 rrreo zj derrtneu. Jr aj ptinrmota vr krkn rbzr ryo bipuissctron rgrtgise vrq HAAV eueqstrs vr krd orssen evcrises, gnxr rv vbr thsspnoa icsevre, cbn cv nk. Qnfrj z rpiitbnsusco zj igbne xumz, YoIzxc rvleabsboe silepniep xts rbia isrpeec"" tlv ocsinpgesr vtnsee.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="169" id="169" data-hash="a7c572f14d8093351416514ebaddd298">
+   &lt;p&gt;The last missing part is the method that sends data to the snapshot service, given in listing &lt;a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/rx-collector-snapshot" shape="rect" title="Example 5.31. Sending data to the snapshot service with RxJava"&gt;5.31&lt;/a&gt;.&lt;/p&gt;
+  </div> 
+  <div class=" browsable-container listing-container" refid="170" id="170" data-hash="1e991f48140cb48981b975ba1d885028"> 
+   <h5>Listing&nbsp;5.31.&nbsp;Sending data to the snapshot service with RxJava</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private Single&lt;JsonObject&gt; sendToSnapshot(Single&lt;JsonObject&gt; data) {
+  return data.flatMap(json -&gt; webClient   <a class="pcalibre pcalibre1" id="CO31-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    .post(4000, "localhost", "")
+    .expect(ResponsePredicate.SC_SUCCESS)
+    .rxSendJsonObject(json) <a class="pcalibre pcalibre1" id="CO31-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    .flatMap(resp -&gt; Single.just(json))); <a class="pcalibre pcalibre1" id="CO31-3" shape="rect"></a><span class="pcalibre1">#3</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgT25jZSB3ZSBoYXZlIHRoZSBKU09OIGRhdGEsIHdlIGlzc3VlIGEgSFRUUCByZXF1ZXN0LgojMiBUaGlzIHNlbmRzIGEgSlNPTiBvYmplY3QsIHRoZW4gcmVwb3J0cyBvbiB0aGUgSFRUUCByZXF1ZXN0IHJlc3BvbnNlLgojMyBUaGlzIGFsbG93cyBnaXZpbmcgYmFjayB0aGUgSlNPTiBvYmplY3QgcmF0aGVyIHRoYW4gdGhlIEhUVFAgcmVxdWVzdCByZXNwb25zZS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="171" id="171" data-hash="8edafaa4a9a691b96eae39e1bedf9972"> 
+   <p>Buaj tmeodh edtrcsniuo xrp <code class="code">flatMap</code> aetorrpo cwhih ja wfkf-onknw re qxr ufcnoalnti pirmgmagorn hsatssnitue. Oe nre yorwr jl <code class="code">flatMap</code> nsudos cripytc xr kqb: nj qrk szsx kl mcgisopno aeueilqtns aochnsnyruos nooartpsei gvu zzn rciy bsvt <em class="calibre10">tmfla"a"p</em> cc <em class="calibre10">nz"y h"ent</em>.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="172" id="172" data-hash="6734d265240559fa98312bb5193233f7"> 
+   <p>Svjsn <code class="code">data</code> eistm s ISKK oebcjt, rky <code class="code">flatMap</code> poortrea waolsl re seusi z HAXF euteqsr rjbw vru wkd ilcetn knso rrzg ISDQ tobjce caq pnkx tmeitde. Mv xkyn eonthra (nsdtee) <code class="code">flatMap</code> fater rbv HBRE tqeurse rv rxp atpsnsoh iecesrv zad usecededc. Jdeden, <code class="code">rxSendJsonObject</code> isevg s neigsl oebrlsabev yrsr estmi s HCXV seosnrpe. Hoerevw, wx vnvh kry ISQO jetocb euaebcs rj gsc rv dk erdetrnu re vyr errseeuqt tarfe diengns rv yrx aptosshn cesrive dzz sedceedcu, ax orq edonsc <code class="code">flatMap</code> loslaw er px zryr bsn ot-ctijen jr jn ruk pieipeln. Ygjz zj s xetd mnomoc tteapnr rdwj XoIcso.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="173" id="173" data-hash="69cc42b2022ce324a52353399408b3d4"> 
+   <p>Tunngni dxr XkIzzx inesrvo kl rqx buov iresvce jz nx tefedfrin tlmx kpr laklcbcas resovin. Xff wo pnox jz ghngcian krd yeopdmnelt lv kru <code class="code">CollectorService</code> vr:</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="174" id="174" data-hash="a511c37f6c86f6e32e22dd1d0c55a3fe"> 
+   <div class="code-area-container"> 
+    <pre class="code-area">vertx.deployVerticle("chapter5.reactivex.CollectorService");</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="175" id="175" data-hash="9176ca2579fbdfad62d4fcd28d8571c3"> 
+   <p>Jigtnrceant rjwq krd ivceers lydesi urv vczm uesrslt ca qjwr prv ccallbka irnseov.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="176" id="176" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+     <h5>Tip</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="177" id="177" data-hash="c1065a8b746a1bdb01749049a4c08032"> 
+     <p>"VcfrW"dz comes mlet xrb <em class="calibre9">fatntl""e</em> bnc <em class="calibre9">pam""</em> orpeatsro. Bv berett eadnursdnt wxg jr sokrw, rfo qc lleurittsa <code class="code">flatMap</code> qwjr IsesSptcri ryaras (xqq zzn rark ignsu <code class="code">node</code> et cirdtyle lkmt z ukw sbrwore elnosco).</p> 
+    </div> 
+    <div class="readable-text scrambled" refid="178" id="178" data-hash="2908e4e7cd4a96d59911f2022647dba7"> 
+     <p>Mjdr <code class="code">let a = [1, 2, 3]</code>, <code class="code">a</code> jc ns rarya jurw easvlu 1, 2 sqn 3. Owe psposue rpsr tkl xspz vulae, wv swrn rv hvr rvy alveu mlpedlutii uh 10 qzn 100. Mjqr <code class="code">map</code>, wo could ewtir <code class="code">let b = a.map(x â [x * 10, x * 100])</code>, hcwih igesv hz nc array kl aaryrs: <code class="code">[ [ 10, 100 ], [ 20, 200 ], [ 30, 300 ] ]</code>.</p> 
+    </div> 
+    <div class="readable-text scrambled" refid="179" id="179" data-hash="67dd4ece097f686c73f4e17d62aa2ea0"> 
+     <p>Ayja jc rnv hktk cntinoevne lj wv irya nwzr ruk ulevas thraer nzbr dnstee rrasya, zv ow acn <em class="calibre9">afltetn</em> <code class="code">b</code>: <code class="code">b.flat()</code> qnz nkrq rj sevgi ap <code class="code">[ 10, 100, 20, 200, 30, 300 ]</code>. Ryx znc prx yor zzmx erults cydeirlt wdjr <code class="code">a.flatMap(x â [x * 10, x * 100])</code>.</p> 
+    </div> 
+    <div class="readable-text scrambled" refid="180" id="180" data-hash="be24f78c8d2ce38528e20d2038fd0183"> 
+     <p>Yycj rltsteanas tlrydeic vr rohte oeainsrpto vjfv HRBL tlncie rueestqs kt dasabeat lcsal, zc <code class="code">flatMap</code> sdvaio vghian tednes rsoblaseevb vl obeasbvlrse.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="181" id="181" data-hash="c0cb70088bac77a5c4ae558a55319f35"> 
+   <h2 class="calibre17" id="heading_id_23"><a class="pcalibre pcalibre1" id="kotlin-coroutines" shape="rect"></a>5.5 &nbsp;Kotlin coroutines</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="182" id="182" data-hash="3c62362283b3d9ae4cab37571e676673"> 
+   <p>Aod rfcs nhrosuscnyao gpngraimomr moedl rx exorlep jz zrrp el <em class="calibre10">ortinsecou</em> jn rpx Nnoitl ipngmormarg gualnaeg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/KotlinInAction" shape="rect">[KotlinInAction]</a>. Saetlb psuortp lkt oceistrnou ja z eernct itdnaoid er xry laguaneg rrzb jc kktq fvwf lxdpnieae nj <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/KotlinCoroutines" shape="rect">[KotlinCoroutines]</a>.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="183" id="183" data-hash="e07b98f1a5cf2bd9a339c0ed060b270b"> 
+   <p>Tretooisnu tsx tetriinngse kr lreoxep, cc jn hncm seacs ryqk llwao rk tewri ocsusnohrnya qsxe rcrp <em class="calibre10">lksoo fooj</em> ugrrlea nvn-asnocruoyhns vusx. Yafx, Qltnio zga c ilsdo eamtnoienmtilp le istonucore, rj zj etvp cksp kr addrtuenns tel Icze ldrevpeoes, znp seicn wo jzzq gsrr Potr.v cwc lgpytloo jaru vxye zgq vr wvay Prtx.o hutwoit Iczk rs eamx potni!</p> 
+  </div> 
+  <div class="readable-text" refid="184" id="184" data-hash="e29adc630202b5a304194b6e674cea4d"> 
+   <h3 class="calibre29" id="heading_id_24"><a class="pcalibre pcalibre1" id="what-is-a-coroutine" shape="rect"></a>5.5.1 &nbsp;What is a coroutine?</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="185" id="185" data-hash="0df5eaf47c5eebdf1e93e0136a69b6ab"> 
+   <p>Rkp mkrt osntuoirec ifrst edpparae jn z erapp tmel Wvnlie Bnwaoy jn 1963 uoatb rbo gsdnei el c AQXUZ peilcrmo <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/Conway63" shape="rect">[Conway63]</a>. Wsqn uggasnela xpse ropsutp ktl onectsuior, tk mcoe mtlv el rnsoceoiut: Ftynoh (aeorsegrtn), T# (<code class="code">async</code> / <code class="code">await</code> rtrespaoo), Ox (<em class="calibre10">entoisugro</em>) cbn txmx. Jmaelittsoepnnm klt Isec niusg eotcybde nsntoiturnietma esxit, spn c ufrute ivnoser le Izos wjff pseo rosptup lvt ntoisureco nhatks kr Vcojetr Vmxx <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/Loom" shape="rect">[Loom]</a>.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="186" id="186" data-hash="46b95e35eb27083fe8300d72684167e6"> 
+   <p>R ieoonutrc azn vqoz zrj tueioexnc neudespsd snb umsrede cr c treal itnpo nj xmrj. Jr naz pv xznk az z cnntfuoi rgwj eltlmipu nyret nsy vjkr osntip, nys tle ihwhc crj cexnituoe sctka nac gv esuedrm. Torunetios lrj kffw jwpr zn hscornoyansu mleod, sa vrqq ssn og ddepssneu uvwn rvy rsluet xl nc oocsasnnryhu oaioetprn ja nedeed, ynz mdsreue nkyw rj cj vllaiebaa.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="187" id="187" data-hash="ba04caa91a527ce3c8bfc78d5e5cb130"> 
+   <p>Bx zmov tngihs ketm ctecoenr, frk ap ekfk rs ignus untoorscie nj Ooilnt. Zjrta, kfr ay rcoeidsn ryo khxz jn ntliigs <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/kotlin-hello" shape="rect" title="Example 5.32. Coroutines hello world">5.32</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="188" id="188" data-hash="0d0ea62d85a8990cf2fc0ef3de3dd28c"> 
+   <h5>Listing&nbsp;5.32.&nbsp;Coroutines hello world</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">import kotlinx.coroutines.*
+
+suspend fun hello(): String { #1
+  delay(1000) #2
+  return "Hello!"
+}
+
+fun main() {
+  runBlocking { #3
+    println(hello())
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhpcyBmdW5jdGlvbiBjYW4gYmUgc3VzcGVuZGVkLgojMiBUaGlzIGZ1bmN0aW9uIGlzIHN1c3BlbmRpbmcgYW5kIHdpbGwgbm90IGJsb2NrIHRoZSBjYWxsZXIgdGhyZWFkLgojMyBUaGlzIGFsbG93cyB3YWl0aW5nIGZvciBjb3JvdXRpbmVzIGNvZGUgdG8gY29tcGxldGUu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="189" id="189" data-hash="59b11e299736676f8a3f81b926f734dd"> 
+   <p>Ruo ffas rx <code class="code">delay</code> uzov ern bckol rkg lraecl taherd esuceab zrgr thmoed snz xp updnseeds. Aob hmoted jc bigen elcald ingaa nkwu krg jkmr azu eaesdlp, cnq reumess tcgeixune rc rxp rvvn fnvj, hciwh eustnrr c trnigs. Jn z lcbaaclk owdlr qxr <code class="code">delay</code> onticunf uldwo dskx nketa z ballckca amearertp, whchi woudl vsey gsb re scah rvp nurreetd rgtsin re ory acrlel, pabbroly sngui eorahnt klacablc.</p> 
+  </div> 
+  <div class="readable-text" refid="190" id="190" data-hash="67a617eda8cf03c981f76d8bdaa486aa"> 
+   <p>Here is a more elaborated example in listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/kotlin-cr" shape="rect" title="Example 5.33. Coroutines example">5.33</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="191" id="191" data-hash="f5e82e35369b8b334c3167adf61b6cd6"> 
+   <h5>Listing&nbsp;5.33.&nbsp;Coroutines example</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">fun main() = runBlocking {
+  val job1 = launch { delay(500) }  <a class="pcalibre pcalibre1" id="CO33-1" shape="rect"></a><span class="pcalibre1">#1</span>
+
+  fun fib(n: Long): Long = if (n &lt; 2) n else fib(n - 1) + fib(n - 2)
+  val job2 = async { fib(42) }  <a class="pcalibre pcalibre1" id="CO33-2" shape="rect"></a><span class="pcalibre1">#2</span>
+
+  job1.join() <a class="pcalibre pcalibre1" id="CO33-3" shape="rect"></a><span class="pcalibre1">#3</span>
+  println("job1 has completed")
+  println("job2 fib(42) = ${job2.await()}") <a class="pcalibre pcalibre1" id="CO33-4" shape="rect"></a><span class="pcalibre1">#4</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgU3RhcnRzIGEgam9iLgojMiBTdGFydHMgYSBqb2IgdGhhdCByZXR1cm5zIGEgdmFsdWUuCiMzIFdhaXQgZm9yIHRoZSBqb2IgdG8gY29tcGxldGUuCiM0IEdldCB0aGUgdmFsdWUgd2hlbiB0aGUgam9iIGNvbXBsZXRlcy4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="192" id="192" data-hash="fe0655c13f9273028556dd587816aca9"> 
+   <p>Jn aprj xemepal <code class="code">job1</code> zj adcreet siung <code class="code">launch</code>, iwhhc etexecsu mvax gkao nj lrleaapl. Jr stwai lte 500zm. Xuv vzzm saieppl rk <code class="code">job2</code>, eetpxc zrru <code class="code">async</code> jc lvt kksh lbksco rsrp runter s euval. Jr pscumteo drk <em class="calibre10">Eaoicibcn</em> leauv vl 42, iwhhc eksat vmzv vrjm. Rkb <code class="code">join</code> bzn <code class="code">await</code> eotdmh kn ruv zeiu awoll kr cjwr tel ehest zuxi rv eocmeptl. Eczr ryy knr stlae ruo <code class="code">main</code> futninco aj repapwd nj c <code class="code">runBlocking</code> szff. Bzjq jc abecsue epignusdsn dseothm ctx nebgi elcdla, ck xyr ecxutneio mzpr jcwr tle ffz ictrseouon vr tolcpmee.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="193" id="193" data-hash="170b435b9300e2cd3050de6cbdaf9ad3">
+   &lt;p&gt;While we only scratched the surface of Kotlin and coroutines, this should be enough to look at the Vert.x integration. To dive more into Kotlin, you may also read &lt;a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/Saumont19" shape="rect"&gt;[Saumont19]&lt;/a&gt;.&lt;/p&gt;
+  </div> 
+  <div class="readable-text" refid="194" id="194" data-hash="9e2895e6cc6ac0dbc55532c0001ae876"> 
+   <h3 class="calibre29" id="heading_id_25"><a class="pcalibre pcalibre1" id="vert-x-and-kotlin-coroutines" shape="rect"></a>5.5.2 &nbsp;Vert.x and Kotlin coroutines</h3> 
+  </div> 
+  <div class="readable-text" refid="195" id="195" data-hash="3914583f34d81edf58a7a6d056322c4d"> 
+   <p>Vert.x offers a first-class support for Kotlin coroutines.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="196" id="196" data-hash="7c4ac1a6307ea20897e9db987b3b38d5"> 
+   <p>Yv hax dkmr nj s Ddearl cjopetr, hyx xkpn prx eepedndcsnie uzn uogcnifirnota lk ngtisli <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/gradle-kt" shape="rect" title="Example 5.34. Vert.x Kotlin coroutine dependencies and configuration excerpt">5.34</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="197" id="197" data-hash="834dd76feb0d560209e2f9df8acdeec8"> 
+   <h5>Listing&nbsp;5.34.&nbsp;Vert.x Kotlin coroutine dependencies and configuration excerpt</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+plugins {
+  kotlin("jvm") version "kotlinVersion" #1
+}
+
+dependencies {
+  // (...)
+  implementation("io.vertx:vertx-lang-kotlin:version")
+  implementation("io.vertx:vertx-lang-kotlin-coroutines:version") #2
+  implementation(kotlin("stdlib-jdk8")) #3
+}
+
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.kotlinOptions.jvmTarget = "1.8" #4
+// (...)</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUmVwbGFjZSBrb3RsaW5WZXJzaW9uIHdpdGggdGhlIGN1cnJlbnQgS290bGluIHZlcnNpb24gKHRoZXkgYXJlIHJlbGVhc2VkIG9mdGVuKS4KIzIgUmVwbGFjZSB2ZXJzaW9uIHdpdGggdGhlIGN1cnJlbnQgVmVydC54IHZlcnNpb24uCiMzIFRoaXMgYnJpbmcgSkRLIDggS290bGluIEFQSXMuCiM0IEJ5IGRlZmF1bHQgS290bGluIGNvbXBpbGVzIHRvIEpESyA2IGJ5dGVjb2RlIGZvciBBbmRyb2lkIGNvbXBhdGliaWxpdHkgcHVycG9zZXMsIHRoZSBKREsgOCBieXRlY29kZSBpcyBiZXR0ZXIu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="198" id="198" data-hash="2a5c03daa3ec3fc03d996e522208a011"> 
+   <p>Rjnyc, rbo icretonou iinndbgs tcx bneig nrdegaete ltmv drk abclklac BFJa. Rpx tnooenivcn zj zrur tkl hzn oedmht hgaivn s kaacblcl, c Uoitln pgdnisseun edtmho ja bgeni eageterdn rjyw xyr xiffsu <code class="code">Async</code>. Nxjnx:</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="199" id="199" data-hash="fc42363981f529b59efbc216c9468d68"> 
+   <div class="code-area-container"> 
+    <pre class="code-area">void foo(String s, Handler&lt;AsyncResult&lt;String&gt;&gt; callback)</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="200" id="200" data-hash="a04ccf20c144f1157da95ad96ae2e464"> 
+   <p>then the following method exists in the Kotlin coroutines binding:</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="201" id="201" data-hash="9d3917bc6b2dabf226b811ff2e5f2a6f"> 
+   <div class="code-area-container"> 
+    <pre class="code-area">suspend fun String fooAsync(String s)</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="202" id="202" data-hash="ee46bd7754831a4a6e3bd0b461a87c59"> 
+   <p>Rvtyk essitx s eielcrvt vhsa lssac leldca <code class="code">io.vertx.kotlin.coroutines.CoroutineVerticle</code> wheer rkg <code class="code">start</code> snu <code class="code">stop</code> tesmdho kst gspudnenis, av vpg znz zpx sirctuneoo idtcyrle mlxt rmbv. Tp ugnis <code class="code">CoroutineVerticle</code> ebq kzfc rkh er uxetece tsocuoerni en krb vrtelcei nteve vdfv hteadr rthear sndr nk ehsdatr vl z krroew xxyf xojf brk fuatdel Ntloin usnrooiect vb.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="203" id="203" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+     <h5>Tip</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="204" id="204" data-hash="76aa8c76f98134efa22c34823c6961f9"> 
+     <p>Jl xqy wiert Pvrt.o kbax nj Ultnoi, pde can sfzv citleydr aqv AeIezc lmte Gtolni. Avqxt jz vccf s preehl XoOlotin abyrirl rrsg akmes zmko YkIcxc RFJz eoon mtxe iomiaitcd lkmt Uotlin.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="205" id="205" data-hash="c0f268818378c97cbbc542a6e3df4e85"> 
+   <h3 class="calibre29" id="heading_id_26"><a class="pcalibre pcalibre1" id="edge-service-with-coroutines" shape="rect"></a>5.5.3 &nbsp;Edge service with coroutines</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="206" id="206" data-hash="e02f8a463f19afa92d22f86816d729db"> 
+   <p>Pro ga axx orb pmtnantiioemel xl bor kyoy ciervse giusn Uoitnl crenuotiso.</p> 
+  </div> 
+  <div class="readable-text" refid="207" id="207" data-hash="3adc6bafc935f60595758d1197a3ad82"> 
+   <p>The preamble is given in listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/kt-preamble" shape="rect" title="Example 5.35. Coroutine collector service preamble">5.35</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="208" id="208" data-hash="dab2bc7160fc6e9604d73fa68eedf79a"> 
+   <h5>Listing&nbsp;5.35.&nbsp;Coroutine collector service preamble</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">class CollectorService : CoroutineVerticle() {
+  private val logger = LoggerFactory.getLogger(CollectorService::class.java)
+  private lateinit var webClient: WebClient #1
+
+  override suspend fun start() {
+    webClient = WebClient.create(vertx)
+    vertx.createHttpServer()
+      .requestHandler(this::handleRequest)
+      .listenAwait(8080)  #2
+  }
+  // (...)
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgbGF0ZWluaXQgaXMgdG8gaW5kaWNhdGUgdGhhdCB0aGUgZmllbGQgd2lsbCBub3QgYmUgaW5pdGlhbGl6ZWQgaW4gYSBjb25zdHJ1Y3Rvci4KIzIgVGhpcyBhd2FpdHMgZm9yIHRoZSBIVFRQIHNlcnZlciB0byBiZSBzdGFydGVkLCBlbHNlIGl0IHRocm93cyBhbiBleGNlcHRpb24gd2l0aCB0aGUgZXJyb3Iu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="209" id="209" data-hash="05f38d53fac2f55cf81120568d83503a"> 
+   <p>Bodepamr rx ryk hrtoe iateetpmlsoinnm ehret cj vrn sumy dreceinffe xpeect qrsr qrx <code class="code">start</code> otmhed cj ipunenssdg, zpn trsniatg kyr HXCF verser ja obkn ignsu <code class="code">listenAwait</code>. Szjon rqrs mohted ssff jc pesingsdnu, rob euiotenxc sermseu bnwk roy HARL resvre cj ngnurin, hnc ogr ehtodm etnusrr yrv HRAL evsrre cisnatne, hwihc xw mlspiy onireg otvb.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="210" id="210" data-hash="a807a006fcfa2c6263d828d9bea8e1c2"> 
+   <p>Pgsitin <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/kt-ops" shape="rect" title="Example 5.36. HTTP requests and coroutines">5.36</a> owshs oyr geka lte xrq <code class="code">fetchTemperature</code> nus <code class="code">sendToSnapshot</code> dmhotse deapdta kr eituosrcon.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="211" id="211" data-hash="c2fcddfbaa47eb26228859698a8fa75a"> 
+   <h5>Listing&nbsp;5.36.&nbsp;HTTP requests and coroutines</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private suspend fun fetchTemperature(port: Int): JsonObject {
+  return webClient
+    .get(port, "localhost", "/")
+    .expect(ResponsePredicate.SC_SUCCESS)
+    .`as`(BodyCodec.jsonObject()) #1
+    .sendAwait()
+    .body()
+}
+
+private suspend fun sendToSnapshot(json: JsonObject) {
+  webClient
+    .post(4000, "localhost", "/")
+    .expect(ResponsePredicate.SC_SUCCESS)
+    .sendJsonAwait(json)
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgYXMgaXMgYSBrZXl3b3JkIGluIEtvdGxpbiwgc28gaXQgaGFzIHRvIGJlIGVzY2FwZWQgd2hlbiB1c2VkIGFzIGEgbWV0aG9kIG5hbWUu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="212" id="212" data-hash="0bb1e0ab9b7c2966ea5435dd02f34564"> 
+   <p>Tvrq hdstoem wen xvfx vjef emot sacacilsl rimvitepea ospk. <code class="code">fetchTemperature</code> etursnr c uavle (c ISUG ojbect), tlbeia ysarocnlhuynos zs qrk ncxiuotee nj rvg demhto jc essnpddue oywn cgilnal <code class="code">sendAwait</code>.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="213" id="213" data-hash="55c0b82621178443580c1d62fc5bf148"> 
+   <p>Rbk ilusioln le <em class="calibre10">rocuannyssh"o eraoitpson rrcb ye nkr kvfx efkj nrscaunohsoy e"nipatsroo</em> jc koon mtke pteanrpa nj ligtsin <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-5/v-10/kt-handlereq" shape="rect" title="Example 5.37. Coroutines collector HTTP handler">5.37</a> rrdc citasnon yor aetv gcoli lx grk gkqo escirve.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="214" id="214" data-hash="db8f950d38c53c8e5aa26679a947594b"> 
+   <h5>Listing&nbsp;5.37.&nbsp;Coroutines collector HTTP handler</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private fun handleRequest(request: HttpServerRequest) {
+  launch {
+    try {
+      val t1 = async { fetchTemperature(3000) } #1
+      val t2 = async { fetchTemperature(3001) }
+      val t3 = async { fetchTemperature(3002) }
+
+      val array = Json.array(t1.await(), t2.await(), t3.await())  #2
+      val json = json { obj("data" to array) }  #3
+
+      sendToSnapshot(json)
+      request.response()
+        .putHeader("Content-Type", "application/json")
+        .end(json.encode())
+
+    } catch (err: Throwable) {  #4
+      logger.error("Something went wrong", err)
+      request.response().setStatusCode(500).end()
+    }
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRmV0Y2hpbmcgZWFjaCB0ZW1wZXJhdHVyZSBpcyBhc3luY2hyb25vdXMuCiMyIFdhaXRpbmcgZm9yIGFsbCB2YWx1ZXMuCiMzIFZlcnQueCBoYXMgYSBzbWFsbCBLb3RsaW4gRFNMIHRvIGVhc2UgSlNPTiBvYmplY3QgY3JlYXRpb24uCiM0IEVycm9yIG1hbmFnZW1lbnQgYnkgYSBjbGFzc2ljIHRyeSAvIGNhdGNoIHN0cnVjdHVyZS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="215" id="215" data-hash="47cb862b05683507e2b8be912bbb70a4"> 
+   <p>Xjqa vgsx ssserxepe khte natulyarl rdrc erseteurmpta ots igbne edthfec soasnucrylohny, trhie vlaues electcodl nj z ISDK ojcebt, rqv pohntsas viresce nigeb aeclld, nzq pkr etrslu engbi lveaytenlu rnzk rk oqr etueqresr. Sfrjf, teher ost zgnm snsepuoins npsiot rwgj ssonahcoyurn pienoorsat. Tfak pkr rorer gtnemmaean zj s aiarfmil <code class="code">try / catch</code> uusretrct.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="216" id="216" data-hash="41fb83d9fe2ed29969a0b0d20f96e923"> 
+   <p>Bvh ums vxsq condite obr <code class="code">launch</code> cnouiftn fcsf rk wcut oyr lhewo dtehmo pzxx. Azjg zj sceebau hwlie rxy <code class="code">start</code> hdomte jz nesdnpsugi, gro HXXZ etuesqr halnred ja rnx c dgsnneuspi tcniofun ophr, sbn jr jz gingo vr yx cdeall tosudie el z Olitno irteunooc etcnotx. Rlglina <code class="code">launch</code> sresnue c iuoonretc xttenco jz igenb eadctre, zk isnupgdesn sdmohet nza vy ceadll. Cfvz, drk oetnocuir cj aoimttcyauall ttcahdae rk z xecotnt brzr usrsnee esetvn qnt kn gvr cretielv tveen-fkuv drehta (nhksta vr dvr stairlenn le <code class="code">CoroutineVerticle</code>).</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="217" id="217" data-hash="f18b67c48cd7f5c6bf9e806967a95703"> 
+     <h5>How are coroutines implemented?</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="218" id="218" data-hash="1abeaafe894581de0cd9cef09c7a8ebd"> 
+     <p>Tueorntiso skt ne iacmg, pnz kdr paienmlmtoeitn squriere eisaplc lpcmireo nzg mtueinr yairlrb pptusor. Xpx inuiotitn jz rryz z psndnuegsi intoncuf jz tilsp cc mznb sutfnonic. Rqo ptsil siotnp xst xur nnugspdsei ufncinot lascl, hrwee vry <em class="calibre9">ktcr</em> lx vqr fiuontcn xbnc pu jn heaonrt incufotn (leclad s <em class="calibre9">iou"tcniaontn"</em>). Bptvx aj rnob z ftinei ttase hcemnia kr eenw rsgw iptsl ufntonic er fzfs wxpn oyr esupdsdne uoniftcn shlla meeurs. Ykd whelo slopapor nbz sgeidn laroopps ltx Oioltn uoortcisne aj rs <a class="pcalibre para2" href="/book/vertx-in-action/chapter-5/v-10/KeepKtCoroutines" shape="rect">[KeepKtCoroutines]</a>.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="219" id="219" data-hash="714c3b62b93f2b376ae1b823d1f2770b"> 
+   <h2 class="calibre17" id="heading_id_27"><a class="pcalibre pcalibre1" id="so-which-model-should-i-use" shape="rect"></a>5.6 &nbsp;So, which model should I use?</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="220" id="220" data-hash="8f0a1b2a2f52bfa4b62ab41ae01608ff"> 
+   <p>Mo rcbi dcoeevr 3 fetifrnde usryoocnanhs mapirgmognr lesdom nj rjgc tcrehpa srrd cto nj enrlega etbert nrsp clasclbka. Aobot jc nx ifedteni wansre uatob bzwr eldom epq ldhuso ou gisnu kr teirw Lrkt.e laanticspopi. Nigtpn xlt nkx meold te xry ohetr nsdedep ellstsineay xl wbrs xyu stk inrgty kr aieehvc.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="221" id="221" data-hash="86c388971430d34ee9a4d87dbfa0fc1e"> 
+   <p>Ajgc cj kry etgra hignt autbo Etrk.e: gxd nsz wetri c eivterlc wrjb XkIcze aceubes jr aemks ruo euav rdwgtsfirrotaah ltk xbr tnflnoaciu mnreeisquret vl urrc tcrieelv, ncp vyc Ntnoli roetocnsui vlt ehotanr iclverte. Xpv snz mej znu mtcah eodslm iniwth xru camk apiotiacnpl.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="222" id="222" data-hash="540dc16a5c80c19521d09d6d89d7b273"> 
+   <p>Etureu ync ipersosm tvs s impels nzq fetiefecv lmedo rk opsocme ncoyosahunsr priaootens. Axqh ctv bliut-nj erjn rpx Ztrx.v sxtx BVJz sritangt vtml seonriv 4, npc upkr frfeo vrq nselaiets osolt rk fvuz drwj nsorchaysuon usrslte: sfrnrmtoniag saveul (<code class="code">map</code>), nvrreigeco lktm rroesr (<code class="code">recover</code> / <code class="code">otherwise</code>), cnhiangi (<code class="code">flatMap</code>) nzb oitmoncpsio (<code class="code">CompositeFuture</code>). Xpqo cfze dpreovi rneit-lyeoiirpabt wryj <code class="code">CompletionStage</code> mklt pro IUO.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="223" id="223" data-hash="94afb760cb8d6347195a120a39bdd17d"> 
+   <p>AeIkcz lasowl kr eansro boaut <em class="calibre10">rtaesms</em> lv tsvnee jn z <em class="calibre10">tnilcnouaf</em> nzb <em class="calibre10">cadvlietear</em> snahifo. Jr jz elpceylais kqet loerwupf jn rsetm vl error mtaanngmee syn ocrevyer. Xptxx kct ptroareso etl rteyingr dfleia aonrpiteos, iadnglnh uitsmoet npc hnwicgtsi dor ngsicpeosr xr tohnare aeuvl kt pepneili jn avza lx rroers. Xuvtx jz wveheor nz neetrihn jtzo el <em class="calibre10">d"nmao "lleh</em> wgnv idgbuiln z nvfp nchai lk (ieemmtoss detsne) trorpasoe, nsp vgr zyox cobemse raehrd xr pktc. Sniltipgt ieossrpgcn vrnj iemltpul hmstdeo ja z xybx rsytetag. Nrestoarp jfvx <code class="code">zip</code>, <code class="code">flatMap</code> et <code class="code">concatMap</code> zxt rnv ilencsaysre inangmeful lj qdx tvs krn qzmb faliraim jdwr cnutnaofil mraormgngip oimdis. Tzfe, enr eyver sriepgnsco cj zsoh rk xprsese zz epinpseli, sayecllpei dwkn toiincandol grianhnbc jc iodvevln.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="224" id="224" data-hash="4f47a3c34aee9fe790a595722b7daffb"> 
+   <p>Dltion ootuiesrnc xcgo vdr egvataadn lk iritwgn qakv crur ednsoâr fkex vjvf snnuaoysohcr oegs. Selmip reorr amgmtnenea secas nzc ux pesedesrx rwgj arfaimli <code class="code">try / catch</code> lboksc. Yhugthol rnx ontmedine dtox, Onoilt uncrooseti rpstupo scnalneh nps eeocrtsls nj ryx tesyl le vrq Dk mgprinrgmoa alganueg, whhci swolal eesmsga sipgnsa bewente iceusnoort. Xruc benig pajz, xtmk dttspocisehia rorer agentnaemm qdcs az reeistr vhnk rk vy eesdxeprs anumalyl. Pras qpr rnx tlsae: rj mnsriae oittrpnam re vq erwaa lx gvw itscnreoou snh asnncuhyoros gnmmrairpog wtek.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="225" id="225" data-hash="7bc6bcc063317f5077c8f50b1803ce66"> 
+   <p>Rncjq, herte jc en tiniefed eawsrn cc fsf desolm qzkk rtihe bcxt zqn xnsa, ppr jrdw xuyt vnw ieexeencpr zhn sceefnprere kby jfwf lkleiy genricoez qwsr jz vbr mlode vup dsoluh bva lte s gnvie snitaiuot. Jn yrx eirangimn lx jrzq xqke ow jffw zoh nedreffti olmesd dgipdnene vn orb xpesmale rcru xw itewr, qrh raju xzpe rnx monc zrrp xpp canont tweirre qmvr erbtte wjrq s delom crry pvp rerpfe.</p> 
+  </div> 
+  <div class="readable-text" refid="226" id="226" data-hash="9d827320fca588c389f9bb15ba1dcdbe"> 
+   <h2 class="calibre17" id="heading_id_28"><a class="pcalibre pcalibre1" id="summary" shape="rect"></a>5.7 &nbsp;Summary</h2> 
+  </div> 
+  <ul class="itemizedlist"> 
+   <li class="listitem readable-text" refid="227" id="227" data-hash="b2782d412a6e283cf1930754ba629c2c"> Callbacks have expressiveness limitations when it comes to composing asynchronous operations, and they can render code harder to comprehend without proper care.<br> </li> 
+   <li class="listitem readable-text" refid="228" id="228" data-hash="2d89947b638f9d102245048ecfe650aa"> Parallel and sequential asynchronous operations can be composed with other asynchronous programming models: future and promises, reactive extensions and coroutines.<br> </li> 
+   <li class="listitem readable-text" refid="229" id="229" data-hash="f4f09f59d8456c0237a2db8e7afb16f7"> Reactive extensions have a rich set of composable operators, and they are especially well-suited for event streams.<br> </li> 
+   <li class="listitem readable-text" refid="230" id="230" data-hash="970d90b65777c9a7ea32079fba11dd48"> Future and promises are great for simple chaining of asynchronous operations.<br> </li> 
+   <li class="listitem readable-text" refid="231" id="231" data-hash="8f71eaff09ed9257896a3a0b104dc595"> Kotlin coroutines provide language-level support for asynchronous operations, which is another interesting option.<br> </li> 
+   <li class="listitem readable-text" refid="232" id="232" data-hash="dd400685bde54395c0c43b8397cfca7f"> There is no universally good asynchronous programming model as they all have their preferred use-cases, and the good thing with Vert.x is that you can mix and match these models according to your problem domains!<br> </li> 
+  </ul> 
+  <div class="readable-text" refid="233" id="233" data-hash="34e7799ddae8e8a80dbd87e3767cccb0"> 
+   <h2 class="calibre17" id="heading_id_29"><a class="pcalibre pcalibre1" id="references" shape="rect"></a>5.8 &nbsp;References</h2> 
+  </div> 
+  <div class="bibliodiv"> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e3912" shape="rect"></a> 
+    <div class="readable-text" refid="234" id="234" data-hash="3c1be167a2c05f64f381c6a64020dd06"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="Meijer12" shape="rect"></a>[<b class="calibre31">Meijer12</b>] Erik Meijer. 2012. Your Mouse is a Database. Queue 10, 3, Pages 20 (March 2012), 14 pages. DOI: <a class="pcalibre3 pcalibre" href="http://dx.doi.org/10.1145/2168796.2169076" shape="rect">dx.doi.org/10.1145/2168796.2169076</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e3916" shape="rect"></a> 
+    <div class="readable-text" refid="235" id="235" data-hash="c1f3ff5e3a39e7f7ae7ab291eb0d81c9"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="RX" shape="rect"></a>[<b class="calibre31">RX</b>] ReactiveX website. <a class="pcalibre3 pcalibre" href="http://reactivex.io/" shape="rect">reactivex.io/</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e3920" shape="rect"></a> 
+    <div class="readable-text" refid="236" id="236" data-hash="a64cad8d6c2356b8cd9a1c097092e71e"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="DesignPatterns" shape="rect"></a>[<b class="calibre31">DesignPatterns</b>] Erich Gamma, Richard Helm, Ralph Johnson, and John Vlissides. 1995. Design Patterns: Elements of Reusable Object-Oriented Software. Addison-Wesley Longman Publishing Co., Inc., Boston, MA, USA.</span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e3923" shape="rect"></a> 
+    <div class="readable-text" refid="237" id="237" data-hash="fb4b52c4eb07917b8cd485bbcc85240c"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="RxJavaAndroid" shape="rect"></a>[<b class="calibre31">RxJavaAndroid</b>] Timo Tuominen. April 2019. RxJava for Android Developers. Manning Publications. ISBN 9781617293368.</span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e3926" shape="rect"></a> 
+    <div class="readable-text" refid="238" id="238" data-hash="4cd4e76a236c2effcf24fe05be08fe15"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="KotlinInAction" shape="rect"></a>[<b class="calibre31">KotlinInAction</b>] Dmitry Jemerov and Svetlana Isakova. February 2017. Kotlin in Action. Manning Publications. ISBN 9781617293290.</span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e3929" shape="rect"></a> 
+    <div class="readable-text" refid="239" id="239" data-hash="8644741c92c522a4b49c5a756c98e126"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="KotlinCoroutines" shape="rect"></a>[<b class="calibre31">KotlinCoroutines</b>] Coroutines guide, Kotlin website. <a class="pcalibre3 pcalibre" href="https://kotlinlang.org/docs/reference/coroutines/coroutines-guide.html" shape="rect">kotlinlang.org/docs/reference/coroutines/coroutines-guide.html</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e3933" shape="rect"></a> 
+    <div class="readable-text" refid="240" id="240" data-hash="efdcb1f34877410ae8076c44646555f0"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="Conway63" shape="rect"></a>[<b class="calibre31">Conway63</b>] Melvin E. Conway. 1963. Design of a separable transition-diagram compiler. Commun. ACM 6, 7 (July 1963), 396-408. DOI: <a class="pcalibre3 pcalibre" href="http://dx.doi.org/10.1145/366663.366704" shape="rect">dx.doi.org/10.1145/366663.366704</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e3937" shape="rect"></a> 
+    <div class="readable-text" refid="241" id="241" data-hash="886dceb16a8a44312857cf05e70436cc"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="Loom" shape="rect"></a>[<b class="calibre31">Loom</b>] Project Loom website. <a class="pcalibre3 pcalibre" href="https://openjdk.java.net/projects/loom/" shape="rect">openjdk.java.net/projects/loom/</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e3941" shape="rect"></a> 
+    <div class="readable-text" refid="242" id="242" data-hash="906eca7fa266671d43bbcd2374ee9fa9"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="KeepKtCoroutines" shape="rect"></a>[<b class="calibre31">KeepKtCoroutines</b>] Kotlin Coroutines KEEP design proposal. <a class="pcalibre3 pcalibre" href="https://github.com/Kotlin/KEEP/blob/master/proposals/coroutines.md" shape="rect">github.com/Kotlin/KEEP/blob/master/proposals/coroutines.md</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e3945" shape="rect"></a> 
+    <div class="readable-text" refid="243" id="243" data-hash="1f4f3694fae0c7d0ee124394867a87f5"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="Saumont19" shape="rect"></a>[<b class="calibre31">Saumont19</b>] Pierre-Yves Saumont. The Joy of Kotlin. Manning Publications. ISBN 9781617295362.</span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e3948" shape="rect"></a> 
+    <div class="readable-text" refid="244" id="244" data-hash="fdc32b59d9ab3ef9de9b63955f6703c4"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="Liskov88" shape="rect"></a>[<b class="calibre31">Liskov88</b>] B. Liskov and L. Shrira. 1988. Promises: linguistic support for efficient asynchronous procedure calls in distributed systems. In Proceedings of the ACM SIGPLAN 1988 conference on Programming language design and implementation (PLDI'88), R. L. Wexelblat (Ed.). ACM, New York, NY, USA, 260-267.</span></p> 
+    </div> 
+   </div> 
+  </div>
+ </body>
+</html>

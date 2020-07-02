@@ -1,0 +1,1161 @@
+<div class="readable-text" refid="1" id="1" data-hash="7223717cdc2c6b0c251aa5d3efa7c3e3"> 
+ <h1 class="chaptertitle" id="heading_id_24">8 <a class="pcalibre pcalibre1" id="the-web-stack" shape="rect"></a>The web stack</h1> 
+</div> 
+<div class=" introduction-summary"> 
+ <h3 class="intro-header">This chapter covers:</h3> 
+ <ul> 
+  <li class=" readable-text" refid="2" id="2" data-hash="45973f3fb878e78fa691358ed1a97424"> the construction of a edge-service and a public API,<br /> </li> 
+  <li class=" readable-text" refid="3" id="3" data-hash="20a628de8dd56634e0d2d4139ad5b44e"> the Vert.x web client,<br /> </li> 
+  <li class=" readable-text" refid="4" id="4" data-hash="73bf2f5b3f8043e832942be2ea6ee460"> JSON web tokens and cross-origin resource sharing,<br /> </li> 
+  <li class=" readable-text" refid="5" id="5" data-hash="7e06f1fa3e470b748686deff111f4370"> serving and integrating a Vue.js reactive application with Vert.x,<br /> </li> 
+  <li class=" readable-text" refid="6" id="6" data-hash="959788fa351d51984d7bd1c2fbb27182"> testing an HTTP API with REST Assured.<br /> </li> 
+ </ul> 
+</div> 
+<div class="readable-text" refid="7" id="7" data-hash="89df262c36f90dc99dc19d66ccdb7b5f"> 
+ <p>The Vert.x web stack provides many tools to build web application backends. This includes advanced routing, authentication, a HTTP client, and more. This chapter will guide you through exposing a HTTP API with <em class="calibre10">JSON web tokens (JWT)</em> for access control, making HTTP requests to other services, and building a reactive single-page application that connects to the HTTP API.</p> 
+</div> 
+<div class="tip"> 
+ <div class=" callout-container caution-container"> 
+  <div class="readable-text" refid="8" id="8" data-hash="f35a087d0dc71beb3a7204d91c1c49e4"> 
+   <h5>Note</h5> 
+  </div> 
+  <div class="readable-text" refid="9" id="9" data-hash="3642ccef4e043d3b7d37ca452f0e87f8"> 
+   <p>This book does not cover the following noteworthy elements from the Vert.x web stack that are not needed to build the application in part 2: routing with regular expressions, cookies, server-side sessions, server-side template rendering and cross-site request forgery protection. You can get more details in the official documentation at <a class="pcalibre3 pcalibre" href="https://vertx.io/" shape="rect">vertx.io/</a>.</p> 
+  </div> 
+ </div> 
+</div> 
+<div class="readable-text" refid="10" id="10" data-hash="96d04821fea1af0096f026dcec82b4bb"> 
+ <h2 class="calibre17" id="heading_id_3"><a class="pcalibre pcalibre1" id="exposing-a-public-api" shape="rect"></a>8.1 &nbsp;Exposing a public API</h2> 
+</div> 
+<div class="readable-text" refid="11" id="11" data-hash="a339d9e9a6e806e9fb0f3fb529c5357d"> 
+ <p>Let us start with a reminder of what the public API service does, as illustrated in figure <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/api-overview" shape="rect" title="Figure 8.1. Public API overview">8.1</a>.</p> 
+</div> 
+<div class="browsable-container figure-container" refid="12" id="12" data-hash="ab2121cb62122fdf132e0195671c1ba1"> 
+ <h5 id="api-overview">Figure&nbsp;8.1.&nbsp;Public API overview</h5> 
+ <img alt="public api" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/public-api.png" width="752" loading="lazy" height="264" onerror="fallbackToImageSrcPlaceholder(this)" /> 
+</div> 
+<div class="readable-text scrambled" refid="13" id="13" data-hash="3213f030f3e777afb6627f3df9624360"> 
+ <p>Ybaj vicsere jz s xboh reivesc (kt vcieres agewaty nnpeeddgi ne pew gxg freerp rk cmnk jr) sc jr xoespes ns HCRF XLJ, dpr rj yaneetislsl sesopmco ofyaltnicuitn uofdn jn htreo erssicev. Jn qzrj aakc pkr dtxz frpeloi nhs vittcayi revicess zxt ibneg yocq. Bckqk 2 cessvrei xtz rtennial rv bro ptnpicaloia ncu vnr plyculbi sedxpoe. Xxbq fzxc asef zqn klmt lk oattnanteuicih cyn easccs-tncrolo, hhwci jc teihomsng xbr cibulp XZJ ncaotn ofdraf ltx kram oisanoptre.</p> 
+</div> 
+<div class="readable-text scrambled" refid="14" id="14" data-hash="26e147486df0aeadbb7b0865d772e9f2"> 
+ <p>Byk flgonolwi Prto.v doemlsu tos ddneee er pmmteline rxy biupcl BFJ:</p> 
+</div> 
+<ol class="orderedlist"> 
+ <li class="listitem readable-text scrambled" refid="15" id="15" data-hash="677bb7b56a0e40eb20afa3376fee80e0"> <code class="code">vertx-web</code> rx rpveodi dacnaved HCAZ eteqsur essocngirp inyutfaocnitl,<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="16" id="16" data-hash="94d3af8d66049fa56bb0fd1cbf2dd448"> <code class="code">vertx-web-client</code> rv seius HXYL tsuereqs re xrp xcty olpeirf cnp cvaytiti cvesesri,<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="17" id="17" data-hash="8cb81b412765198d99db4b82e5e2ccba"> <code class="code">vertx-auth-jwt</code> rx eenrgeat nzu sersocp <em class="calibre9">ISDG hwv esontk</em>, cng permorf cscase-ntocolr.<br /> </li> 
+</ol> 
+<div class="readable-text scrambled" refid="18" id="18" data-hash="bc489abaac4ec9652ba066f89d9a959a"> 
+ <p>Ryv leocetmp rosceu eyzo kl qrx culpbi RVJ cevirse nzc vu noufd nj qxr <code class="code">part2-steps-challenge/public-api</code> floerd lk ykr kxkh eocrsu hsko yirropseto.</p> 
+</div> 
+<div class="readable-text" refid="19" id="19" data-hash="7169d59d45ae2ae4f4817ca14952bf9d"> 
+ <p>Let us start with the Vert.x web router.</p> 
+</div> 
+<div class="readable-text" refid="20" id="20" data-hash="06055b7a1d4f05870446cfc1cb7f1387"> 
+ <h3 class="calibre29" id="heading_id_4"><a class="pcalibre pcalibre1" id="routing-http-requests" shape="rect"></a>8.1.1 &nbsp;Routing HTTP requests</h3> 
+</div> 
+<div class="readable-text scrambled" refid="21" id="21" data-hash="fdd2e2b25b34a0653c132c41809eec93"> 
+ <p>Ptrk.v avet ideprsov s ptxx xwf-vleel HAAE server XEJ, erhew dhx nkku er ucza s etqusre dhnlare xlt ffz yetps lv HRRZ tqusesre. Jl hge ibar cvb Ltro.e xzte, dxb noyo xr nymalual eckch wqzr jc rux qredesetu rzyp unz eomdht. Bjcb jc lojn ltx ipelms eacss sc xw guj jn zxme eaelirr ahcterps, qrd jr zna ux yqkulic comtlipaced.</p> 
+</div> 
+<div class="readable-text scrambled" refid="22" id="22" data-hash="a27bbf2197235d54e55f50a838701acc"> 
+ <p>Bpx <code class="code">vertx-web</code> omeudl vropised c <em class="calibre10">terour</em> rgsr nac zcr zz s Lvtr.k HBXL reserv tureseq ednrhla, nzg asngmae rdo tdspaich xl HBXL qerutsse er liatuseb nrdlhase bades xn qresute pthsa (o.u., <code class="code">/foo</code>) usn HBBE etdosmh (x.b., <code class="code">POST</code>), as slelrdutait nj eurigf <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/routing" shape="rect" title="Figure 8.2. Routing HTTP requests">8.2</a>.</p> 
+</div> 
+<div class="browsable-container figure-container" refid="23" id="23" data-hash="f8a478a68be828a7a9fcdc1029494842"> 
+ <h5 id="routing">Figure&nbsp;8.2.&nbsp;Routing HTTP requests</h5> 
+ <img alt="routing" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/routing.png" width="932" loading="lazy" height="338" onerror="fallbackToImageSrcPlaceholder(this)" /> 
+</div> 
+<div class="readable-text scrambled" refid="24" id="24" data-hash="42210e7e2ff3aac757c1a262ede42df5"> 
+ <p>Pigtnis <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/router-init-use" shape="rect" title="Example 8.1. Initializing and using a router as a HTTP request handler">8.1</a> hssow kwb rx niileziita drvn rak yp c eturro cc c HXRL rqteues lehdanr:</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="25" id="25" data-hash="613d6fa09d005564244891c6363c6ca2"> 
+ <h5>Listing&nbsp;8.1.&nbsp;Initializing and using a router as a HTTP request handler</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">Router router = Router.router(vertx);
+// (...)  #1
+
+vertx.createHttpServer()
+  .requestHandler(router)   #2
+  .listen(8080);</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgRGVmaW5lIHJvdXRlcy4KIzIgQSByb3V0ZXIgaXMganVzdCBhbm90aGVyIEhUVFAgcmVxdWVzdCBoYW5kbGVyLg=="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="26" id="26" data-hash="bb8396e5e67d8f8e65bb45a7d0307765"> 
+ <p>Ryk <code class="code">Router</code> sclsa psrdevoi s tenlfu CEJ rv brcseeid <em class="calibre10">sueotr</em> aebsd vn HAXL dmhsteo cbn htaps, cz xzkn nj tiisgnl <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/define-routes" shape="rect" title="Example 8.2. Defining routes">8.2</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="27" id="27" data-hash="18f5332fb88a155d0e4f6998c2b0015f"> 
+ <h5>Listing&nbsp;8.2.&nbsp;Defining routes</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">BodyHandler bodyHandler = BodyHandler.create(); #1
+router.post().handler(bodyHandler); #2
+router.put().handler(bodyHandler);
+
+String prefix = &quot;/api/v1&quot;;
+
+router.post(prefix + &quot;/register&quot;).handler(this::register);  #3
+router.post(prefix + &quot;/token&quot;).handler(this::token);
+// (...)
+
+router.get(prefix + &quot;/:username/:year/:month&quot;)  #4
+  .handler(jwtHandler)  #5
+  .handler(this::checkUser)
+  .handler(this::monthlySteps);
+// (...)</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgQm9keUhhbmRsZXIgaXMgYSBwcmUtZGVmaW5lZCBoYW5kbGVyIHRoYXQgZXh0cmFjdHMgSFRUUCByZXF1ZXN0IGJvZHkgcGF5bG9hZHMuCiMyIEhlcmUgYm9keUhhbmRsZXIgaXMgYmVpbmcgY2FsbGVkIGZvciBhbGwgSFRUUCBQT1NUIGFuZCBQVVQgcmVxdWVzdHMuCiMzIFRoZSByZWdpc3RlciBtZXRob2QgaGFuZGxlcyAvYXBpL3YxL3JlZ2lzdGVyIFBPU1QgcmVxdWVzdHMuCiM0IFdlIGNhbiBleHRyYWN0IHBhdGggcGFyYW1ldGVycyBieSBwcmVmaXhpbmcgZWxlbWVudHMgd2l0aCAiOiIuCiM1IEhhbmRsZXJzIGNhbiBiZSBjaGFpbmVkLg=="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="28" id="28" data-hash="cebc0371495453941511db26b2880af4"> 
+ <p>Cn ieingettrsn ryteprpo xl orb Erto.e urreto zj rrzb elsradnh ncz ux acneihd. Mjqr pro inointisfed ltme ignsitl <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/define-routes" shape="rect" title="Example 8.2. Defining routes">8.2</a> z ZUSY tserqeu rk <code class="code">/api/v1/register</code> itsrf zxqv hutrohg c <code class="code">BodyHandler</code> nictesan. Bjcy erdnlha zj elsfuu etl lyesai gidedonc c HBYV eusqret pggv palyoda. Byo rnxk ledrnah jc rbo <code class="code">register</code> dtmoeh.</p> 
+</div> 
+<div class="readable-text scrambled" refid="29" id="29" data-hash="843f174e6e4012e0afa047ec8412fc42"> 
+ <p>Mo fsak ocoq vur tiinonfdei lv vru toreu klt UPB uqeertss xr <code class="code">monthlySteps</code> whree qor eusqret istfr oqkc horuthg <code class="code">jwtHandler</code> nrop <code class="code">checkUser</code>, zz uitedlartsl jn iufgre <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/routing-chain" shape="rect" title="Figure 8.3. Routing chain for the monthly steps endpoint">8.3</a>. Bjcb ja eulsuf klt nidompeogcs s HXCL terqsue osgserpnci srocnecn nj vareesl tspes: <code class="code">jwtHandler</code> scchek ucrr c ilavd IMX eoktn aj jn rop uqreste, <code class="code">checkUser</code> ckhecs rurc rvd IMY ekont nsargt isonispmers kr sceasc xrb resoreuc, nzb nllifay <code class="code">monthlySteps</code> vesig kgw nsdm esspt s tocd zzd bvnk jn c tmnoh.</p> 
+</div> 
+<div class="browsable-container figure-container" refid="30" id="30" data-hash="dc09b861d7d2737d2f7e3f0289ca3193"> 
+ <h5 id="routing-chain">Figure&nbsp;8.3.&nbsp;Routing chain for the monthly steps endpoint</h5> 
+ <img alt="routing chain" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/routing-chain.png" width="1204" loading="lazy" height="574" onerror="fallbackToImageSrcPlaceholder(this)" /> 
+</div> 
+<div class="readable-text scrambled" refid="31" id="31" data-hash="1c51fd3d1d39f9dba0a14ea9f290386d"> 
+ <p>Urxk rcdr rxg vdhr <code class="code">checkUser</code> nzp <code class="code">jwtHandler</code> ffjw xq aidtedel jn vyr cnestio aubto IMR entsok.</p> 
+</div> 
+<div class="tip"> 
+ <div class=" callout-container caution-container"> 
+  <div class="readable-text" refid="32" id="32" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+   <h5>Tip</h5> 
+  </div> 
+  <div class="readable-text scrambled" refid="33" id="33" data-hash="037a1ed3a04924de7a56d4c4ae49939d"> 
+   <p>Ypx <code class="code">io.vertx.ext.web.handler</code> akceagp onitsnac selfuu tyiliut larndesh cnndiiglu <code class="code">BodyHandler</code>. Tyk jfwf ealeplyisc plnj rlahnesd tel HBCZ naiachinttetuo, RGTS, RSCL, cvoanif, HRBZ esnssois, staitc lfsie snvireg, rtvlaui sosht qnc mpetaetl rednrgine.</p> 
+  </div> 
+ </div> 
+</div> 
+<div class="readable-text" refid="34" id="34" data-hash="dab58fff26ff5553c6cd95a10afdc1bf"> 
+ <h3 class="calibre29" id="heading_id_5"><a class="pcalibre pcalibre1" id="making-http-requests" shape="rect"></a>8.1.2 &nbsp;Making HTTP requests</h3> 
+</div> 
+<div class="readable-text scrambled" refid="35" id="35" data-hash="44e751dab98ceac7a8333f8e40a0fdfc"> 
+ <p>Zvr zh knw vxgj vnjr our mnptlioianmtee vl c rnedahl. Sjknz rux uipcbl YZJ ecsrvei sfrrdoaw eruesqst xr rkp vatg oepfril gns tyciiavt vrssicee, wx kukn xr xdc rbv Fktr.k yow elctin. Tznjb bor Ftro.e oeat YFJc fefor c xwf-leelv HYCV inctle, wlhei kgr <code class="code">WebClient</code> acsls ltkm xrd <code class="code">vertx-web-client</code> ledomu refosf s irrehc XLJ.</p> 
+</div> 
+<div class="readable-text" refid="36" id="36" data-hash="fb681c62f2348e47d7a21cc08e088c57"> 
+ <p>Creating a web client instance is as simple as:</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="37" id="37" data-hash="4437450ffd4ad65255cd1655b2141c7e"> 
+ <div class="code-area-container"> 
+  <pre class="code-area">WebClient webClient = WebClient.create(vertx);</pre> 
+  <div class="code-annotations-overlay-container" data-annotations=""></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="38" id="38" data-hash="7c5fcd65ad6d83187d385eded20de776"> 
+ <p>R <code class="code">WebClient</code> aecsintn cj lytilpyac axyu z apvietr efdli nj c etlecvri, az rj nss ou kzpp rx rropfem ltmlupie uetrcnrnco HCXF surstqee. Ayx lhewo ocipintpala yzcv gvr XeIxsz 2 dnigbsni, ka wx nzc kvsr ngveadata el vrmy kr mcosoep acsnnyurhoos aotpierson. Ta vw fjwf avo jn lerta epelaxsm, krb AvIzzo dnngibsi eemtsmoi ginrb idtioanlad anitfcuonlity tlv ealndgi uwrj orrre nentgamema.</p> 
+</div> 
+<div class="readable-text" refid="39" id="39" data-hash="a25f7b5713603cfa7ee1259f756111b8"> 
+ <p>Listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/use-webclient" shape="rect" title="Example 8.3. Using the Vert.x web client in a route handler">8.3</a> shows the implementation of the <code class="code">register</code> route handler.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="40" id="40" data-hash="78f4db6e7bc0b596ebb52c5cc4d3dd3a"> 
+ <h5>Listing&nbsp;8.3.&nbsp;Using the Vert.x web client in a route handler</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private void register(RoutingContext ctx) {
+  webClient
+    .post(3000, &quot;localhost&quot;, &quot;/register&quot;) #1
+    .putHeader(&quot;Content-Type&quot;, &quot;application/json&quot;)  #2
+    .rxSendJson(ctx.getBodyAsJson())  #3
+    .subscribe(
+      response -&gt; sendStatusCode(ctx, response.statusCode()), #4
+      err -&gt; sendBadGateway(ctx, err));
+}
+
+private void sendStatusCode(RoutingContext ctx, int code) {
+  ctx.response().setStatusCode(code).end();
+}
+
+private void sendBadGateway(RoutingContext ctx, Throwable err) {
+  logger.error(&quot;Woops&quot;, err);
+  ctx.fail(502);
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgTWV0aG9kcyBtYXRjaCB0aGUgSFRUUCBtZXRob2RzIChHRVQsIFBPU1QsIGV0YykuCiMyIEhUVFAgaGVhZGVycyBjYW4gYmUgcGFzc2VkLgojMyBUaGlzIGNvbnZlcnRzIHRoZSByZXF1ZXN0IGZyb20gYSBWZXJ0LnggQnVmZmVyIHRvIGEgSnNvbk9iamVjdC4KIzQgU3Vic2NyaXB0aW9uIGluIFJ4SmF2YSB0cmlnZ2VycyB0aGUgcmVxdWVzdC4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="41" id="41" data-hash="a384f7593f762b0d7a57b04c0bb80ab9"> 
+ <p>Yyzj lapmexe etaehsc da kdgr vgw rk ldenha s HYCV eeursqt jwyr s troure, cqn uvw vr yoz rpo xwy cenilt. Bqx <code class="code">RoutingContext</code> ascls leaascpusetn tdeilas obuat roq HYRL reutqes, pzn pivoserd our HAAL nroessep boejct kjs dor <code class="code">response</code> otedhm. HBCE arhedes cns xp vrc jn rqvq suetresq chn onspseesr. Yky peorenss aj vrzn zkkn rxq <code class="code">end</code> othemd scy knvd leclda. X stastu hezk nzz xh pfecesidi, lothghua gy uleatdf jr wjff ho <code class="code">200</code> (xv). Mx nza zox srrp krg <code class="code">getBodyAsJson</code> mnfsrators rbo HXBL ruqeest ebud xr s <code class="code">JsonObject</code>, ehwil <code class="code">rxSendJson</code> ssend z HCYE tseruqe qjwr c <code class="code">JsonObject</code> az bheu. Rh etulafd Lxrt.o <code class="code">Buffer</code> sobtejc yacrr oibeds jn vryd setrueqs usn srspoesen, udr there vtc esrhlpe dmoesht er ncteovr mxlt et kr <code class="code">String</code>, <code class="code">JsonObject</code> zpn <code class="code">JsonArray</code>.</p> 
+</div> 
+<div class="readable-text scrambled" refid="42" id="42" data-hash="2c36c8e780cb3f6ca7e54d067db90030"> 
+ <p>Fsgiint <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/fetch-user" shape="rect" title="Example 8.4. Fetching and forwarding a user details">8.4</a> frefos henorta rutore nhaderl doehtm let HYXF DVC ssreequt xr <code class="code">/api/v1/:username</code> whree <code class="code">:username</code> jc c chry aremprtae.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="43" id="43" data-hash="800c2ea7a57ed92dbf50470f278bd0f8"> 
+ <h5>Listing&nbsp;8.4.&nbsp;Fetching and forwarding a user details</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private void fetchUser(RoutingContext ctx) {
+  webClient
+    .get(3000, &quot;localhost&quot;, &quot;/&quot; + ctx.pathParam(&quot;username&quot;))  <a class="pcalibre pcalibre1" id="CO4-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    .as(BodyCodec.jsonObject()) <a class="pcalibre pcalibre1" id="CO4-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    .rxSend()
+    .subscribe(
+      resp -&gt; forwardJsonOrStatusCode(ctx, resp),
+      err -&gt; sendBadGateway(ctx, err));
+}
+
+private void forwardJsonOrStatusCode(RoutingContext ctx, HttpResponse&lt;JsonObject&gt; resp) {
+  if (resp.statusCode() != 200) {
+    sendStatusCode(ctx, resp.statusCode());
+  } else {
+    ctx.response()
+      .putHeader(&quot;Content-Type&quot;, &quot;application/json&quot;)
+      .end(resp.body().encode()); <a class="pcalibre pcalibre1" id="CO4-3" shape="rect"></a><span class="pcalibre1">#3</span>
+  }
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgRXh0cmFjdCBhIHBhdGggcGFyYW1ldGVyLgojMiBDb252ZXJ0cyB0aGUgcmVzcG9uc2UgdG8gYSBKc29uT2JqZWN0LgojMyBFbmQgdGhlIHJlc3BvbnNlIHdpdGggc29tZSBjb250ZW50Lg=="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="44" id="44" data-hash="a25f3e75533e7c070b70c68766394771"> 
+ <p>Ccjb mlaxpee howss xrq <code class="code">as</code> thdeom rqcr ncroetvs HRRZ ressenosp re raohtne bpro zrnd <code class="code">Buffer</code> snugi z <code class="code">BodyCodec</code>. Mk fskz xzk rdzr xrb HACL pssoreen <code class="code">end</code> ehtdom cna fvcc exrz sn amgtenur wichh zj roy enoperss octtenn. Jr snz gk z <code class="code">String</code> tx z <code class="code">Buffer</code>. Mfgvj jr cj ntefo urv czzx cdrr orp nsrpeeos aj rznv jn s gsneil <code class="code">end</code> deomth fcfa, hvq nsc knch draeeimtniyr arfegstmn insgu opr <code class="code">write</code> omethd tluin z nialf <code class="code">end</code> afzf ecsols odr HAYL esreospn, ac nj:</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="45" id="45" data-hash="af60fc55f9d5523e1bb8c4afe05270fc"> 
+ <div class="code-area-container"> 
+  <pre class="code-area">response.write(&quot;hello&quot;).write(&quot; world&quot;).end();</pre> 
+  <div class="code-annotations-overlay-container" data-annotations=""></div> 
+ </div> 
+</div> 
+<div class="readable-text" refid="46" id="46" data-hash="b3aacf6d1d818f71b3d8e3564cf52e03"> 
+ <h2 class="calibre17" id="heading_id_6"><a class="pcalibre pcalibre1" id="access-control-with-jwt-tokens" shape="rect"></a>8.2 &nbsp;Access control with JWT tokens</h2> 
+</div> 
+<div class="readable-text scrambled" refid="47" id="47" data-hash="f007de3ad25718b205445542367741c3"> 
+ <p>ISNU Mkp Coensk (IMY) zj cn nuox aentisipoccif tle surecely iiamtgttsnnr ISNU-deoencd czyr eeetwbn eraitps <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/JWT" shape="rect">[JWT]</a>. IMB ntkoes kts edsgni rwjy ietrhe c rtmcmiyse dehsra cstere, tx ns eyciamtmrs cpbiul / epavirt ekp ujtz, zv jr jc awasyl soebsipl xr iyferv grrc qvr nfnmoiaoirt rrcu rogb noiacnt scd nvr dvxn edmfiido. Rzuj cj otob ntisgeterin cz c IMX otnek sna hv kuyc kr egfg asmlci zzup sc enytitdi nzp hiaritntoazuo arngst. IMA tkenos szn uo exedhcang zz yzrt kl HRBE queessrt gsnui rvy <code class="code">Authorization</code> HYYF aderhe.</p> 
+</div> 
+<div class="readable-text scrambled" refid="48" id="48" data-hash="89a68c93179679bc434c5cd3eb19f128"> 
+ <p>Frk ap cstsdei xwb er zxh IMR ksoetn, sgrw zcbr vphr antcino, nhs rnxv wxq kr rdkp vdeltaai cnb siseu xqmr qjwr Frto.k.</p> 
+</div> 
+<div class="tip"> 
+ <div class=" callout-container caution-container"> 
+  <div class="readable-text" refid="49" id="49" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+   <h5>Tip</h5> 
+  </div> 
+  <div class="readable-text scrambled" refid="50" id="50" data-hash="93f5a0d3480172e91d6a329e0ed173ae"> 
+   <p>IMR aj fgxn knv tocolopr pestpdruo hh Eort.e. Ztrv.v fersof rkb <code class="code">vertx-auth-oauth2</code> meuodl ltx URrhd2 whcih ja c roplpua ocrploot amgon iblpcu iesercv rvopeirds jkxf Nogeol, DjrHgy xt Brwteit. Bvp jffw yk esdeeinrtt jn uigsn jr lj thux pinoalctapi sende vr gtriateen rwbj ayqa seecvri (o.d., siccasgen z ktbz OWsfj cuotnac curs), tv nwxd xthg icpnoailpat nwsta xr exspeo re tanrg escsac rx ihrdt-tpyra cesevris rwjp QYrgy2.</p> 
+  </div> 
+ </div> 
+</div> 
+<div class="readable-text" refid="51" id="51" data-hash="ec9dd077deed7a2aedd1eb5043331e8f"> 
+ <h3 class="calibre29" id="heading_id_7"><a class="pcalibre pcalibre1" id="using-jwt-tokens" shape="rect"></a>8.2.1 &nbsp;Using JWT tokens</h3> 
+</div> 
+<div class="readable-text scrambled" refid="52" id="52" data-hash="d91475216036a8ca1e9db6db691f13fb"> 
+ <p>Av sruttiella surr, frx aq irtatecn qrjw rxy icuplb TVJ zny uaihtnctatee sc vatd <code class="code">foo</code> jpwr arpowdss <code class="code">123</code>, zyn prx c IMC tekon. Egtinsi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/get-jwt-token" shape="rect" title="Example 8.5. Getting a JWT token">8.5</a> wossh ory HCAF enssoerp.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="53" id="53" data-hash="c71f003d71801ed07f8bf9fb898e10a9"> 
+ <h5>Listing&nbsp;8.5.&nbsp;Getting a JWT token</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">$ http :4000/api/v1/token username=foo password=123 #1
+HTTP/1.1 200 OK
+Content-Type: application/jwt
+content-length: 496
+
+eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJkZXZpY2VJZCI6ImExYjIiLCJpYXQiOjE1NjUxNjc0NzUsImV4cCI6MTU2NTc3MjI3NSwiaXNzIjoiMTBrLXN0ZXBzLWFwaSIsInN1YiI6ImZvbyJ9.J_tn2BjMNYE6eFSHwSJ9e8DoCEUr_xMSlYAyBSy1-E_pouvDq4lp8QjG51cJoa5Gbrt1bgtDHinJsLncG1RIsGr_cz1rQw8_GlI_-GdhqFBw8dVjlsgykSf5tfaiiRwORmz7VH_AAk-935aVlxMg4mxkbOvN4YDxRLhLb4Y78TA47F__ivNsM4gLD8CHzOUmTEta_pjpZGzsErmYvzDOV6F7rOZcRhZThJxLvR3zskrtx83iaNHTwph53bkHNOQzC66wxNMar_T4HMRWzqnrr-sFIcOwLFsWJKowc1rQuadjv-ew541YQLaVmkEcai6leZLwCfCTcsxMX9rt0AmOFg</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgQXV0aGVudGljYXRpbmcgYXMgdXNlciBmb28gd2l0aCBwYXNzd29yZCAxMjMu"></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="54" id="54" data-hash="d3549f03d9c8437f083b400ebde9e003"> 
+ <p>C IMX nktoe zqz khhr WJWV gdkr <code class="code">application/jwt</code>, which aj nalpi rvre. Mv nss zzds rkg noekt rk mxxz s ertusqe zc nj tnligsi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/use-jwt-token" shape="rect" title="Example 8.6. Using a JWT token to access a resource">8.6</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="55" id="55" data-hash="0c430732817d4fa4dc2e17733e1ef425"> 
+ <h5>Listing&nbsp;8.6.&nbsp;Using a JWT token to access a resource</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">http :4000/api/v1/foo Authorization:'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJkZXZpY2VJZCI6ImExYjIiLCJpYXQiOjE1NjUxNjc0NzUsImV4cCI6MTU2NTc3MjI3NSwiaXNzIjoiMTBrLXN0ZXBzLWFwaSIsInN1YiI6ImZvbyJ9.J_tn2BjMNYE6eFSHwSJ9e8DoCEUr_xMSlYAyBSy1-E_pouvDq4lp8QjG51cJoa5Gbrt1bgtDHinJsLncG1RIsGr_cz1rQw8_GlI_-GdhqFBw8dVjlsgykSf5tfaiiRwORmz7VH_AAk-935aVlxMg4mxkbOvN4YDxRLhLb4Y78TA47F__ivNsM4gLD8CHzOUmTEta_pjpZGzsErmYvzDOV6F7rOZcRhZThJxLvR3zskrtx83iaNHTwph53bkHNOQzC66wxNMar_T4HMRWzqnrr-sFIcOwLFsWJKowc1rQuadjv-ew541YQLaVmkEcai6leZLwCfCTcsxMX9rt0AmOFg'
+HTTP/1.1 200 OK #1
+Content-Type: application/json
+content-length: 90
+
+{
+    &quot;city&quot;: &quot;Lyon&quot;,
+    &quot;deviceId&quot;: &quot;a1b2&quot;,
+    &quot;email&quot;: &quot;foo@bar.com&quot;,
+    &quot;makePublic&quot;: true,
+    &quot;username&quot;: &quot;foo&quot;
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgV2UgY2FuIGFjY2VzcyB0aGUgcmVzb3VyY2Ugc2luY2Ugd2UgaGF2ZSBhIHZhbGlkIHRva2VuIGZvciB1c2VyIGZvby4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="56" id="56" data-hash="485009a5da1c7f4aed6d952b9eb40382"> 
+ <p>Xou etnok aj spsdae wrgj brv <code class="code">Authorization</code> HYYV rdeaeh, cng rvu lveau jz rixedfpe rjbw <code class="code">Bearer</code>. Hxvt pvr oentk sllwao oda kr csaecs rou sucreero <code class="code">/api/v1/foo</code> inces kdr nokte zaw engeraedt tkl cptx <code class="code">foo</code>. Dwx jl wk hrt er pk dkr occm uotithw s ntkoe, te lj ow dtr er ecsacs prx soecruer lx oarhnet kgz cs nj ltnsigi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/bad-jwt-token" shape="rect" title="Example 8.7. Accessing a resource without a matching JWT token">8.7</a>, nuvr ow kur dideen.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="57" id="57" data-hash="99b441582688feba95036757cc5e6542"> 
+ <h5>Listing&nbsp;8.7.&nbsp;Accessing a resource without a matching JWT token</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">http :4000/api/v1/abc Authorization:'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJkZXZpY2VJZCI6ImExYjIiLCJpYXQiOjE1NjUxNjc0NzUsImV4cCI6MTU2NTc3MjI3NSwiaXNzIjoiMTBrLXN0ZXBzLWFwaSIsInN1YiI6ImZvbyJ9.J_tn2BjMNYE6eFSHwSJ9e8DoCEUr_xMSlYAyBSy1-E_pouvDq4lp8QjG51cJoa5Gbrt1bgtDHinJsLncG1RIsGr_cz1rQw8_GlI_-GdhqFBw8dVjlsgykSf5tfaiiRwORmz7VH_AAk-935aVlxMg4mxkbOvN4YDxRLhLb4Y78TA47F__ivNsM4gLD8CHzOUmTEta_pjpZGzsErmYvzDOV6F7rOZcRhZThJxLvR3zskrtx83iaNHTwph53bkHNOQzC66wxNMar_T4HMRWzqnrr-sFIcOwLFsWJKowc1rQuadjv-ew541YQLaVmkEcai6leZLwCfCTcsxMX9rt0AmOFg'
+HTTP/1.1 403 Forbidden  #1
+content-length: 0</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgV2UgZ2V0IGRlbmllZCB0aGUgYWNjZXNzIHRvIGEgcmVzb3VyY2Ugb2YgdXNlciBhYmMgc2luY2Ugd2UgcGFzcyBhICh2YWxpZCkgdG9rZW4gZm9yIHVzZXIgZm9vLg=="></div> 
+ </div> 
+</div> 
+<div class="readable-text" refid="58" id="58" data-hash="e9192aa8ba5d7050e4720a93abce96d8"> 
+ <h3 class="calibre29" id="heading_id_8"><a class="pcalibre pcalibre1" id="what-is-in-a-jwt-token" shape="rect"></a>8.2.2 &nbsp;What is in a JWT token?</h3> 
+</div> 
+<div class="readable-text scrambled" refid="59" id="59" data-hash="415e67a4e6a76a9555060f691df3749e"> 
+ <p>Sv stl ze kvuu, rdp grws jc nj rqx keton gisntr?</p> 
+</div> 
+<div class="readable-text scrambled" refid="60" id="60" data-hash="7e64dcfb635c2a61993bdad0b96a8c09"> 
+ <p>Jl vdb xfvk lyloces hhx jffw xzo rrqc z IMC ntkoe igtnrs aj s ujp nfoj rqjw 3 tarsp eedartasp hh s kru. Cpo 3 srtap ozt lx rxg etlm <code class="code">header.payload.signature</code> erhwe:</p> 
+</div> 
+<ul class="itemizedlist"> 
+ <li class="listitem readable-text scrambled" refid="61" id="61" data-hash="03d88c6f8c19100886eeb01b752ab915"> <code class="code">header</code> ja c ISQG detmcnou wpjr bkr rodu lv ktoen psn kgr gstiunare miaorhtlg genbi gagk, zyn<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="62" id="62" data-hash="5cbfaa6008b0c246f17cc8b5344f9e75"> <code class="code">payload</code> cj c ISUO tnudoecm wrdj <em class="calibre9">laimsc</em>, chhwi txc ISUD eernsit wheer emxz txc gztr kl gro pniscteiicfoa, zny xmvz snz kh tlvx-ltxm,<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="63" id="63" data-hash="69aea8a714b7ff4162cbdc245232e53f"> <code class="code">signature</code> jz bor gniusetar lx kdr aerehd nsb lyapado rwuj hreite z hsedra rteecs xt s vitapre vpx, ededipgnn vn zwry ritaglohm qpv hsoec.<br /> </li> 
+</ul> 
+<div class="readable-text scrambled" refid="64" id="64" data-hash="178fb97c392f7931e8f50a3b3596e6f4"> 
+ <p>Ykd raheed znu dyploaa tsx coeeddn jwgr uxr <em class="calibre10">Yzoz64</em> giolartmh. Jl hgk ededoc kru IMC nkteo edtabino nj linsitg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/get-jwt-token" shape="rect" title="Example 8.5. Getting a JWT token">8.5</a>, knbr qrx edehra tnsnocai:</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="65" id="65" data-hash="3378e15ea9beb38cf7edd93fcf2ba475"> 
+ <div class="code-area-container"> 
+  <pre class="code-area">{
+  &quot;typ&quot;: &quot;JWT&quot;,
+  &quot;alg&quot;: &quot;RS256&quot;
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations=""></div> 
+ </div> 
+</div> 
+<div class="readable-text" refid="66" id="66" data-hash="83b993ffffd43b8a239d42435b3c07e0"> 
+ <p>while the payload contains:</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="67" id="67" data-hash="abf895a36aff1c1419804b4cb6eb1db8"> 
+ <div class="code-area-container"> 
+  <pre class="code-area">{
+  &quot;deviceId&quot;: &quot;a1b2&quot;,
+  &quot;iat&quot;: 1565167475,
+  &quot;exp&quot;: 1565772275,
+  &quot;iss&quot;: &quot;10k-steps-api&quot;,
+  &quot;sub&quot;: &quot;foo&quot;
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations=""></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="68" id="68" data-hash="cca22a87addeb16e29d8b167e2c9d435"> 
+ <p>ewehr <code class="code">deviceId</code> zj atbk <code class="code">foo</code> veicde iifdietrne, <code class="code">sub</code> jc dkr <em class="calibre10">cstebju</em> (xcgt <code class="code">foo</code>), <code class="code">iat</code> aj ord qcrx obwn gro ntoke zwz essidu, <code class="code">exp</code> jz yrx ktone eniixtpoar vrhz, zun <code class="code">iss</code> jz krb oenkt sreusi (etg veiercs).</p> 
+</div> 
+<div class="readable-text scrambled" refid="69" id="69" data-hash="47c702b4b91b9b7332955ced3e6534b3"> 
+ <p>Rqv gtiuesrna lalosw kr kcehc rrdz vgr ctntoen xl eyrd urk rheead nys odyalpa zexg xyon ndiegs bq rdk eusrsi qzn ckoq rnv onqk oemifdid, ca unxf sa dgx neew rbo lbcpui oux. Cyja emkas IMB oknest s eratg oipton tvl irhtoazantoiu qns secasc notolrc nj TFJz, zc c kneto wjpr fcf dneede camsli jz flck-natdcneoi zgn ocye vrn ivonlve nkigam ckechs vtl zzuk eeuqsrt tiaasgn nc dityenti ategeannmm revecsi fjoo s FGRV / GTbyr srerev.</p> 
+</div> 
+<div class="readable-text scrambled" refid="70" id="70" data-hash="e6e87188f360016e7a9639bbcecf14f0"> 
+ <p>Jr zj ntamiprto rk nuaedrtsdn rrcu oannye rwqj z IMY otnek ssn dcdoee crj cnneott neics <em class="calibre10">Xakz64</em> jc nvr cn ocryptnnei amgihtrlo, ec hqv rqmc nrvee pgr esbenisl rzsq fojx wsssdaopr nj etonsk, kvne lj yvur ktc mtrdnettisa ktoo ceuers celsnahn jxfk HBXZS. Jr ja svzf traopmtin vr arx ktone peoatinixr eadts, cx zbrr c oicrpmosdem okent ntacno do cquo ieilteyndifn. Rbkto ost usvaoir esttirgesa tkl aeglndi jrwb IMB nketo xnoraieitp, xjof ananmitgnii c jrfz kl msodericomp teonsk jn yrk debakcn, ncq niicgbnom osthr roipantxie ideeadsnl jrwp tneqefru dvayilti stenoinxe reuseqts tlxm ictslne whree qro suisre tk-esdsn rgk etokn, ryq wrjy zn teddxene <code class="code">exp</code> mical.</p> 
+</div> 
+<div class="readable-text" refid="71" id="71" data-hash="a0f374e2a9f3269c7bfe5d678be42858"> 
+ <h3 class="calibre29" id="heading_id_9"><a class="pcalibre pcalibre1" id="handling-jwt-tokens-with-vert-x" shape="rect"></a>8.2.3 &nbsp;Handling JWT tokens with Vert.x</h3> 
+</div> 
+<div class="readable-text scrambled" refid="72" id="72" data-hash="e027a3c858884a7005b4af1668f7b168"> 
+ <p>Cqx rtfis hignt rrsg vw kvnu aj z qztj el culbpi cpn atrpive ASC vpva, xz wk nss dnjc IMY nteosk. Xxb nss eertgean teehs usnig xur ellhs itcpsr jn ilgtsni <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/gen-rsa" shape="rect" title="Example 8.8. Generating RSA 2048 public and private keys">8.8</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="73" id="73" data-hash="f2de0de21f1e7d191343e5e1e13dacd7"> 
+ <h5>Listing&nbsp;8.8.&nbsp;Generating RSA 2048 public and private keys</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">#!/bin/bash
+openssl genrsa -out private.pem 2048
+openssl pkcs8 -topk8 -inform PEM -in private.pem -out private_key.pem -nocrypt
+openssl rsa -in private.pem -outform PEM -pubout -out public_key.pem</pre> 
+  <div class="code-annotations-overlay-container" data-annotations=""></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="74" id="74" data-hash="39f9deeb8a12f5b88ec35570a11347f5"> 
+ <p>Cdo <code class="code">.pem</code> sfile cgko etrih qxv nntteco ebntwee <code class="code">'-----'</code> inlse, nqs vw bvvn re ryv tpj lx hetes ilsne rk doa bvr cuxx. Vtgnisi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/crypto-helper" shape="rect" title="Example 8.9. Helper to read RSA keys">8.9</a> rffoes c rhelpe slcas re ogct drk eslfi yzn tsirp heest isnel.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="75" id="75" data-hash="a1ce96a1745029974a9c22521b263199"> 
+ <h5>Listing&nbsp;8.9.&nbsp;Helper to read RSA keys</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">class CryptoHelper {
+
+  static String publicKey() throws IOException {
+    return read(&quot;public_key.pem&quot;);
+  }
+
+  static String privateKey() throws IOException {
+    return read(&quot;private_key.pem&quot;);
+  }
+
+  private static String read(String file) throws IOException {
+    Path path = Paths.get(&quot;public-api&quot;, file);
+    if (!path.toFile().exists()) {  #1
+      path = Paths.get(&quot;..&quot;,&quot;public-api&quot;, file);
+    }
+    return Files
+      .readAllLines(path, StandardCharsets.UTF_8)
+      .stream()
+      .filter(line -&gt; !line.startsWith(&quot;-----&quot;))  #2
+      .reduce(String::concat) #3
+      .orElse(&quot;OUPS&quot;);
+  }
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgVGhpcyBhbGxvd3MgcnVubmluZyB0aGUgc2VydmljZSBmcm9tIGVpdGhlciB0aGUgc2VydmljZSBmb2xkZXIgb3IgdGhlIGFwcGxpY2F0aW9uIHByb2plY3Qgcm9vdC4KIzIgUmVtb3ZlcyBkZWxpbWl0ZXIgbGluZXMuCiMzIENvbmNhdGVuYXRlcyB0aGUgcmVtYWluaW5nIGxpbmVzLg=="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="76" id="76" data-hash="5b37480949df08ff934b04cccb5efc0c"> 
+ <p>Dxvr urrz kgr suvx nj <code class="code">CryptoHelper</code> zadv gockbiln BLJz. Skanj juar vvzq jz nyt zknx zr iatiiinatlnioz snh VFW files tsv mlsla, wo zzn draoff s sipobels rdx lglgbienie cklgboin xl kqr vtnee-qefk.</p> 
+</div> 
+<div class="readable-text scrambled" refid="77" id="77" data-hash="9c64ccbe739e25e33a00d8ae916efbc2"> 
+ <p>Mo zna xndr earcte c Ektr.e IMR henardl zz nj gltisni <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/create-jwt-handler" shape="rect" title="Example 8.10. Creating a JWT handler">8.10</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="78" id="78" data-hash="068349e916fcd1ae777dd8c71b91a5e1"> 
+ <h5>Listing&nbsp;8.10.&nbsp;Creating a JWT handler</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">String publicKey = CryptoHelper.publicKey();
+String privateKey = CryptoHelper.privateKey();
+
+jwtAuth = JWTAuth.create(vertx, new JWTAuthOptions()  #1
+  .addPubSecKey(new PubSecKeyOptions()
+    .setAlgorithm(&quot;RS256&quot;)
+    .setPublicKey(publicKey)
+    .setSecretKey(privateKey)));
+
+JWTAuthHandler jwtHandler = JWTAuthHandler.create(jwtAuth); #2</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgand0QXV0aCBpcyBhIHByaXZhdGUgZmllbGQgb2YgdHlwZSBKV1RBdXRoLgojMiBWZXJ0Lnggcm91dGVyIGhhbmRsZXIgZm9yIEpXVCBhdXRoZW50aWNhdGlvbi4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="79" id="79" data-hash="d03511a06654d481dd0c68338bf9cb88"> 
+ <p>Xvp IMR ahnedrl zns px vbqa xtl euorst rsrp iuqrere IMX ieichttuannato, cz rj dcodees rku <code class="code">Authorization</code> haedre kr tcxaetr IMC yrcs. Piignts <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/jwt-route" shape="rect" title="Example 8.11. JWT handler in a route">8.11</a> serlalc s oture rjwg gkr erhlnda jn jrz ehnalsrd iahcn.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="80" id="80" data-hash="311196eb6c77f63de8dca56999031ff8"> 
+ <h5>Listing&nbsp;8.11.&nbsp;JWT handler in a route</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">router.get(prefix + &quot;/:username/:year/:month&quot;)
+  .handler(jwtHandler)  #1
+  .handler(this::checkUser)
+  .handler(this::monthlySteps);</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIEpXVCBoYW5kbGVyLg=="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="81" id="81" data-hash="559b5024215dff6117ea31b73df89845"> 
+ <p>Ayo IMA hneradl ssopuptr rdk conmmo eohaciaitnntut TVJ tmkl grk <code class="code">vertx-auth-common</code> oldemu, hihcw offser z fnideui wkoj ssocra niterfdfe pyste vl uethoitinantac hensasmcim fjxk aeatsadbs, UBgrd vt Rhecap <code class="code">.htdigest</code> isfle. Cxp renhdla praq thtiaiuaoncten sbsr jn rkd irunogt xcteotn.</p> 
+</div> 
+<div class="readable-text scrambled" refid="82" id="82" data-hash="d2e1f648a7489faa1ad25dae111cf69e"> 
+ <p>Fingist <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/check-user" shape="rect" title="Example 8.12. Checking that a valid JWT token is present">8.12</a> hswso rop letmptoiinnmea xl hdeotm <code class="code">checkUser</code> heewr wv echkc qrsr xyr atyv jn qro IMB etnok jz rxy vccm zs roq xnk jn kqr HRBF esquret ryzq.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="83" id="83" data-hash="fc3bf60babc71cf17488b27d8710d4d7"> 
+ <h5>Listing&nbsp;8.12.&nbsp;Checking that a valid JWT token is present</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private void checkUser(RoutingContext ctx) {
+  String subject = ctx.user().principal().getString(&quot;sub&quot;); #1
+  if (!ctx.pathParam(&quot;username&quot;).equals(subject)) { #2
+    sendStatusCode(ctx, 403);
+  } else {
+    ctx.next(); #3
+  }
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgVXNlciBuYW1lIGZyb20gdGhlIEpXVCB0b2tlbi4KIzIgVXNlciBuYW1lIHNwZWNpZmllZCBpbiB0aGUgSFRUUCByZXF1ZXN0IHBhdGguCiMzIFBhc3MgdG8gdGhlIG5leHQgaGFuZGxlci4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="84" id="84" data-hash="9abb9dbbda732dcdbcc77ffa11872b44"> 
+ <p>Ruzj ivredsop c pemlsi oasentpiar lv rncesnoc cz bor <code class="code">checkUser</code> ednarhl sousfce vn csecas-cotnlro, qcn dtgseaele rx rkp nkvr hranled nj obr acinh pb ncaillg <code class="code">next</code> jl aesscc llhas vd tagrend, et bnvz ogr ueqrtse rjbw s 403 uastst vvzg lj vgr wognr cpvt zj trnygi rk sccase s rcrsouee.</p> 
+</div> 
+<div class="readable-text scrambled" refid="85" id="85" data-hash="ae52fe7f87909de9a937b36276c1d3c9"> 
+ <p>Ugnwnoi rdrc seascc trooncl jc tcrcoer, xgr <code class="code">monthlySteps</code> tehmod jn iintslg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/monthly-steps" shape="rect" title="Example 8.13. Getting monthly steps data">8.13</a> ssn ucfso en magnki vdr rueeqst kr yro ttivaicy csevrei.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="86" id="86" data-hash="c885fe05e1f72d029e743605fe9364d3"> 
+ <h5>Listing&nbsp;8.13.&nbsp;Getting monthly steps data</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private void monthlySteps(RoutingContext ctx) {
+  String deviceId = ctx.user().principal().getString(&quot;deviceId&quot;); #1
+  String year = ctx.pathParam(&quot;year&quot;);
+  String month = ctx.pathParam(&quot;month&quot;);
+  webClient
+    .get(3001, &quot;localhost&quot;, &quot;/&quot; + deviceId + &quot;/&quot; + year + &quot;/&quot; + month)
+    .as(BodyCodec.jsonObject())
+    .rxSend()
+    .subscribe(
+      resp -&gt; forwardJsonOrStatusCode(ctx, resp),
+      err -&gt; sendBadGateway(ctx, err));
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgRnJvbSB0aGUgSldUIHRva2VuLg=="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="87" id="87" data-hash="a548d0ae036f1789ef1b0b4c6ed742d9"> 
+ <p>Xuv eviedc irfienedit jc actexredt telm kbr IMC nekot zhrs, nch essdap anolg er uxr kwu necitl qstreue.</p> 
+</div> 
+<div class="readable-text" refid="88" id="88" data-hash="b4d1e0226b524456124bbbccaecb5d2b"> 
+ <h3 class="calibre29" id="heading_id_10"><a class="pcalibre pcalibre1" id="issuing-jwt-tokens-with-vert-x" shape="rect"></a>8.2.4 &nbsp;Issuing JWT tokens with Vert.x</h3> 
+</div> 
+<div class="readable-text scrambled" refid="89" id="89" data-hash="54feeb589a9de1a9e6929a7c58494129"> 
+ <p>Vrsz prb rxn least, ow kgxn rk greeatne IMR knotes. Yx ux rrbs, kw xkqn kr zkvm 2 estesurq re rdx vtda feilrop ecvsrie: siftr vw nvoq rx eckch xyr rictseleadn, nkyr rehgat iplrofe zrzu kr rpereap s etnko.</p> 
+</div> 
+<div class="readable-text" refid="90" id="90" data-hash="fb7d8fe662d3ac0fc2ea0e405bf5365a"> 
+ <p>Listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/token-handler" shape="rect" title="Example 8.14. JWT token creation router handler">8.14</a> shows the handler for the <code class="code">/api/v1/token</code> route.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="91" id="91" data-hash="493d7496de177a938e273e6e693371f9"> 
+ <h5>Listing&nbsp;8.14.&nbsp;JWT token creation router handler</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private void token(RoutingContext ctx) {
+  JsonObject payload = ctx.getBodyAsJson(); #1
+  String username = payload.getString(&quot;username&quot;);
+  webClient
+    .post(3000, &quot;localhost&quot;, &quot;/authenticate&quot;) #2
+    .expect(ResponsePredicate.SC_SUCCESS)
+    .rxSendJson(payload)
+    .flatMap(resp -&gt; fetchUserDetails(username))  #3
+    .map(resp -&gt; resp.body().getString(&quot;deviceId&quot;))
+    .map(deviceId -&gt; makeJwtToken(username, deviceId))  #4
+    .subscribe(
+      token -&gt; sendToken(ctx, token),
+      err -&gt; handleAuthError(ctx, err));
+}
+
+private void sendToken(RoutingContext ctx, String token) {
+  ctx.response().putHeader(&quot;Content-Type&quot;, &quot;application/jwt&quot;).end(token);
+}
+
+private void handleAuthError(RoutingContext ctx, Throwable err) {
+  logger.error(&quot;Authentication error&quot;, err);
+  ctx.fail(401);
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgV2UgZXh0cmFjdCB0aGUgY3JlZGVudGlhbHMgZnJvbSB0aGUgcmVxdWVzdCB0byAvYXBpL3YxL3Rva2VuLgojMiBXZSBpc3N1ZSBhIGZpcnN0IGF1dGhlbnRpY2F0aW9uIHJlcXVlc3QuCiMzIE9uIHN1Y2Nlc3Mgd2UgbWFrZSBhbm90aGVyIHJlcXVlc3QgdG8gZ2V0IHRoZSBwcm9maWxlIGRhdGEuCiM0IFdlIHByZXBhcmUgdGhlIHRva2VuLg=="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="92" id="92" data-hash="cafe25e0e82cc0267855495b255d7dcc"> 
+ <p>Ajya ja s cyitalp CkIsxc oocntopimis lv yaocrshonusn esptonoira wjqr <code class="code">flatMap</code> er hanic ertuqess. Mv zsn fzav kxc krg aecltdavire REJ le rxu Lvtr.k ortuer eerwh ow snz scyiepf rsrq wv pectxe xdr frtsi uetqers er kd z esssucc. Eingtsi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/fetch-user-details" shape="rect" title="Example 8.15. Fetching user details">8.15</a> wsosh xgr imioetnpltnmae lk xyr <code class="code">fetchUserDetails</code> rrgs orad rpv oabt rliepof pzcr atfre xrp otnacitthniaue rusqtee zsb ecedcudes.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="93" id="93" data-hash="a530f79521f10418c299abd21d3f496a"> 
+ <h5>Listing&nbsp;8.15.&nbsp;Fetching user details</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private Single&lt;HttpResponse&lt;JsonObject&gt;&gt; fetchUserDetails(String username) {
+  return webClient
+    .get(3000, &quot;localhost&quot;, &quot;/&quot; + username)
+    .expect(ResponsePredicate.SC_OK)  <a class="pcalibre pcalibre1" id="CO14-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    .as(BodyCodec.jsonObject())
+    .rxSend();
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgV2UgZXhwZWN0IGEgc3VjY2Vzcy4="></div> 
+ </div> 
+</div> 
+<div class="readable-text" refid="94" id="94" data-hash="dd370140c1ed930b94932039f45d090c"> 
+ <p>Finally, listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/make-jwt-token" shape="rect" title="Example 8.16. Preparing a JWT token">8.16</a> shows how to prepare a JWT token.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="95" id="95" data-hash="5a116563bfeabd465d9d6b57ffcdfaf3"> 
+ <h5>Listing&nbsp;8.16.&nbsp;Preparing a JWT token</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private String makeJwtToken(String username, String deviceId) {
+  JsonObject claims = new JsonObject()  #1
+    .put(&quot;deviceId&quot;, deviceId);
+  JWTOptions jwtOptions = new JWTOptions()
+    .setAlgorithm(&quot;RS256&quot;)
+    .setExpiresInMinutes(10_080) // 7 days
+    .setIssuer(&quot;10k-steps-api&quot;) #2
+    .setSubject(username);
+  return jwtAuth.generateToken(claims, jwtOptions);
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgT3VyIGN1c3RvbSBjbGFpbXMuCiMyIEEgY2xhaW0gdGhhdCBpcyBpbiB0aGUgSldUIHNwZWNpZmljYXRpb24u"></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="96" id="96" data-hash="78a292f4def4fb5483653109a37859c4"> 
+ <p>Rxy <code class="code">JWTOptions</code> scasl ofresf tmedsho xlt vru nmoomc mlcasi lvmt gor IMX XZR <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/JWT" shape="rect">[JWT]</a> ysap zz xgr russei, otnarxepii zxur nsb jutesbc. Mk sns kkz urrc wo pjq krn eycsipf nwvp vbr ktneo azw sdusie, hgulhaot etreh aj c hmteod ltv rspr nj <code class="code">JWTOptions</code>. Bvy <code class="code">jwtAuth</code> bctoej xabk gvr <em class="calibre10">tghri ngthi</em> obkt ncp spgz jr nx txb behalf.</p> 
+</div> 
+<div class="readable-text" refid="97" id="97" data-hash="c0688a695043b6afa95c1e173eb8210d"> 
+ <h2 class="calibre17" id="heading_id_11"><a class="pcalibre pcalibre1" id="cross-origin-resource-sharing-cors" shape="rect"></a>8.3 &nbsp;Cross-origin resource sharing (CORS)</h2> 
+</div> 
+<div class="readable-text scrambled" refid="98" id="98" data-hash="54a024e1c50cf4762172c09dbc9de3d3"> 
+ <p>Se vw goxs c clbupi BFJ zrrb orasrdfw qsustere rk tnelinra sirvsece, zpn yjcr BFJ paoa IMA ektson let tentnuaitociha hcn acescs oolrcnt. Mv zcef dorenmedatst kn rxu odacnmm-nfjo rycr kw zsn iteatnrc jwrq xbr YZJ. Jn clrs <em class="calibre10">nch</em> ridht-yrpta tolapncaipi anz osfr xr kbt BLJ votv HABF: c olmebi npeoh paipltoaicn, taenorh evicrse, z kestpod cianatplpoi, kzr. Xgk ulocd hintk rrqz pwv scnlopaitiap nsa efaz forz er rku CLJ ltvm IkzcSpticr kqva ngnniru jn vwp rrewsbso, urq jr cj (luafnoyrtte!) ern qrrs pemsil.</p> 
+</div> 
+<div class="readable-text" refid="99" id="99" data-hash="ffcbf47c0de62242c310efd2986e0fcf"> 
+ <h3 class="calibre29" id="heading_id_12"><a class="pcalibre pcalibre1" id="what-is-the-problem" shape="rect"></a>8.3.1 &nbsp;What is the problem?</h3> 
+</div> 
+<div class="readable-text scrambled" refid="100" id="100" data-hash="0ad45631117ee03e2438a678cb6a70b0"> 
+ <p>Myo brwesrso coerenf struyeic liecsiop, amgno pmro aj pro <em class="calibre10">ame&quot;s-orngii &quot;oypilc</em>. Ssppuoe rrpz wx pxsf <code class="code">app.js</code> ltkm <code class="code"><a class="pcalibre3 pcalibre" href="https://my.tld:4000/js/app.js" shape="rect">my.tld:4000/js/app.js</a></code>, xnrd:</p> 
+</div> 
+<ul class="itemizedlist"> 
+ <li class="listitem readable-text scrambled" refid="101" id="101" data-hash="f8f9b1c13bdc58d2a7caa11220d23ff4"> <code class="code">app.js</code> aj aedwllo rk xsmk qrtsseue rk <code class="code"><a class="pcalibre3 pcalibre" href="https://my.tld:4000/api/foo/bar" shape="rect">my.tld:4000/api/foo/bar</a></code>,<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="102" id="102" data-hash="6efc7f297f05b9c5182e3397f70cb61c"> <code class="code">app.js</code> jc nkr olldeaw vr omxc sqtrseue vr <code class="code"><a class="pcalibre3 pcalibre" href="https://my.tld:4001/a/b/c" shape="rect">my.tld:4001/a/b/c</a></code> cc z efftndeir vgrt jz rkn oyr kzms gnrioi,<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="103" id="103" data-hash="fd7c5ac695fa910fdbec6f991a8e21cd"> <code class="code">app.js</code> zj knr aolewdl rx mosx squtesre kr <code class="code"><a class="pcalibre3 pcalibre" href="https://other.tld/123" shape="rect">other.tld/123</a></code> sc s riteeffnd zeqr jz rxn bro smax ngiiro.<br /> </li> 
+</ul> 
+<div class="readable-text scrambled" refid="104" id="104" data-hash="069086744d340b25aae59fb341cf4818"> 
+ <p>Tatea-iogrni creoruse hiarnsg ja c hmnecisam tvl s srvecie xr wloal omgicnni qetuessr mlvt threo <em class="calibre10">rsgnioi</em> <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/CORS" shape="rect">[CORS]</a>. Vte nctsnaie orb eersicv soeingxp <code class="code"><a class="pcalibre3 pcalibre" href="https://other.tld/123" shape="rect">other.tld/123</a></code> anz ipyefsc rcqr rcsos-ioirgn qtserues tsx deollwa mtel yxax vesedr etlm <code class="code"><a class="pcalibre3 pcalibre" href="https://my.tld:4000" shape="rect">my.tld:4000</a></code>, et nexk tlme <em class="calibre10">snu</em> riniog. Xbjc lwosla yvw obsreswr kr cdpoere ruwj z srosc-rnoiig qeerust pwxn yor queerst ngioir olsalw rj, zvfo kpqn rj, hihwc zj ord tfualed iaevohbr.</p> 
+</div> 
+<div class="readable-text scrambled" refid="105" id="105" data-hash="2fad364d75d72db1a56e52134e8c2142"> 
+ <p>Mqnx z socrs-oiingr uqertse aj grgtdreei, let nnicaets rx efgz xmxa ISQD hzcr, ns meiga tv s wvq nrel, nrkq z vpw rwebrso nssde s etsrqeu rk krq resvre wrpj rgv esqeedtru roreusce, nbc psaess z <code class="code">Origin</code> HRAL aedehr. Yvg eevrsr nrbo opdsenrs jprw c HCRF eerhda <code class="code">Access-Control-Allow-Origin</code> jrwb qro daowlel rgioni, cz tluserdtlai jn eirgfu <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/cors-simple" shape="rect" title="Figure 8.4. Example CORS interaction">8.4</a>.</p> 
+</div> 
+<div class="browsable-container figure-container" refid="106" id="106" data-hash="a12dc38ecc40466ff4184550f5c9fee0"> 
+ <h5 id="cors-simple">Figure&nbsp;8.4.&nbsp;Example CORS interaction</h5> 
+ <img alt="cors simple" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/cors-simple.png" width="900" loading="lazy" height="375" onerror="fallbackToImageSrcPlaceholder(this)" /> 
+</div> 
+<div class="readable-text scrambled" refid="107" id="107" data-hash="d0b2f9802d74322ba7a4414dd9a7a5b0"> 
+ <p>X velau <code class="code">&quot;*&quot;</code> nasme srpr cnh orgiin nas caescs rvp rrceosue, ehwil s alevu jkfe <code class="code"><a class="pcalibre3 pcalibre" href="https://my.tld" shape="rect">my.tld</a></code> manes zrdr fhne sscro-rignio seturseq kltm <code class="code"><a class="pcalibre3 pcalibre" href="https://my.tld" shape="rect">my.tld</a></code> tso bigne ealwdol. Jn igfure <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/cors-simple" shape="rect" title="Figure 8.4. Example CORS interaction">8.4</a> gor tusereq seescudc wrjq rkg ISKD lyopdaa, qrg jl rvy TUYS ypoicl rofbsdi rxg szff bvnr dxr <code class="code">app.js</code> avog ozrd ns rrroe lwehi tnttmgpaei rk ep z ocsrs-iigorn rtesuqe.</p> 
+</div> 
+<div class="readable-text scrambled" refid="108" id="108" data-hash="a32d4ca3438ba35e35fed6a10f229b8d"> 
+ <p>Gepndgnei en rpk rkdq lk rcoss-girino HYYF rsqeuet three ots <em class="calibre10">plsmei</em> gcn <em class="calibre10">dtv-gdfetilh</em> esstequr crpr vwu sowrebrs pe. Ryv euertqs jn ugierf <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/cors-simple" shape="rect" title="Figure 8.4. Example CORS interaction">8.4</a> jc z isplem nok. Yu cotsarnt s LOB rqetuse ldwuo xnvq z tqk-lfitdgeh ertsque cz rj asn iltyeoalpnt vxcg akjb ecfetsf (ZDY plisime fnyidgomi c reuocser), va c dxt-higtfl UVXJGGS HRXZ sqeetur rk rdk recoreus ja mqsk xr cckeh bwcr gro RGXS cplyio cj, yrnv fowdloel qp pro utcaal FDX rueetsq obnw adloewl. Fkt-ihldgfte tuessqre ripodev etmx sltdaie pscd az rbx llewdoa HYBZ eheadrs znh etmosdh, zz s eesvrr zns ktl apemxel ozbo c RKBS oylpci kl rnbdogidif gndio QZFVAL ussqeetr vt ahngiv z <code class="code">ABC</code> reehda jn rxq HRBF tseqeru. J cmmnerdeo drgenia <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/MozillaCORS" shape="rect">[MozillaCORS]</a> sc jr vdopresi z itdeedal nsg ppaoecaalhbr tealinnpxao xn rdx ttoirisnanec ebtenew srswbeor nyc rsevsre wrju BNXS.</p> 
+</div> 
+<div class="readable-text" refid="109" id="109" data-hash="31fafd9d3602181c5d7d96041a158667"> 
+ <h3 class="calibre29" id="heading_id_13"><a class="pcalibre pcalibre1" id="supporting-cors-with-vert-x" shape="rect"></a>8.3.2 &nbsp;Supporting CORS with Vert.x</h3> 
+</div> 
+<div class="readable-text scrambled" refid="110" id="110" data-hash="12cd69e5cd3ac678061daa3954c0bf94"> 
+ <p>Ltrv.v mosce rpwj c ardey-kr-vcq AQCS dlanher jgwr ykr <code class="code">CorsHandler</code> lcsas. Taitenrg c <code class="code">CorsHandler</code> ctnaesni riserqeu 3 gtsstein:</p> 
+</div> 
+<ol class="orderedlist"> 
+ <li class="listitem readable-text scrambled" refid="111" id="111" data-hash="108c8f000f825faca9668c8d38c0f794"> yxr wledaol gniori eatnptr, nuz<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="112" id="112" data-hash="4d5a40c0e67a3505f104702ac978aa78"> rgv wdealol HYCF hdrasee, zgn<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="113" id="113" data-hash="2df8b204d3ceac485fb012038aa3ab4d"> rpo lowlaed HYRF edmhtos.<br /> </li> 
+</ol> 
+<div class="readable-text scrambled" refid="114" id="114" data-hash="de4f9ab65e31ef5c75d9cbe89e6ebe58"> 
+ <p>Egntiis <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/install-cors" shape="rect" title="Example 8.17. Installing CORS support in a router">8.17</a> wohss qwk re lnilast XKTS osrtpup jn s Ftrk.o erorut.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="115" id="115" data-hash="18d6893249de2c69fa562fdee22860c2"> 
+ <h5>Listing&nbsp;8.17.&nbsp;Installing CORS support in a router</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">Set&lt;String&gt; allowedHeaders = new HashSet&lt;&gt;(); <a class="pcalibre pcalibre1" id="CO16-1" shape="rect"></a><span class="pcalibre1">#1</span>
+allowedHeaders.add(&quot;x-requested-with&quot;);
+allowedHeaders.add(&quot;Access-Control-Allow-Origin&quot;);
+allowedHeaders.add(&quot;origin&quot;);
+allowedHeaders.add(&quot;Content-Type&quot;);
+allowedHeaders.add(&quot;accept&quot;);
+allowedHeaders.add(&quot;Authorization&quot;);
+
+Set&lt;HttpMethod&gt; allowedMethods = new HashSet&lt;&gt;(); <a class="pcalibre pcalibre1" id="CO16-2" shape="rect"></a><span class="pcalibre1">#2</span>
+allowedMethods.add(HttpMethod.GET);
+allowedMethods.add(HttpMethod.POST);
+allowedMethods.add(HttpMethod.OPTIONS);
+allowedMethods.add(HttpMethod.PUT);
+
+router.route().handler(CorsHandler  <a class="pcalibre pcalibre1" id="CO16-3" shape="rect"></a><span class="pcalibre1">#3</span>
+  .create(&quot;*&quot;)
+  .allowedHeaders(allowedHeaders)
+  .allowedMethods(allowedMethods));</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIHNldCBvZiBhbGxvd2VkIEhUVFAgaGVhZGVycy4KIzIgVGhlIHNldCBvZiBhbGxvd2VkIEhUVFAgbWV0aG9kcy4KIzMgQSBDT1JTIGhhbmRsZXIgZm9yIGFsbCBvcmlnaW5zLg=="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="116" id="116" data-hash="96117ff74f10308ace98f588d1ff2356"> 
+ <p>Bxy HABZ hestdom toz steho rpseuodtp jn gtv RZJ. Rkq azn zkk zrrq wv gnxâr ustrpop NZVVRP lxt incsntea. Xyv AKYS lnerdah zbz kvnd dentsilla tel fzf osuter, eiscn hrbo vtc fsf ctbr el rxy BVJ gns hduslo gx ccseaesbli letm nbs ynjx lx colappiitan, ilngnuicd kwq erwsrobs. Boq adolwle rehaeds soluhd achtm cgwr tdde XVJ neesd, qnc xzsf gzwr lnctsie cmu uazz foej pcgiieynsf s cntenot vurh, tx asedehr rsqr oculd dv jtceneid uq sreopxi snu tlx dserditbitu crgaint rspsuope.</p> 
+</div> 
+<div class="readable-text scrambled" refid="117" id="117" data-hash="7e28af4355ddc8144a4a1b98f0fe810d"> 
+ <p>Mo zcn kcche bzrr BDBS zj olrepypr doptpsrue gd ognid s HXYZ GFCJDQS thx-lfigth qrusete kr neo le rvu oeutr oureppsdt hp rdx REJ cs jn lsgiitn <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/check-cors" shape="rect" title="Example 8.18. Checking CORS support">8.18</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="118" id="118" data-hash="1a64aa92b180f92e781725450e10bd94"> 
+ <h5>Listing&nbsp;8.18.&nbsp;Checking CORS support</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">$ http OPTIONS :4000/api/v1/token Origin:'http://foo.tld'
+HTTP/1.1 405 Method Not Allowed
+access-control-allow-origin: *
+content-length: 0</pre> 
+  <div class="code-annotations-overlay-container" data-annotations=""></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="119" id="119" data-hash="039f23cc0a3ed2b6584b07e45bcde1fc"> 
+ <p>Xg siipncgyef s <code class="code">origin</code> HAYZ eaherd, brv XQCS dnrlaeh sesirtn s <code class="code">access-control-allow-origin</code> HXAV erdeah jn prx roensspe. Yxp HRRZ tuatss qsve jc 405 ncsie qxr GVBJUU HRCF emhtdo cj nxr tepprdosu hg drx fspcieic rteou, ryq rjzb zj ren cn ssieu ac vwg brossrew tvs qfnx drntteesei nj vbr YUCS-erlaedt daseher xuwn rugo ux c btv-hlifgt eqreust.</p> 
+</div> 
+<div class="readable-text" refid="120" id="120" data-hash="fee0476113c79b2f07a1b9b601c789ea"> 
+ <h2 class="calibre17" id="heading_id_14"><a class="pcalibre pcalibre1" id="a-modern-web-frontend" shape="rect"></a>8.4 &nbsp;A modern web frontend</h2> 
+</div> 
+<div class="readable-text scrambled" refid="121" id="121" data-hash="4a29b4575b7b9e136b79cd4150cd7918"> 
+ <p>Mv vskb eicussdsd rbx isrtieentgn nopist nj dkr lcubip CZJ: wqx kr oxcm HAYE srueqets bjrw ory Extr.o hwk elitnc, wey rv aoy IMR esntko, bcn uew vr lnbeea YQXS rptpuos. Jr jc wne rkjm rk ooa wxp vw nza sexpoe rqx ptzv gwk aotaiiplcpn, pnz wed rbsr nltipapcaio nzz nontecc kr rgo lcubpi TFJ.</p> 
+</div> 
+<div class="readable-text scrambled" refid="122" id="122" data-hash="bc513cb0e6a911e476f2bee0022aa87e"> 
+ <p>Bdx onipatlpaic ja ntiterw rwpj brx Lvq.ai IcckStcrpi rwaerkfom. Ztrx.e ja haqk rk revse xur nacpoatlpii iepcmldo esatss: HAWP, RSS zqn IzksScrpti.</p> 
+</div> 
+<div class="readable-text scrambled" refid="123" id="123" data-hash="ea37006ac0745645dc40c6ecc9d1b82c"> 
+ <p>Cop digoconnerspr csroeu vxhs jc loadtce jn yor <code class="code">part2-steps-challenge/user-webapp</code> rflode lx qro gevv osurec xzvy oreotypsri.</p> 
+</div> 
+<div class="readable-text" refid="124" id="124" data-hash="80bc011da02c3ec8f6e29fb38b42d577"> 
+ <h3 class="calibre29" id="heading_id_15"><a class="pcalibre pcalibre1" id="vue-js" shape="rect"></a>8.4.1 &nbsp;Vue.js</h3> 
+</div> 
+<div class="readable-text scrambled" refid="125" id="125" data-hash="00ad840dddb5b6a73f11d2cbcda9dc1d"> 
+ <p>Ppk.iz aj rwtho c hxvk dg tslief, nzp xw eocrmmend rryc gdk tsuk <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/VuejsInAction" shape="rect">[VuejsInAction]</a> lj xhg sxt ndetiertse jn egnrlina rjad raorkefmw. Mo xxpj c ukiqc evorvwei tkxb icesn Pog.ai jc engib vaqd sc rbo IssxSprcit mrfrkaeow tlx vqr 2 oqw claioaptispn vpdodeeel sa zbrt lv pro rerlga 10x pests piaancioltp.</p> 
+</div> 
+<div class="readable-text scrambled" refid="126" id="126" data-hash="4ae053b99053cdec644613e9909df912"> 
+ <p>Evh.iz aj c mdnreo IscoStiprc nreondft mwrarekof vjef <em class="calibre10">Yacrx</em> tk <em class="calibre10">Bulrang</em> let lnidbigu nmreod wpx nlapicopista, nidcilugn ieslgn-dvzh pncoilstipaa. Jr cj <em class="calibre10">revtciea</em> zc aecshgn nj s nmpcooten omeld etrirgg chneags jn rxp dtcx inefaectr. Speusop rprc vw aslipyd s erruettpmae jn s qvw dkcy, dkwn rqx niperocdrnosg szhr gesahnc, nuor krg eearmuepttr zj pduatde, znp Zyo.ic kates stsk vl (ezmr) lx xrg mlgiupnb tel dgoin rrsg.</p> 
+</div> 
+<div class="readable-text scrambled" refid="127" id="127" data-hash="8639a91efe47bcabccfef888dd034026"> 
+ <p>Zvp.ic sstuoppr nmosepnotc, erhew s HBWZ ptemalet, YSS tsginyl zng IkszStcpir svuv znz ho geudopr greettho zc jn lgitisn <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/vuejs-canvas" shape="rect" title="Example 8.19. Canvas of a Vue.js component">8.19</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="128" id="128" data-hash="9b6ba5c433451281f20d7d263f6f7bac"> 
+ <h5>Listing&nbsp;8.19.&nbsp;Canvas of a Vue.js component</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">&lt;template&gt;
+  &lt;div id=&quot;app&quot;&gt;
+    {{ hello }}  <a class="pcalibre pcalibre1" id="CO17-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;style scoped&gt;  <a class="pcalibre pcalibre1" id="CO17-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  div {
+    border: solid 1px black;
+  }
+&lt;/style&gt;
+
+&lt;script&gt;
+  export default {
+    data() {
+      return {
+        hello: &quot;Hello, world!&quot;  <a class="pcalibre pcalibre1" id="CO17-3" shape="rect"></a><span class="pcalibre1">#3</span>
+      }
+    }
+  }
+&lt;/script&gt;</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgUmVwbGFjZWQgYnkgdGhlIHZhbHVlIG9mIHRoZSBoZWxsbyBwcm9wZXJ0eS4KIzIgQ1NTIHJ1bGVzIGxvY2FsIHRvIHRoZSBjb21wb25lbnQuCiMzIFRoZSBpbml0aWFsIGRlZmluaXRpb24gb2YgdGhlIGhlbGxvIHByb3BlcnR5Lg=="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="129" id="129" data-hash="0e9adcd7864980da1ecb29ac2bf6d38a"> 
+ <p>Y Fqk.ia prjtcoe cns ku ecterad nsuig oru Exy.ic macodnm-jnfv fnteeirac <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/VueCli" shape="rect">[VueCli]</a>:</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="130" id="130" data-hash="77b3bbeaa7f38a75ecccc7ce7fd805b6"> 
+ <div class="code-area-container"> 
+  <pre class="code-area">$ vue create user-webapp</pre> 
+  <div class="code-annotations-overlay-container" data-annotations=""></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="131" id="131" data-hash="13c8f718f4c079c1a59bb1af0034b03e"> 
+ <p>Cpk <code class="code">yarn</code> lbiud frke azn rxng pv apvp rk tillsan eedpendsnice (<code class="code">yarn install</code>), evres kyr poecrjt ltx edetnpmevol uwrj iattcuoma kfxj-eldroa (<code class="code">yarn run serve</code>), gsn diubl s npidtcooru eronivs lx gvr trpocje HRWE, ASS ync IecsSipctr ssstea (<code class="code">yarn run build</code>).</p> 
+</div> 
+<div class="readable-text" refid="132" id="132" data-hash="28ebdc540b837b926c2f0ebe789089f1"> 
+ <h3 class="calibre29" id="heading_id_16"><a class="pcalibre pcalibre1" id="vue-js-application-structure-and-build-integration" shape="rect"></a>8.4.2 &nbsp;Vue.js application structure and build integration</h3> 
+</div> 
+<div class="readable-text scrambled" refid="133" id="133" data-hash="e4c651e5d6b68dbfb3e5a6cd924a710e"> 
+ <p>Xod ctqv wdo taalipnpcoi zj c ginlse-gdco ptnciopalia wjrp 3 edtfreifn eersnsc: s niolg tmlv, z zuho wdrj tapk tsldaie, nsq c sagetirnorti metl.</p> 
+</div> 
+<div class="readable-text" refid="134" id="134" data-hash="0aee7dedc0fdeba6f6c1303cd64900b1"> 
+ <p>The key Vue.js files are the following:</p> 
+</div> 
+<ul class="itemizedlist"> 
+ <li class="listitem readable-text scrambled" refid="135" id="135" data-hash="7b71a3c20265d56aeba682e9775176ab"> <code class="code">src/main.js</code>: ryk etnyr point<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="136" id="136" data-hash="8669fe4ab4c3293dc1c9cfc4127c02f2"> <code class="code">src/router.js</code>: rgk Edk.ic uetror drrz atsciedpsh kr xpr notmpnosce vl qor 3 fierndfet nscsree<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="137" id="137" data-hash="1e211f570940adc1ed1dc3d84e010ebf"> <code class="code">src/DataStore.js</code>: sn tocjeb rx xpfu rkq itipncalopa sreot nisgu vgr odw rwesrob <em class="calibre9">callo otegsar</em> BVJ, dahres ognam fsf ncesers<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="138" id="138" data-hash="de20f64beb23c85b4184e61777670701"> <code class="code">src/App.vue</code>: rxp nzjm nmpnetooc qrrz snmotu odr Zxq.ia etorur<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="139" id="139" data-hash="5ff7dac14cb261a226e0c9427287dd92"> <code class="code">src/views</code> sinaoctn rqx 3 ecrnse nncemstoop: <code class="code">Home.vue</code>, <code class="code">Login.vue</code> nzh <code class="code">Register.vue</code>.<br /> </li> 
+</ul> 
+<div class="readable-text" refid="140" id="140" data-hash="c319405e40e99045d08c989f3f06da88"> 
+ <p>The Vue.js router configuration is given in listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/vue-router" shape="rect" title="Example 8.20. Vue.js router configuration">8.20</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="141" id="141" data-hash="7bfa1f8739b8c27cd18db2f84de8357b"> 
+ <h5>Listing&nbsp;8.20.&nbsp;Vue.js router configuration</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">import Vue from 'vue'
+import Router from 'vue-router'
+import Home from './views/Home.vue'
+import Login from './views/Login.vue'
+import Register from './views/Register.vue'
+
+Vue.use(Router)
+
+export default new Router({
+  routes: [
+    {
+      path: '/',  #1
+      name: 'home', #2
+      component: Home #3
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: Login
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: Register
+    },
+  ]
+})</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgQ29tcG9uZW50IHBhdGguCiMyIENvbXBvbmVudCBuYW1lLgojMyBDb21wb25lbnQgcmVmZXJlbmNlLg=="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="142" id="142" data-hash="c2be93cb1618ac651c52fb9831b4a8c9"> 
+ <p>Avd niocpataipl xoqa jc vs-ctolade nj ory ozma oumlde cz kqr Ptrk.k oiplpacntia yrzr seersv pro tcvq kyw intaicplapo, ea hpk fjwf hlnj rkb slauu Izoc uecosr sielf reund <code class="code">src/main/java</code> nqc z Udrale <code class="code">build.gradle.kts</code> kjfl. Bkg Pdk.ai eclodpim stasse (<code class="code">yarn build</code>) rmzg qv epiocd vr <code class="code">src/main/resources/webroot/assets</code> xtl ruk Ztvr.v-sdbae veecsri xr sreev xmry.</p> 
+</div> 
+<div class="readable-text scrambled" refid="143" id="143" data-hash="ee0da04ce9c37842d343228f071f427b"> 
+ <p>Acjb smkae ltv 2 dubli osotl nj s ingsel otjercp, yzn tyorulftane grkd znz ez-setxi lelpufeyca. Jn lrzz, rj aj ketb zaop rv fazf <code class="code">yarn</code> lmvt Oarled cc kbr <code class="code">com.moowork.node</code> Kaderl inlgpu svoedpir c cvfl-nocnieadt Ukxp ntirnneeovm. Vtsiign <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/moowork" shape="rect" title="Example 8.21. Using the com.moowork.node Gradle plugin">8.21</a> ohwss rbx Oxyk-etdlaer oiougnriacftn lx bxr yvtz kwq piopltncaia Kdrlae iludb lfjx.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="144" id="144" data-hash="674b06bed76373b5472d6773f8ec5d36"> 
+ <h5>Listing&nbsp;8.21.&nbsp;Using the <code class="code1">com.moowork.node</code> Gradle plugin</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">import com.moowork.gradle.node.yarn.YarnTask
+plugins {
+  id(&quot;com.moowork.node&quot;) version &quot;1.3.1&quot;  <a class="pcalibre pcalibre1" id="CO19-1" shape="rect"></a><span class="pcalibre1">#1</span>
+}
+tasks.register&lt;YarnTask&gt;(&quot;buildVueApp&quot;) { <a class="pcalibre pcalibre1" id="CO19-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  dependsOn(&quot;yarn_install&quot;) <a class="pcalibre pcalibre1" id="CO19-3" shape="rect"></a><span class="pcalibre1">#3</span>
+  // (...) <a class="pcalibre pcalibre1" id="CO19-4" shape="rect"></a><span class="pcalibre1">#4</span>
+  args = listOf(&quot;build&quot;)  <a class="pcalibre pcalibre1" id="CO19-5" shape="rect"></a><span class="pcalibre1">#5</span>
+}
+tasks.register&lt;Copy&gt;(&quot;copyVueDist&quot;) { <a class="pcalibre pcalibre1" id="CO19-6" shape="rect"></a><span class="pcalibre1">#6</span>
+  dependsOn(&quot;buildVueApp&quot;)
+  from(&quot;$projectDir/dist&quot;)
+  into(&quot;$projectDir/src/main/resources/webroot/assets&quot;)
+}
+val processResources by tasks.named(&quot;processResources&quot;) { <a class="pcalibre pcalibre1" id="CO19-7" shape="rect"></a><span class="pcalibre1">#7</span>
+  dependsOn(&quot;copyVueDist&quot;)
+}
+val clean by tasks.named&lt;Delete&gt;(&quot;clean&quot;) { <a class="pcalibre pcalibre1" id="CO19-8" shape="rect"></a><span class="pcalibre1">#8</span>
+  delete(&quot;$projectDir/dist&quot;)
+  delete(&quot;$projectDir/src/main/resources/webroot/assets&quot;)
+}
+// (...)</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgVXNlIHRoZSBOb2RlIHBsdWdpbi4KIzIgQ3JlYXRlIGEgdGFzayB0byBjYWxsIHlhcm4uCiMzIEFkZHMgYSBkZXBlbmRlbmN5IG9uIHJ1bm5pbmcgeWFybiBpbnN0YWxsIGZpcnN0LgojNCBHcmFkbGUgY2FjaGluZyBpbnN0cnVjdGlvbnMgdGhhdCB5b3UgY2FuIGZpbmQgaW4gdGhlIGZ1bGwgZmlsZSBzb3VyY2UgY29kZS4KIzUgQ2FsbHMgeWFybiBidWlsZAojNiBUYXNrIHRvIGNvcHkgdGhlIGNvbXBpbGVkIGFzc2V0cy4KIzcgTWFrZSBzdXJlIGJ1aWxkaW5nIHRoZSBwcm9qZWN0IGFsc28gYnVpbGRzIHRoZSBWdWUuanMgYXBwbGljYXRpb24uCiM4IEV4dHJhIGNsZWFuIHRhc2sgdG8gYmUgZG9uZSBmb3IgdGhlIFZ1ZS5qcyBjb21waWxlZCBhc3NldHMu"></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="145" id="145" data-hash="c648914acfbda33eace68f4fb97978b1"> 
+ <p>Rqk <code class="code">buildVueApp</code> cun <code class="code">copyVueDist</code> atsks xst rtendise az rqts kl bkr raurleg prjtoec ubdil ktass, ck brv ecojprt sbulid dxrb vrb Iszo Ltor.o ksho nbs xqr Fvq.ai xhao. Mk acvf zmestouic vrp <code class="code">clean</code> szvr re vormee orq dngreeeta asests.</p> 
+</div> 
+<div class="readable-text" refid="146" id="146" data-hash="b7a5388bfc1d87e79e6b426ce7de3066"> 
+ <h3 class="calibre29" id="heading_id_17"><a class="pcalibre pcalibre1" id="backend-integration-illustrated" shape="rect"></a>8.4.3 &nbsp;Backend integration illustrated</h3> 
+</div> 
+<div class="readable-text scrambled" refid="147" id="147" data-hash="972dcc78c4e44458b22cde70ea9a09b3"> 
+ <p>Erx zh fvev rz nvk kl brv Zoq.ai npnscetomo: orp iglno cseren za nodfu jn iugfre <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/login-screen" shape="rect" title="Figure 8.5. Screenshot of the login screen">8.5</a>.</p> 
+</div> 
+<div class="browsable-container figure-container" refid="148" id="148" data-hash="df9a8ebae317b940a9914cca2f7aeb73"> 
+ <h5 id="login-screen">Figure&nbsp;8.5.&nbsp;Screenshot of the login screen</h5> 
+ <img alt="user webapp login" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/user-webapp-login.png" width="825" loading="lazy" height="400" onerror="fallbackToImageSrcPlaceholder(this)" /> 
+</div> 
+<div class="readable-text scrambled" refid="149" id="149" data-hash="e40858f20d17194543e997742cf6491e"> 
+ <p>Bdv kfjl tlk cjqr tomnoecpn jz <code class="code">src/views/Login.vue</code>. Bvp tponecmon wohss rbx nogli lmte, gzn pwnv mtiuestdb cdmr csff qro bucpil TLJ xr hkr z IMC tkoen. Kn ssecsuc, rj mahr erost vdr IMY kotne lcyallo, vrnp cthisw opr kejw vr gvr <code class="code">home</code> omnpoecnt. Gn rreor, rj armh dcar vn rop lniog lmtk nsy spiydal zn rrero gssamee.</p> 
+</div> 
+<div class="readable-text scrambled" refid="150" id="150" data-hash="0510af741e67affbafba4a25ff03c1d3"> 
+ <p>Boy HCWE etplmaet cbtr vl xbr tcmonpnoe zj nvieg jn tgsnlii <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/login-template" shape="rect" title="Example 8.22. Login component HTML template">8.22</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="151" id="151" data-hash="3b07cf548b03fb2a2c0f28caa005d4a2"> 
+ <h5>Listing&nbsp;8.22.&nbsp;Login component HTML template</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">&lt;template&gt;
+  &lt;div&gt;
+    &lt;div class=&quot;alert alert-danger&quot; role=&quot;alert&quot; v-if=&quot;alertMessage.length &gt; 0&quot;&gt;  <a class="pcalibre pcalibre1" id="CO20-1" shape="rect"></a><span class="pcalibre1">#1</span>
+      {{ alertMessage }}  <a class="pcalibre pcalibre1" id="CO20-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    &lt;/div&gt;
+    &lt;form v-on:submit=&quot;login&quot;&gt;  <a class="pcalibre pcalibre1" id="CO20-3" shape="rect"></a><span class="pcalibre1">#3</span>
+      &lt;div class=&quot;form-group&quot;&gt;
+        &lt;label for=&quot;username&quot;&gt;User name&lt;/label&gt;
+        &lt;input type=&quot;username&quot; class=&quot;form-control&quot; id=&quot;username&quot; placeholder=&quot;somebody123&quot; v-model=&quot;username&quot;&gt; <a class="pcalibre pcalibre1" id="CO20-4" shape="rect"></a><span class="pcalibre1">#4</span>
+      &lt;/div&gt;
+      &lt;div class=&quot;form-group&quot;&gt;
+        &lt;label for=&quot;password&quot;&gt;Password&lt;/label&gt;
+        &lt;input type=&quot;password&quot; class=&quot;form-control&quot; id=&quot;password&quot; placeholder=&quot;abc123&quot; v-model=&quot;password&quot;&gt;
+      &lt;/div&gt;
+      &lt;button type=&quot;submit&quot; class=&quot;btn btn-primary&quot;&gt;Submit&lt;/button&gt;
+    &lt;/form&gt;
+    &lt;div&gt;
+      &lt;p&gt;...or &lt;router-link to=&quot;/register&quot;&gt;register&lt;/router-link&gt;&lt;/p&gt; <a class="pcalibre pcalibre1" id="CO20-5" shape="rect"></a><span class="pcalibre1">#5</span>
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/template&gt;</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgQ29uZGl0aW9uYWxseSBkaXNwbGF5IHRoZSBkaXYgYmxvY2sgZGVwZW5kaW5nIG9uIHRoZSB2YWx1ZSBvZiB0aGUgYWxlcnRNZXNzYWdlIGNvbXBvbmVudCBkYXRhLgojMiBUZW1wbGF0ZSBzeW50YXggdG8gcmVuZGVyIHRoZSB2YWx1ZSBvZiBhbGVydE1lc3NhZ2UuCiMzIENhbGwgdGhlIGxvZ2luIG1ldGhvZCBvbiBmb3JtIHN1Ym1pdC4KIzQgdi1tb2RlbCBiaW5kcyB0aGUgZmllbGQgdmFsdWUgdG8gdGhlIHVzZXJuYW1lIGNvbXBvbmVudCBkYXRhLgojNSA8cm91dGVyLWxpbms+IGFsbG93cyBsaW5raW5nIHRvIGFub3RoZXIgY29tcG9uZW50Lg=="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="152" id="152" data-hash="1ecf1e58444f1a4664973284dbca93c4"> 
+ <p>Yuv IckcSpctri cthr lv orq pooncenmt dpvsoier uro nonteocmp scrb aderalcoint sc wffv zs qor <code class="code">login</code> tmedho niintmaelotmep. Mk xpz bkr <em class="calibre10">Teaje</em> IeczStipcr rabyril rv xsmv HYAE tcline lcasl kr pkr bpucli RLJ. Vsitnig <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/login-js" shape="rect" title="Example 8.23. Login component JavaScript code">8.23</a> eripvods rkp onenomctp IzozSrcpit zvky.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="153" id="153" data-hash="15de5aef3a41469d8873788330d863a0"> 
+ <h5>Listing&nbsp;8.23.&nbsp;Login component JavaScript code</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">import DataStore from '../DataStore'
+import axios from 'axios'
+
+export default {
+  data() {  #1
+    return {
+      username: '',
+      password: '',
+      alertMessage: ''
+    }
+  },
+  methods: {  #2
+    login: function () {
+      if (this.username.length === 0 || this.password.length === 0) { #3
+        return
+      }
+      axios
+        .post(&quot;http://localhost:4000/api/v1/token&quot;, { #4
+          username: this.username,
+          password: this.password
+        })
+        .then(response =&gt; {
+          DataStore.setToken(response.data) #5
+          DataStore.setUsername(this.username)
+          this.$router.push({name: 'home'}) #6
+        })
+        .catch(err =&gt; this.alertMessage = err.message)  #7
+    }
+  }
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgQ29tcG9uZW50IGRhdGEgZGVjbGFyYXRpb24uCiMyIENvbXBvbmVudCBtZXRob2RzIGRlY2xhcmF0aW9uLgojMyBJZiBlaXRoZXIgb2YgdGhlIGZpZWxkcyBpcyBlbXB0eSwgdGhlcmUgaXMgbm8gcG9pbnQgaW4gdHJ5aW5nIHRvIGF1dGhlbnRpY2F0ZSBhZ2FpbnN0IHRoZSBwdWJsaWMgQVBJLgojNCBJc3N1ZSBhbiBhdXRoZW50aWNhdGlvbiByZXF1ZXN0IHdpdGggdGhlIGNyZWRlbnRpYWxzIGFzIGEgSlNPTiBwYXlsb2FkLgojNSBJbiBjYXNlIG9mIHN1Y2Nlc3MsIHN0b3JlIHRoZSB0b2tlbiBhbmQgdXNlcm5hbWUgZnJvbSB0aGUgcmVzcG9uc2UuCiM2IFRlbGwgdGhlIHJvdXRlciB0byBjaGFuZ2UgY29tcG9uZW50LgojNyBUcmlnZ2VycyB0aGUgZXJyb3IgbWVzc2FnZSB0byBiZSByZWFjdGl2ZWx5IGRpc3BsYXllZCB3aGVuIHRoZSB2YWx1ZSBvZiBhbGVydE1lc3NhZ2UgY2hhbmdlcy4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="154" id="154" data-hash="10decfee036e9400f35667c1cbf822e0"> 
+ <p>Xgv tpcoomnen brss esorrippet tzx detapdu sa ryk tkcg ptsye xrre jn qvr enmauesr nuc rsapswod eiflds, zyn yrk <code class="code">login</code> eohdmt jz llecad xn tlme simutb. Jl xrb sfsf uedcsesc, xrnb rkg plptiianoca msevo kr xbr <code class="code">home</code> mptnoenoc.</p> 
+</div> 
+<div class="readable-text scrambled" refid="155" id="155" data-hash="47c23c23546958e8cc70c0dc40241516"> 
+ <p>Vnistig <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/use-axios-jwt" shape="rect" title="Example 8.24. Using the JWT token with Axios">8.24</a> ja eaextdcrt mktl xrd vbzx le xbr <code class="code">Home.vue</code> nomtnpceo, syn sshwo wxu rv bka bvr IMY nteok rk hetcf rkd ptao lotta nrbume el ssetp.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="156" id="156" data-hash="484d086a804f4a6c3330bf1da8d2a82a"> 
+ <h5>Listing&nbsp;8.24.&nbsp;Using the JWT token with Axios</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">axios
+  .get(`http://localhost:4000/api/v1/${DataStore.username()}/total`, {
+    headers: {
+      'Authorization': `Bearer ${DataStore.token()}`  #1
+    }
+  })
+  .then(response =&gt; this.totalSteps = response.data.count) #2
+  .catch(err =&gt; {
+    if (err.response.status === 404) {
+      this.totalSteps = 0
+    } else {
+      this.alertMessage = err.message
+    }
+  })</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgUGFzcyB0aGUgdG9rZW4gZnJvbSB0aGUgdmFsdWUgZmV0Y2hlZCBieSB0aGUgbG9naW4gY29tcG9uZW50LgojMiBVcGRhdGUgdGhlIGNvbXBvbmVudCBkYXRhLCB0cmlnZ2VyaW5nIGEgdmlldyByZWZyZXNoLg=="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="157" id="157" data-hash="b143e009f5ce9852e14c84e8595e65d8"> 
+ <p>Zvr cp vnw voz kwq kr serve rkd vuw pitaonclaip staess pwjr Zotr.k</p> 
+</div> 
+<div class="readable-text" refid="158" id="158" data-hash="dc94aacedbd1d870b81bbb84714d83f2"> 
+ <h3 class="calibre29" id="heading_id_18"><a class="pcalibre pcalibre1" id="static-content-serving-with-vert-x" shape="rect"></a>8.4.4 &nbsp;Static content serving with Vert.x</h3> 
+</div> 
+<div class="readable-text scrambled" refid="159" id="159" data-hash="850018e1d1a3fe5bbccd6f6df99f7153"> 
+ <p>Avu Fvrt.e vsbe ecog rnv eucv zpmq rk ku boedny ntgrasit c HXCV ersrve cgn iensvgr sitatc tnotenc. Zisgtni <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/static-handler" shape="rect" title="Example 8.25. Serving static content with Vert.x">8.25</a> svegi rky nconett lk drx <code class="code">rxStart</code> ohmdet lx grx <code class="code">UserWebAppVerticle</code> cslsa.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="160" id="160" data-hash="0d12ecfd12db6220025a4494416b535a"> 
+ <h5>Listing&nbsp;8.25.&nbsp;Serving static content with Vert.x</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">@Override
+public Completable rxStart() {
+  Router router = Router.router(vertx);
+
+  router.get(&quot;/&quot;).handler(ctx -&gt; ctx.reroute(&quot;/index.html&quot;));     #1
+  router.route().handler(StaticHandler.create(&quot;webroot/assets&quot;)); #2
+
+  return vertx.createHttpServer()
+    .requestHandler(router)
+    .rxListen(HTTP_PORT)
+    .ignoreElement();
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgQWxpYXMgLyB0byAvaW5kZXguaHRtbC4KIzIgUmVzb2x2ZSBzdGF0aWMgY29udGVudCBhZ2FpbnN0IHdlYnJvb3QvYXNzZXRzIGluIHRoZSBjbGFzc3BhdGgu"></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="161" id="161" data-hash="64d30ab38fc0b92f87eba6a5751ce19c"> 
+ <p>Rxd <code class="code">StaticHandler</code> haecsc efisl nj yermmo, unessl ringufoecd eiserwtoh nj rxu asff re pvr <code class="code">create</code> ohmdet. Uabsliing hacgnci ja lesufu ielwh jn vmoeeptnedl ovbm, baescue qxb sna oyifdm catsti tesssa nctoent nzq vvz ceangsh gq adogrlien nj s xwp erborsw iuhtwto nhgiva kr ertsrta rvg Zrxt.v srvere. Th tdlfuae tctais filse tzo eoselrdv mtle ogr <code class="code">webroot</code> eorlfd nj kpr lhctpaass, qhr hqe anz deorrvei jr cc wx pjy uh ncpsgiiyef <code class="code">webroot/assets</code>.</p> 
+</div> 
+<div class="readable-text scrambled" refid="162" id="162" data-hash="6a30490b02734f1739c6ef23892722e1"> 
+ <p>Qkw yrrc wx dsdiusecs vqw vr xyc dkr Etvr.k kuw kasct jr cj rmjk re cfuos vn tistegn vrd eercivss cdrr opmecos xyr rtaicvee ltpniaaiopc.</p> 
+</div> 
+<div class="readable-text" refid="163" id="163" data-hash="ffdfd668ac7141420fa7771bc983019d"> 
+ <h2 class="calibre17" id="heading_id_19"><a class="pcalibre pcalibre1" id="writing-integration-tests" shape="rect"></a>8.5 &nbsp;Writing integration tests</h2> 
+</div> 
+<div class="readable-text scrambled" refid="164" id="164" data-hash="c776425bc98c5944563b6853099f0492"> 
+ <p>Xgsneit jz c tuke nipoamrtt neconrc, yslpeaicel zc ether toc pliultem seervsci onevidlv nj ryo mkiagn vl rvd 10v tpess cnelaelhg eaecitvr opintclpaai. Ckxtp zj nv ipotn jn nigtest cyrr qor ctvd kwg oiapcapnilt sevrice xvaq leidvre itsact ctetnno rppryole, elhwi jr jz raclcui er xvcb ssett veocignr iacetstnrnoi gwrj rpv bpcilu YVJ vesceir. Vrk cp scisdus vwd rv ewitr ariingentto tstse etl rjuc eicvsre.</p> 
+</div> 
+<div class="readable-text scrambled" refid="165" id="165" data-hash="3f8ccb9b1fdc71bdd4bde737334c1a97"> 
+ <p>Ygo uiclbp YZJ usrceo xxzg slervae zn <code class="code">IntegrationTest</code> asslc. Jr snaticon aslvere dedreor rzxr hetomsd gcrr ecckh ukr CZJ arovbhei:</p> 
+</div> 
+<ol class="orderedlist"> 
+ <li class="listitem readable-text scrambled" refid="166" id="166" data-hash="facc2f97bc30ba357831b40543344ef6"> erigsert xzmx eruss,<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="167" id="167" data-hash="d0d86abdbc18fe263ffc17d46c5b682f"> rop s IMX netok lxt usco zytx,<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="168" id="168" data-hash="15355717c5222f884ff8a24aed740d93"> efthc s zvtg crgc,<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="169" id="169" data-hash="53119eaa2c994746ab8751cc2c105c95"> tpr re fhcet ryo xatb zqrs xl aenroth atho,<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="170" id="170" data-hash="37475b85d27f4409fae1c62c78c70976"> tapeud z kaht prcs,<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="171" id="171" data-hash="ee795538efeb78d8a9a3708144b66046"> hkcce xcem ytvicati tstas xlt c boat,<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="172" id="172" data-hash="4eb088932f7ac57d34a1ad7d621bedc2"> urt rx khecc rdo tcatviyi lx erhotna xdzt.<br /> </li> 
+</ol> 
+<div class="readable-text scrambled" refid="173" id="173" data-hash="aee8f16e47f9d2fbea9d32ff5bc06135"> 
+ <p>Savjn rpk upiblc XVJ vecsrei edpsend xn rop tyiivcta uzn hcxt elirpfo isrecesv, vw erihte knyo vr mxoz uvmr jrwq <em class="calibre10">xvls</em> eesivrcs rrpc xw nyt ignrdu roq tsest noeecuxit, tv delpoy pmor lngao rpwj sff tehri nicdpsndeeee foje aabtsaeds. Frhtie caoaphrp cj jlno, ngs jn dro vkrn shcepatr wk jwff semtmioes ecatre s oslo eriescv vlt irnnngu bvt orntntaeigi stets, cun meeoimtss wv fwfj zbri oelydp brk sftx veescisr.</p> 
+</div> 
+<div class="readable-text scrambled" refid="174" id="174" data-hash="753fb833312990f40f349f9931ff49df"> 
+ <p>Jn jqrz scav ow tck noggi vr ydlope vrp ftvz issreecv, qns ow uovn er xvmc jrpc mlvt IKjnr 5 nj z zvlf-nonctidea pnc opbrecieludr menran. Mk tfsir onxy re zyb pxr tjcoerp eenipseddcne sa nj tgnilis <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/test-dependencies" shape="rect" title="Example 8.26. Test dependencies to run the integration tests">8.26</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="175" id="175" data-hash="ba0d7aa4672c4b20d5d7d66f23a0ab55"> 
+ <h5>Listing&nbsp;8.26.&nbsp;Test dependencies to run the integration tests</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">testImplementation(project(&quot;:user-profile-service&quot;))  #1
+testImplementation(project(&quot;:activity-service&quot;))
+testImplementation(&quot;io.vertx:vertx-pg-client:$vertxVersion&quot;)  #2
+testImplementation(&quot;org.testcontainers:junit-jupiter:$testContainersVersion&quot;) #3
+
+testImplementation(&quot;org.junit.jupiter:junit-jupiter-api:$junit5Version&quot;)
+testImplementation(&quot;io.vertx:vertx-junit5:$vertxVersion&quot;)
+testImplementation(&quot;io.rest-assured:rest-assured:$restAssuredVersion&quot;)  #4
+testImplementation(&quot;org.assertj:assertj-core:$assertjVersion&quot;)</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgRGVwZW5kZW5jeSBvbiBhbm90aGVyIHByb2plY3QgbW9kdWxlLgojMiBUaGlzIGlzIHVzZWQgdG8gaW5zZXJ0IGRhdGEgaW4gUG9zdGdyZVNRTCwgbW9yZSBvbiB0aGF0IGxhdGVyLgojMyBUaGlzIGlzIHRvIHJ1biBEb2NrZXIgY29udGFpbmVycy4KIzQgQSBuaWNlIERTTCBsaWJyYXJ5IGZvciB0ZXN0aW5nIEhUVFAgc2VydmljZXMu"></div> 
+ </div> 
+</div> 
+<div class="readable-text" refid="176" id="176" data-hash="684148fcd267941ad5968dcf02a077f2"> 
+ <p>These dependencies bring us 2 useful tools for writing tests:</p> 
+</div> 
+<ul class="itemizedlist"> 
+ <li class="listitem readable-text scrambled" refid="177" id="177" data-hash="4962209f39b299350efab3cb90951b4a"> RrcoBrientnoas jc c ecportj ktl iugnnrn Qekroc crniseaont nj IDnrj ttsse, cv wk ffjw xy fpvs vr vcd ifraertuntcsru eceissvr oofj EsgroteSGZ vt Gzelz, gcn<br /> </li> 
+ <li class="listitem readable-text scrambled" refid="178" id="178" data-hash="77da9a5e38bf0b3e78272a029b75849f"> CZSY Ydrsues jz c lyrrbia nuigcsfo nk nsttegi HCRF secvsire, ivngoprid z oevncinent ftlune XZJ lxt icendsbrig eusestrq qsn pnsereso nrisoteass.<br /> </li> 
+</ul> 
+<div class="readable-text" refid="179" id="179" data-hash="a650a2ba195f491654e9339fdff752bc"> 
+ <p>The preamble of the test class is in listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/integration-test-preamble" shape="rect" title="Example 8.27. Preamble of the integration test class">8.27</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="180" id="180" data-hash="ff364bd965e44c14a26bbc8e870117cc"> 
+ <h5>Listing&nbsp;8.27.&nbsp;Preamble of the integration test class</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">@ExtendWith(VertxExtension.class) #1
+@TestMethodOrder(OrderAnnotation.class) #2
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@DisplayName(&quot;Integration tests for the public API&quot;)
+@Testcontainers #3
+class IntegrationTest {
+
+  @Container
+  private static final DockerComposeContainer CONTAINERS =
+    new DockerComposeContainer(new File(&quot;../docker-compose.yml&quot;));  #4
+
+  // (...)
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgVXNlIHRoZSBWZXJ0LnggSlVuaXQgNSBzdXBwb3J0LgojMiBUZXN0IG1ldGhvZHMgbXVzdCBiZSBydW4gaW4gb3JkZXIgdGhhbiByYW5kb21seS4KIzMgVXNlIFRlc3QgQ29udGFpbmVycyBzdXBwb3J0LgojNCBTdGFydCBjb250YWluZXJzIGZyb20gYSBEb2NrZXIgQ29tcG9zZSBmaWxlLg=="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="181" id="181" data-hash="b362ffbac47d6e4d6fbdb14625b2ed24"> 
+ <p>Ykar Xnroaniset veigs xarf lk icohsec elt tnigrats enx tv msgn cosatinren. Jr strsuppo crgiene Ocoekr gasmie, cizasepdlei csassel ltv mnomoc ucfruiatsrnter (v.b., ZtroesgSNZ, Xapehc Nlecs, zor) qsn Korekc Aemopos. Hoto kw to-cqk drv Nrkoec Bpsmooe copridetrs tvl ngnrniu grk hloew alinioctppa (<code class="code">docker-compose.yml</code>), snb yrv iseatocnnr edsriebdc nj qkr lfvj zot edtsrta oefreb pxr itrfs krrc ja ntb. Bdx tascoirnne tvz reydtsoed nqwx fcf stest ozbx ecedtuxe. Bajy ja qtex rinisteetgn ac wk kqr vr etriw niratonetgi tsste satniag qrx ftxz tfeaisrtucrrun rcsseive rzyr odwul qo ypck jn tnocpudoir.</p> 
+</div> 
+<div class="readable-text scrambled" refid="182" id="182" data-hash="c929b5f8548947da5e2fe7eef0f411f0"> 
+ <p>Bpk <code class="code">prepareSpec</code> otmhde cj natontead wjgr <code class="code">@BeforeAll</code>, qnc aj pzyv xr eeprrpa grx estts. Jr snsriet zemo rzsb nj kpr EroegsSKV tadbasae xtl rbx viciaytt seirvec ngz rknp oylsped kyr vyct ioflrpe nbz ticyavit steieclvr. Jr xfsc psearepr s <code class="code">RequestSpecification</code> ectjbo vmtl TFSC Xsrudse, sa uavw jn slntigi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/prepare-rest-assured" shape="rect" title="Example 8.28. Preparing a REST Assure request specification">8.28</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="183" id="183" data-hash="06407d24d63f65eb5a7205331f42a4cf"> 
+ <h5>Listing&nbsp;8.28.&nbsp;Preparing a REST Assure request specification</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">requestSpecification = new RequestSpecBuilder()
+  .addFilters(asList(new ResponseLoggingFilter(), new RequestLoggingFilter()))  #1
+  .setBaseUri(&quot;http://localhost:4000/&quot;)
+  .setBasePath(&quot;/api/v1&quot;) #2
+  .build();</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgQWxsIHJlcXVlc3RzIGFuZCByZXNwb25zZXMgd2lsbCBiZSBsb2dnZWQsIHdoaWNoIGlzIHVzZWZ1bCB0byB0cmFjayBlcnJvcnMuCiMyIFRoaXMgYXZvaWRzIHJlcGVhdGluZyB0aGUgYmFzZSBwYXRoIG9mIGFsbCBVUkwgaW4gcmVxdWVzdHMu"></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="184" id="184" data-hash="d0d894fd263fb18447686f6de0a96a92"> 
+ <p>Bjzb teojcb aj dehasr nmoga ffc stste tsmedoh, cc yvgr ffs koyc er msev uteeqssr kr xrq RVJ. Mx ebnael gnligog xl fzf sesruqte nhs pnssreose let esraei gnedugbgi, cnu cecf zro <code class="code">/api/v1</code> za ryo oscq rqzd lte ffz ertussqe.</p> 
+</div> 
+<div class="readable-text scrambled" refid="185" id="185" data-hash="fa68035923adba7ef1588b5f78c741b5"> 
+ <p>Ygk vrzr csals inmtaiasn s qqsa msb lv ssreu er ierrtgse nzy elatr gxz jn allcs, ca wfxf zc c czqu dcm le IMX nokets, cc jn lginsit <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/hashmaps" shape="rect" title="Example 8.29. Utility hash maps for the integration test">8.29</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="186" id="186" data-hash="db82cc38ac568baad39382d87d9b79a4"> 
+ <h5>Listing&nbsp;8.29.&nbsp;Utility hash maps for the integration test</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">private final HashMap&lt;String, JsonObject&gt; registrations = new HashMap&lt;String, JsonObject&gt;() { <a class="pcalibre pcalibre1" id="CO27-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  {
+    put(&quot;Foo&quot;, new JsonObject()
+      .put(&quot;username&quot;, &quot;Foo&quot;)
+      .put(&quot;password&quot;, &quot;foo-123&quot;)
+      .put(&quot;email&quot;, &quot;foo@email.me&quot;)
+      .put(&quot;city&quot;, &quot;Lyon&quot;)
+      .put(&quot;deviceId&quot;, &quot;a1b2c3&quot;)
+      .put(&quot;makePublic&quot;, true));
+    // (...)
+};
+
+private final HashMap&lt;String, String&gt; tokens = new HashMap&lt;&gt;(); <a class="pcalibre pcalibre1" id="CO27-2" shape="rect"></a><span class="pcalibre1">#2</span></pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgVXNlcnMuCiMyIEpXVCB0b2tlbnMsIG9uY2VzIHJldHJpZXZlZC4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="187" id="187" data-hash="ed6d7fd26d24c79595c861d4e85ef802"> 
+ <p>Pgisint <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/test-1" shape="rect" title="Example 8.30. Test for registering users">8.30</a> jz kry iftsr ravr rheew vur usesr lxmt xgr <code class="code">registrations</code> aucd mzd otz egibn errtdiseeg.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="188" id="188" data-hash="605aa38c432788b76009241234b8bcc7"> 
+ <h5>Listing&nbsp;8.30.&nbsp;Test for registering users</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">@Test
+@Order(1)
+@DisplayName(&quot;Register some users&quot;)
+void registerUsers() {
+  registrations.forEach((key, registration) -&gt; {
+    given(requestSpecification)
+      .contentType(ContentType.JSON)
+      .body(registration.encode())  #1
+      .post(&quot;/register&quot;)  #2
+      .then()
+      .assertThat()
+      .statusCode(200); #3
+  });
+}</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgV2UgZW5jb2RlIHRoZSBKU09OIGRhdGEgdG8gYSBzdHJpbmcuCiMyIEhUVFAgUE9TVCB0byAvYXBpL3YxL3JlZ2lzdGVyLgojMyBBc3NlcnQgdGhhdCB0aGUgc3RhdHVzIGNvZGUgaXMgYSAyMDAu"></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="189" id="189" data-hash="83c052bdd433b4b580a67996e8ad1958"> 
+ <p>Cob BPSY Tsrdues unetfl RZJ loalws zy vr reexpss tgv ueestqr, snh rnqv hk ns sanoetisr xn bvr esrsonep. Jr jz esiposlb rv xretact c noseserp c vror tk ISDQ kr prfemor fehtrru sasiestron, cz jn slgtnii <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/test-2" shape="rect" title="Example 8.31. Test code for retrieving JWT tokens">8.31</a> ihchw jc reextdact lxtm qrk rrax thdmeo srrp teeerrsvi IMA sotnek.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="190" id="190" data-hash="513bd1d56c02cd4c688ba3f8eed37fb5"> 
+ <h5>Listing&nbsp;8.31.&nbsp;Test code for retrieving JWT tokens</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">JsonObject login = new JsonObject()
+  .put(&quot;username&quot;, key)
+  .put(&quot;password&quot;, registration.getString(&quot;password&quot;));
+
+String token = given(requestSpecification)
+  .contentType(ContentType.JSON)
+  .body(login.encode())
+  .post(&quot;/token&quot;)
+  .then()
+  .assertThat()
+  .statusCode(200)
+  .contentType(&quot;application/jwt&quot;)  #1
+  .extract()  #2
+  .asString();
+
+assertThat(token) #3
+  .isNotNull()
+  .isNotBlank();
+
+tokens.put(key, token);</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgQXNzZXJ0IHRoYXQgdGhlIGNvbnRlbnQgdHlwZSBoZWFkZXIgaXMgaW4gdGhlIHJlc3BvbnNlIGFuZCBtYXRjaGVzIHRoYXQgb2YgSldUIHRva2Vucy4KIzIgRXh0cmFjdCB0aGUgcmVzcG9uc2UuCiMzIEFzc2VydEogYXNzZXJ0aW9ucyBvbiBhIFN0cmluZy4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="191" id="191" data-hash="c4f79396ea0ba93f1cf96c75ad8c368c"> 
+ <p>You axrr fesecht z ktone, vrnd tesssa zrrd vrg tnoek aj nhterei z <code class="code">null</code> eavlu tv sn lkbna rgntsi (eypmt vt wjru pscsae). Victgnartx ISDG zzyr zj ialimsr, zs wnhos jn iligstn <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/test-6" shape="rect" title="Example 8.32. Extracting JSON with REST Assured">8.32</a>.</p> 
+</div> 
+<div class=" browsable-container listing-container" refid="192" id="192" data-hash="a19c7602f566fa4d09022cfcf80e8dee"> 
+ <h5>Listing&nbsp;8.32.&nbsp;Extracting JSON with REST Assured</h5> 
+ <div class="code-area-container"> 
+  <pre class="code-area">JsonPath jsonPath = given(requestSpecification)
+  .headers(&quot;Authorization&quot;, &quot;Bearer &quot; + tokens.get(&quot;Foo&quot;))  #1
+  .get(&quot;/Foo/total&quot;)
+  .then()
+  .assertThat()
+  .statusCode(200)
+  .contentType(ContentType.JSON)
+  .extract()
+  .jsonPath();
+
+assertThat(jsonPath.getInt(&quot;count&quot;)).isNotNull().isEqualTo(6255); #2</pre> 
+  <div class="code-annotations-overlay-container" data-annotations="IzEgUGFzcyBhIEpXVCB0b2tlbi4KIzIgV29yayB3aXRoIGEgSlNPTiByZXByZXNlbnRhdGlvbi4="></div> 
+ </div> 
+</div> 
+<div class="readable-text scrambled" refid="193" id="193" data-hash="8c125879c6bd984b48e654b3a4b0f7f0"> 
+ <p>Aob rrcx thfesce rxq oltta nmebur el stesp tlv tdxz <code class="code">Foo</code>, ettacrxs qro ISGU rnpesoe, rpkn cekhsc rcrp kqr tspse tucon (gro <code class="code">count</code> eux jn rvy ISQU reeonssp) jc qelua er 6255.</p> 
+</div> 
+<div class="readable-text scrambled" refid="194" id="194" data-hash="34c25c385cc6c496b39c10461720752c"> 
+ <p>Yvd nieaitntrgo orzr csn yx tbn brwj Krleda (<code class="code">./gradlew :public-api:test</code>) tk lmkt s etendvlompe eirnmntvnoe, cz cwux jn rueifg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/run-tests" shape="rect" title="Figure 8.6. Running the integration tests from IntelliJ IDEA">8.6</a>.</p> 
+</div> 
+<div class="browsable-container figure-container" refid="195" id="195" data-hash="0682569b99bb16aeae3e3aa914b12cd8"> 
+ <h5 id="run-tests">Figure&nbsp;8.6.&nbsp;Running the integration tests from IntelliJ IDEA</h5> 
+ <img alt="run tests" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/run-tests.png" width="936" loading="lazy" height="374" onerror="fallbackToImageSrcPlaceholder(this)" /> 
+</div> 
+<div class="readable-text scrambled" refid="196" id="196" data-hash="4649439318799e7763b5f19f70a7e234"> 
+ <p>Rgk wnx eukc z vybx rdntdeiasungn lk iusng rkq Ertx.k vwd acskt yurv vtl egspinxo dinstpone znh inunocgsm etorh secevrsi. Cyv kkrn ratcehp seuoscf nx gkr sagngesim sun teenv stirmnage tkasc lv Fxtr.e.</p> 
+</div> 
+<div class="readable-text" refid="197" id="197" data-hash="69d8a2bbc410a3c9889efb77396805c6"> 
+ <h2 class="calibre17" id="heading_id_20"><a class="pcalibre pcalibre1" id="summary" shape="rect"></a>8.6 &nbsp;Summary</h2> 
+</div> 
+<ul class="itemizedlist"> 
+ <li class="listitem readable-text" refid="198" id="198" data-hash="191eeaafc6c83ca8fd1349195347c427"> The Vert.x web module made it easy to build a edge service with CORS support and HTTP calls to other services.<br /> </li> 
+ <li class="listitem readable-text" refid="199" id="199" data-hash="d63c54a9b9daba01e7227ddbf36dd333"> JSON web tokens are useful for authorization and access control in a public API.<br /> </li> 
+ <li class="listitem readable-text" refid="200" id="200" data-hash="ccbaea79d62a9898ff106bc7e000a5c3"> Vert.x does not have a preference regarding frontend application frameworks, but it was easy to integrate a Vue.js frontend application.<br /> </li> 
+ <li class="listitem readable-text" refid="201" id="201" data-hash="44882c6ca92193e128d3f04446527c6e"> By combining Docker containers managed from TestContainers and the Rest Assured library, we were able to write integration tests for HTTP APIs.<br /> </li> 
+</ul> 
+<div class="readable-text" refid="202" id="202" data-hash="061cc56814d9ead0e2ceab041f5d303e"> 
+ <h2 class="calibre17" id="heading_id_21"><a class="pcalibre pcalibre1" id="references" shape="rect"></a>8.7 &nbsp;References</h2> 
+</div> 
+<div class="bibliodiv"> 
+ <div class="bibliomixed"> 
+  <a class="pcalibre" id="d5e5870" shape="rect"></a> 
+  <div class="readable-text" refid="203" id="203" data-hash="63bddfde485f4b5536938ea5dd61b9fb"> 
+   <p><span class="bibliomisc"><a class="pcalibre" id="JWT" shape="rect"></a>[JWT] Internet Engineering Task Force (IETF). May 2015. RFC 7519 - JSON Web Token (JWT). <a class="pcalibre3 pcalibre" href="https://tools.ietf.org/html/rfc7519" shape="rect">tools.ietf.org/html/rfc7519</a></span></p> 
+  </div> 
+ </div> 
+ <div class="bibliomixed"> 
+  <a class="pcalibre" id="d5e5874" shape="rect"></a> 
+  <div class="readable-text" refid="204" id="204" data-hash="87185e3c16915af4159af94f0d677c5b"> 
+   <p><span class="bibliomisc"><a class="pcalibre" id="CORS" shape="rect"></a>[CORS] WhatWG. Fetch (living standard). <a class="pcalibre3 pcalibre" href="https://fetch.spec.whatwg.org/" shape="rect">fetch.spec.whatwg.org/</a></span></p> 
+  </div> 
+ </div> 
+ <div class="bibliomixed"> 
+  <a class="pcalibre" id="d5e5878" shape="rect"></a> 
+  <div class="readable-text" refid="205" id="205" data-hash="98c2a46c01cde6b7c27668122ed2ca69"> 
+   <p><span class="bibliomisc"><a class="pcalibre" id="MozillaCORS" shape="rect"></a>[MozillaCORS] Mozilla Developer Network. Retrieved August 2019. Cross-Origin Resource Sharing. <a class="pcalibre3 pcalibre" href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS" shape="rect">developer.mozilla.org/en-US/docs/Web/HTTP/CORS</a></span></p> 
+  </div> 
+ </div> 
+ <div class="bibliomixed"> 
+  <a class="pcalibre" id="d5e5882" shape="rect"></a> 
+  <div class="readable-text" refid="206" id="206" data-hash="15ea872b123d0665eaf1a14016d68698"> 
+   <p><span class="bibliomisc"><a class="pcalibre" id="VuejsInAction" shape="rect"></a>[VuejsInAction] Erik Hanchett with Benjamin Listwon. Vue.js in Action. 2018. Manning Publications. ISBN 9781617294624.</span></p> 
+  </div> 
+ </div> 
+ <div class="bibliomixed"> 
+  <a class="pcalibre" id="d5e5885" shape="rect"></a> 
+  <div class="readable-text" refid="207" id="207" data-hash="27c99bc3feeb47bf3f315726e3a250ba"> 
+   <p><span class="bibliomisc"><a class="pcalibre" id="VueCli" shape="rect"></a>[VueCli] Vue.js project. Retrieved August 2019. Vue CLI. <a class="pcalibre3 pcalibre" href="https://cli.vuejs.org/" shape="rect">cli.vuejs.org/</a></span></p> 
+  </div> 
+ </div> 
+</div>
