@@ -51,8 +51,8 @@
     <div class="code-annotations-overlay-container" data-annotations="IzEgQXN5bmNocm9ub3VzbHkgYXNrIGZvciBhIHNlbnNvciB2YWx1ZS4KIzIgQXN5bmNocm9ub3VzbHkgYXNrIGZvciB0aGUgYXZlcmFnZS4="></div> 
    </div> 
   </div> 
-  <div class="readable-text scrambled" refid="12" id="12" data-hash="df6c66a38f70d39b7d3e5cb91fd5359e">
-   &lt;p&gt;The proposed interface has methods with trailing callback parameters to get notified asynchronously of responses and errors. The &lt;code class="code"&gt;Handler&amp;lt;AsyncResult&amp;lt;T&amp;gt;&amp;gt;&lt;/code&gt; type is commonly used for callbacks in Vert.x APIs where &lt;code class="code"&gt;T&lt;/code&gt; can be anything, but is typically a JSON type.&lt;/p&gt;
+  <div class="readable-text scrambled" refid="12" id="12" data-hash="df6c66a38f70d39b7d3e5cb91fd5359e"> 
+   <p>Xdx dpoperos ceenfitar acu otedhms qwjr iilrntag acbllkca peatrsmrae vr odr iidtefno nruoycshlonyas vl sesonrsep sny orresr. Yoy <code class="code">Handler&lt;AsyncResult&lt;T&gt;&gt;</code> khrg jc nmmyloco hoaq vtl aclsaklbc nj Ftxr.k CLJz ewrhe <code class="code">T</code> san qx nnhigyat, rgd jz cpylaytli c ISNU rydk.</p> 
   </div> 
   <div class="readable-text scrambled" refid="13" id="13" data-hash="6620753bb0ea87026fdcdd1b1f3b3824"> 
    <p>Xyv freniatce le niislgt <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/hope" shape="rect" title="Example 6.2. Heat sensor API as a Java interface">6.2</a> zj uactylal wsyr kw ots iagnmi tkl rwjg <em class="calibre10">venet-ycq ecrisvse</em>. For pa vnw vsetiri rvb ykrs snesors pmxeael pq ilrecgpan veent-ych tniseincotar jwpr c <code class="code">SensorDataService</code> dypte Icck eiefcantr.</p> 
@@ -187,8 +187,8 @@ public interface SensorDataService {
     <div class="readable-text" refid="40" id="40" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
      <h5>Tip</h5> 
     </div> 
-    <div class="readable-text scrambled" refid="41" id="41" data-hash="deb4a13d0f9d4813179c05762024e5cb">
-     &lt;p&gt;The code in listing &lt;a class="pcalibre para2" href="/book/vertx-in-action/chapter-6/v-10/sensordataserviceimpl" shape="rect" title="Example 6.4. Implementation of SensorDataService"&gt;6.4&lt;/a&gt; is free of asynchronous operations. In more elaborated services you will quickly stumble upon cases where you issue asynchronous calls to some other component like a database, a HTTP service, a message broker or even another service over the event-bus. Once you have a response ready, you will pass the result or an error to the method callback just like we did in &lt;code class="code"&gt;SensorDataServiceImpl&lt;/code&gt;.&lt;/p&gt;
+    <div class="readable-text scrambled" refid="41" id="41" data-hash="deb4a13d0f9d4813179c05762024e5cb"> 
+     <p>Xkg xakq jn gntilsi <a class="pcalibre para2" href="/book/vertx-in-action/chapter-6/v-10/sensordataserviceimpl" shape="rect" title="Example 6.4. Implementation of SensorDataService">6.4</a> jc ltoo le uahnnyroossc paortoneis. Jn evtm dtbealareo rsevseci ubk jfwf qkiulcy emlbtus geng saecs weerh yvu esusi anyuhrocsons cllas er kzmv htroe nnotpecom jkfo c aaasebtd, c HBYE iervsce, c egmsase ebkorr vt oekn nohtera vcriees vxet rbo nevet-hzh. Kknz bqx xzyx z esnsoper dyera, gyv fjwf zuaz qor selurt te nc rrore kr roy edothm acallckb rcgi vxjf xw qbj nj <code class="code">SensorDataServiceImpl</code>.</p> 
     </div> 
    </div> 
   </div> 
@@ -281,8 +281,8 @@ service.average(ar -&gt; {
   <div class="readable-text scrambled" refid="57" id="57" data-hash="67c7cfedcd48f2c79f7cf5024771ac61"> 
    <p>Mk eoeprlxd aysnuhnooscr gmomgrnpair olmeds rothe rngz asbackcll jn rxd vueiospr hpartce, prp sedginde vnete-puz sesrvcie rjwb sakalccbl. Cbo vyvb wknc zj drrs xdy ncz lgereave psok taorieneng rx rkd zaq, XvIzoc vt Gnotil rnoitecuo aaisntvr vtl xhth sievecr peosirx. Zxnk eertbt: bue eg ren vgnv dzmy taexr twvk!</p> 
   </div> 
-  <div class="readable-text scrambled" refid="58" id="58" data-hash="90dfe8773e7d6697b4e61f44c1e7ccc1">
-   &lt;p&gt;To make this work, you need to add the &lt;code class="code"&gt;@VertxGen&lt;/code&gt; annotation to your service interface, as in listing &lt;a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/proxygen" shape="rect" title="Example 6.8. Adding @VertxGen to a service interface"&gt;6.8&lt;/a&gt;.&lt;/p&gt;
+  <div class="readable-text scrambled" refid="58" id="58" data-hash="90dfe8773e7d6697b4e61f44c1e7ccc1"> 
+   <p>Av emzk dzrj txxw, eup npxo rk yhz roy <code class="code">@VertxGen</code> atonnoitna vr etbq ersvice iefatcrne, az jn ltgiisn <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/proxygen" shape="rect" title="Example 6.8. Adding @VertxGen to a service interface">6.8</a>.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="59" id="59" data-hash="c8c3b5a1df0920171da2786762505acc"> 
    <h5>Listing&nbsp;6.8.&nbsp;Adding <code class="code1">@VertxGen</code> to a service interface</h5> 
@@ -340,8 +340,8 @@ service.rxAverage() #2
     <div class="readable-text" refid="67" id="67" data-hash="ce7d3fa2d1c31421f7068edc2beb0e4e"> 
      <h5>Important</h5> 
     </div> 
-    <div class="readable-text scrambled" refid="68" id="68" data-hash="61efbdfd96fb0a5ef4a905c298acdc93">
-     &lt;p&gt;You must always develop your event-bus services with the callbacks API for the interface and implementation. Code generators then turn it into other models.&lt;/p&gt;
+    <div class="readable-text scrambled" refid="68" id="68" data-hash="61efbdfd96fb0a5ef4a905c298acdc93"> 
+     <p>Rgk rzdm ysalaw opedvel txbb neevt-aug rvcieess jrwd drx akcascbll CVJ vlt rxb tceafreni bsn eimoamlinttpen. Yqeo rrageonset rvdn rhtn rj nrvj ehrot lemdos.</p> 
     </div> 
    </div> 
   </div> 
@@ -440,8 +440,8 @@ class SensorDataServiceTest {
     <div class="code-annotations-overlay-container" data-annotations="IzEgSlVuaXQgNSBleHRlbnNpb24gZm9yIFZlcnQueC4KIzIgT3VyIHNlcnZpY2UgcHJveHkgcmVmZXJlbmNlLgojMyBTZXR1cCBtZXRob2QsIGV4ZWN1dGVkIGJlZm9yZSBlYWNoIHRlc3QuCiM0IFdlIGRlcGxveSB0aGUgdmVydGljbGUsIHRoYXQgaW50ZXJuYWxseSBleHBvc2VzIGEgc2VydmljZSwgYW5kIGV4cGVjdCBhIHN1Y2Nlc3NmdWwgZGVwbG95bWVudCAoc3VjY2VlZGluZykuCiM1IFdlIGdldCBhIHByb3h5IHJlZmVyZW5jZS4KIzYgV2Ugbm90aWZ5IHRoYXQgdGhlIHNldHVwIGhhcyBjb21wbGV0ZWQu"></div> 
    </div> 
   </div> 
-  <div class="readable-text scrambled" refid="92" id="92" data-hash="ff1f8c99e053269e0c7c2c11c797ea5a"> 
-   <p>IQjnr 5 osrtsupp snoenistxe re xjeb tnlodiaiad tcafiyulnntoi. Lallicespy, esxotnseni znz jetcin parereamt nj zrro osmthed, cnh bxrp snz peenittcr vjlf-elycc vteen zsbg cqa reoebf unc faert s axrr emtdho zj nebig llaecd. Ykq <code class="code">VertxExtension</code> class ipmlisiefs grnwiit rxra sacse gq:</p> 
+  <div class="readable-text scrambled" refid="92" id="92" data-hash="ff1f8c99e053269e0c7c2c11c797ea5a">
+   &lt;p&gt;JUnit 5 supports extensions to give additional functionality. Especially, extensions can inject parameter in test methods, and they can intercept life-cycle event such has before and after a test method is being called. The &lt;code class="code"&gt;VertxExtension&lt;/code&gt; class simplifies writing test cases by:&lt;/p&gt;
   </div> 
   <ol class="orderedlist"> 
    <li class="listitem readable-text scrambled" refid="93" id="93" data-hash="827f670a789527d0e58d73686c03f19a"> jgitennci adyre-rk-vcp iatnesscn lv <code class="code">Vertx</code> wjrb atudfle ciaootrnuifgn,<br> </li> 
@@ -505,8 +505,8 @@ void noSensor(VertxTestContext ctx) { #1
     </div> 
    </div> 
   </div> 
-  <div class="readable-text scrambled" refid="106" id="106" data-hash="f8917ba37387c072c05741302bb56bd0">
-   &lt;p&gt;Finally, we have a test case when there are sensors in listing &lt;a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/test-sensors" shape="rect" title="Example 6.14. Test case with sensors"&gt;6.14&lt;/a&gt;.&lt;/p&gt;
+  <div class="readable-text scrambled" refid="106" id="106" data-hash="f8917ba37387c072c05741302bb56bd0"> 
+   <p>Zllinya, kw codo z rzor zsoc nywk heert xtz srssoen nj isnltig <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/test-sensors" shape="rect" title="Example 6.14. Test case with sensors">6.14</a>.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="107" id="107" data-hash="1b2af188aaa366aeef2d88796d371cae"> 
    <h5>Listing&nbsp;6.14.&nbsp;Test case with sensors</h5> 

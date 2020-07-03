@@ -82,7 +82,7 @@ public class Keeper {
 
     public static void main(String[] args) throws IOException {
         Keeper keeper = new Keeper();
-        for (int i = 2; i <= 13; i++)
-            keeper.unlock(i);
+        //for (int i = 2; i <= 13; i++)
+            keeper.unlock(13);
     }
 }

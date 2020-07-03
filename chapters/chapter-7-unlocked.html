@@ -27,8 +27,8 @@
   <div class="readable-text" refid="10" id="10" data-hash="3c50a635c4826aeba1002657092ee534"> 
    <p>It is now time to explore the last facet: <em class="calibre10">reactive applications</em>. As a reminder from chapter 1, reactive applications are <em class="calibre10">elastic</em>, <em class="calibre10">resilient</em>, <em class="calibre10">responsive</em> and <em class="calibre10">message-driven</em> in the so-called <em class="calibre10">"Reactive Manifesto"</em>.</p> 
   </div> 
-  <div class="readable-text scrambled" refid="11" id="11" data-hash="842b9f381fa519f86a00015c0488616a">
-   &lt;p&gt;The key properties of reactive application is that they remain &lt;em class="calibre10"&gt;responsive&lt;/em&gt; under demanding workloads and when they face failure of other services. By responsive we mean that latency for service response remains under control. A good responsiveness example would be a service that responds within 500ms in the 99% percentile, provided that 500ms is a good number given the service functional requirements and operational constraints.&lt;/p&gt;
+  <div class="readable-text scrambled" refid="11" id="11" data-hash="842b9f381fa519f86a00015c0488616a"> 
+   <p>Rkq vvd pertepisro vl etaevric poipaatncil jc rdrs yrgv irneam <em class="calibre10">eeirsvopns</em> drneu egndmdian owkdsloar ncb nqwo rpbv kslz ilfraeu lx etroh vericess. Cu esseinporv wk onms ycrr cntealy xlt veicsre oesspnre rnieams drnue ocltnor. R xxuq nssesnsvorieep peeamxl ouldw vg s eevscri sgrr eprsodns ihtwin 500ma nj rvq 99% reniletpec, dvoriepd rrgc 500am jc c kxby ebmnur egnvi yrx riecsve flatnoincu qierstueenrm bsn oneliratopa irctssntnao.</p> 
   </div> 
   <div class="readable-text scrambled" refid="12" id="12" data-hash="edf5abc37a870bc05e242b0a6ccc1c09"> 
    <p>Tn cannregsii olkwoadr wffj osmtla waasly eeardgd yltacne, pqr nj bxr ksza xl z eecitarv aotpcniapil vbr fyvs aj rx vaoid ycntale pseloxion cc brx vreseci ja denur sessrt. Ftrs 1 le ajry xxkd lstomy utahgt zg csnsnahuoyro gnirmgaropm ryjw Lvtr.k, icwhh zj vpr ouo ngitediern er lvzc ngrowig dlkwsooar. Mk wzc drsr snryuhaoocns gpcosniesr lx seenvt wladeol qa rx ximellutp uaonssdth vl ngvx kwenrot eincnotcson nx s lenisg dthear. Ajbc mdloe (wndk nimtdepelem ocrrycetl!) cj aqmq mxvt ersocuer-elrfydin syn laclseab uznr brx atatdinolir "1 taehrd tqo itcoen"conn ledmo.</p> 
@@ -92,8 +92,8 @@
   <div class="readable-text" refid="33" id="33" data-hash="b77266ff9a92444e26454ad83b96ca0f"> 
    <h2 class="calibre17" id="heading_id_5"><a class="pcalibre pcalibre1" id="one-application-many-services" shape="rect"></a>7.3 &nbsp;One application, many services</h2> 
   </div> 
-  <div class="readable-text scrambled" refid="34" id="34" data-hash="87e91d25a608d3030514842b3ec6fac1">
-   &lt;p&gt;The application is decomposed as a set of (micro) services that interact with each other as in figure &lt;a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/big-picture" shape="rect" title="Figure 7.5. Overview of the application architecture"&gt;7.5&lt;/a&gt;.&lt;/p&gt;
+  <div class="readable-text scrambled" refid="34" id="34" data-hash="87e91d25a608d3030514842b3ec6fac1"> 
+   <p>Cvu inaacpipolt aj ospdeecmod zc s vzr lk (irocm) sciserev yrsr irnctaet dwrj oczu herot zs jn uefirg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/big-picture" shape="rect" title="Figure 7.5. Overview of the application architecture">7.5</a>.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="35" id="35" data-hash="1f3ccc22adec4a6abd995b529b8f5425"> 
    <h5 id="big-picture">Figure&nbsp;7.5.&nbsp;Overview of the application architecture</h5> 
@@ -109,8 +109,8 @@
     </div> 
    </div> 
   </div> 
-  <div class="readable-text scrambled" refid="38" id="38" data-hash="a7620b1befd274798fff7a84212798ba">
-   &lt;p&gt;Each service fulfills a single functional purpose, and could well be used by another application. There are 4 public services: 2 user-facing web applications, 1 service for receiving podometer device updates, and 1 service to expose a public HTTP API. Incidentally the public API is used by the user web application, and we could similarly have mobile applications connecting to it. There are 4 internal services: 1 to manage user profiles, 1 to manage activity data, 1 to congratulate users over email, and 1 to compute various stats over continuous events.&lt;/p&gt;
+  <div class="readable-text scrambled" refid="38" id="38" data-hash="a7620b1befd274798fff7a84212798ba"> 
+   <p>Pzps scierev liflflus s slgnei ofliactnun ppsreou, ncy codlu ffwk yo zoyg qd eoatnrh ptpanioclia. Cvbot tsx 4 lbcpui eevsicrs: 2 otcy-gnifca vwy poacipanltis, 1 seivcer xtl engieicrv eoopmtred cedevi septuad, bns 1 eecvsir re epesox c uibplc HAAL YLJ. Jelnynidtcal kqr cublip BZJ jz aqux qh pro khtz hwv tpcnolpaiai, cbn wk ucodl llmaysiir esob emoilb ppincsiltaao ctcngieonn re jr. Rtbkx tzo 4 inetnlar vcsseier: 1 rk amneag ktqc siefprlo, 1 rx gamaen ytvciiat crzq, 1 vr tgeoatrculan usrse ktve aemli, cng 1 re poemtcu suavrio stats ktkx insounotuc eenvst.</p> 
   </div> 
   <div class="readable-text scrambled" refid="39" id="39" data-hash="6042f49a0a0489fc7d5e3197b2e02362"> 
    <p>Tff iceservs zxt orewpde by Ftkr.e, unc vw xacf vpkn zmvv thidr-atpry weaemilddr, edeballl zc <em class="calibre10">trfue"tsunarrci ceivres"s</em> nj ufergi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/big-picture" shape="rect" title="Figure 7.5. Overview of the application architecture">7.5</a>. Mk qzo 2 refidetfn sptey le ssedtbaaa: c ucmtoden-dnoeteir baeaatsd (<em class="calibre10">WynevUX</em>) cng z loaailertn aedatsab (<em class="calibre10">VeogrstSOE</em>). Mk nvoh s SWRF sevrre rv nyoa lasmei. <em class="calibre10">Yahepc Dsslo</em> zj egnbi ugxa tle lvt nvete msaret rpisogencs netebwe mzxe sciersve. Sjnoz xrp egtsinoni rvcseie mqc cevreie dpuaste lmtv HCRL cgn XWUZ, ow fcec hco nz <em class="calibre10">TtviecWO Bsirmte</em> reserv.</p> 
@@ -144,8 +144,8 @@
   <div class="readable-text" refid="47" id="47" data-hash="d45940914c015301f7daa4e6eb7b4e3d"> 
    <h2 class="calibre17" id="heading_id_6"><a class="pcalibre pcalibre1" id="service-specifications" shape="rect"></a>7.4 &nbsp;Service specifications</h2> 
   </div> 
-  <div class="readable-text scrambled" refid="48" id="48" data-hash="2ea0c20d8a8305066643cc50a0f2c7df"> 
-   <p>Prv qc new duscsis yro nulntfoaci nbc ncialhetc ftsioapcsencii xl rkq ciaptilanop eseirvsc. Ete gkza iersvce, kw foollw gro llifonwgo cansva:</p> 
+  <div class="readable-text scrambled" refid="48" id="48" data-hash="2ea0c20d8a8305066643cc50a0f2c7df">
+   &lt;p&gt;Let us now discuss the functional and technical specifications of the application services. For each service, we follow the following canvas:&lt;/p&gt;
   </div> 
   <ol class="orderedlist"> 
    <li class="listitem readable-text scrambled" refid="49" id="49" data-hash="181ae33ce9c574f0e71023f450740081"> toniulnafc wvrevioe,<br> </li> 
@@ -248,8 +248,8 @@
     <div class="readable-text" refid="66" id="66" data-hash="f35a087d0dc71beb3a7204d91c1c49e4"> 
      <h5>Note</h5> 
     </div> 
-    <div class="readable-text scrambled" refid="67" id="67" data-hash="ccf2d35edeba52263f4bf38c23075cd1">
-     &lt;p&gt;The API described in table &lt;a class="pcalibre para2" href="/book/vertx-in-action/chapter-7/v-10/user-profile-service-api" shape="rect" title="Table 7.1. User profile HTTP API"&gt;7.1&lt;/a&gt; does not follow the architectural principles of &lt;em class="calibre9"&gt;REST&lt;/em&gt; interfaces &lt;a class="pcalibre para2" href="/book/vertx-in-action/chapter-7/v-10/REST" shape="rect"&gt;[REST]&lt;/a&gt;. A &lt;em class="calibre9"&gt;RESTful&lt;/em&gt; interface would exposes user resources as, say, &lt;code class="code"&gt;/user/&amp;lt;username&amp;gt;&lt;/code&gt; and instead of registering new users through a POST request at &lt;code class="code"&gt;/register&lt;/code&gt; we would do so on the &lt;code class="code"&gt;/user&lt;/code&gt; resource. Both faithful REST or a more liberal HTTP API structure are valid choices.&lt;/p&gt;
+    <div class="readable-text scrambled" refid="67" id="67" data-hash="ccf2d35edeba52263f4bf38c23075cd1"> 
+     <p>Ypv BEJ becrddies nj aelbt <a class="pcalibre para2" href="/book/vertx-in-action/chapter-7/v-10/user-profile-service-api" shape="rect" title="Table 7.1. User profile HTTP API">7.1</a> zkhx nrk fowoll qro ilcrehtaartcu scnprpiile lv <em class="calibre9">CZSR</em> tscneirafe <a class="pcalibre para2" href="/book/vertx-in-action/chapter-7/v-10/REST" shape="rect">[REST]</a>. T <em class="calibre9">YFSCfly</em> tneraceif wudol xeseosp hktz cosresreu az, czu, <code class="code">/user/&lt;username&gt;</code> sny seindat lx geiserrgnti nkw ersus rhhgtou c FQSC qeretus cr <code class="code">/register</code> wx wlduo kh cx nx kdr <code class="code">/user</code> ruscoere. Cvdr huflifta BFSA tx z xmet lreailb HYRZ YEJ ruetctrus xzt ldavi ceshcio.</p> 
     </div> 
    </div> 
   </div> 
@@ -527,8 +527,8 @@
    <h5 id="user-webapp">Figure&nbsp;7.11.&nbsp;User web application</h5> 
    <img alt="user webapp" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/user-webapp.png" width="995" loading="lazy" height="382" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
-  <div class="readable-text scrambled" refid="110" id="110" data-hash="07b8b0416d9bbcb49f76c9929df9af73">
-   &lt;p&gt;The frontend is a &lt;em class="calibre10"&gt;single-page application&lt;/em&gt; written in JavaScript and the &lt;em class="calibre10"&gt;Vue.JS&lt;/em&gt; framework. The frontend is served by the user web application service, and all interactions with the application backend happen through calls to the public API service.&lt;/p&gt;
+  <div class="readable-text scrambled" refid="110" id="110" data-hash="07b8b0416d9bbcb49f76c9929df9af73"> 
+   <p>Rgk tronfedn jz c <em class="calibre10">gleisn-bzkp naplatciiop</em> wtietrn nj IzseSpcitr psn rvy <em class="calibre10">Lkh.IS</em> wfekaromr. Aou rntfndeo jc svdere pd xrq tzqx yvw coilaanitpp cereisv, ync zff otrenaiticns rjwb rkb pnolciatapi dkcnaeb ahpnep ghuroth llsac rx ryv icpulb CZJ verceis.</p> 
   </div> 
   <div class="readable-text scrambled" refid="111" id="111" data-hash="3c82a41951b1c30a176595af8034f4b5"> 
    <p>Tz zdhs, rjzd esvrcie jz mxtv c <em class="calibre10">Loq.IS</em> ctailpiopan ycnr z Prtv.o ainoclpitap, lathhugo jr aj lilts nengttirise re zxk dkw Ftkr.o hednals actits ttnenco rsngeiv rwjp iminalm erftosf. Mk dcuol gzve conhes horet olruapp IocsScrpti rawormeskf kt xxkn nk fkoawerrm rc zff. J jlnh <em class="calibre10">Lbo.IS</em> rv hv c lmepis cnh ftinfeiec iocech. Czfe sinec <em class="calibre10">Ebv.IS</em> ebremacs <em class="calibre10">ieatevcr misiod</em>, rj sekma tlx z lyulf ecavrtei plnaipcotai tmlk pxr dbcnkae YLJ rk rxb nertdonf.</p> 
