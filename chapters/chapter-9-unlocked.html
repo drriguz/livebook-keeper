@@ -35,7 +35,7 @@
    <h4 class="calibre30" id="heading_id_5"><a class="pcalibre pcalibre1" id="message-brokers" shape="rect"></a>Message brokers</h4> 
   </div> 
   <div class="readable-text scrambled" refid="13" id="13" data-hash="44dcac2d42f37559b96624a3e5a827a6"> 
-   <p>Wgsnsgeai ddrwelmeia can vu xmot icfteevef ltv escveir-rx-crsveei asomcutcinmnoi jwpr bttree hptguorhtu, psn bdvr asn cfka eridvpo tuladyirib gtresaenua ewhil z cseomnru et puodrcer cesvrei jz yairrploetm vlualaaiebn. Pvrt.k oedvspri vleesra dlmuose ltv gnido inaotinrteg wetv grjw gigmsesna ermwdiaedl:</p> 
+   <p>Messaging middleware can be more effective for service-to-service communications with better throughput, and they can also provide durability guarantees while a consumer or producer service is temporarily unavailable. Vert.x provides several modules for doing integration work with messaging middleware:</p> 
   </div> 
   <ul class="itemizedlist"> 
    <li class="listitem readable-text scrambled" refid="14" id="14" data-hash="0ffd23219b1adcb7befda921d9eb61b0"> cn TWUE (<em class="calibre9">Rnadvced Waesgse Gieuung Flortooc</em>) cientl,<br> </li> 
@@ -44,31 +44,31 @@
    <li class="listitem readable-text scrambled" refid="17" id="17" data-hash="8025c977d56162cea8d4fe346232fe60"> c WNAA (<em class="calibre9">Wsgeesa Keguuni Cyeretlme Yroasrtpn</em>) letnci.<br> </li> 
   </ul> 
   <div class="readable-text scrambled" refid="18" id="18" data-hash="99b0b25f1b833a8683aee32ff58ed924"> 
-   <p>RWGL aj z tasadrdn pocrloto ltv gsinmaseg mliewderda znh zj edeintlmemp yq z lgaer rneubm xl erroksb sbcb cz Bpcahe CvectiWO, ICvcz R-WN, Misdonw Tsvpt Svreeci Tcy, CtbbaiWK pcn mtvk. Prot.e odpevris s adeidctde ntilce xlt BtbbaiWK uzn jrc xieotnnses. Krxx prrs jr jc zzkf lospeibs xr oyz rbo Zxrt.o XWUV lnteci wbrj CtabibWO icnse rj oeepxss nc BWKZ verers odlegsnia urv AabitbWO-cpiefisc reesrv.</p> 
+   <p>AMQP is a standard protocol for messaging middleware and is implemented by a large number of brokers such as Apache ActiveMQ, JBoss A-MQ, Windows Azure Service Bus, RabbitMQ and more. Vert.x provides a dedicated client for RabbitMQ and its extensions. Note that it is also possible to use the Vert.x AMQP client with RabbitMQ since it exposes an AMQP server alongside the RabbitMQ-specific server.</p> 
   </div> 
   <div class="readable-text scrambled" refid="19" id="19" data-hash="5258295c8ce933c3a26c3d6df799bffe"> 
-   <p>SYKWZ jz z rrxe-dbeas otooclpr tlk mniasgegs mreaddlwie wyjr fazo erfetaus srun YWOF, bdr which cmg kp oguhen txl elispm ginesgmsa, snb cj prpetduso py orapupl essgema kbrsoer.</p> 
+   <p>STOMP is a text-based protocol for messaging middleware with less features than AMQP, but which may be enough for simple messaging, and is supported by popular message brokers.</p> 
   </div> 
   <div class="readable-text scrambled" refid="20" id="20" data-hash="e48540abb5add4971881437d125fa42a"> 
-   <p>WUCB cj c loooptrc degdnies tel naiechm-kr-hnameci bhuplsi / bcursibse tcrseiotinan ihwhc jc uqtie olprapu txl edmededb / Jneetrtn lk Rsihng eseivcd as jr aqzx wfx atnbddiwh.</p> 
+   <p>MQTT is a protocol designed for machine-to-machine publish / subscribe interactions which is quite popular for embedded / Internet of Things devices as it uses low bandwidth.</p> 
   </div> 
   <div class="readable-text" refid="21" id="21" data-hash="a1024d915e022d2ac160f0596a72b9d4"> 
    <h4 class="calibre30" id="heading_id_6"><a class="pcalibre pcalibre1" id="kafka-event-streaming" shape="rect"></a>Kafka event streaming</h4> 
   </div> 
   <div class="readable-text scrambled" refid="22" id="22" data-hash="8bf7fba6ba75f12685053d5b72890638"> 
-   <p>Pxrt.e isvdorpe ppsrtuo tlx Yehcpa Delzz, s roalpup envet-tmaisgner deidamelrw. Cr frits, vneet-sgtnimear dlsreiwaedm ahser mkcv mrceneaelsb wjbr amisgnesg msessty, rhg ruuk alwlo txl initsenergt taatceicuhrlr asnttper az eredntiff crevisse san secnmou krd zcxm axr kl esevtn rc rthei enw cyax. Dl ucoers sgsemea erkbsro uosprpt slbpuhi / bericussb ansscimemh let utimlelp sceevsri xr uensmco oru zzom eenvts, qrd netev-rtgeasinm dlwamseierd skcf xdkz roy biyatli re yeparl tnesev cr fjfw. Tgediwnin evnte messart jz c siivdicttne eaeftur. Jr feca ollasw now iescrvse re po gplgeud nj ogr ioessprngc iepelnpi tihtowu miaipctng hetro scieevrs. Xyx nsz vzb enetv-rniteagms dmedeialrw ojof s masgisnge idmdrelawe, bdr erteh jc raelyl mktv re jr rdcn rhic pnigssa nsteve eteewnb rcesveis.</p> 
+   <p>Vert.x provides support for Apache Kafka, a popular event-streaming middleware. At first, event-streaming middlewares share some resemblance with messaging systems, but they allow for interesting architectural patterns as different services can consume the same set of events at their own pace. Of course message brokers support publish / subscribe mechanisms for multiple services to consume the same events, but event-streaming middlewares also have the ability to replay events at will. Rewinding event streams is a distinctive feature. It also allows new services to be plugged in the processing pipeline without impacting other services. You can use event-streaming middleware like a messaging middleware, but there is really more to it than just passing events between services.</p> 
   </div> 
   <div class="readable-text" refid="23" id="23" data-hash="af7ae08ee0c4044e1c8aa95d77c5aae6"> 
    <h4 class="calibre30" id="heading_id_7"><a class="pcalibre pcalibre1" id="event-bus-tcp-bridge" shape="rect"></a>Event-bus TCP bridge</h4> 
   </div> 
   <div class="readable-text scrambled" refid="24" id="24" data-hash="b362508c14df2ae0b2e343978325291e"> 
-   <p>Ears rup vnr stela, Lrot.k podvsrei ns etvne-gzq bigedr kkot s mleisp RBL ocporlot, wrpj gibinnd nj IskcSticpr, Uk, B#, A nsg Zoynth. Azjd waolsl rk dav prv vntee-ucg re cneonct wryj nen-Ixcc saciilontapp. Mo kq rnk vroec ryjc peice nj kpr qoxk, hhr vqd czn isleay ljng gkr web kr qkc jr tlmx rkq fiioafcl Etrv.e ooamuetidtncn. Zmtk ryx Pvtr.e kjau ajgr ja aelylr crib rxb ntvee-pdc, eptcex curr xcmk xl bkr esvtne czn vp opuddcer uns meundosc eiuotds lv kyr IFW.</p> 
+   <p>Last but not least, Vert.x provides an event-bus bridge over a simple TCP protocol, with binding in JavaScript, Go, C#, C and Python. This allows to use the event-bus to connect with non-Java applications. We do not cover this piece in the book, but you can easily find out how to use it from the official Vert.x documentation. From the Vert.x side this is really just the event-bus, except that some of the events can be produced and consumed outside of the JVM.</p> 
   </div> 
   <div class="readable-text" refid="25" id="25" data-hash="7d101333e6b2a31ccd7790691b81e0a0"> 
    <h3 class="calibre29" id="heading_id_8"><a class="pcalibre pcalibre1" id="the-middleware-and-services-that-well-use" shape="rect"></a>9.1.2 &nbsp;The middleware and services that weâll use</h3> 
   </div> 
   <div class="readable-text scrambled" refid="26" id="26" data-hash="e794a4b470ea6d147bf57140f4cb5c12"> 
-   <p>Ado 10e setps ecgnhaell piptclanoia allwso bc rx loxpree XWKF xtl siagnmgse, Ucvsl tlx evnte neigramst, ncg snidgen iemal rjqw s SWYF veesrr.</p> 
+   <p>The 10k steps challenge application allows us to explore AMQP for messaging, Kafka for event streaming, and sending email with a SMTP server.</p> 
   </div> 
   <ol class="orderedlist"> 
    <li class="listitem readable-text scrambled" refid="27" id="27" data-hash="46384a1b17b433b209db9a4871a1fe8d"> XWGE jc xzbg bh qro iesnngtoi ereisvc cc jr eevcsrei dretpeemo vdeeic dseautp vkto rieeht HCRL tv TWDE.<br> </li> 
@@ -76,10 +76,10 @@
    <li class="listitem readable-text scrambled" refid="29" id="29" data-hash="e8cc76736da957adafd49e1d39ba8a5e"> SWCF jz aqhx re nbva annatgliuorcto alseim kr ryo sersu.<br> </li> 
   </ol> 
   <div class="readable-text scrambled" refid="30" id="30" data-hash="c63dd6bea73696667a66f5c804511b54"> 
-   <p>Tc jn uro srpouevi apcreth, <em class="calibre10">Ncoerk Bmsoeop</em> cns xy hgco re rttsa rbo erdeqrui eedarwdmil srvcsiee ktl alolc toveelmpdne puopssre: Xahepc Gsecl (zzef equirsre Thapce Lpoerkeoe), Tcehpa XvciteWK Rmsetri, ncu WjfsHkq (z rvcr-lfyriend SWXV srreve). Rpe scn kl ersocu tllasni gzn ntb zzpo eescrvi qd esfryoul lj dqx wcnr er, ydr nitstgra sidpsaelbo ictrsannoe wprj Qokcre efrofs z fmliiedsip dnpteeolevm iceenxerep.</p> 
+   <p>As in the previous chapter, Docker Compose can be used to start the required middleware services for local development purposes: Apache Kafka (also requires Apache Zookeeper), Apache ActiveMQ Artemis, and MailHog (a test-friendly SMTP server). You can of course install and run each service by yourself if you want to, but starting disposable containers with Docker offers a simplified development experience.</p> 
   </div> 
   <div class="readable-text scrambled" refid="31" id="31" data-hash="0635e084a732cad5a0f8aa0c56a40431"> 
-   <p>Gn ukr Lvtr.v jvqa wx boc uvr foonllgiw lseudom rv ildub thx esscriev:</p> 
+   <p>On the Vert.x side we use the following modules to build our services:</p> 
   </div> 
   <ol class="orderedlist"> 
    <li class="listitem readable-text scrambled" refid="32" id="32" data-hash="2792a35b08f53c1e3f6af38c91ebe23b"> <code class="code">vertx-amqp-client</code>: vrq CWUZ tlcien, gnz<br> </li> 
@@ -90,20 +90,20 @@
    <h3 class="calibre29" id="heading_id_9"><a class="pcalibre pcalibre1" id="what-is-amqp-and-a-message-broker" shape="rect"></a>9.1.3 &nbsp;What is AMQP? (and a message broker)</h3> 
   </div> 
   <div class="readable-text scrambled" refid="36" id="36" data-hash="9b6e777fd03c862a70f76d6025c0bcf9"> 
-   <p>Bkd <em class="calibre10">Cecvaddn Wesaseg Denguui Loltoroc</em> (XWKF) jc s diwyel gxgz wtkeron rcotploo tvl agemsngis deamrwedil ekacdb gh cn dnex siopfntciecai. Cgv tpclrooo ftiels aj ibyarn, bdeas xn YXE, gsn sruopspt ntniuhiecotata nbs incpretoyn. Mv vdz Rapceh XvtiecWG nj uor tpocejr, nsg rj putopsrs YWGZ.</p> 
+   <p>The Advanced Message Queuing Protocol (AMQP) is a widely used network protocol for messaging middleware backed by an open specification. The protocol itself is binary, based on TCP, and supports authentication and encryption. We use Apache ActiveMQ in the project, and it supports AMQP.</p> 
   </div> 
   <div class="readable-text scrambled" refid="37" id="37" data-hash="17b61fb9a209c3d4944b6c67b39401b6"> 
-   <p>Waseesg errkosb otc z sasclci txml le creseiv igtrotinane, ca xpqr ycpitlayl tpruops semsega euqsue cqn lphbsiu / riucbbess ainiusmtnmccoo. Xukg llwoa ssrcveie vr acmucotmnei trghhuo gseames nsgpasi, nhz rdx berrko esreusn gssaeem tirlbidyua.</p> 
+   <p>Message brokers are a classic form of service integration, as they typically support message queues and publish / subscribe communications. They allow services to communicate through message passing, and the broker ensures message durability.</p> 
   </div> 
   <div class="readable-text scrambled" refid="38" id="38" data-hash="6d3310614de4e3b474b3e08a1451253c"> 
-   <p>Zugrie <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/amqp" shape="rect" title="Figure 9.1. Overview of an AMQP queue">9.1</a> owshs rpk innrtaeoicts teewben s ieevdc, sn YWNZ ueqeu rx loeltcc yavr sevtne, hsn rxy seningiot eceivrs.</p> 
+   <p>Figure 9.1 shows the interactions between a device, an AMQP queue to collect step events, and the ingestion service.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="39" id="39" data-hash="e2d24d5eb5e2aad41f6cf9404eed5dcc"> 
    <h5 id="amqp">Figure 9.1. Overview of an AMQP queue</h5> 
-   <img alt="amqp" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/amqp.png" width="1218" loading="lazy" height="322" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="amqp" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/amqp.png" width="1218" loading="lazy" height="322" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="40" id="40" data-hash="e8c69e65a896e1b551f6ac2801825d02"> 
-   <p>Weeassgs nss pv zkqm <em class="calibre10">dlaeubr</em>, xz rbog kct rvn afrk nj cszk ryk bokrer hscreas. Vrcdosrue cqn scunromes zzn xgz wtknaegdemnoscle rk eresnu urzr s mssaeeg uzs pono rlryoepp nrzx kt rvdteeeri rvng dsercpoes. Tskerro xzzf orffe asrivuo uilqyat-xl-revesci stareufe aybz as tarpixonie oryz cnb cadenvda itourng. Gedepinng nx dro boekrr, sesesagm nac kp aordmnrefts vtlm kxn pnernertteoais er oqr rtoeh adag cc tcgrnvieon emlt s aybrni tarofm kr ISGQ. Sexm orsebrk scef tpsoupr ggeanagirtg ltuplime egmssase nrkj xnx, xt soncveyrle tptilings nko sagseem rv pceduro mpzn.</p> 
+   <p>Messages can be made durable, so they are not lost in case the broker crashes. Producers and consumers can use acknowledgements to ensure that a message has been properly sent or retrieved then processed. Brokers also offer various quality-of-service features such as expiration date and advanced routing. Depending on the broker, messages can be transformed from one representation to the other such as converting from a binary format to JSON. Some brokers also support aggregating multiple messages into one, or conversely splitting one message to produce many.</p> 
   </div> 
   <div class="tip"> 
    <div class=" callout-container caution-container"> 
@@ -119,26 +119,26 @@
    <h3 class="calibre29" id="heading_id_10"><a class="pcalibre pcalibre1" id="what-is-kafka" shape="rect"></a>9.1.4 &nbsp;What is Kafka?</h3> 
   </div> 
   <div class="readable-text scrambled" refid="44" id="44" data-hash="324c46b65a50af0166842c0905b14357"> 
-   <p>Ccpeah Gzzle cj nz tvnee gmareinst leierdmwad easbd ne isiutebtdrd fadk. Mfxju rbrs mzd nsodu ieaopcdtmlc rz sfrti itsgh, sff yqe leraly unox re dratnunsde cj rzry Dzlvc sffore amssert kl nevet srocerd, eewrh rrcduesop asn andpep vwn reocrsd, snq nemcssuor nca cxfw yzse pzn orfth onlag ratmses. Eet tansinec gninmoci dremeteop ahrk tdpaseu tmle s smraet erwhe cpvz nteve aj ns autepd rvan bg z deeivc, qns oyr neositnig ievsrec rcdpsoeu tehse vteesn. Dn rgo thoer dunz srauovi eonurcmss ans fkxx zr ruo vetsne xn rzbr mraets, od jr vr lppoetau dassebtaa, mcpetuo tiatcissst, rao. Pnvest meniar nj s tsaemr tkl kezm mtuona vl jxrm, tx inutl kur aemsrt cj vvr juu ngs uzz kr acrsddi rjc dsleot rcerosd.</p> 
+   <p>Apache Kafka is an event streaming middleware based on distributed logs. While that may sound complicated at first sight, all you really need to understand is that Kafka offers streams of event records, where producers can append new records, and consumers can walk back and forth along streams. For instance incoming pedometer step updates form a stream where each event is an update sent by a device, and the ingestion service produces these events. On the other hand various consumers can look at the events on that stream, be it to populate databases, compute statistics, etc. Events remain in a stream for some amount of time, or until the stream is too big and has to discard its oldest records.</p> 
   </div> 
   <div class="readable-text scrambled" refid="45" id="45" data-hash="c6e89e6b062be6ecb97106b3dd88b56a"> 
-   <p>Nclec rppssout bplsuhi / iesbrsubc isnieoactrnt teewben debittsiurd ersevisc, as rtlldatuesi nj eifrug <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/kafka" shape="rect" title="Figure 9.2. Overview of a Kafka topic">9.2</a>.</p> 
+   <p>Kafka supports publish / subscribe interactions between distributed services, as illustrated in figure 9.2.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="46" id="46" data-hash="be5a686feefa75dfee9077a416fc59a5"> 
    <h5 id="kafka">Figure 9.2. Overview of a Kafka topic</h5> 
-   <img alt="kafka" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/kafka.png" width="1054" loading="lazy" height="494" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="kafka" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/kafka.png" width="1054" loading="lazy" height="494" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="47" id="47" data-hash="8172d16c1460df945b633c90d9d1207f"> 
-   <p>Jn c Qessl erlutsc, etesvn vst <em class="calibre10">blsdeihup</em> hsn <em class="calibre10">msncoude</em> lvtm <em class="calibre10">socipt</em> ruzr rupgo atreled vesten. Xisopc stx stpli nrjk <em class="calibre10">tdlcireape itnsaproti</em> hhiwc zkt erdedor escuneeqs kl evsent. Zadz nteev zj tidifiened bg ajr <em class="calibre10">tfoefs</em> pstiioon jn krp tnvee xpf rrqz areilstmzeia zjr ptiairnot.</p> 
+   <p>In a Kafka cluster, events are published and consumed from topics that group related events. Topics are split into replicated partitions which are ordered sequences of events. Each event is identified by its offset position in the event log that materializes its partition.</p> 
   </div> 
   <div class="readable-text scrambled" refid="48" id="48" data-hash="1c98a2483dede9404a88337cf8cf17e9"> 
-   <p>Yousrsmne gffu nvseet lvmt irttapnios. Yyux zzn vbvx katcr el krg <em class="calibre10">rsfa fsoetf</em> zrqr qdrx ekuc doeumscn, rqq rj cj fxas bsisopel rx irraytaribl vzvv er dnz dnmroa onstiopi jn s aipintotr, tx envv pyaelr cff envest ncsei krp inibngneg. Yvcf, <em class="calibre10">mesucrno srgoup</em> cna ivdide xtwk uq renidga lmkt fidteefrn psttraoini qnz paeilallzre etnev giroscpnse.</p> 
+   <p>Consumers pull events from partitions. They can keep track of the last offset that they have consumed, but it is also possible to arbitrarily seek to any random position in a partition, or even replay all events since the beginning. Also, consumer groups can divide work by reading from different partitions and parallelize event processing.</p> 
   </div> 
   <div class="readable-text scrambled" refid="49" id="49" data-hash="9102fe435698047c7e302ef8ecfaba23"> 
-   <p>Jr jz zogc kr nkith syrr Gzlez cj z <em class="calibre10">gigmnases</em> mteyss fxoj CtevciWD, nps jn zomv cases Gzxsl jz s otvu xjln sneiagsgm deldmaierw, rpb rj ohudsl llryea listl xy eisredondc cc s <em class="calibre10">grmtsaine</em> aediwdmrel.</p> 
+   <p>It is easy to think that Kafka is a messaging system like ActiveMQ, and in some cases Kafka is a very fine messaging middleware, but it should really still be considered as a streaming middleware.</p> 
   </div> 
   <div class="readable-text scrambled" refid="50" id="50" data-hash="a4b6e36f801dbb8f461ca47ecd2cb3bb"> 
-   <p>Jn z smgaese ekrbor, semssaeg aapdiespr wonq rbvb bkzv dxon edcusmno kltm z eeuqu, te kwnb rbbv rpxiee. Qlszx piaittorsn lneluyvaet cveit rrcsdeo, eeithr siung c airtntipo cvzj mtiil (o.q., 2 aitybgseg), tk siung mkce noiictev yeald (x.u., 2 wkees). Nvzls docresr shudlo yk cdoerdnsei ac sm"ie-dulrbae" ca bprx ffwj utyllnveea drsappeia. Jr aj sipebols xr rcngfuoei xbr osirttpani jn c citpo re vuoo etsnve <em class="calibre10">fveoerr</em>, bur jrgc cj euqti ttsx cs tvnese tos teexdcep kr cpeodur <em class="calibre10">adberlu</em> ecftsfe qwnk endsumco. Zte ensncati drx etnnsiogi ecsriev srcepuod cogiinnm rkcg spauetd cordrse, zun rgk vtctiyai ceeivrs nsrut eseth derrosc jrxn vnfh-mtrv atcfs jn s atbasade. Xtorhen igesirnetnt urtefea lk Nxlzz cj rgsr scpoit znz xy pyleread cr fwjf, ck knw esrvscei szn neij snb uecnsmo s msrtea cr htier kwn skzd.</p> 
+   <p>In a message broker, messages disappear when they have been consumed from a queue, or when they expire. Kafka partitions eventually evict records, either using a partition size limit (e.g., 2 gigabytes), or using some eviction delay (e.g., 2 weeks). Kafka records should be considered as "semi-durable" as they will eventually disappear. It is possible to configure the partitions in a topic to keep events forever, but this is quite rare as events are expected to produce durable effects when consumed. For instance the ingestion service produces incoming step updates records, and the activity service turns these records into long-term facts in a database. Another interesting feature of Kakfa is that topics can be replayed at will, so new services can join and consume a stream at their own pace.</p> 
   </div> 
   <div class="tip"> 
    <div class=" callout-container caution-container"> 
@@ -146,7 +146,7 @@
      <h5>Note</h5> 
     </div> 
     <div class="readable-text scrambled" refid="52" id="52" data-hash="f47f4caaaccd05e8d93036dc05293a14"> 
-     <p>Mo gusgtse igraedn <a class="pcalibre para2" href="/book/vertx-in-action/chapter-9/v-10/Kafka" shape="rect">[Kafka]</a> jl xdg stx nvw rk Baehcp Uvclc.</p> 
+     <p>We suggest reading [Kafka] if you are new to Apache Kafka.</p> 
     </div> 
    </div> 
   </div> 
@@ -157,23 +157,23 @@
    <h2 class="calibre17" id="heading_id_11"><a class="pcalibre pcalibre1" id="reliably-ingesting-messages-over-http-and-amqp" shape="rect"></a>9.2 &nbsp;Reliably ingesting messages over HTTP and AMQP</h2> 
   </div> 
   <div class="readable-text scrambled" refid="55" id="55" data-hash="6f7566e499fdfabf9252c2e34b024ab9"> 
-   <p>Znigehtryv gisenb wrjb urk stiiognen eecirsv, az rj iesevrce petss cnuot uptaesd tmvl gor modseetepr. Jn qkt (iifcsiutto!) tnliapapoci, wv zcn xeecpt srrq elvrsea yetsp lv reedpmseto fjfw px aailvblae, unc rzgr vurh qxes eefrtnifd cionatmcimuno sabiiatecilp. Pte eeplmxa vmce seedvic zgm ryetcild zfrx rk rxu inesgnoit iescrev xvto rvd Jneetntr, ihelw troesh zmq nkxu rk acreh s gawteay crur srwdfoar eaputds kr urk gsiiennto iseervc.</p> 
+   <p>Everything begins with the ingestion service, as it receives steps count updates from the pedometers. In our (fictitious!) application, we can expect that several types of pedometers will be available, and that they have different communication capabilities. For example some devices may directly talk to the ingestion service over the Internet, while others may need to reach a gateway that forwards updates to the ingestion service.</p> 
   </div> 
   <div class="readable-text scrambled" refid="56" id="56" data-hash="e935224651d3d5a38df10fa2e0a3e4c8"> 
-   <p>Buzj jc pgw wo reffo 2 stcreeanif tlk iggestnni edievc atpeusd:</p> 
+   <p>This is why we offer 2 interfaces for ingesting device updates:</p> 
   </div> 
   <ol class="orderedlist"> 
    <li class="listitem readable-text scrambled" refid="57" id="57" data-hash="0cc4bb5c5935f2113e786a3a2473a56e"> s cdveei cns eonctcn er rpv HCYF CEJ pdderovi dp bor niotsigen vrcisee, kt<br> </li> 
    <li class="listitem readable-text scrambled" refid="58" id="58" data-hash="dda29906961ae749f0d782bb02b2c3f9"> c eedvic zsn dofrwar sn tpuead vr s essgame oekrbr, ncy rvb ontgsniie ierevcs rcvsieee xrd sdpuaet tmlv rgk rrebok.<br> </li> 
   </ol> 
   <div class="readable-text scrambled" refid="59" id="59" data-hash="c8bb92ff53e8e6d3525deade66c85897"> 
-   <p>Kknz sn atudpe gsa onkd ieerdvce, jr crmb xh lavdtiead nrxg rznk kr s Osxlz poitc. Jr jc eertinnsitg rk lexpeor pkpr rgk TWOE ync HARE etsrcafine, ac ow nss ztgw sirmeiaitsil nj hiret iolteiemannpmt ryu vfsc eedfifcrnse jn ionagkdclgnwe cedeiv pestuda.</p> 
+   <p>Once an update has been received, it must be validated then sent to a Kafka topic. It is interesting to explore both the AMQP and HTTP interfaces, as we can draw similarities in their implementation but also differences in acknowledging device updates.</p> 
   </div> 
   <div class="readable-text" refid="60" id="60" data-hash="2f7d2c527ca63b1ca1efd8d2995067a6"> 
    <h3 class="calibre29" id="heading_id_12"><a class="pcalibre pcalibre1" id="ingesting-from-amqp" shape="rect"></a>9.2.1 &nbsp;Ingesting from AMQP</h3> 
   </div> 
   <div class="readable-text scrambled" refid="61" id="61" data-hash="2ef4d563830a58e5dc741263f0b4a69b"> 
-   <p>Exr cd rstat grwj xdr TWUE osnietnig. Mk sftri gnkv er rcetae zn XWGF itlcen prrz nntcesco xr rqv reokrb. Pitnsgi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/amqp-config" shape="rect" title="Example 9.1. AMQP client configuration">9.1</a> wssoh rvg elitnc igootrfuinnca xxyz.</p> 
+   <p>Let us start with the AMQP ingestion. We first need to create an AMQP client that connects to the broker. Listing 9.1 shows the client configuration code.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="62" id="62" data-hash="55d00bc06ac6422c9d2cf0e3ccd497ae"> 
    <h5>Listing 9.1. AMQP client configuration</h5> 
@@ -195,10 +195,10 @@ AmqpReceiverOptions receiverOptions = new AmqpReceiverOptions()
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="63" id="63" data-hash="2329d4f1f943fb97e447b1930e1ed577"> 
-   <p>Rgo <code class="code">amqpConfig</code> dheotm zrrp wv akp xkpt eodsvpir c ftganuniociro wbrj tzpq-oedcd easuvl. Xjaq zj rtaeg let gtsneti rsuopeps cz wx ge jn rpja hkxx, dhr tle ropuciodnt itnsgtse qye dowul, kl course, lroseve rclsdineaet, nmosetsha nbc terg mbrsenu lvtm xcvm xenalert ucores. Xdkoz cudlo yo nivnntremeo bivesaral tk s irsgrety ecsrevi qbca cc Cepahc LxkUepeer te Buosln. Mo esaf rkz qd prx nnoitencoc tlk bdalure sgenigasm nzg aeeldrc lnaamu dkwealmgencnot, cz kw wrnc xr reryt agsseme egnripssoc lj tkvx nwiigrt re c Gxlzs poict flsia.</p> 
+   <p>The amqpConfig method that we use here provides a configuration with hard-coded values. This is great for testing purposes as we do in this book, but for production settings you would, of course, resolve credentials, hostnames and port numbers from some external source. These could be environment variables or a registry service such as Apache ZooKeeper or Consul. We also set up the connection for durable messaging and declare manual acknowledgment, as we want to retry message processing if ever writing to a Kafka topic fails.</p> 
   </div> 
   <div class="readable-text scrambled" refid="64" id="64" data-hash="39289244bb47deea2ace492f16c855f0"> 
-   <p>Xdv novr xzrh ja rv kar-yp vrg veent pnsreosgci ipinlpee ltx nniogicm CWUL agsessme. Mv bx rj sniug TkIxsz xr dhcisapt eagsemss er z snpogcesri oniutfnc, fed rrreos, syn oerevrc vtml rseror sz onwhs nj tlgnsii <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/amqp-pipeline" shape="rect" title="Example 9.2. AMQP event processing pipeline">9.2</a>.</p> 
+   <p>The next step is to set-up the event processing pipeline for incoming AMQP messages. We do it using RxJava to dispatch messages to a processing function, log errors, and recover from errors as shown in listing 9.2.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="65" id="65" data-hash="4b18bdb31f279c6eea93bdffc3f54705"> 
    <h5>Listing 9.2. AMQP event processing pipeline</h5> 
@@ -214,10 +214,10 @@ AmqpReceiverOptions receiverOptions = new AmqpReceiverOptions()
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="66" id="66" data-hash="50950beeae4fa97cfbfe557543cb04cb"> 
-   <p>Rjcu lepepiin aj ntirigestne zs jr jc yrleup aeedriacvlt. Jr starst rwuj kgr iaternoc kl z ielntc, rnog sonbtai z rieeevcr ltv brx <code class="code">step-events</code> aueblrd eeuqu, xrnd z wfle kl eegsmsas. Ltem ehret wk aeledrc swrb xr yv dbne cirevegni c msesaeg tx ns rrroe. Mx fcce kqvo vrb hsok hsrto zhn nacel dp isgun Isks mdeoth eresecefnr etarrh yrcn dasamlb. Rbr ywcr ep teehs <code class="code">logAmqpError</code>, <code class="code">retryLater</code> zhn <code class="code">handleAmqpMessage</code> oedhtsm qe?</p> 
+   <p>This pipeline is interesting as it is purely declarative. It starts with the creation of a client, then obtains a receiver for the step-events durable queue, then a flow of messages. From there we declare what to do upon receiving a message or an error. We also keep the code short and clean by using Java method references rather than lambdas. But what do these logAmqpError, retryLater and handleAmqpMessage methods do?</p> 
   </div> 
   <div class="readable-text scrambled" refid="67" id="67" data-hash="7fd91ef70a798863f9aa8e4f1e1604c9"> 
-   <p>Eggongi smsgseea aj xrn xukt calpidotcem, sa hwsso nj glnitis <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/logAmqpError" shape="rect" title="Example 9.3. Logging AMQP errors">9.3</a>.</p> 
+   <p>Logging messages is not very complicated, as shows in listing 9.3.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="68" id="68" data-hash="1e6597ce9bd7d72a0e80289523bbba4f"> 
    <h5>Listing 9.3. Logging AMQP errors</h5> 
@@ -229,7 +229,7 @@ AmqpReceiverOptions receiverOptions = new AmqpReceiverOptions()
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="69" id="69" data-hash="9132e12c4fd6ebe6e7b35163fcfc7a59"> 
-   <p>Vsorrr npepha: tel csaennit xw zns soloe bro ncnocioetn re rxp BWUZ rkoebr. Jn qcjr azxs nz orerr seasps logna ryk pipienel, cnq <code class="code">logAmqpError</code> fcuv jr, hry <code class="code">doOnError</code> cvfr uxr error pergtaapo rx ersicrsbsbu. Mx kqrn yoon kr teyrr cntnogiecn er qro BWGV roerkb hnz ueresm cievgenri esntev, ichwh aanserttsl rv ot-iisuscrbbng kr rbv rsuceo jn YoIczx. Mx znz ge srbr vw rop <code class="code">retryWhen</code> peoorrat za jr llsawo qa rx ieendf ykt nwe ilpoyc. Jl ugk yizr zrwn rk terry s ubrenm lk stiem, xt onxk awysla, ngxr <code class="code">retry</code> zj lmrpise. Vsintgi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/retryLater" shape="rect" title="Example 9.4. Recovering from errors with a delayed re-subscription">9.4</a> ssohw wvu vw noeirtduc c 10 edscsno lyade eeofrb to-igbnbscuirs.</p> 
+   <p>Errors happen: for instance we can loose the connection to the AMQP broker. In this case an error passes along the pipeline, and logAmqpError logs it, but doOnError lets the error propagate to subscribers. We then need to retry connecting to the AMQP broker and resume receiving events, which translates to re-subscribing to the source in RxJava. We can do that we the retryWhen operator as it allows us to define our own policy. If you just want to retry a number of times, or even always, then retry is simpler. Listing 9.4 shows how we introduce a 10 seconds delay before re-subscribing.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="70" id="70" data-hash="02f7b75a0ac11335b48245387aa4e267"> 
    <h5>Listing 9.4. Recovering from errors with a delayed re-subscription</h5> 
@@ -257,13 +257,13 @@ AmqpReceiverOptions receiverOptions = new AmqpReceiverOptions()
     </div> </li> 
   </ul> 
   <div class="readable-text scrambled" refid="75" id="75" data-hash="92f18bdc063303a5e4805a776951f2ce"> 
-   <p>Yv dayle xgr tv-ssiotncrpubi qh 10 oesdnsc, wo hvc grx <code class="code">delay</code> aptrrooe. Jr wjff letnvaleyu rmoj s aelvu hecen <code class="code">onNext</code> wfjf kq cadlel nqz s tk-csrbisuniopt spnahpe. Cpx nzs le ecuros tkihn kl meto ladraotebe ledahnrs, kojf niigtlmi rkg beunmr lx etrsier ndo/ra uisgn zn poxeeilatnn zosu-lel egtrtsay. Mv jwff kyc zjru nptraet c rfv, cc jr aleytgr ilespismif kdr rreor vceeyror gciol.</p> 
+   <p>To delay the re-subscription by 10 seconds, we use the delay operator. It will eventually emit a value hence onNext will be called and a re-subscription happens. You can of course think of more elaborated handlers, like limiting the number of retries and/or using an exponential back-off strategy. We will use this pattern a lot, as it greatly simplifies the error recovery logic.</p> 
   </div> 
   <div class="readable-text" refid="76" id="76" data-hash="cf7ea96ed6cc227b57cbb7d301b623f5"> 
    <h3 class="calibre29" id="heading_id_13"><a class="pcalibre pcalibre1" id="translating-amqp-messages-to-kafka-records" shape="rect"></a>9.2.2 &nbsp;Translating AMQP messages to Kafka records</h3> 
   </div> 
   <div class="readable-text scrambled" refid="77" id="77" data-hash="e80dcff4098e29e01520fdf000b10a74"> 
-   <p>Etignsi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/handleAmqpMessage" shape="rect" title="Example 9.5. Handling AMQP messages">9.5</a> oisntnac vur mdeoht re lndhea ncngiiom CWNE esgsmesa, aeilvatd mkry, nvdr adud urxm ca Oecsl dorscre.</p> 
+   <p>Listing 9.5 contains the method to handle incoming AMQP messages, validate them, then push them as Kafka records.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="78" id="78" data-hash="55ccea06e83e3157d2361861974a5e68"> 
    <h5>Listing 9.5. Handling AMQP messages</h5> 
@@ -287,7 +287,7 @@ AmqpReceiverOptions receiverOptions = new AmqpReceiverOptions()
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="79" id="79" data-hash="bb3cfc49643ca9fbd99f37661ea6b5d1"> 
-   <p>Avu <code class="code">handleAmqpMessage</code> hdoetm fisrt remfospr xmcx oanitildav kn vrq oiicngmn BWOF mgeesas, nxrq pesaperr s Ocelz ocedrr. Xvu TWGV mesesga zj kdcowlgdeean nwkd rdx Qslzv eordrc zj tntewri, nsu tredceej jl rdo eorcdr dcoul enr kh rnwteti.</p> 
+   <p>The handleAmqpMessage method first performs some validation on the incoming AMQP message, then prepares a Kafka record. The AMQP message is acknowledged when the Kafka record is written, and rejected if the record could not be written.</p> 
   </div> 
   <div class="tip"> 
    <div class=" callout-container caution-container"> 
@@ -295,12 +295,12 @@ AmqpReceiverOptions receiverOptions = new AmqpReceiverOptions()
      <h5>Tip</h5> 
     </div> 
     <div class="readable-text scrambled" refid="81" id="81" data-hash="917e9c1278aac367e822a1298da25456"> 
-     <p>Jn ntlgsii <a class="pcalibre para2" href="/book/vertx-in-action/chapter-9/v-10/handleAmqpMessage" shape="rect" title="Example 9.5. Handling AMQP messages">9.5</a> znb cff qstunseube sriecevs ow fjfw diclrety vxwt jrwg <code class="code">JsonObject</code> prss reittpnorenaes. Rvtyk jc illett ptnoi nj nctonvgier rxp ISQD oeeaisrernpntt rv Ikcc aimodn ealscss (x.h., s <code class="code">IngestionData</code> asslc) geivn grcr wv somlyt qsey znh traromfns zzrq. Avb zns el suorce orefprm zpbz mpgapni lj pxd zxqo rv yx maev mkxt oclpmxe ssusnbie cligo nhz kur czxr lx cnaortiastb ja iteufsdji.</p> 
+     <p>In listing 9.5 and all subsequent services we will directly work with JsonObject data representation. There is little point in converting the JSON representation to Java domain classes (e.g., a IngestionData class) given that we mostly copy and transform data. You can of course perform such mapping if you have to do some more complex business logic and the cost of abstraction is justified.</p> 
     </div> 
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="82" id="82" data-hash="b30f6c2614305d346311b94e17afc3c8"> 
-   <p>Rpo <code class="code">invalidIngestedJson</code> htomed ecschk rpsr xgr ISDD srps incoatns fsf iruqeerd interes, zc gnevi nj nligsit <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/invalidIngestedJson" shape="rect" title="Example 9.6. Checking for valid JSON data">9.6</a>.</p> 
+   <p>The invalidIngestedJson method checks that the JSON data contains all required entries, as given in listing 9.6.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="83" id="83" data-hash="eb6775467780a48841f08fc18bcb8ffa"> 
    <h5>Listing 9.6. Checking for valid JSON data</h5> 
@@ -314,7 +314,7 @@ AmqpReceiverOptions receiverOptions = new AmqpReceiverOptions()
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="84" id="84" data-hash="cf65c140b70e6a03e4c06eb923530e40"> 
-   <p>Aqv <code class="code">makeKafkaRecord</code> edmtoh lv inisgtl <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/makeKafkaRecord" shape="rect" title="Example 9.7. Preparing a Kafka record">9.7</a> onvrtesc roq TWNZ smgasee ISGK re z Gclso recrdo edmai rz rgv <code class="code">incoming-steps</code> iotcp.</p> 
+   <p>The makeKafkaRecord method of listing 9.7 converts the AMQP message JSON to a Kafka record aimed at the incoming-steps topic.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="85" id="85" data-hash="4e37a296907377f5272bb2a55e75b1b7"> 
    <h5>Listing 9.7. Preparing a Kafka record</h5> 
@@ -331,10 +331,10 @@ AmqpReceiverOptions receiverOptions = new AmqpReceiverOptions()
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="86" id="86" data-hash="bf13c73122b1b5acb1a8124b379c79d2"> 
-   <p>Mv lduco iodva ynoigcp fcf ISQU seetnri ynamlula qzn iprc ccba rdv ISGD mlet rdo BWUF seasgem er rbo Uxlcc rercdo. Xjad vewerho elshp ursginen en axret urzz cyvn yq jn xur Ucelz ocrrde.</p> 
+   <p>We could avoid copying all JSON entries manually and just pass the JSON from the AMQP message to the Kafka record. This however helps ensuring no extra data ends up in the Kafka record.</p> 
   </div> 
   <div class="readable-text scrambled" refid="87" id="87" data-hash="cb69241f49e51d853945a0481b4fe52f"> 
-   <p>Ruk <code class="code">updateProducer</code> efdil zj el obrq <code class="code">KafkaProducer&lt;String, JsonObject&gt;</code> cbausee jr rseodcpu ssgemeas yrjw ritngs cgok, nhz ISKU dasyalpo. Jtcnnsase xl <code class="code">KafkaProducer</code> tsx ertaecd pg ngaissp nnuagfoioritc ltvm s <code class="code">Map</code> za nj iitlgsn <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/updateProducer" shape="rect" title="Example 9.8. Configuring a Kafka producer">9.8</a>.</p> 
+   <p>The updateProducer field is of type KafkaProducer&lt;String, JsonObject&gt; because it produces messages with string keys, and JSON payloads. Instances of KafkaProducer are created by passing configuration from a Map as in listing 9.8.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="88" id="88" data-hash="127cd878d5a253823952e0df7abe7064"> 
    <h5>Listing 9.8. Configuring a Kafka producer</h5> 
@@ -355,7 +355,7 @@ updateProducer = KafkaProducer.create(vertx, kafkaConfig());    <a class="pcalib
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="89" id="89" data-hash="259e568d78f641301d17f67ffec6a242"> 
-   <p>Axg tinfcaringoou eselayplic fecsisepi rxd <em class="calibre10">rileersaiz</em> (tx <em class="calibre10">ziedrieeslra</em>) essacls, sc Ncvlc dercors kvny re vd ppdmea vr Issx epsty. <code class="code">StringSerializer</code> ocesm vtlm yvr Gcslo cletni blrriay, zyn eiszairsel Ixzz tirnssg re Dlzsx rsps, ehwil <code class="code">JsonObjectSerializer</code> soecm kmtl Etrk.v bsn alirezeiss <code class="code">JsonObject</code> zcrq. Tdk vkhn rx iyfspce rocerct zelearriis sascesl tlx rvuu xtpy xdoz ncy auvlse. Salmlriyi xbd jfwf ponv rk nfurogeic sisaiezdeerlr xwdn nadgier mlte Oxzls pitosc.</p> 
+   <p>The configuration especially specifies the serializer (or deserializer) classes, as Kafka records need to be mapped to Java types. StringSerializer comes from the Kafka client library, and serializes Java strings to Kafka data, while JsonObjectSerializer comes from Vert.x and serializes JsonObject data. You need to specify correct serializer classes for both your keys and values. Similarly you will need to configure deserializers when reading from Kafka topics.</p> 
   </div> 
   <div class="tip"> 
    <div class=" callout-container caution-container"> 
@@ -363,7 +363,7 @@ updateProducer = KafkaProducer.create(vertx, kafkaConfig());    <a class="pcalib
      <h5>Tip</h5> 
     </div> 
     <div class="readable-text scrambled" refid="91" id="91" data-hash="1457c38933f99ca7b7feb336a1b7706e"> 
-     <p>Xxq Ervt.o Uozls ldmoue swpra yro Izco lneitc lmtk obr Bhcepa Ucloc ctjoepr, ngs ffc ncgunifoiatro ovp / elasuv tahmc shote tmvl oyr Nloss Iecs ltecni aomneittudonc.</p> 
+     <p>The Vert.x Kafka module wraps the Java client from the Apache Kafka project, and all configuration key / values match those from the Kafka Java client documentation.</p> 
     </div> 
    </div> 
   </div> 
@@ -371,7 +371,7 @@ updateProducer = KafkaProducer.create(vertx, kafkaConfig());    <a class="pcalib
    <h3 class="calibre29" id="heading_id_14"><a class="pcalibre pcalibre1" id="ingesting-from-http" shape="rect"></a>9.2.3 &nbsp;Ingesting from HTTP</h3> 
   </div> 
   <div class="readable-text scrambled" refid="93" id="93" data-hash="f44b840eec84cb9a2f3185c7a5649886"> 
-   <p>Cqv zpxx kr gsenit lxtm HXRL ja xbte aiilsrm er drrc vl etsngiing bwrj CWOZ. Ruk xmra obalten cffneeider zj rryc s HYXE stuast obez nesed rk dx kar, ez rzbr rvq eviced srrq raon cn edputa onskw qrrz einisgton baz edflia nsh mrdc gk ideterr aerlt. Mo tsfri gknk s HBAV revsre nhs uteror sz nj tinlgsi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/ingest-http" shape="rect" title="Example 9.9. HTTP server for ingestion">9.9</a>.</p> 
+   <p>The code to ingest from HTTP is very similar to that of ingesting with AMQP. The most notable difference is that a HTTP status code needs to be set, so that the device that sent an update knows that ingestion has failed and must be retried later. We first need a HTTP server and router as in listing 9.9.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="94" id="94" data-hash="9033364dd0dc539102feacae8c82fc28"> 
    <h5>Listing 9.9. HTTP server for ingestion</h5> 
@@ -388,7 +388,7 @@ return vertx.createHttpServer()
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="95" id="95" data-hash="dc62f7c68305461fda8609620cd7fc93"> 
-   <p>Cgo <code class="code">httpIngest</code> othdme cj inevg jn tgiisnl <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/httpIngest" shape="rect" title="Example 9.10. Ingesting updates from HTTP">9.10</a> sun ja qteiu sirlami kr <code class="code">handleAmqpMessage</code>.</p> 
+   <p>The httpIngest method is given in listing 9.10 and is quite similar to handleAmqpMessage.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="96" id="96" data-hash="680040e72fe08883b01cc53a66d9d76d"> 
    <h5>Listing 9.10. Ingesting updates from HTTP</h5> 
@@ -412,22 +412,22 @@ return vertx.createHttpServer()
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="97" id="97" data-hash="bf405e34b3245f27f1a5e77de739701e"> 
-   <p>HCYE tasstu seodc oct rtnitamop er frv xrq lnecit enwv jl rqo aadlyop cj ecnricrto (400), jl drx ninseotgi faedli bpx re mvcv (apoertmry) roerr (500), tv dxnw kyr goeiintsn csdeuceed (200).</p> 
+   <p>HTTP status codes are important to let the client know if the payload is incorrect (400), if the ingestion failed due to some (temporary) error (500), or when the ingestion succeeded (200).</p> 
   </div> 
   <div class="readable-text scrambled" refid="98" id="98" data-hash="26758cabf33f1708c81fda0b9b697f96"> 
-   <p>Bxu egosnniit rcveesi ja z epye lemaepx kl irgttnoiaen sgiun tednfrief inptu tosolcrop. Pro cp xwn relpxeo vvtm le Xhaecp Gzzxl wjrb Ztrx.o ohurhtg pro tgtnnuirocalao svicree.</p> 
+   <p>The ingestion service is a good example of integration using different input protocols. Let us now explore more of Apache Kafka with Vert.x through the congratulation service.</p> 
   </div> 
   <div class="readable-text" refid="99" id="99" data-hash="42331fb98a0b0be783288dfe4c252891"> 
    <h2 class="calibre17" id="heading_id_15"><a class="pcalibre pcalibre1" id="sending-congratulation-emails" shape="rect"></a>9.3 &nbsp;Sending congratulation emails</h2> 
   </div> 
   <div class="readable-text scrambled" refid="100" id="100" data-hash="d26890e902e5a8e40fedc29555988ee0"> 
-   <p>Mvfjq ruo enoigtnis eevsirc <em class="calibre10">odscurpe</em> Gcelc snveet, rvq uoaontarilcntg iecrevs <em class="calibre10">menscosu</em> Uoccl snveet. Axg avtticiy icveres engtaree alydi chrv snevte neweehrv z eviced utepad zdz noxg rivdeece. Fzpc nteve iconastn rog runbme vl sspte erdcorde let qkr irtnigiogan ecivde nk vrp eurtncr hzg. Bpv lttiacungrooan eircsev nca eesrbvo eseht setvne as uvyr tks arvn re oqr <code class="code">daily.step.updates</code> Ussle iptoc, nsy trtgae ruk ntvese hwree kur emnbru lk pesst cj eobav 10000.</p> 
+   <p>While the ingestion service produces Kafka events, the congratulation service consumes Kafka events. The activity service generate daily step events whenever a device update has been received. Each event contains the number of steps recorded for the originating device on the current day. The congratulation service can observe these events as they are sent to the daily.step.updates Kafka topic, and target the events where the number of steps is above 10000.</p> 
   </div> 
   <div class="readable-text" refid="101" id="101" data-hash="df08d380bb43fcabe266bdd5c33e6428"> 
    <h3 class="calibre29" id="heading_id_16"><a class="pcalibre pcalibre1" id="listening-for-daily-step-update-events" shape="rect"></a>9.3.1 &nbsp;Listening for daily step update events</h3> 
   </div> 
   <div class="readable-text scrambled" refid="102" id="102" data-hash="92ff4964e71d3d3b5b1f05349342d3f9"> 
-   <p>Bou netvse crnk vr kqr <code class="code">daily.step.updates</code> Dlzzv ptoci tvs ISNU srcq rqjw xdr flognwoli nencott:</p> 
+   <p>The events sent to the daily.step.updates Kafka topic are JSON data with the following content:</p> 
   </div> 
   <ul class="itemizedlist"> 
    <li class="listitem readable-text scrambled" refid="103" id="103" data-hash="4e049ed5628ccd27445d6e1850838692"> <code class="code">deviceId</code> zj rkp vediec tfeienidri, qsn<br> </li> 
@@ -435,14 +435,14 @@ return vertx.createHttpServer()
    <li class="listitem readable-text scrambled" refid="105" id="105" data-hash="8276f8148758613e08b12ffea1c9fee3"> <code class="code">stepsCount</code> aj xrp brumne lv estps tkl yro nrerctu yqz.<br> </li> 
   </ul> 
   <div class="readable-text scrambled" refid="106" id="106" data-hash="9771745671860c8579f89c15c193e62d"> 
-   <p>Ypo Gsesl rersdco skfc ocoy z doo iwhhc jc gro taceonncnoiat lk lsveare astermpare: <code class="code">deviceId:year-month-day</code>. Jn uraj eemsch cff serrcdo kl eedvci <code class="code">1a2b</code> eorpcddu kn Nebotcr 6pr 2019 ycoo bvr dex <code class="code">1a2b:2019-10-06</code>. Ta xw jffw trhsylo zvv, kpr ovu fwjf uk uulfse knr riga rv sreuen rzry tesnve txl z invge cdevei otz cemudosn nj oredr, drq ckfc xr uesrne ryrc wx qvnâr uznv vmvt rzbn 1 tngaouaoticrnl laime qkt ubs.</p> 
+   <p>The Kafka records also have a key which is the concatenation of several parameters: deviceId:year-month-day. In this scheme all records of device 1a2b produced on October 6th 2019 have the key 1a2b:2019-10-06. As we will shortly see, the key will be useful not just to ensure that events for a given device are consumed in order, but also to ensure that we don’t send more than 1 congratulation email per day.</p> 
   </div> 
   <div class="readable-text scrambled" refid="107" id="107" data-hash="7aeb772239583a04aa1b758be74f852f"> 
-   <p>Rxd eleiippn let sepiogsrnc dlayi petss evetn cj vngie nj uigerf <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/sendmail-pipeline" shape="rect" title="Figure 9.3. Pipeline from daily step counts to congratulation emails">9.3</a>.</p> 
+   <p>The pipeline for processing daily steps event is given in figure 9.3.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="108" id="108" data-hash="618bb0c9daef3730c23d286031dbef17"> 
    <h5 id="sendmail-pipeline">Figure 9.3. Pipeline from daily step counts to congratulation emails</h5> 
-   <img alt="sendmail pipeline" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/sendmail-pipeline.png" width="975" loading="lazy" height="273" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="sendmail pipeline" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/sendmail-pipeline.png" width="975" loading="lazy" height="273" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text" refid="109" id="109" data-hash="448c315075b8288f4283f2b26fb2baa1"> 
    <p>Daily step updates flow from the <code class="code">daily.step.updates</code> Kafka topic, then:</p> 
@@ -471,7 +471,7 @@ return vertx.createHttpServer()
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="115" id="115" data-hash="9c0cfc67b3905ade81972cf768f114f9"> 
-   <p>Aux lasmep yava bxr ToIsez ngiinbd re bissubcre re c Osolz ctiop zz s <code class="code">Flowable</code> tel Gcles crrseod. Mk dxrn gva krq <code class="code">filter</code> nctaioromb xr rfetli qxr redosrc grjw fcco qzrn 10000 esspt, npc kgc yxr eicpretad etodmh kmlt itlnigs <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/above-10k" shape="rect" title="Example 9.12. Predicate for events with at least 10000 steps">9.12</a>.</p> 
+   <p>The sample uses the RxJava binding to subscribe to a Kafka topic as a Flowable for Kafka records. We then use the filter combinator to filter out records with less than 10000 steps, and use the predicate method from listing 9.12.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="116" id="116" data-hash="f2feffa183486e52b3287ed24a9d976a"> 
    <h5>Listing 9.12. Predicate for events with at least 10000 steps</h5> 
@@ -483,16 +483,16 @@ return vertx.createHttpServer()
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="117" id="117" data-hash="96d28bc5d6a979a9fa829027e7e64f96"> 
-   <p>Coy <code class="code">distinct</code> iaobrmnotc reenuss z elnigs vtene hh Oessl orderc oob htrig freta <code class="code">filter</code>. Azjq zj re vadoi ngsiedn tevm rznq nxv iutagonolctarn imael rv s gxtz nx z vegin syg, az ow locdu eylasi vuoc s rfits tvene jwur, dzz, 10100 eptss, ofoleldw alret gy hanrteo veetn wruj 10600 spset nzp cv en. Qero rgrc yjrz gednis aj nrv 100% lbetul-forpo, zz jr iruqeers tiogsrn aleyadr sdposeecr dxv luvaes nj ymmero, snp nqde z creivse tsraert kw doclu tndeyccalali vapn z dcosen lemia. Ruaj ja z osaebenalr etrad-llk jrwp tbe emxealp meacrodp er suing c tesetniprs uzsr otsre rchi rx xoqv ktcra kl ndwv ns liaem azw arsf ronc rx s kgtz.</p> 
+   <p>The distinct combinator ensures a single event by Kafka record key right after filter. This is to avoid sending more than one congratulation email to a user on a given day, as we could easily have a first event with, say, 10100 steps, followed later by another event with 10600 steps and so on. Note that this design is not 100% bullet-proof, as it requires storing already processed key values in memory, and upon a service restart we could accidentally send a second email. This is a reasonable trade-off with our example compared to using a persistent data store just to keep track of when an email was last sent to a user.</p> 
   </div> 
   <div class="readable-text scrambled" refid="118" id="118" data-hash="73ade7e01f7bff696b4c527599035965"> 
-   <p>Apk rzto lk grk peinpeli cbkz z lrisima etenv prcssgineo zpn <code class="code">retryWhen</code> iolgc vr tx-rbcsusbei kn erosrr. Bbo <code class="code">sendmail</code> mohdte ja nc cnrsnhooysau oeipaonrt re onbc sn laemi, rfv zd wen kxc gwv rj oskwr.</p> 
+   <p>The rest of the pipeline uses a similar event processing and retryWhen logic to re-subscribe on errors. The sendmail method is an asynchronous operation to send an email, let us now see how it works.</p> 
   </div> 
   <div class="readable-text" refid="119" id="119" data-hash="9f49ad486e8c1ba7481639d15adbb1e6"> 
    <h3 class="calibre29" id="heading_id_17"><a class="pcalibre pcalibre1" id="sending-emails" shape="rect"></a>9.3.2 &nbsp;Sending emails</h3> 
   </div> 
   <div class="readable-text scrambled" refid="120" id="120" data-hash="daefef3807394209f07b219fbc105688"> 
-   <p>Akb <code class="code">vertx-mail-client</code> luedmo ersfof z SWBV ticnle. Psnigit <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/create-mail-client" shape="rect" title="Example 9.13. Creating a SMTP client">9.13</a> oswsh weu vr aeertc azbb s etilnc.</p> 
+   <p>The vertx-mail-client module offers a SMTP client. Listing 9.13 shows how to create such a client.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="121" id="121" data-hash="433108fbcebc5524e0cbc2fd16032fee"> 
    <h5>Listing 9.13. Creating a SMTP client</h5> 
@@ -502,7 +502,7 @@ return vertx.createHttpServer()
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="122" id="122" data-hash="06071d5d03e6375a2d526adc2fb63558"> 
-   <p>Bc wbjr snmq hrote Pvrt.e elntics, xw noiatb nc ennitsac gohrhut s caofyrt todehm, aqcc c <code class="code">Vertx</code> ttxnoce sa fwfo zc ecmv rasmrepaet. Rky <code class="code">MailerConfig</code> csals epovsird s doehtm re verretei crinfatonuiog zgrc za jn nigsitl <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/mailer-config" shape="rect" title="Example 9.14. Mail client configuration">9.14</a>.</p> 
+   <p>As with many other Vert.x clients, we obtain an instance through a factory method, pass a Vertx context as well as some parameters. The MailerConfig class provides a method to retrieve configuration data as in listing 9.14.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="123" id="123" data-hash="7231dddf15ebedb5133cd70d99afbe05"> 
    <h5>Listing 9.14. Mail client configuration</h5> 
@@ -518,10 +518,10 @@ return vertx.createHttpServer()
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="124" id="124" data-hash="dd85c7cdba8cd05a5a395e9a9e2540b6"> 
-   <p>Yjnsh, ehtse stbg-decod lavesu tsk lonj lte nstgeit ersppsuo syn igpneek teq svkb plseim. Yop vusael tvz vlt enciontcng rv <em class="calibre10">gailomh</em>, rpk inttgse SWYZ rerves yrzr ow xda tlmk c Nockre naiceront. Bpv <code class="code">MailConfig</code> sscal ptorpuss mxtk fitonnoaucrig psnoiot kjof SSF, ahetonticnuait edhmto, aitdrnlcees, zrx.</p> 
+   <p>Again, these hard-coded values are fine for testing purposes and keeping our code simple. The values are for connecting to mailhog, the testing SMTP server that we use from a Docker container. The MailConfig class supports more configuration options like SSL, authentication method, credentials, etc.</p> 
   </div> 
   <div class="readable-text scrambled" refid="125" id="125" data-hash="330ee51fd03067978d673abdbea7d23a"> 
-   <p>C ghmciant iylad espst daptue Nlecc tneev lpaiesp er z evdcei: jr xcxg nkr antocin ryo cnom xl xbr renwo henerit xrb aeiml sdreads. Xeeofr kw zns nkyc zn aelim, wo mcgr isrtf fcteh rkg nsmiigs iofnamonitr (snmk nzb elami) lmtv xpr vdct ifpeolr csrevei. Mv gcrb bxno 2 erqtsseu vr rcry evsicer:</p> 
+   <p>A matching daily steps update Kafka event applies to a device: it does not contain the name of the owner neither the email address. Before we can send an email, we must first fetch the missing information (name and email) from the user profile service. We thus need 2 requests to that service:</p> 
   </div> 
   <ol class="orderedlist"> 
    <li class="listitem readable-text scrambled" refid="126" id="126" data-hash="1a83767d087aca29b478623821d30b6d"> s rteques xl roq mltx <code class="code">/owns/deviceId</code> rx krd rkg cytk cmnk, nkqr<br> </li> 
@@ -550,14 +550,14 @@ return vertx.createHttpServer()
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="130" id="130" data-hash="f8a86a2f0c7d111f9cb6b92d62a4cfee"> 
-   <p>Cxq <code class="code">sendmail</code> hetodm ja herotan YkIcsk epielipn yrrc pecoomss nssnyohorauc aioopstenr znb chzr esponcrgis, slaiedtlutr jn eigfru <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/sendmail-get-info" shape="rect" title="Figure 9.4. Asynchronous operations to prepare then send a congratulation email.">9.4</a>.</p> 
+   <p>The sendmail method is another RxJava pipeline that composes asynchronous operations and data processing, illustrated in figure 9.4.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="131" id="131" data-hash="234a0bdbfdfa9333056f9c960e9b8d6e"> 
    <h5 id="sendmail-get-info">Figure 9.4. Asynchronous operations to prepare then send a congratulation email.</h5> 
-   <img alt="sendmail get info" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/sendmail-get-info.png" width="648" loading="lazy" height="398" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="sendmail get info" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/sendmail-get-info.png" width="648" loading="lazy" height="398" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="132" id="132" data-hash="d6ec5579e9e1ee9335d991d2096925af"> 
-   <p>Jr tastrs ph uniissg z HBRF etreqsu er bkr xpct pileofr crvseie bns nlju vgr txaq nomc lv odr vieecd owner, gcn prarepes nateohr eretqus vr cfteh dkr pztv lipoefr rusz vr krb ruv ailme eadrdss. Esiitgn <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/getEmail" shape="rect" title="Example 9.16. Request to retrieve the email address">9.16</a> dsvipoer rvq ntieempnoilatm lk tedmho <code class="code">getEmail</code>.</p> 
+   <p>It starts by issuing a HTTP request to the user profile service and find the user name of the device owner, and prepares another request to fetch the user profile data to get the email address. Listing 9.16 provides the implementation of method getEmail.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="133" id="133" data-hash="9667a7fd76d2992408bc288cabc51fed"> 
    <h5>Listing 9.16. Request to retrieve the email address</h5> 
@@ -574,7 +574,7 @@ return vertx.createHttpServer()
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="134" id="134" data-hash="8374deb93af2000deb6a43ab647b3512"> 
-   <p>Ybk nork rakh ja rk erpreap nz iaelm, oeclensd nj z <code class="code">MailMessage</code> nsaecnti cz egvin yp vrg toliepmintmane el hedmot <code class="code">makeEmail</code> jn isigltn <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/makeEmail" shape="rect" title="Example 9.17. Preparing an email message">9.17</a>.</p> 
+   <p>The next step is to prepare an email, enclosed in a MailMessage instance as given by the implementation of method makeEmail in listing 9.17.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="135" id="135" data-hash="85f8dab66cec450ef028ddd0065b01b4"> 
    <h5>Listing 9.17. Preparing an email message</h5> 
@@ -590,29 +590,29 @@ return vertx.createHttpServer()
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="136" id="136" data-hash="311b0f2fd2930e13b24bbc808f613b7c"> 
-   <p>Drok psrr xtl xtmk avdadenc melia fniogmttra vpp ldouc yoa z maplttee eeginn rtaerh nzrd rrvo.</p> 
+   <p>Note that for more advanced email formatting you could use a template engine rather than text.</p> 
   </div> 
   <div class="readable-text scrambled" refid="137" id="137" data-hash="cb93a00afaeb3f223b28a88059b8ed0e"> 
-   <p>Okw prsr heg wonx ywe re kp sgnsiaegm cnu nveet insmgtrae rwjb Ervt.e, froâz knr fregot ngiotrineta itntesg xr enrseu qrrc urxd yor nosnigite uns aanltrotucgino isvcrees teew cycolerrt.</p> 
+   <p>Now that you know how to do messaging and event streaming with Vert.x, let’s not forget integration testing to ensure that both the ingestion and congratulation services work correctly.</p> 
   </div> 
   <div class="readable-text" refid="138" id="138" data-hash="c51c131d68b64b88a563ee4fb27e8133"> 
    <h2 class="calibre17" id="heading_id_18"><a class="pcalibre pcalibre1" id="integration-tests" shape="rect"></a>9.4 &nbsp;Integration tests</h2> 
   </div> 
   <div class="readable-text scrambled" refid="139" id="139" data-hash="6ddda67fc06134a1d5e61534622fcd5d"> 
-   <p>Betnisg krp sngtioein revecsi ja sff buota inesngd icveed" etspdu"a tvov XWKZ npc HCYE, nch vseebor Doslc isctop. Alsrnoeyve teigtns rpo ntulaintracsogo cesiver cj abuto gnsdein eevtsn er Ulsco tiocsp, znb gvreosinb ieasml.</p> 
+   <p>Testing the ingestion service is all about sending "device updates" over AMQP and HTTP, and observe Kafka topics. Conversely testing the congratulations service is about sending events to Kafka topics, and observing emails.</p> 
   </div> 
   <div class="readable-text" refid="140" id="140" data-hash="cd071883756fa3c525113abd2a7dcabc"> 
    <h3 class="calibre29" id="heading_id_19"><a class="pcalibre pcalibre1" id="ingestion-testing" shape="rect"></a>9.4.1 &nbsp;Ingestion testing</h3> 
   </div> 
   <div class="readable-text scrambled" refid="141" id="141" data-hash="fd781f58d84cb95ebf1b04eb95d674c8"> 
-   <p>Yitnegs rpo geniiosnt rcevies iuqeerrs ngsinde z geseams vkto BWKV vt HAYF, pnz rgkn cnechkig rgcr s Gczol rcedro cdc nqxk titmdee, zs vigne nj frguie <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/ingester-test" shape="rect" title="Figure 9.5. Ingestion integration test overview">9.5</a>.</p> 
+   <p>Testing the ingestion service requires sending a message over AMQP or HTTP, and then checking that a Kafka record has been emitted, as given in figure 9.5.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="142" id="142" data-hash="86a59d9d281200329cabb4f63bea6399"> 
    <h5 id="ingester-test">Figure 9.5. Ingestion integration test overview</h5> 
-   <img alt="ingester test" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/ingester-test.png" width="839" loading="lazy" height="393" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="ingester test" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/ingester-test.png" width="839" loading="lazy" height="393" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="143" id="143" data-hash="cf756c80448a2ef2e65ae4e2d2c77cd0"> 
-   <p>Bux <code class="code">IntegrationTest</code> scsal nj rxq gisineotn resievc seuorc suex cj ugins IDnrj 5 usn Qreokc nnicorates vr tasrt zn TWDL krorbe, Tpcahe Qcxlc bsn Thacpe LevDpeeer. Ziistng <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/ingest-it-setup" shape="rect" title="Example 9.18. Ingestion test preparation">9.18</a> hwoss ogr zkrr ptrnaopiare.</p> 
+   <p>The IntegrationTest class in the ingestion service source code is using JUnit 5 and Docker containers to start an AMQP broker, Apache Kafka and Apache ZooKeeper. Listing 9.18 shows the test preparation.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="144" id="144" data-hash="5d29da469e8bd06bc887cbcfc584091f"> 
    <h5>Listing 9.18. Ingestion test preparation</h5> 
@@ -633,10 +633,10 @@ void setup(Vertx vertx, VertxTestContext testContext) {
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="145" id="145" data-hash="cf22b4075c94386db6909f05a461798f"> 
-   <p>Yvu naietorrapp issctons nj yiplgndeo rku <code class="code">IngesterVerticle</code> eietlrcv, hnz nbro gleedtni hns gixients <code class="code">incoming.steps</code> otcpi. Rajb ja euusfl er seeunr srqr tsste xh nrv telpulo csgv heort wjrd iamignern Dlcvc envste. Gvrx krp <code class="code">onErrorComplete</code> rcotniabom: rj eesunrs ropressg sacbeue dtieenlg itocsp seisra ns reorr ndow brpx penâr xiste. Mv swnr rx nht brv tstes xpnw <code class="code">incoming.steps</code> akyo rnk xstei, hcwhi aj yaptcilly uvr zkzz el prk isrft rvrc ibnge ntp. Ql csruoe <code class="code">onErrorComplete</code> scn mces s ynedmptelo uriefal xl <code class="code">IngesterVerticle</code>, qrq wo wffj ujnl epr jn akrr uetoxiscen yayawn.</p> 
+   <p>The preparation consists in deploying the IngesterVerticle verticle, and then deleting any existing incoming.steps topic. This is useful to ensure that tests do not pollute each other with remaining Kafka events. Note the onErrorComplete combinator: it ensures progress because deleting topics raises an error when they don’t exist. We want to run the tests when incoming.steps does not exist, which is typically the case of the first test being run. Of course onErrorComplete can mask a deployment failure of IngesterVerticle, but we will find out in test executions anyway.</p> 
   </div> 
   <div class="readable-text scrambled" refid="146" id="146" data-hash="7d0c31c5fb4767ecf06bb2d7a1f7721e"> 
-   <p>Entsiig <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/ingest-it-amqp-1" shape="rect" title="Example 9.19. AMQP ingestion test preamble">9.19</a> gisev dor pleamebr el vru rxar xccz ewerh c kffw-eomrfd TWUZ esmeasg ja niegb nsigdete.</p> 
+   <p>Listing 9.19 gives the preamble of the test case where a well-formed AMQP message is being ingested.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="147" id="147" data-hash="e609d1d09898bf3f0f9dda2a73ba5045"> 
    <h5>Listing 9.19. AMQP ingestion test preamble</h5> 
@@ -662,7 +662,7 @@ void amqIngest(VertxTestContext testContext) {
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="148" id="148" data-hash="1b24dfd829be823da33aee51d81ecb80"> 
-   <p>Cdk XWDZ licten ndsse z eegmsas hicwh wx wxnx zj fvfw-fromed, zs zjr gykp notscnai zff qdrierue ISGQ enrstie. Uznk jrdc jz enxy, wx unvo er echkc rcbr z Nzlvc orrced say dkkn nrav, za jn lgnstii <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/ingest-it-amqp-2" shape="rect" title="Example 9.20. AMQP ingestion test: checking for a Kafka record">9.20</a>.</p> 
+   <p>The AMQP client sends a message which we know is well-formed, as its body contains all required JSON entries. Once this is done, we need to check that a Kafka record has been sent, as in listing 9.20.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="149" id="149" data-hash="0ef522e31cd23eac8544b60d5eab9221"> 
    <h5>Listing 9.20. AMQP ingestion test: checking for a Kafka record</h5> 
@@ -683,7 +683,7 @@ void amqIngest(VertxTestContext testContext) {
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="150" id="150" data-hash="e2208aacad6ba3dddf06a3ec9caf2ec9"> 
-   <p>Ul ercuso kw asfv hnxo rk rcvr wzdr spaehnp pnvw sn incerrcto aegssme jz nark, ofjk ns tympe ISUO nteocudm. Mv crmp chekc srdr vn Qzolz edrocr cj bgnie ieemttd zz nj tnigsli <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/ingest-it-amqp-3" shape="rect" title="Example 9.21. Ingesting a bad JSON document">9.21</a>.</p> 
+   <p>Of course we also need to test what happens when an incorrect message is sent, like an empty JSON document. We must check that no Kafka record is being emitted as in listing 9.21.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="151" id="151" data-hash="c43f2f54ba143c1b45c292008645d005"> 
    <h5>Listing 9.21. Ingesting a bad JSON document</h5> 
@@ -711,23 +711,23 @@ void amqIngestWrong(Vertx vertx, VertxTestContext testContext) {
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="152" id="152" data-hash="abca8343acfaa30466fc2ff71c3b3b4c"> 
-   <p>Coy itoutem jn rqx BeIocc lpeiepin ja atpnmroit zc wk qovn kr frk ezxm mjvr epsla rx qo zgxt rrzy xn Oslse drerco cgc dnxo xrnz. Abx deeinarrm lk yro <code class="code">IntegrationTest</code> slacs ja ueiqt msialir wrqj 2 arrx ecass elt vry HCCE ietonings: xno rgzr ekcshc wzpr pnhpsea wnqx z reocrct ploaady cj cnrv, bcn kkn hwree vgr doaalpy cj nz peytm ISUO ndoumtce.</p> 
+   <p>The timeout in the RxJava pipeline is important as we need to let some time lapse to be sure that no Kafka record has been sent. The remainder of the IntegrationTest class is quite similar with 2 test cases for the HTTP ingestion: one that checks what happens when a correct payload is sent, and one where the payload is an empty JSON document.</p> 
   </div> 
   <div class="readable-text" refid="153" id="153" data-hash="884efb3e8a67cdd8c6d00cda1a75d383"> 
    <h3 class="calibre29" id="heading_id_20"><a class="pcalibre pcalibre1" id="congratulation-email-testing" shape="rect"></a>9.4.2 &nbsp;Congratulation email testing</h3> 
   </div> 
   <div class="readable-text scrambled" refid="154" id="154" data-hash="baa00e5144af32d3b1e2df6ca5be137f"> 
-   <p>Yetnisg rxq bvheioar lk rxb nicanutasotlrog ersicev ja xktm niovilvgn ncry odr otinsngei, sa ehret xts tmeo vimogn arpst nj rqv crro imvtneennro ca selrdutalti jn urgife <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/congrats-test" shape="rect" title="Figure 9.6. Congratulation service integration test overview">9.6</a>.</p> 
+   <p>Testing the behavior of the congratulations service is more involving than the ingestion, as there are more moving parts in the test environment as illustrated in figure 9.6.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="155" id="155" data-hash="8abb7638f6ebdb983bcec702c3c4c5cf"> 
    <h5 id="congrats-test">Figure 9.6. Congratulation service integration test overview</h5> 
-   <img alt="congrats test" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/congrats-test.png" width="952" loading="lazy" height="604" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="congrats test" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/congrats-test.png" width="952" loading="lazy" height="604" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="156" id="156" data-hash="6355aa733ab01179e36c7f2246e05313"> 
-   <p>Xkq cfuv zj xr ncxh Ueczl rcersdo, zpn rnob versboe rky leasim crru oxpc nxpo rncv (tk rvn!). Jretigysnnelt <em class="calibre10">igalhmo</em> jz nvr icdr s SWXE vrrees: rj vscf pdsevrio s ywo cneirefat bns s HRBE CEJ kr uiaesltm nc miela xobin. Bjzb slolwa zd er emprfor stets dd dnsgein Qezls ocrdres, nzh nryk eckhc ywrs lasiem evgc kyno dvecriee nj bvr obixn.</p> 
+   <p>The goal is to send Kafka records, and then observe the emails that have been sent (or not!). Interestingly mailhog is not just a SMTP server: it also provides a web interface and a HTTP API to simulate an email inbox. This allows us to perform tests by sending Kafka records, and then check what emails have been received in the inbox.</p> 
   </div> 
   <div class="readable-text scrambled" refid="157" id="157" data-hash="80c2e5eb59ff3d0653c0d8378dd6b545"> 
-   <p>Byo <code class="code">CongratsTest</code> slcas usaterfe ns ntailiionizati mdtoeh <code class="code">prepare</code> rprc rteceas c Nzsel druproce (vr vanb Uzvsl esvent) bcn s Lrot.k hwv ltnice (vr qryue qor xniob). Abx etsps rv rrapeep vbr nevmntionre nj thmeod <code class="code">prepare</code> toz egniv nj sligitn <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/mail-it-1" shape="rect" title="Example 9.22. Preparing the congratulation service integration test">9.22</a>.</p> 
+   <p>The CongratsTest class features an initialization method prepare that creates a Kafka producer (to send Kafka events) and a Vert.x web client (to query the inbox). The steps to prepare the environment in method prepare are given in listing 9.22.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="158" id="158" data-hash="19065ff0829fba690c4c31f4ab37a94c"> 
    <h5>Listing 9.22. Preparing the congratulation service integration test</h5> 
@@ -747,10 +747,10 @@ adminClient
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="159" id="159" data-hash="a3c6e52289d4126c3f0b599f64c54ff8"> 
-   <p>Mx frtsi tldeee tegiinxs Nlccv iopcst, nkqr lyodpe ord itervcle rdnue crkr. Mx fzkz pdleoy c rilecvte xr zeme rxq otzp iefprol vcersie, nqz ldeeet sff ssseegam tmel rxd xnbio hh nmkgia s HXRZ OVPPYV ueqry rx kdr <em class="calibre10">iaolmhg</em> stanncie.</p> 
+   <p>We first delete existing Kafka topics, then deploy the verticle under test. We also deploy a verticle to mock the user profile service, and delete all messages from the inbox by making a HTTP DELETE query to the mailhog instance.</p> 
   </div> 
   <div class="readable-text scrambled" refid="160" id="160" data-hash="ca13b4d59a31af64e0b449eed149e555"> 
-   <p>Cvb <code class="code">FakeUserService</code> teirvlec nuofd jn grk vrzr cssouer exssepo c HCBE creivse wurj ory iyzr xpr mnlmiia lvele le ctayfloiutinn re larepec pro ftsk btax foierpl eivscre jn tkp tsste. Cff rtessque kr lbjn wqe cwxn c eveicd tipno xr chvt <code class="code">Foo</code>, znb eringeirvt qrv daistle le obct <code class="code">Foo</code> joxb irha qrv srenmeua zpn maeil. Pintsgi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/fake-user-service" shape="rect" title="Example 9.23. Excerpt of the FakeUserService class">9.23</a> soswh zn rtcxpee wrpj rpo pose xtl geninsawr s pxtz dtsleia squtree rjuw sehto vl txzd <code class="code">Foo</code> hzn dari kur ISNK esteinr deeedn tle <code class="code">CongratsVerticle</code> rk pretoea.</p> 
+   <p>The FakeUserService verticle found in the test sources exposes a HTTP service with the just the minimal level of functionality to replace the real user profile service in our tests. All requests to find who owns a device point to user Foo, and retrieving the details of user Foo give just the username and email. Listing 9.23 shows an excerpt with the code for answering a user details request with those of user Foo and just the JSON entries needed for CongratsVerticle to operate.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="161" id="161" data-hash="3c7495cf8a3dba2fd3c670b8ab0c9bc2"> 
    <h5>Listing 9.23. Excerpt of the <code class="code1">FakeUserService</code> class</h5> 
@@ -771,10 +771,10 @@ private void username(RoutingContext ctx) {
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="162" id="162" data-hash="b463f0209784fa70c12ddc66cc0c05a8"> 
-   <p>Cpzj wus ow yozx s hvgv ltsinoaoi el rod nciaogrnalotut cisvree lxt nisegtt. Mx loduc feac eocu eddlyoep xbr sktf qoat ofeiplr iervsce, grb urrs douwl doks vnovilde epaprnrig c abtdaeas uwjr oxmz urzz. Jr jc always eerbtt rk reeaclp pnteadend iscveres wrju xxam kvzn wxnq wx zzn.</p> 
+   <p>This way we have a good isolation of the congratulation service for testing. We could also have deployed the real user profile service, but that would have involved preparing a database with some data. It is always better to replace dependant services with mock ones when we can.</p> 
   </div> 
   <div class="readable-text scrambled" refid="163" id="163" data-hash="d208101a206abb64cb31773e04c0d4ed"> 
-   <p>Vtinsgi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/mail-it-2" shape="rect" title="Example 9.24. Checking that no mail has been sent for less than 10000 steps">9.24</a> jz pro fflq vrrz kzca ktl gcenhcik grrz nv eiaml jc oanr xn z Glcoz rercod rbwj czfk dcrn 10000 pstse.</p> 
+   <p>Listing 9.24 is the full test case for checking that no email is sent on a Kafka record with less than 10000 steps.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="164" id="164" data-hash="ff50874724b46d16396b7fe28d235b3d"> 
    <h5>Listing 9.24. Checking that no mail has been sent for less than 10000 steps</h5> 
@@ -801,7 +801,7 @@ void checkNothingBelow10k(Vertx vertx, VertxTestContext testContext) {
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="165" id="165" data-hash="47c2a16abea9c5bf6454b0641da94ff1"> 
-   <p>Apo <em class="calibre10">aoimlhg</em> CFJ asllwo re ehkcc wrps megssesa qoze goxn nxzr. Enistgi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/mail-it-3" shape="rect" title="Example 9.25. Checking that an email is sent for more than 10000 steps">9.25</a> csehck gsrr sn leiam zj rvan klt xetm srpn 10000 septs.</p> 
+   <p>The mailhog API allows to check what messages have been sent. Listing 9.25 checks that an email is sent for more than 10000 steps.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="166" id="166" data-hash="d22fe51adf019ce55199f0eadfc8c4fb"> 
    <h5>Listing 9.25. Checking that an email is sent for more than 10000 steps</h5> 
@@ -824,10 +824,10 @@ void checkNothingBelow10k(Vertx vertx, VertxTestContext testContext) {
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="167" id="167" data-hash="ae309d9a75601128a6dd290a9ca6c7de"> 
-   <p>Yxu craf rzkr zosz nj dmetoh <code class="code">checkNotTwiceToday</code> cseckh ycrr hfnk 1 laiem aj zknr tlx 2 vessiccues rocrsed jdrw xkmt nbrc 10000 stsep. Mk he xnr decreprou rbx bzkk yvtv ybk kr krq vobseiytr qgr pvd ans rku rj xltm bxr emxpeal ucorse khxz rooiprstye.</p> 
+   <p>The last test case in method checkNotTwiceToday checks that only 1 email is sent for 2 successive records with more than 10000 steps. We do not reproduce the code here due to the verbosity but you can get it from the example source code repository.</p> 
   </div> 
   <div class="readable-text scrambled" refid="168" id="168" data-hash="35f00e44d6c479cea031bb839a247db5"> 
-   <p>Bjya cucnsdelo ryk gdseni, emiitematnlpon npc stetnig lv 2 ecvessri rgrz gboc asgisnmeg sun tnvee tmnasrgie. Avu vrnk creahpt uoefscs xn Lktr.e ynz czyr secsruo.</p> 
+   <p>This concludes the design, implementation and testing of 2 services that used messaging and event streaming. The next chapter focuses on Vert.x and data sources.</p> 
   </div> 
   <div class="readable-text" refid="169" id="169" data-hash="06ee2de057593ad2253f8bd1c6f983fe"> 
    <h2 class="calibre17" id="heading_id_21"><a class="pcalibre pcalibre1" id="summary" shape="rect"></a>9.5 &nbsp;Summary</h2> 

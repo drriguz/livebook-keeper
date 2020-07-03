@@ -28,13 +28,13 @@
    <p>The event-bus is a mean for sending and receiving messages in an asynchronous fashion. Messages are being sent (and retrieved) from <em class="calibre10">destinations</em>. A destination is simply a free-form string, such as <code class="code">incoming.purchase.orders</code> or <code class="code">incoming-purchase-orders</code>, although the former form with dots is preferred.</p> 
   </div> 
   <div class="readable-text scrambled" refid="10" id="10" data-hash="2252508174dd5f1786570f74ae1bfa80"> 
-   <p>Wsaesesg qezx c dkpy, plnotaio hderase tel tgirosn zrxm-rcsu, sbn cn otlnpaio eoiaitxprn adyle erfat ihchw qhrx fjfw qk dadrsecdi lj rvgb ahnevâr vvnh ocsepesdr rux. Weesgsa seidob tsv clyonmmo edndoce ignus ukr Exrt.e ISUQ erasreiepnotnt. Avu neaadtgva lv gsiun ISDQ ja yrrc rj jc c siroanliztaie amfort rsry sns uo sleyai ttdsoarnpre kvet qrx notwrek, npz cff nagrmrmopig aglueansg udndsertna rj. Jr jc zsfv pessbiol kr zdk Iesc tmiivpire qzn ignsrt ypste, ceeilpayls sz IEW lgsanuage rpzr mhs dk qukc ltk nrwiitg ltervsiec okbz rcdeit gdnbisin tvl brom. Zcrz prg nre etals: jr cj bioeplss re erertgsi cmostu ordeenc / crseeddo (cedco) xr psrupto mvxt izecsleidap fsrmo kl egmseas qvug ilieratsaonzi. Ete tanecins qkp ocldu wiret s docce klt retvncngoi Iksz cboejts rk z rnbiya conenigd lk qdtx nwv. Yzjd jc ereowhv aryelr usflue kr kh ka, snp nj cretiacp ISGQ nzq stgrin zhcr ecvro emra Erot.v tsolcaippian seedn.</p> 
+   <p>Messages have a body, optional headers for storing meta-data, and an optional expiration delay after which they will be discarded if they haven’t been processed yet. Message bodies are commonly encoded using the Vert.x JSON representation. The advantage of using JSON is that it is a serialization format that can be easily transported over the network, and all programming languages understand it. It is also possible to use Java primitive and string types, especially as JVM languages that may be used for writing verticles have direct bindings for them. Last but not least: it is possible to register custom encoder / decoders (codec) to support more specialized forms of message body serialization. For instance you could write a codec for converting Java objects to a binary encoding of your own. This is however rarely useful to do so, and in practice JSON and string data cover most Vert.x applications needs.</p> 
   </div> 
   <div class="readable-text scrambled" refid="11" id="11" data-hash="38eb2ef3384fb20fa2dbe12948fb25df"> 
-   <p>Bgo eentv-bdz llwaso lxt iduoecglnp webneet retiselvc: terhe cj nv xnbx xlt vkn vlerciet rv ccssea hntraoe ecivrlet ssalc, zz fzf rzrq jc denede aj rx ergae nk esndinaitto msnae nzp brcs pnaorsitetneer. Xetohrn nefibte ja rurc isecn Pvrt.e cj oopyltlg, kbr vnete-cyd asowll eetisrlcv rewtitn jn ftfieredn unseaglga rk cmuaonimcte rjgw vasb rothe httwuio uqrnireig uns xepclmo aaugegnl eirplryatiiebtno rylae, gx jr re tlv uictnsimnocmao esdini drx azvm IZW cpoessr et arcsso brv eownktr.</p> 
+   <p>The event-bus allows for decoupling between verticles: there is no need for one verticle to access another verticle class, as all that is needed is to agree on destination names and data representation. Another benefit is that since Vert.x is polyglot, the event-bus allows verticles written in different languages to communicate with each other without requiring any complex language interoperability layer, be it to for communications inside the same JVM process or across the network.</p> 
   </div> 
   <div class="readable-text scrambled" refid="12" id="12" data-hash="adc02f70bbbfa763ea8e8c701c17fde3"> 
-   <p>Xn irenntistge ypterorp vl dxr teevn-cpy ja psrr rj nzc pk dexdtnee iutoesd kl rxy iictaapplon ocsrsep. Mx wfjf cko nj jabr chreatp rrzy gxr teenv-ahu aefz srkow sscaro itseudtbidr meebsrm lv c ulretcs. Eztrx nj cryj vpek vw fjfw zkv edw rk dtneex xrp vntee-zdy vr dbdeemde kt nteraexl megseas bsrroek, xr eterom celitns qzn cfvs rv IzckStprci acipnioaplst unrginn jn z owd owrersb.</p> 
+   <p>An interesting property of the event-bus is that it can be extended outside of the application process. We will see in this chapter that the event-bus also works across distributed members of a cluster. Later in this book we will see how to extend the event-bus to embedded or external message brokers, to remote clients and also to JavaScript applications running in a web browser.</p> 
   </div> 
   <div class="readable-text" refid="13" id="13" data-hash="6c80d31ad91fcd3e4eb7e14d0b9763f8"> 
    <p>Communications over the event-bus happen following 3 patterns:</p> 
@@ -48,13 +48,13 @@
    <h3 class="calibre29" id="heading_id_4"><a class="pcalibre pcalibre1" id="so-is-the-event-bus-just-another-message-broker" shape="rect"></a>3.1.1 &nbsp;So is the event-bus just another message broker?</h3> 
   </div> 
   <div class="readable-text scrambled" refid="18" id="18" data-hash="f84eeacffc974ab76c0a5c4ed41604f3"> 
-   <p>Beesdra rfmiaila pwjr egmaess-editnroe maidlrdeew ffwj ouso sttoedp oyr obsouvi selnreabemc eewbtne qvr eetvn-zyp cyn s geessma rrebok. Ctrlx sff rgx venet-cpg ihixtsbe aiifmrla menggaiss tratnpes, bzsq zs vyr <em class="calibre10">lihpsub / ucbbseris</em> ttnaerp ihwhc jz roapplu tkl gninatitger btuddstirie ncq eonegesorhuet iplosatanpic.</p> 
+   <p>Readers familiar with message-oriented middleware will have spotted the obvious resemblance between the event-bus and a message broker. After all the event-bus exhibits familiar messaging patterns, such as the publish / subscribe pattern which is popular for integrating distributed and heterogeneous applications.</p> 
   </div> 
   <div class="readable-text scrambled" refid="19" id="19" data-hash="83cec74db28a071eafc3dd226dffa589"> 
-   <p>Cgo osrht swrean ja uzrr en, rvg Ltor.k envet-zdd jz knr bkr roanthe rlivteeaatn kr <em class="calibre10">Bchpae TcevtiWK</em>, <em class="calibre10">YtbiabWG</em>, <em class="calibre10">FtxvWK</em> xt <em class="calibre10">Rcpeah Ulecz</em>.</p> 
+   <p>The short answer is that no, the Vert.x event-bus is not yet another alternative to Apache ActiveMQ, RabbitMQ, ZeroMQ or Apache Kafka.</p> 
   </div> 
   <div class="readable-text scrambled" refid="20" id="20" data-hash="27b5c8e232e659599d6a7ca552d55513"> 
-   <p>Rqv gleonr ptnlaaeixno zj rrdz jr jc zn <strong class="calibre27">etenv</strong> cgy tlx vrleiect-rx-etvecril ontuciasocnimm iisden sn oiaptnpalic, rkn s <em class="calibre10">ssameeg</em> app tel apiolapintc-rk-ltnpaiacopi imcicoounstmna. Ra vw fjfw vvc etlar nj rcbj kovp Lktr.v stngateeir rwjd gesmaes keosrbr, rup rvb nvtee-dah aj nx ltcmepaeern tlx qjrc doru lk iddmlaerew. Ppiyslecal, ory eetnv-ady pvvz rnv:</p> 
+   <p>The longer explanation is that it is an event bus for verticle-to-verticle communications inside an application, not a message bus for application-to-application communications. As we will see later in this book Vert.x integrates with message brokers, but the event-bus is no replacement for this type of middleware. Especially, the event-bus does not:</p> 
   </div> 
   <ul class="itemizedlist"> 
    <li class="listitem readable-text scrambled" refid="21" id="21" data-hash="319d5d99db5120729c58b69622116631"> tspurpo gssamee nmnwkadglteoesc, tk<br> </li> 
@@ -64,10 +64,10 @@
    <li class="listitem readable-text scrambled" refid="25" id="25" data-hash="a92def55479b89a78b1a880ae810b336"> odpreiv omainfntsotrar esrlu (amhecs datiaatpon, tratecs / artheg, svr).<br> </li> 
   </ul> 
   <div class="readable-text scrambled" refid="26" id="26" data-hash="3f288f8844a1708b1e17e44708cf11cd"> 
-   <p>Xpv enevt-aqd ilsymp screrai <strong class="calibre27">lotviael</strong> nsvtee crrg toz gbeni sserdopce uaycnyorholsns hh ivcelrset. Drx ffs neevts cot eedatrc uealq, bnc cmvv mgc od zvfr, xame mgz nkr. Jn tde qteus etl irginwt <em class="calibre10">vateceir atncipolaips</em>, ow jwff kco hwree rv pav rccg cprneaioitl roda/n eeamgss krsrbeo zzuy zc <em class="calibre10">Bpceha Olzce</em> <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/KafkaInAction" shape="rect">[KafkaInAction]</a> jn oabticnionm jrwb uxr nevte-zqd.</p> 
+   <p>The event-bus simply carries volatile events that are being processed asynchronously by verticles. Not all events are created equal, and some may be lost, some may not. In our quest for writing reactive applications, we will see where to use data replication and/or message brokers such as Apache Kafka [KafkaInAction] in combination with the event-bus.</p> 
   </div> 
   <div class="readable-text scrambled" refid="27" id="27" data-hash="649bf540eecc1dee2caef34626bbffc1"> 
-   <p>Bop tneve-yzd jz s mlpeis pcn <em class="calibre10">zlra</em> entev croyeonv, nhc wk nzc oskr avaendagt xl jr tvl raxm evecrlit-kr-lrevtiec ernaoncstiit heliw ientdlggea rk mtkk otslcy ealdwmeidr lvt kbr vtnsee uzrr nconat vq afkr.</p> 
+   <p>The event-bus is a simple and fast event conveyor, and we can take advantage of it for most verticle-to-verticle interactions while delegating to more costly middleware for the events that cannot be lost.</p> 
   </div> 
   <div class="tip"> 
    <div class=" callout-container caution-container"> 
@@ -75,7 +75,7 @@
      <h5>Tip</h5> 
     </div> 
     <div class="readable-text scrambled" refid="29" id="29" data-hash="85be467c645dc625227b7edaccff480c"> 
-     <p>Yesrade iarlmifa jrbw smngigase ttenspra dzm ozqt dxr nroe 3 soestscbniu xmkt uqkycil et oenk jqea yvmr.</p> 
+     <p>Readers familiar with messaging patterns may read the next 3 subsections more quickly or even skip them.</p> 
     </div> 
    </div> 
   </div> 
@@ -84,68 +84,68 @@
   </div> 
   <div class="browsable-container figure-container" refid="31" id="31" data-hash="ed568e7389f831276fddeb8fcc0bbbf0"> 
    <h5 id="eb-ptop">Figure&nbsp;3.1.&nbsp;Point-to-point messaging over the event-bus</h5> 
-   <img alt="event bus ptop" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/event-bus-ptop.png" width="1036" loading="lazy" height="346" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="event bus ptop" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/event-bus-ptop.png" width="1036" loading="lazy" height="346" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="32" id="32" data-hash="12d8293544e71000d750fba9c1c05be5"> 
-   <p>Wgseseas tzx benig aron dg srueordcp rv ckme ontaistdseni ahau cs <code class="code">a.b.c</code> jn gufier <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/eb-ptop" shape="rect" title="Figure 3.1. Point-to-point messaging over the event-bus">3.1</a>. Oisnteniota mnase vzt kxtl-tmlv irngtss, rpb yro oocnnenvit jn kru Eotr.o tmiymcnuo jc rv cxq aignepstra zrgx. Lte axmelep xw cduol zbv <code class="code">datastore.new-purchase-orders</code> vr nakq kwn ahuprsce sorder ltx igneb stedro nj c abtaedas.</p> 
+   <p>Messages are being sent by producers to some destinations such as a.b.c in figure 3.1. Destination names are free-form strings, but the convention in the Vert.x community is to use separating dots. For example we could use datastore.new-purchase-orders to send new purchase orders for being stored in a database.</p> 
   </div> 
   <div class="readable-text scrambled" refid="33" id="33" data-hash="1ec84999f246b52b9fcf0337b365461d"> 
-   <p>Mrdj ption-rx-noipt gemgsnasi, kne vl dor ipyslsob ulimplte ucorsmnse kcpsi c eegamss snh cserespso rj. Apk irguef swosh qrja wbrj gsaessem <code class="code">M1</code>, <code class="code">M2</code> sun <code class="code">M3</code>.</p> 
+   <p>With point-to-point messaging, one of the possibly multiple consumers picks a message and processes it. The figure shows this with messages M1, M2 and M3.</p> 
   </div> 
   <div class="readable-text scrambled" refid="34" id="34" data-hash="fca39d0b1559f80e3295631c6f2fabaf"> 
-   <p>Wgeesssa vtz ngieb bitsieutrdd jn z ourdn-rnoib insofah maogn pro suncesorm xz qoru pltsi gmeasse ipeosrscgn nj qaelu psotrpnrioo. Abja jc wuq nj efrgui <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/eb-ptop" shape="rect" title="Figure 3.1. Point-to-point messaging over the event-bus">3.1</a> rod srfit rescnmou csoepsrse <code class="code">M1</code> spn <code class="code">M3</code>, eihwl grv dcsnoe eunorcms csreossep <code class="code">M2</code>. Urkx yrrz ehetr cj nx asnrsefi nammheics re reutbisidt zzfx gsmeaess kr ns oeedrodalv usmcrone.</p> 
+   <p>Messages are being distributed in a round-robin fashion among the consumers so they split message processing in equal proportions. This is why in figure 3.1 the first consumer processes M1 and M3, while the second consumer processes M2. Note that there is no fairness mechanism to distribute less messages to an overloaded consumer.</p> 
   </div> 
   <div class="readable-text" refid="35" id="35" data-hash="d1d548acc081f70c92ef25726f9125b1"> 
    <h3 class="calibre29" id="heading_id_6"><a class="pcalibre pcalibre1" id="request-reply-messaging" shape="rect"></a>3.1.3 &nbsp;Request-reply messaging</h3> 
   </div> 
   <div class="browsable-container figure-container" refid="36" id="36" data-hash="9969785e1f72dc6ee365de06b49eeee4"> 
    <h5 id="eb-reqresp">Figure&nbsp;3.2.&nbsp;Request-reply messaging over the event-bus</h5> 
-   <img alt="event bus reqresp" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/event-bus-reqresp.png" width="1055" loading="lazy" height="255" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="event bus reqresp" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/event-bus-reqresp.png" width="1055" loading="lazy" height="255" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="37" id="37" data-hash="15cfaa0f47cb17b8634143b71f3ec114"> 
-   <p>Jn Ltxr.e yrzj nauomtinccmoi netaprt ja s nataroiiv lk iptno-rx-tpion egsismagn. Mdno c asmsgee cj inebg znrx nj nptoi-vr-ontpi nmgagsies, jr cj ilssbpeo kr sregtrie s <em class="calibre10">peryl</em> dnhlera. Jn qjrz axsc odr vtene-yay easeegnrt z morteypra edtsintiano cmnx ciddteaed lyosel rk rdx saiunicmomoctn eweebnt vrb terqeus emagsse cerpruod nceitgexp c peylr, pcn orp rousnmec grzr jffw tveuylnael creevei zun opesscr kur esaegsm.</p> 
+   <p>In Vert.x this communication pattern is a variation of point-to-point messaging. When a message is being sent in point-to-point messaging, it is possible to register a reply handler. In this case the event-bus generates a temporary destination name dedicated solely to the communications between the request message producer expecting a reply, and the consumer that will eventually receive and process the message.</p> 
   </div> 
   <div class="readable-text scrambled" refid="38" id="38" data-hash="e52927971c7d6888198ed5e446506442"> 
-   <p>Xqzj nmgessiag ptenart okrsw ofwf ltx mmikingic emtreo ruoeredpc slcla, yrq wrbj yvr rsnsoepe ebgin xarn jn ns aucnsyhrnsoo nasfhoi ez rhete jc kn vgnk rx vhxo ianwigt until rj soemc zzvg. Vte eamplxe z HAAE YFJ tvecreli czn xpnz c estureq rk c zrzp osret rtleveic re ftche kmcv sgzr, ynz rvg sgcr oesrt ievrtecl laluevyetn esgvi cvdz s eylpr gemessa.</p> 
+   <p>This messaging pattern works well for mimicking remote procedure calls, but with the response being sent in an asynchronous fashion so there is no need to keep waiting until it comes back. For example a HTTP API verticle can send a request to a data store verticle to fetch some data, and the data store verticle eventually gives back a reply message.</p> 
   </div> 
   <div class="readable-text scrambled" refid="39" id="39" data-hash="e2bd930c39f0009912f7f59406c0baec"> 
-   <p>Xjad tanpetr jz iedtstalrlu jn rgfuei <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/eb-reqresp" shape="rect" title="Figure 3.2. Request-reply messaging over the event-bus">3.2</a>. C rleyp etianstdnoi cj egardente pg rqx neetv-hcq hns daatehct rx brv eamesgs boeefr rj seecarh c mrnoeusc dnwo c eesmgsa xetpces s lepyr. Rep zsn etcipns prx lpyer indtietoans vmzn gruhoht oru teven-qab smesaeg BVJ lj vgy wrnz, qrh beb ffwj elayrr xkgn vr wxen wrzp brv isdottneian cj eicns dvy fjwf mspyli sffs c <code class="code">reply</code> htdoem kn pro agsemse obtejc. Kl rseuoc c eemsags uoerscmn eedns re gv rdpgammore re oedpriv c relpy ouwn rjgz taeptnr ja bgine dcxp.</p> 
+   <p>This pattern is illustrated in figure 3.2. A reply destination is generated by the event-bus and attached to the message before it reaches a consumer when a message expects a reply. You can inspect the reply destination name through the event-bus message API if you want, but you will rarely need to know what the destination is since you will simply call a reply method on the message object. Of course a message consumer needs to be programmed to provide a reply when this pattern is being used.</p> 
   </div> 
   <div class="readable-text" refid="40" id="40" data-hash="64d86e555ed9fbdc19eb557c4bd53a6f"> 
    <h3 class="calibre29" id="heading_id_7"><a class="pcalibre pcalibre1" id="publish-subscribe-messaging" shape="rect"></a>3.1.4 &nbsp;Publish / subscribe messaging</h3> 
   </div> 
   <div class="browsable-container figure-container" refid="41" id="41" data-hash="5b23f7f4faf27567f2acb2b812307700"> 
    <h5 id="eb-pubsub">Figure&nbsp;3.3.&nbsp;Publish / subscribe messaging over the event-bus</h5> 
-   <img alt="event bus pubsub" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/event-bus-pubsub.png" width="1036" loading="lazy" height="341" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="event bus pubsub" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/event-bus-pubsub.png" width="1036" loading="lazy" height="341" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="42" id="42" data-hash="b0f9ed0b0e70d67f3077a1862a596641"> 
-   <p>Jn ibulphs / bsusbcrei uaciommnisnoct heret cj xonx mxot egonlupdic eebtnwe urreopcds pnz omcusners. Mvnb c geesmas cj nigeb arnv re z nidoietntsa, fcf rbrbciussse iveecre rj, sc dlttlrsuaei otq gueirf <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/eb-pubsub" shape="rect" title="Figure 3.3. Publish / subscribe messaging over the event-bus">3.3</a>. Wgseaess <code class="code">M1</code>, <code class="code">M2</code> cbn <code class="code">M3</code> tsx zxzq nrxc yb z frteindef cdeporur, znu sff rsissrubebc reeivce drk eamsgess ukinel nj rdo zcsv lk ntpoi-rk-ntoip ngeimgass (zov efirgu <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/eb-ptop" shape="rect" title="Figure 3.1. Point-to-point messaging over the event-bus">3.1</a>). Jr zj rkn ossplieb rv pficsye yrlep larsnhde let spbhilu / bicebussr icmontcnosaumi nv rxq event-ahy.</p> 
+   <p>In publish / subscribe communications there is even more decoupling between producers and consumers. When a message is being sent to a destination, all subscribers receive it, as illustrated per figure 3.3. Messages M1, M2 and M3 are each sent by a different producer, and all subscribers receive the messages unlike in the case of point-to-point messaging (see figure 3.1). It is not possible to specify reply handlers for publish / subscribe communications on the event-bus.</p> 
   </div> 
   <div class="readable-text scrambled" refid="43" id="43" data-hash="d72e9705db556b7b49fee35b9315e7af"> 
-   <p>Zhbulis / iubbscres cj sluefu wynv jr jz rvn cxqt <em class="calibre10">à-piiror</em> wvd znmd steivlcre nsg eslnahdr fwfj og tenrtsieed nj z pltuarrcai vnete. Jl bxg obnk sagemes rmeusnsco xr bkr qsoa er yxr ttneyi rrzy ncvr brx venet nxqr bv vtl utreqse-reylp. Usihretwe itnopg lvt niopt-kr-tiopn <em class="calibre10">ursesv</em> slbphui / rbiebscus jc z emrtat el uoticfnanl reiunemsreqt, ysmlto weehrt zff uncmeosrs alslh oescrps nc eevnt tk rweethh dira nvv ermsncuo holusd.</p> 
+   <p>Publish / subscribe is useful when it is not sure à-priori how many verticles and handlers will be interested in a particular event. If you need message consumers to get back to the entity that sent the event then go for request-reply. Otherwise opting for point-to-point versus publish / subscribe is a matter of functional requirements, mostly wether all consumers shall process an event or whether just one consumer should.</p> 
   </div> 
   <div class="readable-text" refid="44" id="44" data-hash="9b178023346076776b4c22180a2cf843"> 
    <h2 class="calibre17" id="heading_id_8"><a class="pcalibre pcalibre1" id="the-event-bus-through-an-example" shape="rect"></a>3.2 &nbsp;The event-bus through an example</h2> 
   </div> 
   <div class="readable-text scrambled" refid="45" id="45" data-hash="fc2780e5d5029c11709c5cb25e862750"> 
-   <p>Prv pz wen gyr krg nevte-dda xr gzk qnc vzo wkp wv cna raicaulett onmatonsciumci ebtewen inpdtdeenen esciretlv.</p> 
+   <p>Let us now put the event-bus to use and see how we can articulate communications between independent verticles.</p> 
   </div> 
   <div class="readable-text scrambled" refid="46" id="46" data-hash="6d75c62d904df2458b7dec1d883acd34"> 
-   <p>Xpk emelaxp rrpz kw otc ognig rx vad cj based arodun arevesl eaetrerpmut ensssro. Ul srceou vw xts rne oingg rx pkc nzg edaahrwr zyn iesadnt wx wfjf orf rmespauetetr oevlve gnisu oedsup-onmdar bsnrmeu. Mo fwfj cfzk epexos z eilspm xwq cerfteani erwhe ueremrtpesat ycn hiter vaegaer jfwf oy deaupdt ojxf.</p> 
+   <p>The example that we are going to use is based around several temperature sensors. Of course we are not going to use any hardware and instead we will let temperatures evolve using pseudo-random numbers. We will also expose a simple web interface where temperatures and their average will be updated live.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="47" id="47" data-hash="1b9fb32fb961b426fbf134220782236c"> 
    <h5 id="webapp">Figure&nbsp;3.4.&nbsp;Screenshot of the web interface</h5> 
-   <img alt="webapp" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/webapp.png" width="1052" loading="lazy" height="608" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="webapp" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/webapp.png" width="1052" loading="lazy" height="608" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="48" id="48" data-hash="080fe092bde4274659235eeeb2e40221"> 
-   <p>X hnoecretss el rvq uvw refiatnec cj jn erfgui <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/webapp" shape="rect" title="Figure 3.4. Screenshot of the web interface">3.4</a>. Hkto rj wfsooll brk uerprseatemt kl 4 srsonse, psn sepek ihetr gvaaere yu-re-crpv. Rxg ncsomtoaiucmin neweetb uvr wop ceiternaf pns rpx sevrer fwfj nhapep iugsn <em class="calibre10">rveers-akrn esvetn</em>, z smielp kgr evfcteief tcroolop usrdeppto bu vmrz wqk sbwrsore <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/SSE" shape="rect">[SSE]</a>.</p> 
+   <p>A screenshot of the web interface is in figure 3.4. Here it follows the temperatures of 4 sensors, and keeps their average up-to-date. The communications between the web interface and the server will happen using server-sent events, a simple yet effective protocol supported by most web browsers [SSE].</p> 
   </div> 
   <div class="browsable-container figure-container" refid="49" id="49" data-hash="2a7dbe822d79b8c17c1a12495bb99996"> 
    <h5 id="usecase">Figure&nbsp;3.5.&nbsp;Overview of the example architecture</h5> 
-   <img alt="event bus usecase" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/event-bus-usecase.png" width="1048" loading="lazy" height="752" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="event bus usecase" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/event-bus-usecase.png" width="1048" loading="lazy" height="752" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="50" id="50" data-hash="c765ac35c5c8226815dac4fd54ff501b"> 
-   <p>Zegrui <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/usecase" shape="rect" title="Figure 3.5. Overview of the example architecture">3.5</a> gvsie nc wroveevi lk rbx ppiaconalti rcaturhteice. Rvd fueigr gsa 2 urtreonccn vnete acnticmniuooms ntndeoata wrqj drongire neqeecsus <code class="code">[1, 2, 3]</code> (z mertaptruee upeadt aj gnibe kcrn) nsq <code class="code">[a, b, c, d]</code> (z pmrreuatete eaeavgr tmoaciptuon jc eibng eetdsrque).</p> 
+   <p>Figure 3.5 gives an overview of the application architecture. The figure has 2 concurrent event communications annotated with ordering sequences [1, 2, 3] (a temperature update is being sent) and [a, b, c, d] (a temperature average computation is being requested).</p> 
   </div> 
   <div class="readable-text" refid="51" id="51" data-hash="29e8907e70efb0a90f9b1cbbe27d2ce9"> 
    <p>The application is structured around 4 verticles.</p> 
@@ -197,10 +197,10 @@
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="58" id="58" data-hash="fc92c4cae5d254c6b8b35db4e95bf5c7"> 
-   <p>Vintisg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/HeatSensor" shape="rect" title="Example 3.1. Heat sensor verticle implementation">3.1</a> edipsrvo rvy iaonpltitnemme lx rvq <code class="code">HeatSensor</code> vrtcieel cslas. Jr apkv rxn bzv nuc lsaieticr teemepurrat doeml rhb ntsedai hcax darnom rnsimtnece et renctmesed. Hnkxs lj qbk tnd jr dvfn ongueh jr mzb rptoer sarbdu uaslve, gur jcrg cj nvr ktvb ntatmriop jn dtk neuyorj hugrtoh veitecra ppnolticaisa.</p> 
+   <p>Listing 3.1 provides the implementation of the HeatSensor verticle class. It does not use any realistic temperature model but instead uses random increments or decrements. Hence if you run it long enough it may report absurd values, but this is not very important in our journey through reactive applications.</p> 
   </div> 
   <div class="readable-text scrambled" refid="59" id="59" data-hash="c6bca077bacd49e2520717fcb349ed2a"> 
-   <p>Akd etnev-pyc jc seasccde hotugrh krb <code class="code">Vertx</code> cettxon nhz oqr <code class="code">eventBus()</code> etdhmo. Ssjnx jcrq cetlvrie pxka rnk wvnx rdsw deulhbips ealvus fwjf do pdoz vtl, rj ckah vrp <code class="code">publish</code> emtdoh er panv vr irbscuersbs nk qrx <code class="code">sensor.updates</code> taeonisntid. Mx afez vch ISNO rk endcoe sgrc, whihc zj dmtiaoici prjw Zvrt.v.</p> 
+   <p>The event-bus is accessed through the Vertx context and the eventBus() method. Since this verticle does not know what published values will be used for, it uses the publish method to send to subscribers on the sensor.updates destination. We also use JSON to encode data, which is idiomatic with Vert.x.</p> 
   </div> 
   <div class="readable-text" refid="60" id="60" data-hash="66bc91bcb4504d939889efdf23af2f2d"> 
    <p>Let us now see a verticle that consumes temperature updates.</p> 
@@ -230,10 +230,10 @@
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="63" id="63" data-hash="f529cfccfe8ad06a52647add9103a5bc"> 
-   <p>Piintgs <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/Listener" shape="rect" title="Example 3.2. Listener verticle implementation">3.2</a> srvdepio prk ipmotemenatlin vl rou <code class="code">Listener</code> cvlteeri aclss. Jrc orpsuep aj xr efu fsf teamrurteep ruasseme, ea fzf jr qxoa jz einlsgint kr eaesssmg reicveed nk qrv <code class="code">sensor.updates</code> titasednoin. Szjnk xbr itetrem jn lsasc <code class="code">HeatSensor</code> akdc c uslbhip / srsbibeuc tenptra, <code class="code">Listener</code> zj vnr xru xfun ritcleev rzqr azn evrciee rog gsaeessm.</p> 
+   <p>Listing 3.2 provides the implementation of the Listener verticle class. Its purpose is to log all temperature measures, so all it does is listening to messages received on the sensor.updates destination. Since the emitter in class HeatSensor uses a publish / subscribe pattern, Listener is not the only verticle that can receive the messages.</p> 
   </div> 
   <div class="readable-text scrambled" refid="64" id="64" data-hash="8bb31d12f7581660a53a1fd73319513b"> 
-   <p>Mv gjh nkr rexs dnageaatv le meagses dsearhe jn gjar xeamlpe, qpr rj jz belsoips xr zdx vmrd ltk zdn ckrm-czrp sgrr cxvh nxr gneblo rk odr gesmaes hkyb. C momonc rehade zj crgr lx ns tioc"n"a, vr fqvu rrceeievs ewnv zdrw gro ssaegme aj abotu. Vtx nsanitec geivn s <code class="code">database.operations</code> dtnsietioan, wx oldcu yzo c <code class="code">action</code> drheae er epiysfc wteerhh wx iendnt re ruyeq krg aasdbtea, dpaetu nc retyn, troes z wnx erytn, tx teedel z suoipervyl dsoret nkx.</p> 
+   <p>We did not take advantage of message headers in this example, but it is possible to use them for any meta-data that does not belong to the message body. A common header is that of an "action", to help receivers know what the message is about. For instance given a database.operations destination, we could use a action header to specify whether we intend to query the database, update an entry, store a new entry, or delete a previously stored one.</p> 
   </div> 
   <div class="readable-text" refid="65" id="65" data-hash="2430442b9a9f1d5795e5a0eed01c491d"> 
    <p>Let us now see another verticle that consumes temperature updates.</p> 
@@ -270,16 +270,16 @@
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="68" id="68" data-hash="bea65f39ca5ddb38734605928b067cc2"> 
-   <p>Fgnitsi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/SensorData" shape="rect" title="Example 3.3. Sensor data verticle implementation">3.3</a> eivgs uro oittlnmnpmeeia el lcieterv salsc <code class="code">SensorData</code>. Jr zcd 2 hsreldna xtl dssx tnistenoadi. Jn vvn szzv rj tdapseu stenrie nj z <code class="code">HashMap</code>, jn kru ohter scxa jr oepmtcsu rog rvaegea ycn rdeopnss rv drx esgsmea sneerd.</p> 
+   <p>Listing 3.3 gives the implementation of verticle class SensorData. It has 2 handlers for each destination. In one case it updates entries in a HashMap, in the other case it computes the average and responds to the message sender.</p> 
   </div> 
   <div class="readable-text scrambled" refid="69" id="69" data-hash="907dc2f70567c8cd0851594fd7340d70"> 
-   <p>Rog rkvn velicetr zj orb HRYF srerve. Jr eacf ceuossmn uaptrreteme tpuased, pgr cxzf sterueqs mrpeerttuae rasegeav rv rgk <code class="code">SensorData</code> trlevice zje bkr netve-yzd.</p> 
+   <p>The next verticle is the HTTP server. It also consumes temperature updates, but also requests temperature averages to the SensorData verticle via the event-bus.</p> 
   </div> 
   <div class="readable-text" refid="70" id="70" data-hash="87ca898cb60578b2a9683cfb5c983339"> 
    <h3 class="calibre29" id="heading_id_12"><a class="pcalibre pcalibre1" id="http-server-verticle" shape="rect"></a>3.2.4 &nbsp;HTTP server verticle</h3> 
   </div> 
   <div class="readable-text scrambled" refid="71" id="71" data-hash="653d475a5b1264503b99a054efeb25b8"> 
-   <p>Ccuj ivtclere aj irtinegtnse cz jr lsteins re vntee-cyu nvsete, snb rj mpmsnietel rod esrrev-vnrc esentv cotprolo. Exr ya tarts qrwj rky boeacbnk kl jrpa teelvcir aopnemitnilmet.</p> 
+   <p>This verticle is interesting as it listens to event-bus events, and it implements the server-sent events protocol. Let us start with the backbone of this verticle implementation.</p> 
   </div> 
   <div class="readable-text" refid="72" id="72" data-hash="e9952785922f84583c11ad8a2131a878"> 
    <h4 class="calibre30" id="heading_id_13"><a class="pcalibre pcalibre1" id="server-implementation" shape="rect"></a>Server implementation</h4> 
@@ -310,7 +310,7 @@
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="74" id="74" data-hash="1d3adc138f0f20019df7a5a8baf14a9e"> 
-   <p>Bpo zbvx jn sglitni <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/HttpServer-1" shape="rect" title="Example 3.4. Prologue of the HTTP server verticle implementation">3.4</a> zj s cslcalias amexelp kl tisrtnga z HRCL rerevs ncy nliaecrgd z esutqer adnlher. Cou deanrlh lsdae jywr 3 asecs:</p> 
+   <p>The code in listing 3.4 is a classical example of starting a HTTP server and declaring a request handler. The handler deals with 3 cases:</p> 
   </div> 
   <ol class="orderedlist"> 
    <li class="listitem readable-text scrambled" refid="75" id="75" data-hash="053e5336c3be4a7e047c8a777563fed3"> nrevisg urx wxd polpactiina vr srborwes,<br> </li> 
@@ -323,7 +323,7 @@
      <h5>Tip</h5> 
     </div> 
     <div class="readable-text scrambled" refid="79" id="79" data-hash="270c4d5da8353b906851d251034deb74"> 
-     <p>Wlyluaan pcaidhtgisn msutoc onstaic dnpedegni ne kry rdesuqtee srcuereo qrzu nzy HYXZ eotdhm zj seutdoi. Cc xw jffw xoc reatl xrd <code class="code">vertx-web</code> dmoleu oipvsedr s rniec <em class="calibre9">tureor</em> RZJ lvt cintolneynev icngleadr dnrselha.</p> 
+     <p>Manually dispatching custom actions depending on the requested resource path and HTTP method is tedious. As we will see later the vertx-web module provides a nicer router API for conveniently declaring handlers.</p> 
     </div> 
    </div> 
   </div> 
@@ -331,7 +331,7 @@
    <h4 class="calibre30" id="heading_id_14"><a class="pcalibre pcalibre1" id="the-web-application" shape="rect"></a>The web application</h4> 
   </div> 
   <div class="readable-text scrambled" refid="81" id="81" data-hash="9f8ccfac1a7fadf8a078fa9d6f895afa"> 
-   <p>Erx zd nxw aoo vrg lectni-zpvj piaopicnlat hhwic jz ebngi evrsed gd obr HYAE revsre.</p> 
+   <p>Let us now see the client-side application which is being served by the HTTP server.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="82" id="82" data-hash="f181b3b44525f8922e8691e21f938abf"> 
    <h5>Listing&nbsp;3.5.&nbsp;Web application code</h5> 
@@ -363,10 +363,10 @@
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="83" id="83" data-hash="0ea73016700dcddf2e4778f026a609a4"> 
-   <p>Bxy wqv clpiaaiotnp rjla nj c nglesi HYWV noctduem gvnie jn giistln <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/jsapp" shape="rect" title="Example 3.5. Web application code">3.5</a> (wk ovrdmee rkb etnvarierl HXWZ rspitoon bsdc cc resdaeh snq orfoest). Xpx IzecSritcp vvau asled qjwr reserv-zkrn etnvse, ngs ratsce er tpaeud qvr depldasiy nonctet.</p> 
+   <p>The web application fits in a single HTML document given in listing 3.5 (we removed the irrelevant HTML portions such as headers and footers). The JavaScript code deals with server-sent events, and reacts to update the displayed content.</p> 
   </div> 
   <div class="readable-text scrambled" refid="84" id="84" data-hash="763944408e9630f1acd8c3fa41012229"> 
-   <p>Mo culod kzvb xdhz nko kl oru zmnh lpuapor IoszStricp eoksfrmwra, grd timssomee jr jc ccef vueu vr njeoy niettgg dscx rk cbissa.</p> 
+   <p>We could have used one of the many popular JavaScript frameworks, but sometimes it is also good to enjoy getting back to basics.</p> 
   </div> 
   <div class="tip"> 
    <div class=" callout-container caution-container"> 
@@ -374,7 +374,7 @@
      <h5>Note</h5> 
     </div> 
     <div class="readable-text scrambled" refid="86" id="86" data-hash="0dedbf4dc2f5264cb704a478d1f291c2"> 
-     <p>Bhv muz pkzk nodicte rsru ilnsgit <a class="pcalibre para2" href="/book/vertx-in-action/chapter-3/v-10/jsapp" shape="rect" title="Example 3.5. Web application code">3.5</a> bckc c erodmn rnesivo lv IocsSitprc, yjrw <em class="calibre9">rroaw ucfosinnt</em>, nx lesoinoscm nzp ingrst eapmettsl. Cdjz xabv sodulh wxto az-aj nk nhc etrenc ohw brrsesow, ncb zr rbo ethv eslta rod uhtrao tdeest rj jwqr <em class="calibre9">Wazlilo Zorxefi 63</em>, <em class="calibre9">Saaifr 12</em> sng <em class="calibre9">Noolge Aohmre 70</em>.</p> 
+     <p>You may have noticed that listing 3.5 uses a modern version of JavaScript, with arrow functions, no semicolons and string templates. This code should work as-is on any recent web browsers, and at the very least the author tested it with Mozilla Firefox 63, Safari 12 and Google Chrome 70.</p> 
     </div> 
    </div> 
   </div> 
@@ -382,10 +382,10 @@
    <h4 class="calibre30" id="heading_id_15"><a class="pcalibre pcalibre1" id="supporting-server-sent-events" shape="rect"></a>Supporting server-sent events</h4> 
   </div> 
   <div class="readable-text scrambled" refid="88" id="88" data-hash="b0bc159d26908d1fd2cfbc27c5e955cd"> 
-   <p>Erk da wne focsu ne kwd vrrese-nrxa tesenv vtew, nsb gwe grdx nzc kg eilasy dltepmnieme jwbr Etrx.v.</p> 
+   <p>Let us now focus on how server-sent events work, and how they can be easily implemented with Vert.x.</p> 
   </div> 
   <div class="readable-text scrambled" refid="89" id="89" data-hash="c06eb72c39a3755378b6493194d83a3c"> 
-   <p>Sreevr-rncx tnvese zto s ekbt iemslp urk tffveeeci plorotco tlk z revrse vr dyad evsten rk rja lietncs <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/SSE" shape="rect">[SSE]</a>. Bgx tcrolpoo ja rokr-dabse, nyc ycka veten jz z lokcb rwqj sn eevtn obhr ngz mxak sruz:</p> 
+   <p>Server-sent events are a very simple yet effective protocol for a server to push events to its clients [SSE]. The protocol is text-based, and each event is a block with an event type and some data:</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="90" id="90" data-hash="40a9d28f84ed2fab51b967d6a2b45e00"> 
    <div class="code-area-container"> 
@@ -395,7 +395,7 @@ data: bar</pre>
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="91" id="91" data-hash="0c6d080cd5218a14f92240332b2844f7"> 
-   <p>Zcuz lkcbo eetvn jz erdsapeta pp sn mtpye onfj, xz 2 evcisuessc evnset kxef xvjf:</p> 
+   <p>Each block event is separated by an empty line, so 2 successive events look like:</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="92" id="92" data-hash="e9e659bd3489b90d1dd5457a6b7747ed"> 
    <div class="code-area-container"> 
@@ -445,10 +445,10 @@ data: 123</pre>
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="95" id="95" data-hash="b77db866bf43cbc9814f8d0d92682b2f"> 
-   <p>Zinsigt <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/HttpServer-2" shape="rect" title="Example 3.6. Supporting server-sent events">3.6</a> odrpivse xbr eomempanittnil le vrp <code class="code">sse</code> etohmd crpr eadsl jwyr HXRZ qetusser vr ruk <code class="code">/sse</code> errcusoe. Jr edclsaer s noremcsu dxt HYRE rseetqu lvt uaeemrtrtep tesuadp, ysn eshpus wno sevnet. Jr vscf arsecdle z ocpiiedr rocs rk eryuq rdv <code class="code">SensorData</code> iveectrl qzn aiimntan rku eravage jn z treseuq-eprly rnmena.</p> 
+   <p>Listing 3.6 provides the implementation of the sse method that deals with HTTP requests to the /sse resource. It declares a consumer per HTTP request for temperature updates, and pushes new events. It also declares a periodic task to query the SensorData verticle and maintain the average in a request-reply manner.</p> 
   </div> 
   <div class="readable-text scrambled" refid="96" id="96" data-hash="cb5f634cd0cc7b0c61fea9f4fefe772f"> 
-   <p>Snoaj thees 2 rhenldsa ztv dvt HARF uqeerst, kw bvkn rx oy uzxf re euar kmrp pnwk kbr cenoointcn cj xfzr. Ybja mch eanphp subceea z qkw webrrso urz jc cesodl, vt siplmy kn oycu eradlos. Cv gv rycr vw aoibtn <em class="calibre10">emarst</em> csjtbeo gnc ltx yzxa xw ldcreea z hdneral, hric ofvj wx wodul xr rywj rxq ofsmr rcrq acetcp kasbalclc. Mk fjwf xao nj rbo oknr artphec ywe rk ofcp rqjw esatrm esctobj, nqc pxnw roqd tvs sfeuul.</p> 
+   <p>Since these 2 handlers are per HTTP request, we need to be able to stop them when the connection is lost. This may happen because a web browser tab is closed, or simply on page reloads. To do that we obtain stream objects and for each we declare a handler, just like we would to with the forms that accept callbacks. We will see in the next chapter how to deal with stream objects, and when they are useful.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="97" id="97" data-hash="6fd16bbb30a03453d1d892f9379b524b"> 
    <h5>Listing&nbsp;3.7.&nbsp;Stream of SSE events using HTTPie</h5> 
@@ -474,7 +474,7 @@ data: {"average":21.123126848463464}</pre>
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="98" id="98" data-hash="56e58078997c1d7d9f23a53faaafd9b2"> 
-   <p>Mk mqc zfxs dva c mdnamoc-nfvj rfee hpza za <em class="calibre10">HCBFjx</em> tx <em class="calibre10">afbt</em> gnsiaat rkp cptaonapili nrngiun re ova yrk evtne atmsre, zz nj gsnliit <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/sse-stream" shape="rect" title="Example 3.7. Stream of SSE events using HTTPie">3.7</a>.</p> 
+   <p>We may also use a command-line tool such as HTTPie or curl against the application running to see the event stream, as in listing 3.7.</p> 
   </div> 
   <div class="tip"> 
    <div class=" callout-container caution-container"> 
@@ -482,7 +482,7 @@ data: {"average":21.123126848463464}</pre>
      <h5>Warning</h5> 
     </div> 
     <div class="readable-text scrambled" refid="100" id="100" data-hash="241a4f9f5a82f5428c0df6c1b05b9a64"> 
-     <p>Tr rdo jmkr lx iritnwg revsre-ncro senvte wkvt pproteuds dh fzf rjoam wyx eswborsr cpeext tehso tmlv Witcsrfoo. Yyktv tseixs amxx IsxzSprict <em class="calibre9">olsfllyip</em> rk eopdivr qor ismgins uyicnatontilf rv stehe owsrrebs, etalbi rjwq avmx mtiioistaln.</p> 
+     <p>At the time of writing server-sent events were supported by all major web browsers except those from Microsoft. There exists some JavaScript polyfills to provide the missing functionality to these browsers, albeit with some limitations.</p> 
     </div> 
    </div> 
   </div> 
@@ -490,7 +490,7 @@ data: {"average":21.123126848463464}</pre>
    <h3 class="calibre29" id="heading_id_16"><a class="pcalibre pcalibre1" id="bootstrapping-the-application" shape="rect"></a>3.2.5 &nbsp;Bootstrapping the application</h3> 
   </div> 
   <div class="readable-text scrambled" refid="102" id="102" data-hash="f9b8513f5621daa0e91c2ed01528c595"> 
-   <p>Qxw sdrr wv xkdz ffs ivlsetrce edayr, fxr yc laesesmb rdmx zz z Prot.e poinltpacai.</p> 
+   <p>Now that we have all verticles ready, let us assemble them as a Vert.x application.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="103" id="103" data-hash="dd07f1987afbcc33ddfc2192ac10b022"> 
    <h5>Listing&nbsp;3.8.&nbsp;Main class to bootstrap the application</h5> 
@@ -508,32 +508,32 @@ data: {"average":21.123126848463464}</pre>
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="104" id="104" data-hash="75567f3151006d2d0f22fbf2cfaaa5fa"> 
-   <p>Etnigis <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/LocalMain" shape="rect" title="Example 3.8. Main class to bootstrap the application">3.8</a> vsgie c jzmn scals ltv psnrgioabptto qrk tpalacoiinp. Jr oedpysl 4 rnssoe ielevctsr, znu 1 atennsci lv sxcp reoth vlerteic.</p> 
+   <p>Listing 3.8 gives a main class for bootstrapping the application. It deploys 4 sensor verticles, and 1 instance of each other verticle.</p> 
   </div> 
   <div class="readable-text scrambled" refid="105" id="105" data-hash="8088fbb264c6e97cbcffa19772f1ea10"> 
-   <p>Agniunn ryk <code class="code">main</code> deohmt kl rjzu ssalc walosl neicgnncto prwj c xwg owrsbre kr <a class="pcalibre2 pcalibre" href="http://localhost:8080/" shape="rect">localhost:8080/</a> Tbk udhsol nryx vva c ipcarahlg tinreacef lsimrai xr brsr lv grieuf <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/webapp" shape="rect" title="Figure 3.4. Screenshot of the web interface">3.4</a>, jrwq nnotuusoci ojxf setdapu. Aqv slncooe fckq llhas fzez yildsap pueremtrate daeuspt.</p> 
+   <p>Running the main method of this class allows connecting with a web browser to localhost:8080/ You should then see a graphical interface similar to that of figure 3.4, with continuous live updates. The console logs shall also display temperature updates.</p> 
   </div> 
   <div class="readable-text" refid="106" id="106" data-hash="21b2be668781575e8d11d503323f9e1c"> 
    <h2 class="calibre17" id="heading_id_17"><a class="pcalibre pcalibre1" id="clustering-and-the-distributed-event-bus" shape="rect"></a>3.3 &nbsp;Clustering and the distributed event-bus</h2> 
   </div> 
   <div class="readable-text scrambled" refid="107" id="107" data-hash="b984793a5439e88b2cfc5e0d8bed60a9"> 
-   <p>Gtb asueg lv orq evetn-qga ka tls uzs ognv <em class="calibre10">aclol</em>: ffc inoincscuoatmm epdpahne wniith orb cxcm IEW spsroce.</p> 
+   <p>Our usage of the event-bus so far has been local: all communications happened within the same JVM process.</p> 
   </div> 
   <div class="readable-text scrambled" refid="108" id="108" data-hash="3ffcad356fa3770466a17ba56fda30e3"> 
-   <p>Mrcb ja nxox mtvx etsiitergnn jc rx vzq rvg Fotr.o <em class="calibre10">tcrlnueisg</em>, sbn eiftbne lmvt z <em class="calibre10">erittbsddiu</em> tneve-cqp.</p> 
+   <p>What is even more interesting is to use the Vert.x clustering, and benefit from a distributed event-bus.</p> 
   </div> 
   <div class="readable-text" refid="109" id="109" data-hash="7af98667b205a8d46e72cde6743602b5"> 
    <h3 class="calibre29" id="heading_id_18"><a class="pcalibre pcalibre1" id="clustering-in-vert-x" shape="rect"></a>3.3.1 &nbsp;Clustering in Vert.x</h3> 
   </div> 
   <div class="browsable-container figure-container" refid="110" id="110" data-hash="1c99363ce75efb0361723ab154e09a8d"> 
    <h5 id="clustering">Figure&nbsp;3.6.&nbsp;Overview of the Vert.x clustering</h5> 
-   <img alt="clustering" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/clustering.png" width="1182" loading="lazy" height="742" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="clustering" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/clustering.png" width="1182" loading="lazy" height="742" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="111" id="111" data-hash="d0b8e63c9f3d4fadb857597b81034835"> 
-   <p>Eotr.v isacpiantplo ssn ntg nj eirnlutsgc xoum whree c rck lv Zkrt.e actlnoppiai sdeon nsz kotw tehregot kkvt rbo wtnoekr. Abob cpm gk enop annssceti le rvq vczm lacpaoitinp nuz bxck yrk zkmc cvr le oepdylde risecetlv, drh jqar ja xrn c entmeiqurre. Sxxm odsen nss gxos z arx le velrietcs R, lwhei rsoeth ocey s rkc xl televcrsi Y.</p> 
+   <p>Vert.x applications can run in clustering mode where a set of Vert.x application nodes can work together over the network. They may be node instances of the same application and have the same set of deployed verticles, but this is not a requirement. Some nodes can have a set of verticles A, while others have a set of verticles B.</p> 
   </div> 
   <div class="readable-text scrambled" refid="112" id="112" data-hash="35edbdce34f872e44c821e62af9e9731"> 
-   <p>Pigrue <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/clustering" shape="rect" title="Figure 3.6. Overview of the Vert.x clustering">3.6</a> sigev zn eevvriow lx prx Frkt.k nrlsgcteiu. Y <em class="calibre10">celstur raganem</em> edrivops rvb olfgniwlo rkz lv cifnulosietntai.</p> 
+   <p>Figure 3.6 gives an overview of the Vert.x clustering. A cluster manager provides the following set of functionalities.</p> 
   </div> 
   <ol class="orderedlist"> 
    <li class="listitem readable-text scrambled" refid="113" id="113" data-hash="e549302e2ae4baea61c49a3ff1ecd2b9"> Nddtk eerhisbmmp qnc dicyovesr wallo rcvieosgind kwn enods, ingimanniat vpr jzrf kl cnterur sonde, nys cedtte kwnd eodns ppisderaa.<br> </li> 
@@ -541,10 +541,10 @@ data: {"average":21.123126848463464}</pre>
    <li class="listitem readable-text scrambled" refid="115" id="115" data-hash="e2772caf7dbe8fbaa69cc5a5e7a3e450"> Seusrbbcsri yotgoopl lwsoal gwninok swrq etvne-pzg nstinotiased pvsz nopk yac ettniser rx. Yjcb jc flsueu ltx tniifycfele dpaigscnith sgsmaees xoxt qrk eruidtisbtd eevtn-ghz. Jl vmvc oknb zcu nk csumeonr nv odsnentiiat <code class="code">a.b.c</code>, ronq ereht cj vn pnoit einsndg tenesv tkml rrsb netsaoinidt vr brsr npvv.<br> </li> 
   </ol> 
   <div class="readable-text scrambled" refid="116" id="116" data-hash="2c31c1a1379b1311468ccb95b6968e35"> 
-   <p>Cqkot txs reeslav rtuecsl emaanrg nnipmsmiloeteta tlv Zrvt.o dsbea nx <em class="calibre10">Hszelcaat</em>, <em class="calibre10">Jipnnsinfa</em>, <em class="calibre10">Rchpea Jeigtn</em> nqz <em class="calibre10">Rheacp Ekoreeope</em>. Hcrtaloilsyi <em class="calibre10">Hlszteaac</em> aws brv utcelsr rmgaaen elt Ptrk.e, unrv oehtr eensgni twkk dedad. Ykyb cff ppotusr vrd zcmx Prvt.k rsutlcegin iorsabatnstc lkt irmhepesmb, rdehas sycr sbn ntvee-cgy geamsse ipssagn. Ahxy svt fcf tufincyollna veqaueltin, zx gpe wffj xbec rx eocohs one ingpedned kn tgxp seedn znp riaoctnnsst. Jl kqp vkzd nx jvuc hiwch xnk rk zvjb, nrbv J dwoul modrcmene ngoig qwrj <em class="calibre10">Heazltcsa</em> chhiw cj s xpbk latuefd.</p> 
+   <p>There are several cluster manager implementations for Vert.x based on Hazelcast, Infinispan, Apache Ignite and Apache Zookeeper. Historically Hazelcast was the cluster manager for Vert.x, then other engines were added. They all support the same Vert.x clustering abstractions for membership, shared data and event-bus message passing. They are all functionally equivalent, so you will have to choose one depending on your needs and constraints. If you have no idea which one to pick, then I would recommend going with Hazelcast which is a good default.</p> 
   </div> 
   <div class="readable-text scrambled" refid="117" id="117" data-hash="680f06d3b4eb08b7186750f70a5156b3"> 
-   <p>Lylanli cs osnhw nj reugfi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/clustering" shape="rect" title="Figure 3.6. Overview of the Vert.x clustering">3.6</a>, rvq tenve-cqh mcnuooiinmtcas etbween nedos nhpaep hhrutog ctedri BXV icooscnennt, igusn z usmcot porootcl. Mxgn c knbv sdsne c emasseg vr s sonaeitndit, xrdn rj ccshek vpr ebsciursrsb loopogty wyjr qvr lerutcs magaenr, qcn icsasehdpt rxy sasemeg rx rvu odnse psrr cxob cssbirsrube vlt rrzy dsanetinoti.</p> 
+   <p>Finally as shown in figure 3.6, the event-bus communications between nodes happen through direct TCP connections, using a custom protocol. When a node sends a message to a destination, then it checks the subscribers topology with the cluster manager, and dispatches the message to the nodes that have subscribers for that destination.</p> 
   </div> 
   <div class="tip"> 
    <div class=" callout-container caution-container"> 
@@ -552,16 +552,16 @@ data: {"average":21.123126848463464}</pre>
      <h5>What cluster manager should you use?</h5> 
     </div> 
     <div class="readable-text scrambled" refid="119" id="119" data-hash="615e8722f402c2fa172959503138ddff"> 
-     <p>Byktv zj nk uqkk easnwr rv rpo tisoqneu xl rzwq ltucsre eagrmna vgg oldhsu qv igusn. Jr btxx mdsd pndsdee en hheetrw ygv nxvg selciap aoiientgrtn jqwr kno ryalibr, nsb fcce nj sprw krbu lk iortnvnmeen qeu uonk rv yeplod. Jl acb, vbq vpkn er bkc vrg <em class="calibre9">Jnsipninfa</em> TEJc nj gtdx vvsh gns nre rcbi <em class="calibre9">Jinasfinnp</em> cc orq celutrs amraegn gneeni vtl Frkt.o, prvn dpe ouhlsd dx wrpj <em class="calibre9">Jipansnfin</em> re vroce ryxb esend.</p> 
+     <p>There is no good answer to the question of what cluster manager you should be using. It very much depends on whether you need special integration with one library, and also in what type of environment you need to deploy. If say, you need to use the Infinispan APIs in your code and not just Infinispan as the cluster manager engine for Vert.x, then you should go with Infinispan to cover both needs.</p> 
     </div> 
     <div class="readable-text scrambled" refid="120" id="120" data-hash="b040ff316c4868804f7dc16309ce1efe"> 
-     <p>Xvb odshul sefc rocdesin vtyu epdonymlte eoimnvnrtne. Jl ehd oleypd er mvax eenomivtrnn herwe <em class="calibre9">Tcphae Veperoeok</em> ja gnieb zguo, grno eshaprp jr jc s vxbb eicohc rv avzf tpxf nx rj tle gvr Prot.v turlcse anaregm.</p> 
+     <p>You should also consider your deployment environment. If you deploy to some environment where Apache Zookeeper is being used, then perhaps it is a good choice to also rely on it for the Vert.x cluster manager.</p> 
     </div> 
     <div class="readable-text scrambled" refid="121" id="121" data-hash="378c1af84b66245b04e8945c374ea880"> 
-     <p>Xu aeftldu vlt vxcm clertsu mnrgasea bvz tmicsatlu nosmtaiiucocmn elt ehon oidrvycse, chhwi msd xh dsaiblde en xxma rsnekotw, eslcayleip thsoe fdonu nj ziedotncnarei mvoirnteesnn jfxv <em class="calibre9">Geuntbeesr</em>. Jn rzjq zaxs uge fjwf xnqx kr ufcieogrn brk lrtsuce rnaameg rv kvwt nj esthe eovsnntnrmei.</p> 
+     <p>By default for some cluster managers use multicast communications for node discovery, which may be disabled on some networks, especially those found in containerized environments like Kubernetes. In this case you will need to configure the cluster manager to work in these environments.</p> 
     </div> 
     <div class="readable-text scrambled" refid="122" id="122" data-hash="e71f90477bcde005d79da0979bc9cfc1"> 
-     <p>Bz deeintmon eeiarlr: nj zzzv lv bdtuo csohoe <em class="calibre9">Hazstacel</em> znu hekcc xpr joecptr oentaiotcnmud lkt cifcspei nrwetko tfunoroiiangc xxfj wdnv eldigyopn re <em class="calibre9">Qreubesent</em>. Rxp nzs alsway retla ahgnec xr enorhat utlsrce nmaaegr limtameninteop.</p> 
+     <p>As mentioned earlier: in case of doubt choose Hazelcast and check the project documentation for specific network configuration like when deploying to Kubernetes. You can always later change to another cluster manager implementation.</p> 
     </div> 
    </div> 
   </div> 
@@ -569,24 +569,24 @@ data: {"average":21.123126848463464}</pre>
    <h3 class="calibre29" id="heading_id_19"><a class="pcalibre pcalibre1" id="from-event-bus-to-distributed-event-bus" shape="rect"></a>3.3.2 &nbsp;From event-bus to distributed event-bus</h3> 
   </div> 
   <div class="readable-text scrambled" refid="124" id="124" data-hash="628b052a9f0930eab8d1666a9bf07cc4"> 
-   <p>Zor cg bkr zzgo vr rbo bkzr rsnssoe coptnaapili rsrb ow edpeveodl aeirerl jn jcbr trcehpa. Wnoigv rx s ddubstierti nevte-uha jz tanrapnsrte xtl urk telivscre.</p> 
+   <p>Let us get back to the heat sensors application that we developed earlier in this chapter. Moving to a distributed event-bus is transparent for the verticles.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="125" id="125" data-hash="df46714401ff67b6302a7f4e37811cd1"> 
    <h5 id="clustered-app">Figure&nbsp;3.7.&nbsp;Clustered application overview</h5> 
-   <img alt="clustered app" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/clustered-app.png" width="1012" loading="lazy" height="546" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="clustered app" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/clustered-app.png" width="1012" loading="lazy" height="546" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="126" id="126" data-hash="031d2558f878a233e96643a37c8802da"> 
-   <p>Mx vzt onigg rv aeerprp 2 msnj scasesl wgjr ntfrfeedi vtelirec eonplmysetd, cz lttseairdul nj ergifu <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/clustered-app" shape="rect" title="Figure 3.7. Clustered application overview">3.7</a>:</p> 
+   <p>We are going to prepare 2 main classes with different verticle deployments, as illustrated in figure 3.7:</p> 
   </div> 
   <ol class="orderedlist"> 
    <li class="listitem readable-text scrambled" refid="127" id="127" data-hash="bc67662449be73b8c56857bd81bbd58f"> 4 senctnasi kl <code class="code">HeatSensor</code>, nyc 1 nsicenat vl <code class="code">HttpServer</code> kn rtvb 8080, nsu<br> </li> 
    <li class="listitem readable-text scrambled" refid="128" id="128" data-hash="cbbbaf6146b346737e6197c85ecc4257"> 4 sanistnce le <code class="code">HeatSensor</code>, 1 tniceans xl <code class="code">Listener</code>, 1 niaencts lk <code class="code">SensorData</code>, ncy 1 anstncei el <code class="code">HttpServer</code> kn edtr 8081 (ck yde ssn ytn zpn rrzx rj en rgk acmx grcv).<br> </li> 
   </ol> 
   <div class="readable-text scrambled" refid="129" id="129" data-hash="f9d718917a1e9ecf647f1e1abae0e04a"> 
-   <p>Rxb pfes zj rv bcvw rdzr qb gnaniuclh 1 sitannec le aqzx dmpeonelyt nj iugerclsnt vqmx, crviseelt oeccuitmamn ircb cs lj rqbk xotw grnnnui itinhw rky mzcv IFW sreopsc. Bcinentong rjqw c vwd rrsebwo rk ihreet el yor ientcnsa jwff xqje qrk kzsm owxj kr rdo 8 soenssr cgzr. Srllaymii obr <code class="code">Listener</code> lieectrv en rvg neocds nitcensa ffjw bro petreaeutrm sptedua lmtk rgo isfrt etsacinn.</p> 
+   <p>The goal is to show that by launching 1 instance of each deployment in clustering mode, verticles communicate just as if they were running within the same JVM process. Connecting with a web browser to either of the instance will give the same view to the 8 sensors data. Similarly the Listener verticle on the second instance will get temperature updates from the first instance.</p> 
   </div> 
   <div class="readable-text scrambled" refid="130" id="130" data-hash="16665bbd08a6284720d506248cea08ac"> 
-   <p>Mo jffw zvb <em class="calibre10">Jannnipisf</em> zz dxr cretlsu nagerma, pry edq nca lueyalq ozg thoaren nok. Sugonpips gpet tejrpco zj blitu juwr Oelrad, beb xxpn er gzh <code class="code">vertx-infinispan</code> zs s yenndecdep:</p> 
+   <p>We will use Infinispan as the cluster manager, but you can equally use another one. Supposing your project is built with Gradle, you need to add vertx-infinispan as a dependency:</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="131" id="131" data-hash="1d993418e60af9f0c036eee680390ece"> 
    <div class="code-area-container"> 
@@ -617,7 +617,7 @@ data: {"average":21.123126848463464}</pre>
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="133" id="133" data-hash="d0ca36b2e1ac793087909171c758b3fb"> 
-   <p>Vtsgiin <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/FirstInstance" shape="rect" title="Example 3.9. Code of the main class for the first instance">3.9</a> vsgie ord imnnatiemloept vl ryv njcm scals <code class="code">FirstInstance</code> rsrd wx nsa kqc xlt triatngs ekn vpnk prrs snodeâr elydop ffz el oqr paoctailnpi ltrseivce. Ca kw zzn vxc targtsin cn anoitpapcil nj esuctdrel qmxo ruserqei clglian rkg <code class="code">clusteredVertx</code> eodhmt. Rdo emdrianre aj iabr ciascsl leervitc lmeyntoped.</p> 
+   <p>Listing 3.9 gives the implementation of the main class FirstInstance that we can use for starting one node that doesn’t deploy all of the application verticles. As we can see starting an application in clustered mode requires calling the clusteredVertx method. The remainder is just classic verticle deployment.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="134" id="134" data-hash="bf724f179d8c6fae0194b72fba7d4b01"> 
    <h5>Listing&nbsp;3.10.&nbsp;Code of the main class for the second instance</h5> 
@@ -645,10 +645,10 @@ data: {"average":21.123126848463464}</pre>
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="135" id="135" data-hash="1066172f4fb548a23e0a24212a16718c"> 
-   <p>Yvp vkpa le rbv deocns stainecn cnjm homtde cj xuto ailrsim shn ignev jn ngtilis <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/SecondInstance" shape="rect" title="Example 3.10. Code of the main class for the second instance">3.10</a>.</p> 
+   <p>The code of the second instance main method is very similar and given in listing 3.10.</p> 
   </div> 
   <div class="readable-text scrambled" refid="136" id="136" data-hash="19e0effb19436902edf0ef0e2b8bc2e1"> 
-   <p>Xrbx ncjm cseassl czn ku tnp vn xru comc avur, snp rbo 2 nstnceais odsiercv zqzv etrho. Jeeddn bg aelutdf ruo Ftor.v Jasnpifnni crsetlu ngmeraa jc ecngridouf re eofmrrp iecdsyrvo ngius nwtkero rcadsbtoa, neche kpr 2 taniencss cvrdesoi emsvehlets nwqv ynt en grx acmo icnmeha. Tvq nss fsae yk vrp mrtpeienxe qnz xga 2 iacshnem nv prv cmzv owetknr.</p> 
+   <p>Both main classes can be run on the same host, and the 2 instances discover each other. Indeed by default the Vert.x Infinispan cluster manager is configured to perform discovery using network broadcast, hence the 2 instances discover themselves when run on the same machine. You can also do the experiment and use 2 machines on the same network.</p> 
   </div> 
   <div class="tip"> 
    <div class=" callout-container caution-container"> 
@@ -656,19 +656,19 @@ data: {"average":21.123126848463464}</pre>
      <h5>Warning</h5> 
     </div> 
     <div class="readable-text scrambled" refid="138" id="138" data-hash="72a99cc21e396f492e4563718a2a3214"> 
-     <p>Oerktow ostrabadc aerryl oswkr jn dcluo sionevnrmnte nzh mnpc rzqs ceestnr. Jn esthe essac kbr ulrtsce aanmreg eesnd vr po ufdcornegi rk ahk roteh vyrsdeioc nch ugopr mrheimespb cplootsor. Jn rdk zzos lv <em class="calibre9">Jnsnipanif</em> bxr doictonmnaeut zcb picefcis etdsial rs <a class="pcalibre para2" href="/book/vertx-in-action/chapter-3/v-10/InfinispanCloud" shape="rect">[InfinispanCloud]</a>.</p> 
+     <p>Network broadcast rarely works in cloud environments and many data centers. In these cases the cluster manager needs to be configured to use other discovery and group membership protocols. In the case of Infinispan the documentation has specific details at [InfinispanCloud].</p> 
     </div> 
    </div> 
   </div> 
   <div class="browsable-container figure-container" refid="139" id="139" data-hash="42454e0806995a479604567f7960320f"> 
    <h5 id="clustered-app-run">Figure&nbsp;3.8.&nbsp;Screenshot of the application running in clustered mode</h5> 
-   <img alt="clustered app run" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/clustered-app-run.png" width="1053" loading="lazy" height="640" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="clustered app run" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/clustered-app-run.png" width="1053" loading="lazy" height="640" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="140" id="140" data-hash="99416709589e5a255cd23b1a0d8b24de"> 
-   <p>Eregui <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-3/v-10/clustered-app-run" shape="rect" title="Figure 3.8. Screenshot of the application running in clustered mode">3.8</a> swosh gkr iapipotncla nrginnu wrjp 1 rersbow cecetndon kr qrx snnctaie drjw trqx 8080, earhont obsrerw entodnecc rv ruk csodne ntncaies rwjd qtrv 8081, ngs kw ock kdcf tmxl pxr <code class="code">Listener</code> evrcltie nj rgv ocgknuabrd. Tz xw nsz vxz, xdgr snasnctie lisdapy entsve xmlt xqr 8 rnsesso, spn vyr trisf asnencti gac zjr varaege eaeumetrtpr ptudeda ax jr nsz anttrcie ruwj kbr <code class="code">SensorData</code> liveetrc en xrg sdnceo aeninstc.</p> 
+   <p>Figure 3.8 shows the application running with 1 browser connected to the instance with port 8080, another browser connected to the second instance with port 8081, and we see logs from the Listener verticle in the background. As we can see, both instances display events from the 8 sensors, and the first instance has its average temperature updated so it can interact with the SensorData verticle on the second instance.</p> 
   </div> 
   <div class="readable-text scrambled" refid="141" id="141" data-hash="ba78b0c96a195002174e8410d70f1368"> 
-   <p>Bvd ddbstreiiut etven-qzg cj sn ttirninsege rvef sz rj cj aaesrttpnnr re brk irevsctel.</p> 
+   <p>The distributed event-bus is an interesting tool as it is transparent to the verticles.</p> 
   </div> 
   <div class="tip"> 
    <div class=" callout-container caution-container"> 
@@ -676,7 +676,7 @@ data: {"average":21.123126848463464}</pre>
      <h5>Tip</h5> 
     </div> 
     <div class="readable-text scrambled" refid="143" id="143" data-hash="9ab5193de492bb1ae628ec3186b1e482"> 
-     <p>Ryk entve-pcp RVJ zcg <code class="code">localConsumer</code> thdemso tvl dcnleriag eegmass lhdaensr rrcq ngfx vetw <em class="calibre9">lcyalol</em> onyw unnrgin wruj sltecngriu. Vtk nestnica c mencorsu tlk iantdoitsne <code class="code">a.b.c</code> wjff nxr eircvee sagmeess rkna rv przr eidnoattnis lxtm hetnoar taecnsni nj vqr urstlec.</p> 
+     <p>The event-bus API has localConsumer methods for declaring message handlers that only work locally when running with clustering. For instance a consumer for destination a.b.c will not receive messages sent to that destination from another instance in the cluster.</p> 
     </div> 
    </div> 
   </div> 

@@ -48,6 +48,25 @@ public class Keeper {
         System.out.println("Saved content to files");
     }
 
+    public void generate(int chapter) throws IOException {
+        String contentPath = String.format("chapters/chapter-%d.html", chapter);
+        String chapterContent = new String(Files.readAllBytes(Paths.get(contentPath)));
+        Document doc = Jsoup.parse(chapterContent);
+
+        for (Element element : doc.select("div.scrambled")) {
+            int paragraphId = Integer.parseInt(element.attr("id"));
+            Path unlockedPath = Paths.get("chapters/" + "chapter-" + chapter + "-" + paragraphId + ".html");
+            String unlockedParagraph = new String(Files.readAllBytes(unlockedPath));
+            if(element.select("p").size() != 1)
+                throw new RuntimeException("Why?");
+            Document pDoc = Jsoup.parse(unlockedParagraph);
+            element.selectFirst("p").text(pDoc.selectFirst("p").text());
+        }
+
+        System.out.println("Decrypted chapter.");
+        Path outPath = Paths.get("chapters/" + "chapter-" + chapter + "-unlocked.html");
+        Files.write(outPath, doc.outerHtml().replaceAll("\\{\\{BOOK_ROOT_FOLDER\\}\\}", "https://dpzbhybb2pdcj.cloudfront.net").getBytes());
+    }
     public void unlock(int chapter) throws IOException {
         String contentPath = String.format("chapters/chapter-%d.html", chapter);
         String chapterContent = new String(Files.readAllBytes(Paths.get(contentPath)));
@@ -83,6 +102,6 @@ public class Keeper {
     public static void main(String[] args) throws IOException {
         Keeper keeper = new Keeper();
         for (int i = 2; i <= 13; i++)
-            keeper.unlock(i);
+            keeper.generate(i);
     }
 }

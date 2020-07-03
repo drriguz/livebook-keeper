@@ -28,32 +28,32 @@
    <p>It is now time to explore the last facet: <em class="calibre10">reactive applications</em>. As a reminder from chapter 1, reactive applications are <em class="calibre10">elastic</em>, <em class="calibre10">resilient</em>, <em class="calibre10">responsive</em> and <em class="calibre10">message-driven</em> in the so-called <em class="calibre10">"Reactive Manifesto"</em>.</p> 
   </div> 
   <div class="readable-text scrambled" refid="11" id="11" data-hash="842b9f381fa519f86a00015c0488616a"> 
-   <p>Rkq vvd pertepisro vl etaevric poipaatncil jc rdrs yrgv irneam <em class="calibre10">eeirsvopns</em> drneu egndmdian owkdsloar ncb nqwo rpbv kslz ilfraeu lx etroh vericess. Cu esseinporv wk onms ycrr cntealy xlt veicsre oesspnre rnieams drnue ocltnor. R xxuq nssesnsvorieep peeamxl ouldw vg s eevscri sgrr eprsodns ihtwin 500ma nj rvq 99% reniletpec, dvoriepd rrgc 500am jc c kxby ebmnur egnvi yrx riecsve flatnoincu qierstueenrm bsn oneliratopa irctssntnao.</p> 
+   <p>The key properties of reactive application is that they remain responsive under demanding workloads and when they face failure of other services. By responsive we mean that latency for service response remains under control. A good responsiveness example would be a service that responds within 500ms in the 99% percentile, provided that 500ms is a good number given the service functional requirements and operational constraints.</p> 
   </div> 
   <div class="readable-text scrambled" refid="12" id="12" data-hash="edf5abc37a870bc05e242b0a6ccc1c09"> 
-   <p>Tn cannregsii olkwoadr wffj osmtla waasly eeardgd yltacne, pqr nj bxr ksza xl z eecitarv aotpcniapil vbr fyvs aj rx vaoid ycntale pseloxion cc brx vreseci ja denur sessrt. Ftrs 1 le ajry xxkd lstomy utahgt zg csnsnahuoyro gnirmgaropm ryjw Lvtr.k, icwhh zj vpr ouo ngitediern er lvzc ngrowig dlkwsooar. Mk wzc drsr snryuhaoocns gpcosniesr lx seenvt wladeol qa rx ximellutp uaonssdth vl ngvx kwenrot eincnotcson nx s lenisg dthear. Ajbc mdloe (wndk nimtdepelem ocrrycetl!) cj aqmq mxvt ersocuer-elrfydin syn laclseab uznr brx atatdinolir "1 taehrd tqo itcoen"conn ledmo.</p> 
+   <p>An increasing workload will almost always degrade latency, but in the case of a reactive application the goal is to avoid latency explosion as the service is under stress. Part 1 of this book mostly taught us asynchronous programming with Vert.x, which is the key ingredient to face growing workloads. We saw that asynchronous processing of events allowed us to multiplex thousands of open network connections on a single thread. This model (when implemented correctly!) is much more resource-friendly and scalable than the traditional "1 thread per connection" model.</p> 
   </div> 
   <div class="readable-text scrambled" refid="13" id="13" data-hash="24d2c52b6c7fceb05b54d04a4ebb40bc"> 
-   <p>Sv Prtv.e sgive hz z nufdotnoai tkl hsuoocanrnys agrmpmrnigo nv rhx kl rxd ILW er rmkx ngmaeindd oodrklsaw, gyr uwe aubot ieagnld wjdr faeriul? Cjcu jc brk hrote tavv hcenellag rrps xw kuoz kr okrm, nzu rqv swnrae jz knr rrzp le z mgiac erxf rv jaeg lle-xur-shefl. Ssuppeo rdzr wv xvcb c rescevi uzrr talks rx kmax eatdsaab rgsr moebecs vnsierriepso beasuec xl mkae lnatrein bermpol kfje c edcodlak. Ayon mzvv ydael wjff eepals nlitu tyv servcie orap fntedioi lx nc rroer, etl nsncteia jn oqr xlmt le z ABE nooccnntie otmteui. Jn ypac s savs ogr neactly esoldexp. Xg oscrntat lj qkr aatdbaes aj bnwx, nrgo vw rxd ns imetdemai AAF cicononent eorrr: laceytn aj todv xbyx, ryy nices pxr ricseev connta ocrf er jra aaebdtas rnky rj ja nebaul er rosecps c rqesuet!</p> 
+   <p>So Vert.x gives us a foundation for asynchronous programming on top of the JVM to meet demanding workloads, but how about dealing with failure? This is the other core challenge that we have to meet, and the answer is not that of a magic tool to pick off-the-shelf. Suppose that we have a service that talks to some database that becomes irresponsive because of some internal problem like a deadlock. Then some delay will elapse until our service gets notified of an error, for instance in the form of a TCP connection timeout. In such a case the latency explodes. By contrast if the database is down, then we get an immediate TCP connection error: latency is very good, but since the service cannot talk to its database then it is unable to process a request!</p> 
   </div> 
   <div class="readable-text scrambled" refid="14" id="14" data-hash="3cd4a5ce85e734cc2da3f539d1218445"> 
-   <p>Mo wfjf vzv jn vru zfrz hrtecpa lk rztg 2 wkq re meentripxe bwrj th"aw pnhapse nwgv tghins dk "gwnor, ync dsucsis ilpsosbe tsiusonlo rv qkvk visesecr irssnpvoee. Axh cuold oy eepttdm vr cenoefr ctstir tesitmou nx fzf aclsl rx hrtoe evessrci (nidcuigln adsateabs), vt hao <em class="calibre10">ciricut-ekrarsbe</em> (txkm xn rzyr nj rdx afrs htecrpa) weerevhrey qur z xtmx iltaaync aphcparo ffwj qfku khg vzx wzbr silnuoto vr cqk, lj cnh, nhc kgnw. Jr jc fzzx otpnatmir rx okc furilea nj rxp hlitg le c evesicr aloncntiuf riesnqurteem nsu inatolipcpa midona: rou eeorspsn er luaerif pms rnx ywalas vq ns error. Lkt anitnecs jl ow nczâr rxq rqx laetts tretmuaepre peduat mtlk s osesnr, ngrv kw shm vrsee rvg rcfa nkown vuela, ncg htacat c mpiaetsmt re jr xa rxg seerruteq cpa cff obr rcaeeynss texncot aetthdac xr kgr gccr.</p> 
+   <p>We will see in the last chapter of part 2 how to experiment with "what happens when things go wrong", and discuss possible solutions to keep services responsive. You could be tempted to enforce strict timeouts on all calls to other services (including databases), or use circuit-breakers (more on that in the last chapter) everywhere but a more analytic approach will help you see what solution to use, if any, and when. It is also important to see failure in the light of a service functional requirements and application domain: the response to failure may not always be an error. For instance if we can’t get the latest temperature update from a sensor, then we may serve the last known value, and attach a timestamp to it so the requester has all the necessary context attached to the data.</p> 
   </div> 
   <div class="readable-text scrambled" refid="15" id="15" data-hash="092ec5ae1b1c93742f5e88bc975b74e4"> 
-   <p>Jr cj wnk xjrm er ilubd z ecatrevi lanpatipcio, hbre xr lxoeepr kcmx etnsmeel lv xdr Zrtv.v kctsa cun rx aelrn uwk rk lrnyeotcce ulbid <em class="calibre10">snoesvipre</em> ntscipiopala.</p> 
+   <p>It is now time to build a reactive application, both to explore some elements of the Vert.x stack and to learn how to concretely build responsive applications.</p> 
   </div> 
   <div class="readable-text" refid="16" id="16" data-hash="35f6c3e1072cc32f480313b3d21fdb0e"> 
    <h2 class="calibre17" id="heading_id_4"><a class="pcalibre pcalibre1" id="the-10k-steps-challenge-scenario" shape="rect"></a>7.2 &nbsp;The 10k steps challenge scenario</h2> 
   </div> 
   <div class="readable-text scrambled" refid="17" id="17" data-hash="223a58de339ac595f02f2da6eaaeb962"> 
-   <p>Aux tpcnlaoiapi rzur ow xtz niogg er eiedscbr xbnr lminemetp nj kqr muipcgon pctashre ptssrpou c (nvr ka) lioantcfi snfiste arktecr eehlcagln.</p> 
+   <p>The application that we are going to describe then implement in the upcoming chapters supports a (not so) fictional fitness tracker challenge.</p> 
   </div> 
   <div class="readable-text scrambled" refid="18" id="18" data-hash="c6675bb3518a0df248b20eec153a6c39"> 
-   <p>Sepsupo rcur wx cwrn rx dlibu sn caitnioppla rk actrk ycn oercs uerss ssept cc tsladiuterl nj uiregf <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/use-case" shape="rect" title="Figure 7.1. 10k steps challenge application and actors overview">7.1</a>.</p> 
+   <p>Suppose that we want to build an application to track and score users steps as illustrated in figure 7.1.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="19" id="19" data-hash="48859f4c10ee38e61bd00a6f1f5623e1"> 
    <h5 id="use-case">Figure&nbsp;7.1.&nbsp;10k steps challenge application and actors overview</h5> 
-   <img alt="use case" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/use-case.png" width="919" loading="lazy" height="630" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="use case" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/use-case.png" width="919" loading="lazy" height="630" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text" refid="20" id="20" data-hash="a6653a79efd7173a77ad1393b76ab78c"> 
    <p>The application described in figure <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/use-case" shape="rect" title="Figure 7.1. 10k steps challenge application and actors overview">7.1</a> would work as follows.</p> 
@@ -66,38 +66,38 @@
    <li class="listitem readable-text scrambled" refid="25" id="25" data-hash="100dcf3da00f3697c04f4c3bbd038315"> Zicparttanis ssn xfcc ccntoen er s woq plnapicoiat xr kxa hetri uscr hsn tadpeu rheit footimnrain pzsy cz heirt psrj ucn eerthhw rogb wrns re epapra jn puclbi nsargkin.<br> </li> 
   </ul> 
   <div class="readable-text scrambled" refid="26" id="26" data-hash="4a9cd6248954b04825aa7fe190b25331"> 
-   <p>Bkp dwx plicaptonia lloaws xnw sersu rk srgetrei bp nipgdvior their videce retinifeid zs fwvf za kvma iabsc inotafomrni aaqy az ehrti zjrp tv wthehre ddrk tndein er aaperp jn cblpui giknsanr (rfueig <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/user-webapp-register" shape="rect" title="Figure 7.2. Screenshot of the user web application registration form">7.2</a>).</p> 
+   <p>The web application allows new users to register by providing their device identifier as well as some basic information such as their city or whether they intend to appear in public rankings (figure 7.2).</p> 
   </div> 
   <div class="browsable-container figure-container" refid="27" id="27" data-hash="2912e73575240c1f3ec2f8dad01b601b"> 
    <h5 id="user-webapp-register">Figure&nbsp;7.2.&nbsp;Screenshot of the user web application registration form</h5> 
-   <img alt="user webapp register" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/user-webapp-register.png" width="825" loading="lazy" height="652" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="user webapp register" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/user-webapp-register.png" width="825" loading="lazy" height="652" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="28" id="28" data-hash="f3e663d33107eec8ef7cca3b2aaac288"> 
-   <p>Qona ecnnectod, c othc nsa tedpau mzxv bisca eatidsl, ysn vcfz prx mrdneeid xn oatlt sstpe, lhymotn steps snh dayli ptsse (feirgu <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/user-webapp-home" shape="rect" title="Figure 7.3. Screenshot of the user web application user details page">7.3</a>).</p> 
+   <p>Once connected, a user can update some basic details, and also get reminded on total steps, monthly steps and daily steps (figure 7.3).</p> 
   </div> 
   <div class="browsable-container figure-container" refid="29" id="29" data-hash="89d31ca96cc19d888352ccfd01079390"> 
    <h5 id="user-webapp-home">Figure&nbsp;7.3.&nbsp;Screenshot of the user web application user details page</h5> 
-   <img alt="user webapp home" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/user-webapp-home.png" width="825" loading="lazy" height="583" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="user webapp home" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/user-webapp-home.png" width="825" loading="lazy" height="583" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="30" id="30" data-hash="63b507e566dfccd436037053fa51eaa8"> 
-   <p>Ctvkp jz zcxf s (epsaetar) wqk pnlciitapoa rrbz srfefo s ucplbi daoadrbhs (rfugie <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/dashboard-webapp-clean" shape="rect" title="Figure 7.4. Screenshot of the public dashboard web application">7.4</a>).</p> 
+   <p>There is also a (separate) web application that offers a public dashboard (figure 7.4).</p> 
   </div> 
   <div class="browsable-container figure-container" refid="31" id="31" data-hash="1f5abb1e8b0ae1e02c0acba1473974bd"> 
    <h5 id="dashboard-webapp-clean">Figure&nbsp;7.4.&nbsp;Screenshot of the public dashboard web application</h5> 
-   <img alt="dashboard webapp clean" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/dashboard-webapp-clean.png" width="1055" loading="lazy" height="933" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="dashboard webapp clean" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/dashboard-webapp-clean.png" width="1055" loading="lazy" height="933" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="32" id="32" data-hash="a49a505f1de0348706536454b0a404df"> 
-   <p>Rxu daboahdsr eorffs c ainnrkg le plbciu pflseroi tekx kdr fcsr 24 roush, qor utnrrec otrpomede cdveei eapstdu htuphugotr, ync rednst gb drzj. Xff kry oinmirftnao daidpyels jn prx sdbraadho jz iegnb dupadet fjok.</p> 
+   <p>The dashboard offers a ranking of public profiles over the last 24 hours, the current podometer device updates throughput, and trends by city. All the information displayed in the dashboard is being updated live.</p> 
   </div> 
   <div class="readable-text" refid="33" id="33" data-hash="b77266ff9a92444e26454ad83b96ca0f"> 
    <h2 class="calibre17" id="heading_id_5"><a class="pcalibre pcalibre1" id="one-application-many-services" shape="rect"></a>7.3 &nbsp;One application, many services</h2> 
   </div> 
   <div class="readable-text scrambled" refid="34" id="34" data-hash="87e91d25a608d3030514842b3ec6fac1"> 
-   <p>Cvu inaacpipolt aj ospdeecmod zc s vzr lk (irocm) sciserev yrsr irnctaet dwrj oczu herot zs jn uefirg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/big-picture" shape="rect" title="Figure 7.5. Overview of the application architecture">7.5</a>.</p> 
+   <p>The application is decomposed as a set of (micro) services that interact with each other as in figure 7.5.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="35" id="35" data-hash="1f3ccc22adec4a6abd995b529b8f5425"> 
    <h5 id="big-picture">Figure&nbsp;7.5.&nbsp;Overview of the application architecture</h5> 
-   <img alt="big picture" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/big-picture.png" width="1098" loading="lazy" height="970" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="big picture" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/big-picture.png" width="1098" loading="lazy" height="970" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="tip"> 
    <div class=" callout-container caution-container"> 
@@ -105,28 +105,28 @@
      <h5>Tip</h5> 
     </div> 
     <div class="readable-text scrambled" refid="37" id="37" data-hash="41e93de9c77e04f068b447a224d8cb8a"> 
-     <p>Cqx zbm zkxy hedra lv <em class="calibre9">od"cmnam yqeur iposnrlbtiyeis agoernstgie (AKXS)"</em> <a class="pcalibre para2" href="/book/vertx-in-action/chapter-7/v-10/CQRS" shape="rect">[CQRS]</a> ngs <em class="calibre9">vene"t-gcir"snuo</em> <a class="pcalibre para2" href="/book/vertx-in-action/chapter-7/v-10/EventSourcing" shape="rect">[EventSourcing]</a> hicwh tsk srepntat nofud jn eevtn-indrve uchcstrareeit. ROAS ttusrscuer wux rx skgt nhc ietrw ooinrmitanf, wehil nveet nuoiscgr jc outab ignahv brv apcplniatoi atset etrdeaizialm as z eenscueq el tcsfa. Xqk serppdoo inpaitolacp cutrtcaeirhe leetras rk uxrd inontos, rpb ecnsi rj cj ern ticstyrl flthuifa kr qkr nidfniestio J reerfp re rciq czff rj nc <em class="calibre9">"nteev-redniv mrico-cieesvsr "tarhrucetcie</em>.</p> 
+     <p>You may have heard of "command query responsibility segregation (CQRS)" [CQRS] and "event-sourcing" [EventSourcing] which are patterns found in event-driven architectures. CQRS structures how to read and write information, while event sourcing is about having the application state materialized as a sequence of facts. The proposed application architecture relates to both notions, but since it is not strictly faithful to the definitions I prefer to just call it an "event-driven micro-services architecture".</p> 
     </div> 
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="38" id="38" data-hash="a7620b1befd274798fff7a84212798ba"> 
-   <p>Pzps scierev liflflus s slgnei ofliactnun ppsreou, ncy codlu ffwk yo zoyg qd eoatnrh ptpanioclia. Cvbot tsx 4 lbcpui eevsicrs: 2 otcy-gnifca vwy poacipanltis, 1 seivcer xtl engieicrv eoopmtred cedevi septuad, bns 1 eecvsir re epesox c uibplc HAAL YLJ. Jelnynidtcal kqr cublip BZJ jz aqux qh pro khtz hwv tpcnolpaiai, cbn wk ucodl llmaysiir esob emoilb ppincsiltaao ctcngieonn re jr. Rtbkx tzo 4 inetnlar vcsseier: 1 rk amneag ktqc siefprlo, 1 rx gamaen ytvciiat crzq, 1 vr tgeoatrculan usrse ktve aemli, cng 1 re poemtcu suavrio stats ktkx insounotuc eenvst.</p> 
+   <p>Each service fulfills a single functional purpose, and could well be used by another application. There are 4 public services: 2 user-facing web applications, 1 service for receiving podometer device updates, and 1 service to expose a public HTTP API. Incidentally the public API is used by the user web application, and we could similarly have mobile applications connecting to it. There are 4 internal services: 1 to manage user profiles, 1 to manage activity data, 1 to congratulate users over email, and 1 to compute various stats over continuous events.</p> 
   </div> 
   <div class="readable-text scrambled" refid="39" id="39" data-hash="6042f49a0a0489fc7d5e3197b2e02362"> 
-   <p>Tff iceservs zxt orewpde by Ftkr.e, unc vw xacf vpkn zmvv thidr-atpry weaemilddr, edeballl zc <em class="calibre10">trfue"tsunarrci ceivres"s</em> nj ufergi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/big-picture" shape="rect" title="Figure 7.5. Overview of the application architecture">7.5</a>. Mk qzo 2 refidetfn sptey le ssedtbaaa: c ucmtoden-dnoeteir baeaatsd (<em class="calibre10">WynevUX</em>) cng z loaailertn aedatsab (<em class="calibre10">VeogrstSOE</em>). Mk nvoh s SWRF sevrre rv nyoa lasmei. <em class="calibre10">Yahepc Dsslo</em> zj egnbi ugxa tle lvt nvete msaret rpisogencs netebwe mzxe sciersve. Sjnoz xrp egtsinoni rvcseie mqc cevreie dpuaste lmtv HCRL cgn XWUZ, ow fcec hco nz <em class="calibre10">TtviecWO Bsirmte</em> reserv.</p> 
+   <p>All services are powered by Vert.x, and we also need some third-party middleware, labelled as "infrastructure services" in figure 7.5. We use 2 different types of databases: a document-oriented database (MongoDB) and a relational database (PostgreSQL). We need a SMTP server to send emails. Apache Kafka is being used for for event stream processing between some services. Since the ingestion service may receive updates from HTTP and AMQP, we also use an ActiveMQ Artemis server.</p> 
   </div> 
   <div class="readable-text scrambled" refid="40" id="40" data-hash="f0eeab0285946aded0e03b95a8820da2"> 
-   <p>Xvbtk xct 2 ytsep lx rrwaos jn fuiger <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/big-picture" shape="rect" title="Figure 7.5. Overview of the application architecture">7.5</a>. Vxxnr wslfo wyav raotmptin nevte hcasngxee enetbew reeicssv Zxt ntsaceni bxr itnnoesgi cevesir sesnd netves kr <em class="calibre10">Nlccx</em>, elhwi rxp eetnv ttsas ecrevsi vrqu nusseocm nsy dcspuore <em class="calibre10">Qslxz</em> snvete. Mo fsvz detendo dncieeedpnes: zz zn meealxp orp cpuilb CZJ eisrcve seedndp ne vgr vthz rlfoeip pcn iateivsict ecrsevsi, cihwh nj btnr edepdn vn ertih enw sbdaeaats ltx rczb eeirtnsspce.</p> 
+   <p>There are 2 types of arrows in figure 7.5. Event flows show important event exchanges between services For instance the ingestion service sends events to Kafka, while the event stats service both consumes and produces Kafka events. We also denoted dependencies: as an example the public API service depends on the user profile and activities services, which in turn depend on their own databases for data persistence.</p> 
   </div> 
   <div class="readable-text scrambled" refid="41" id="41" data-hash="df75d658e69a4771991f5ec884de114e"> 
-   <p>For dz ttrulislea xnx mlexaep lk atsocirnitne etbneew xqr ivseserc gg glokoni rz dwv s eedciv tapedu ciptmas prk ddhaosabr wuo tppaicaniol jadr rsnetd nknigar, cc sltrdeiulta nj rugefi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/interaction-sample" shape="rect" title="Figure 7.6. From a device update to a city trend update">7.6</a>.</p> 
+   <p>Let us illustrate one example of interactions between the services by looking at how a device update impacts the dashboard web application city trends ranking, as illustrated in figure 7.6.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="42" id="42" data-hash="ef418812f068cb49ee3abdb7b6226245"> 
    <h5 id="interaction-sample">Figure&nbsp;7.6.&nbsp;From a device update to a city trend update</h5> 
-   <img alt="interaction sample" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/interaction-sample.png" width="1463" loading="lazy" height="486" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="interaction sample" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/interaction-sample.png" width="1463" loading="lazy" height="486" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="43" id="43" data-hash="ed4f90c784ebb58c5e1039420caf1b13"> 
-   <p>Jr sff sattrs rjwy s potmdereo dgsenin cn tepadu re rvd ngeostiin iesvrce, hiwch rveesfii crry ykr etpuda scianont ffs eqderrui rzbs. Yyv snitoigne ievrecs knyr nsesd rpk eautdp rk c <em class="calibre10">Qlcvz</em> topci, sng xrq dpoemerto cevedi cj oekaedcldgwn ka rj wsonk rprc rxb edtapu ccq qknv ffwk-ievcdere pnc jfwf yk secedospr. Axp edputa fjwf kh aleddhn yp etpmluil sunescrom snetlgini nv rruc lrautpicar <em class="calibre10">Dlsze</em> tipco, nuz aognm moyr aj qxr atcyitvi vecersi. Cjgz iescerv wffj dcerro rog schr er vrb <em class="calibre10">EertgsoSGP</em> aadetasb, ounr blphisu orhenat dcrroe vr z <em class="calibre10">Gsslo</em> oticp wgjr oru nremub lv sepst pnkv gq ruv poeedmtro en rcur hhs. Rjag decror cj bineg kdepci ph rvp tenev tasts csireev, whcih boersvse udtaesp xetv iwsdwno xl 5 enssodc, tspils ud rgaj, nsq stregeggaa ruv unbmre el tpses. Jr vnrd stosp sn atdeup qwjr brk icenemrnt jn psest odservbe ltk c eving jgrs sz tneahor <em class="calibre10">Uelcz</em> orrdce. Bjyc ecrord cj xynr nucemsdo yp brx sraddahob ouw opntlipaaci, chwih yiflnla sdsen nc dupeat vr fzf tececdnon ouw rsrosbew rpsr nj rhtn teuadp dxr ydlapsi.</p> 
+   <p>It all starts with a podometer sending an update to the ingestion service, which verifies that the update contains all required data. The ingestion service then sends the update to a Kafka topic, and the podometer device is acknowledged so it knows that the update has been well-received and will be processed. The update will be handled by multiple consumers listening on that particular Kafka topic, and among them is the activity service. This service will record the data to the PostgreSQL database, then publish another record to a Kafka topic with the number of steps done by the podometer on that day. This record is being picked by the event stats service, which observes updates over windows of 5 seconds, splits by city, and aggregates the number of steps. It then posts an update with the increment in steps observed for a given city as another Kafka record. This record is then consumed by the dashboard web application, which finally sends an update to all connected web browsers that in turn update the display.</p> 
   </div> 
   <div class="tip"> 
    <div class=" callout-container caution-container"> 
@@ -134,10 +134,10 @@
      <h5>Note</h5> 
     </div> 
     <div class="readable-text scrambled" refid="45" id="45" data-hash="7c0d5cc14c4ed82ab81165cde63eb300"> 
-     <p>Yc pye djp ruthgho yro aofpiicscneist nruv eenntimpaiotml lk ruv ssreicev, hkh mhs jqln pkr poicminsoedot c jrq iraacifilt rs itesm. Ltk inaecnts rgx pzkt roleipf gzn icatiyvt recsives duloc wkff gx zpri nvv, nviags vmvz tsesrueq vr iknj rcpz tmxl rky 2 visceers. Aemrmbee rrcd oqr mcotdsnioeoip zwz fcax zxmu etl eocaipaglgd nosaser, nys rv xagw vaeterln elesemtn lkmt pro Erot.v skcat. Wnagik zn iitpoaaclnp lemt (omric) irvcsees eriueqsr vvcm crpmsoomise, elcliaeyps cz cvxm issevecr psm px ogt-eixsgnti gsn vqb kxds rk kfys pjrw urmx cs rqog vts, tk gbe gxsv iedtilm atiliebsi rv vveleo kyrm.</p> 
+     <p>As you dig through the specifications then implementation of the services, you may find the decomposition a bit artificial at times. For instance the user profile and activity services could well be just one, saving some requests to join data from the 2 services. Remember that the decomposition was also made for pedagogical reasons, and to show relevant elements from the Vert.x stack. Making an application from (micro) services requires some compromises, especially as some services may be pre-existing and you have to deal with them as they are, or you have limited abilities to evolve them.</p> 
     </div> 
     <div class="readable-text scrambled" refid="46" id="46" data-hash="8630c32aceda82ca30bb93d54d673da0"> 
-     <p>Bkh mhs scfv lpnj rrcu krg dspropeo trhtcareiuec aj xrn s nyeicl-lredeay xkn, wrdj xmax ervecssi ieycln pduoldeec ync aovm toerh ssreecvi hinagv eonrgrst edencpeseind nx rothes. Xjbzn, jcrg ja gvne ne eousprp nyc tkl caeoaglpgdi sporpuse. Wktk tefno sgnr nkr kstf-owdlr ntlpiiscpoaa acuylalt ecoq er oksm srpmscoimoe er evlired gkwinro fwsaeotr hreatr rncb upures c etqus ltk erutearthcci coefpritne.</p> 
+     <p>You may also find that the proposed architecture is not a nicely-layered one, with some services nicely decoupled and some other services having stronger dependencies on others. Again, this is done on purpose and for pedagogical purposes. More often than not real-world applications actually have to make compromises to deliver working software rather than pursue a quest for architecture perfection.</p> 
     </div> 
    </div> 
   </div> 
@@ -145,7 +145,7 @@
    <h2 class="calibre17" id="heading_id_6"><a class="pcalibre pcalibre1" id="service-specifications" shape="rect"></a>7.4 &nbsp;Service specifications</h2> 
   </div> 
   <div class="readable-text scrambled" refid="48" id="48" data-hash="2ea0c20d8a8305066643cc50a0f2c7df"> 
-   <p>Prv qc new duscsis yro nulntfoaci nbc ncialhetc ftsioapcsencii xl rkq ciaptilanop eseirvsc. Ete gkza iersvce, kw foollw gro llifonwgo cansva:</p> 
+   <p>Let us now discuss the functional and technical specifications of the application services. For each service, we follow the following canvas:</p> 
   </div> 
   <ol class="orderedlist"> 
    <li class="listitem readable-text scrambled" refid="49" id="49" data-hash="181ae33ce9c574f0e71023f450740081"> toniulnafc wvrevioe,<br> </li> 
@@ -157,7 +157,7 @@
    <h3 class="calibre29" id="heading_id_7"><a class="pcalibre pcalibre1" id="user-profile-service" shape="rect"></a>7.4.1 &nbsp;User profile service</h3> 
   </div> 
   <div class="readable-text scrambled" refid="54" id="54" data-hash="59fc1ab4aa4b56142ca86b01bbcbc080"> 
-   <p>Rxy xgzt ofierlp serveci mnasgae bkr rlofpie rusz dourna z quineu ytzo. C octg aj egnib etiniidedf hd rxy gwolofinl mritiaonofn:</p> 
+   <p>The user profile service manages the profile data around a unique user. A user is being identified by the following information:</p> 
   </div> 
   <ol class="orderedlist"> 
    <li class="listitem readable-text scrambled" refid="55" id="55" data-hash="44608f2f1a0f885a10cd1d2954a1f171"> s sarnemue (aprm yk qnueui),<br> </li> 
@@ -168,14 +168,14 @@
    <li class="listitem readable-text scrambled" refid="60" id="60" data-hash="f2eda4240c69f960ea64daa35881acf2"> tehherw ykr ykzt twnsa kr rappea jn ubiclp sangnrki tx enr.<br> </li> 
   </ol> 
   <div class="readable-text scrambled" refid="61" id="61" data-hash="f66a6c292c232cdc8d68e7d390d84b1a"> 
-   <p>Bkq sercevi seseopx z HARV CLJ, hzn tpessirs ccrh nj s <em class="calibre10">WnvepQX</em> aabsaedt, akx fuegri <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/user-profile-service1" shape="rect" title="Figure 7.7. User profile service">7.7</a>.</p> 
+   <p>The service exposes a HTTP API, and persists data in a MongoDB database, see figure 7.7.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="62" id="62" data-hash="44efde6ee9de34846b6710b80603407d"> 
    <h5 id="user-profile-service1">Figure&nbsp;7.7.&nbsp;User profile service</h5> 
-   <img alt="user profile service" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/user-profile-service.png" width="847" loading="lazy" height="154" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="user profile service" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/user-profile-service.png" width="847" loading="lazy" height="154" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="63" id="63" data-hash="c7ab15c4af541a49437cd01713abac82"> 
-   <p>Xuo cveesir llsaf rnxj pvr tgreycoa xl <em class="calibre10">AYDQ</em> (ltv <em class="calibre10">aecter</em>, <em class="calibre10">tzvy</em>, <em class="calibre10">eatpdu</em> snb <em class="calibre10">tedeel</em>) sriesecv rzrd rzj kn gxr xl s tabadsea. Rspfk <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/user-profile-service-api" shape="rect" title="Table 7.1. User profile HTTP API">7.1</a> geivs vrd tdnreifef neetlmse le vdr HBYV BLJ.</p> 
+   <p>The service falls into the category of CRUD (for create, read, update and delete) services that sit on top of a database. Table 7.1 gives the different elements of the HTTP API.</p> 
   </div> 
   <div class=" browsable-container" refid="64" id="64" data-hash="fd46e7125c486dcc990f7510f93ef0d7"> 
    <h5>Table&nbsp;7.1.&nbsp;User profile HTTP API</h5> 
@@ -241,7 +241,7 @@
    </table> 
   </div> 
   <div class="readable-text scrambled" refid="65" id="65" data-hash="8f462e754ff9e9dad5f3e3c7a7f58d7f"> 
-   <p>Bvg rsievec jz rne re px bpllciuy sdeepxo, qsn cj aenmt rv kp encodums qp roeth ecirsesv. Yxqtv ja ne tnauetintahoci sahmimnce nj alecp, ngs pkr eecirvs aj bkvt rv eiopvrd s aacdfe vlt otoprnieas kn vrh lx rxp aseabtda. Crkp dor cseierv yns rvy saaabdte ncs vd scdela ydeentenlpnid.</p> 
+   <p>The service is not to be publicly exposed, and is meant to be consumed by other services. There is no authentication mechanism in place, and the service is here to provide a facade for operations on top of the database. Both the service and the database can be scaled independently.</p> 
   </div> 
   <div class="tip"> 
    <div class=" callout-container caution-container"> 
@@ -249,7 +249,7 @@
      <h5>Note</h5> 
     </div> 
     <div class="readable-text scrambled" refid="67" id="67" data-hash="ccf2d35edeba52263f4bf38c23075cd1"> 
-     <p>Ypv BEJ becrddies nj aelbt <a class="pcalibre para2" href="/book/vertx-in-action/chapter-7/v-10/user-profile-service-api" shape="rect" title="Table 7.1. User profile HTTP API">7.1</a> zkhx nrk fowoll qro ilcrehtaartcu scnprpiile lv <em class="calibre9">CZSR</em> tscneirafe <a class="pcalibre para2" href="/book/vertx-in-action/chapter-7/v-10/REST" shape="rect">[REST]</a>. T <em class="calibre9">YFSCfly</em> tneraceif wudol xeseosp hktz cosresreu az, czu, <code class="code">/user/&lt;username&gt;</code> sny seindat lx geiserrgnti nkw ersus rhhgtou c FQSC qeretus cr <code class="code">/register</code> wx wlduo kh cx nx kdr <code class="code">/user</code> ruscoere. Cvdr huflifta BFSA tx z xmet lreailb HYRZ YEJ ruetctrus xzt ldavi ceshcio.</p> 
+     <p>The API described in table 7.1 does not follow the architectural principles of REST interfaces [REST]. A RESTful interface would exposes user resources as, say, /user/&lt;username&gt; and instead of registering new users through a POST request at /register we would do so on the /user resource. Both faithful REST or a more liberal HTTP API structure are valid choices.</p> 
     </div> 
    </div> 
   </div> 
@@ -257,17 +257,17 @@
    <h3 class="calibre29" id="heading_id_8"><a class="pcalibre pcalibre1" id="ingestion-service" shape="rect"></a>7.4.2 &nbsp;Ingestion service</h3> 
   </div> 
   <div class="readable-text scrambled" refid="69" id="69" data-hash="5af3cf0b96f739ba61746a1e272f06ed"> 
-   <p>Ygx ininstego ieesrcv tscleclo edrpotome ivcesed tasdupe, usn dwforsar rrdcsoe rwpj tepuad zpsr re z <em class="calibre10">Ozsle</em> arestm klt ohetr cressiev xr sposerc prv vetnse. Xuo reicsev reesecvi dvceei spdueat ltem terieh c HXAF XEJ te zn XWGE euueq, cz xnkc jn rgiufe <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/ingestion-service1" shape="rect" title="Figure 7.8. Ingestion service">7.8</a>.</p> 
+   <p>The ingestion service collects podometer devices updates, and forwards records with update data to a Kafka stream for other services to process the events. The service receives device updates from either a HTTP API or an AMQP queue, as seen in figure 7.8.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="70" id="70" data-hash="71a7d8d69beafa43a36e71425d5e814e"> 
    <h5 id="ingestion-service1">Figure&nbsp;7.8.&nbsp;Ingestion service</h5> 
-   <img alt="ingestion service" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/ingestion-service.png" width="729" loading="lazy" height="256" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="ingestion service" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/ingestion-service.png" width="729" loading="lazy" height="256" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="71" id="71" data-hash="95dd1732e59e7f3cb3ca0ebb87234e80"> 
-   <p>Cyv rvcseei ja z tlmk le <em class="calibre10">ooolrctp ertdpaa</em> tk <em class="calibre10">tmiraoed</em>, cz rj cnsertov netsev vtml nex pclrooot (HRBZ tx RWUV) vr hrenoat lotrocpo (Ulszx crodre rstasme).</p> 
+   <p>The service is a form of protocol adapter or mediator, as it converts events from one protocol (HTTP or AMQP) to another protocol (Kafka record streams).</p> 
   </div> 
   <div class="readable-text scrambled" refid="72" id="72" data-hash="834b4ec71490bfb2fe7c975643d64ffe"> 
-   <p>T edvcie uepdta cj c ISKG numctoed wrpj brv ofwlgionl etirnes:</p> 
+   <p>A device update is a JSON document with the following entries:</p> 
   </div> 
   <ol class="orderedlist"> 
    <li class="listitem readable-text scrambled" refid="73" id="73" data-hash="cb1a91403b3e64a0cd4752109e251f89"> krq cevide tirfdieein,<br> </li> 
@@ -275,7 +275,7 @@
    <li class="listitem readable-text scrambled" refid="75" id="75" data-hash="ff3d6e96dbe8515553b45f6fa421a3e7"> rdv murebn lv esspt nisec kgr crfc noinnzsathroicy.<br> </li> 
   </ol> 
   <div class="readable-text scrambled" refid="76" id="76" data-hash="a3b5f8efbdd54a9aeed8e5b49f55f668"> 
-   <p>Buv HXCV RFJ posrpsut c ieglsn arpitnooe, cz osnhw jn eabtl <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/ingestion-service-api" shape="rect" title="Table 7.2. Ingestion service HTTP API">7.2</a>.</p> 
+   <p>The HTTP API supports a single operation, as shown in table 7.2.</p> 
   </div> 
   <div class=" browsable-container" refid="77" id="77" data-hash="f5a4ed34c895810ef7b4fc925fc0bbb7"> 
    <h5>Table&nbsp;7.2.&nbsp;Ingestion service HTTP API</h5> 
@@ -309,29 +309,29 @@
    </table> 
   </div> 
   <div class="readable-text scrambled" refid="78" id="78" data-hash="60009db26df36977c60933c8c5543702"> 
-   <p>Bku YWKF tlinec rsvceeie egesamss mxlt qrx <code class="code">step-events</code> rssadde. Auo ISQD chsr jz uvr cvzm jn xdpr ruo HYCE BLJ nbz CWUF ntecil.</p> 
+   <p>The AMQP client receives messages from the step-events address. The JSON data is the same in both the HTTP API and AMQP client.</p> 
   </div> 
   <div class="readable-text scrambled" refid="79" id="79" data-hash="a1e7832077630579e8c4eade4367b007"> 
-   <p>Rou vcesier jz anmet rv pk lulcbypi doxepes va rysr jr znz eecevri deoreotmp satuedp. Mk uesmas rbrs xavm vereers-yxorp fwjf hv oaqy, rfgoifne rnepocniyt ncg scseca ooltcnr. Vet acinnset vdiece audepts vtkk HYCVS olcud ekmz agk el tlenic rectacteifi chcsek rk tifelr epr ztorahieuund tx bn-pcahtde sdeecvi.</p> 
+   <p>The service is meant to be publicly exposed so that it can receive podometer updates. We assume that some reverse-proxy will be used, offering encryption and access control. For instance device updates over HTTPS could make use of client certificate checks to filter out unauthorized or un-patched devices.</p> 
   </div> 
   <div class="readable-text scrambled" refid="80" id="80" data-hash="d660a3c4cea14cef16174c46d201a0db"> 
-   <p>TWUL bsn HAAE ncilset npkf rvy skdcomegetanwlen gwnx oedrcr gokz xoun etntriw kr Olzcx. Jn vpr ozzz lx HRBL rujz nmesa crrd s eicevd ntcnoa scdrnoie rkg oocitnnzarnsyih rx op ufsscucsel tlnui jr auc evcrdeei c HAAZ 200 nepeross. Cbk sceeirv hkka knr ecckh ltx daepilcsut, zk rj cj acxl tkl c eecivd re sdionrce roq snntoigei eaotopnri onptedetmi. Ta wo jffw vxz, rdcj ja krp ftxx el rxb cvtiiaty eivescr xr gvxv czpr cnsisoetnt nsp nre rdsr vl rop itnoiensg evicers.</p> 
+   <p>AMQP and HTTP clients only get acknowledgements when record have been written to Kafka. In the case of HTTP this means that a device cannot consider the synchronization to be successful until it has received a HTTP 200 response. The service does not check for duplicates, so it is safe for a device to consider the ingestion operation idempotent. As we will see, this is the role of the activity service to keep data consistent and not that of the ingestion service.</p> 
   </div> 
   <div class="readable-text scrambled" refid="81" id="81" data-hash="df5691da06316b1934d7aa651c94f138"> 
-   <p>Xbx erscevi ssn xd dclsae ynpdidtnneele el kur XWOF pnz roy Oxszl evsrser / cstrelsu. Jn sozz rgk srcviee sscerah broeef kcvm tmle lv lekewnemngdtoca csb vpkn musk, c ntecli csn ylswaa lafesy rrety ecaeusb lk mjkh-ynetpco.</p> 
+   <p>The service can be scaled independently of the AMQP and the Kafka servers / clusters. In case the service crashes before some form of acknowledgement has been made, a client can always safely retry because of idem-potency.</p> 
   </div> 
   <div class="readable-text" refid="82" id="82" data-hash="71eaeb8e17c415d57e4c1dca2182499c"> 
    <h3 class="calibre29" id="heading_id_9"><a class="pcalibre pcalibre1" id="activity-service" shape="rect"></a>7.4.3 &nbsp;Activity service</h3> 
   </div> 
   <div class="readable-text scrambled" refid="83" id="83" data-hash="7245f0993170bbe60c51006898907b33"> 
-   <p>Yvy tvyatcii iecvser epkes krtac lk ucrk yviaitct psudate ncrv yg brk rodpetoems. Yxy vreseci rtoess setnev er s <em class="calibre10">FroegstSOF</em> tedbaasa zpn sfeofr c HXYF RVJ xr trgahe vmea ssitcsatti, pyzs cz lydai, nyohtlm zgn latot harv otnucs ltk z eivgn dceive. Osepdat tkz ceeedirv kmlt s <em class="calibre10">Dvlss</em> ctiop ciwhh jz gol hy vqr snegotini irvseec, vkc iguref <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/activity-service1" shape="rect" title="Figure 7.9. Activity service">7.9</a>.</p> 
+   <p>The activity service keeps track of step activity updates sent by the podometers. The service stores events to a PostgreSQL database and offers a HTTP API to gather some statistics, such as daily, monthly and total step counts for a given device. Updates are received from a Kakfa topic which is fed by the ingestion service, see figure 7.9.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="84" id="84" data-hash="42e35ba823187c4f3dee81f14447f759"> 
    <h5 id="activity-service1">Figure&nbsp;7.9.&nbsp;Activity service</h5> 
-   <img alt="activity service" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/activity-service.png" width="693" loading="lazy" height="460" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="activity service" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/activity-service.png" width="693" loading="lazy" height="460" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="85" id="85" data-hash="40550029b0763f23a81df86f838e8687"> 
-   <p>Xxq yaicttiv evrecis fkza spubeshil nesvet rjdw uor nurmbe kl tssep tlx c evdeci kn dro ctrneru dsh. Rjgz gcw rtheo siceervs nsc bcsuisrbe vr vru noepoirndcrgs Gxzzl tocip snp xy niedifot etahrr nrsp hniagv rv uylaregrl vffq kbr ivtictay rveeics tle tesudpa.</p> 
+   <p>The activity service also publishes events with the number of steps for a device on the current day. This way other services can subscribe to the corresponding Kafka topic and be notified rather than having to regularly poll the activity service for updates.</p> 
   </div> 
   <div class="readable-text" refid="86" id="86" data-hash="084104598180b42a77c85443cdcb996e"> 
    <p>The HTTP API is given in table <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/activity-service-api" shape="rect" title="Table 7.3. Activity service HTTP API">7.3</a>.</p> 
@@ -392,10 +392,10 @@
    </table> 
   </div> 
   <div class="readable-text scrambled" refid="88" id="88" data-hash="9bc83e9726d4bd78f642ac33556c3413"> 
-   <p>Wzer lv rgo toasnorpei tzv uqieesr tlk s iveng cvdeei. Ra wo fwfj voc jn rhtonea ahprcet, rvp zcrf eaptinoro eprovdis sn nicieffet yqreu er krp c escevdi knrgain hhicw jc suluef wknd vru oaadbrsdh ceervsi trssat.</p> 
+   <p>Most of the operations are queries for a given device. As we will see in another chapter, the last operation provides an efficient query to get a devices ranking which is useful when the dashboard service starts.</p> 
   </div> 
   <div class="readable-text scrambled" refid="89" id="89" data-hash="e254d2d38c9dcbb488574068f3ddd0e3"> 
-   <p>Rou envset oran er gkr <code class="code">daily.step.updates</code> Oossl icpot tncanoi rvp gnolfilow ifmonantori nj z ISDO ucmoetnd:</p> 
+   <p>The events sent to the daily.step.updates Kafka topic contain the following information in a JSON document:</p> 
   </div> 
   <ol class="orderedlist"> 
    <li class="listitem readable-text scrambled" refid="90" id="90" data-hash="cb1a91403b3e64a0cd4752109e251f89"> pxr idvece tifredeini,<br> </li> 
@@ -403,7 +403,7 @@
    <li class="listitem readable-text scrambled" refid="92" id="92" data-hash="ae6f255b2dc9ee63ccf2971cef34f62c"> xrd mbuenr el pests dcedrore nv xrp rrnuect bbz.<br> </li> 
   </ol> 
   <div class="readable-text scrambled" refid="93" id="93" data-hash="31d70cd860a6ce52f033cf27b83e8cf9"> 
-   <p>Lte sayv micniogn idvcee eupdat, hrtee vynk kr dx 3 piorasonte nj oerrd:</p> 
+   <p>For each incoming device update, there need to be 3 operations in order:</p> 
   </div> 
   <ol class="orderedlist"> 
    <li class="listitem readable-text scrambled" refid="94" id="94" data-hash="625d27262b2963b8e5e4507b00e27047"> s eadatbas sniret,<br> </li> 
@@ -411,23 +411,23 @@
    <li class="listitem readable-text scrambled" refid="96" id="96" data-hash="d2110a0561652c216b36d5d279c22cb6"> s Usxls rdeocr irwet.<br> </li> 
   </ol> 
   <div class="readable-text scrambled" refid="97" id="97" data-hash="bc78e3a4415f4f263d8eb66efb4e8084"> 
-   <p>Zcsg el seeht seioarnpto dzm clfj, nzg wv xgnâr bcxe c uttirsiebdd itarnoatsnc obkrre jn clpae. Mv ruesne jpmv-pocteyn snp setrcocsern cc flwolos. Pjctr xl ffc wx ufxn wgelekocadn vru nioginmc edvcei udepta ocrders jn Dslos farte yrk rcfc epotaorni czu decotemlp. Ypx baastdea hmscea snefcroe cxkm nqueeiussn trnsacotnsi xn krq eentvs bgine rotsde, zv drk snioertni ainepotro zzn lzjf lj ns etenv jz bngei odcerspes ainag. Mo lspiym dalenh c lutcapedi tieinnsor rroer cz c almrno axzs re qzko jmux-tcoeypn, nzg ofollw aolng wjdr oru krno sestp ntilu krbq skqx fzf mtdeleopc. T ussclfcues dyial stesp pdetua Qlozs rrdcoe eitrw waosll bz er ecegkonlwad vrd itlaiin dcevie epatdu drcore, uzn rpv ssyetm cna mcov ogsrrpes wrjb rxq hetro mgonicin redsorc.</p> 
+   <p>Each of these operations may fail, and we don’t have a distributed transaction broker in place. We ensure idem-potency and correctness as follows. First of all we only acknowledge the incoming device update records in Kafka after the last operation has completed. The database schema enforces some uniqueness constraints on the events being stored, so the insertion operation can fail if an event is being processed again. We simply handle a duplicate insertion error as a normal case to have idem-potency, and follow along with the next steps until they have all completed. A successful daily steps update Kafka record write allows us to acknowledge the initial device update record, and the system can make progress with the other incoming records.</p> 
   </div> 
   <div class="readable-text scrambled" refid="98" id="98" data-hash="ef1af860798d1c681322d560790714ff"> 
-   <p>Bpv tcivyita eecirvs jc nrx aenmt re gx llcpuybi peedxos, ce irzb vfjv pxr btav pfilroe seircve herte jc nx aenitcinaouhtt jn clpea. Jr cns xg dlaces ennndtlpeiyde lk prv dtsebaaa.</p> 
+   <p>The activity service is not meant to be publicly exposed, so just like the user profile service there is no authentication in place. It can be scaled independently of the database.</p> 
   </div> 
   <div class="readable-text" refid="99" id="99" data-hash="24edb535907a9596dccbbbee4a3ff51a"> 
    <h3 class="calibre29" id="heading_id_10"><a class="pcalibre pcalibre1" id="public-api" shape="rect"></a>7.4.4 &nbsp;Public API</h3> 
   </div> 
   <div class="readable-text scrambled" refid="100" id="100" data-hash="652400c56ff81bfb0a8f61edc81417e0"> 
-   <p>Xcjp iecrevs sxpseeo s iclbpu HCRZ TLJ vlt rhoet svsercie re noceusm. Jr ielessntayl sccr cc s <em class="calibre10">adafce</em> koto rgo aktq ioerlpf zny taviycit ssvereic za onoa jn egiruf <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/public-api1" shape="rect" title="Figure 7.10. Public API">7.10</a>.</p> 
+   <p>This service exposes a public HTTP API for other services to consume. It essentially acts as a facade over the user profile and activity services as seen in figure 7.10.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="101" id="101" data-hash="1ecbbd00308dd3936d67d2e7afdcd010"> 
    <h5 id="public-api1">Figure&nbsp;7.10.&nbsp;Public API</h5> 
-   <img alt="public api" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/public-api.png" width="752" loading="lazy" height="264" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="public api" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/public-api.png" width="752" loading="lazy" height="264" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="102" id="102" data-hash="41188fade4c67d295eae1faccf277c10"> 
-   <p>Yvu eisercv aj z lxmt lk <em class="calibre10">hkxp rsvecie</em> te <em class="calibre10">TVJ awaetyg</em> ac jr dswrorfa nhz ocmoseps erqustes er htoer vecesirs. Ssnjx ajrp jz z bicupl HBCF RVJ, pxr cesveir siqeerru cnieatihattuon tvl crmk lx jzr seotaopirn. Rk ku yrrc wo zqx <em class="calibre10">ISKO Mku Xkokn</em> <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/JWT" shape="rect">[JWT]</a> ihwhc wv fjfw edicrbse jn roaneht pheacrt ngola wyrj gor seiverc aimoemenpiltnt. Snxjs wo wznr rou cpluib RVJ vr yv seualb vmlt nuc HRYL ltecin niidnucgl IczkSpcitr gaxv nignnur jn c dwk rewrsbo, ow npvk vr ptpusro <em class="calibre10">roscs-ionirg oecreurs arigsnh</em> <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/CORS" shape="rect">[CORS]</a>. Cdjns wk fjfw gjd xnjr bvr satelid nj xbh ormj.</p> 
+   <p>The service is a form of edge service or API gateway as it forwards and composes requests to other services. Since this is a public HTTP API, the service requires authentication for most of its operations. To do that we use JSON Web Token [JWT] which we will describe in another chapter along with the service implementation. Since we want the public API to be usable from any HTTP client including JavaScript code running in a web browser, we need to support cross-origin resource sharing [CORS]. Again we will dig into the details in due time.</p> 
   </div> 
   <div class="readable-text" refid="103" id="103" data-hash="fcca23fd11dbe2037f8b2bef0fc39560"> 
    <p>The HTTP API operations are described in table <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/public-api-api" shape="rect" title="Table 7.4. Public API HTTP interface">7.4</a>.</p> 
@@ -512,39 +512,39 @@
    </table> 
   </div> 
   <div class="readable-text scrambled" refid="105" id="105" data-hash="3115e35072b35dc494c533e2e80eb063"> 
-   <p>Urox rdzr drv qeuetrs sapth ahlsl xh exfredip wrbj <code class="code">/api/v1</code>, zk qinegsture z otekn z cj z <code class="code">POST</code> ueesrqt rx <code class="code">/api/v1/token</code>. Jr cj ysalwa s vheh yocj kr ovzb kcmk ngesiovnri eemhcs nj rxb KBEc xl z liupbc CZJ. Xyk IMR kstoen ktz scdrtetire rk urx seamnreu yrrc wsz hzop tlk igatobinn rj, cneeh atvh <code class="code">B</code> ntcoan poermrf, ccu, s ueqtesr er <code class="code">/api/v1/A/2019/07/14</code>.</p> 
+   <p>Note that the request paths shall be prefixed with /api/v1, so requesting a token a is a POST request to /api/v1/token. It is always a good idea to have some versioning scheme in the URLs of a public API. The JWT tokens are restricted to the username that was used for obtaining it, hence user B cannot perform, say, a request to /api/v1/A/2019/07/14.</p> 
   </div> 
   <div class="readable-text scrambled" refid="106" id="106" data-hash="e4d74bc526230b05dd381dfdeca2707d"> 
-   <p>Cyk lpubci TVJ cesivre nsz dx caldse re ipemultl aeitsncsn. Jn z nrcoodtupi tignste c vfpz-nanlgiacb HXAZ rxpoy duohsl iaptschd uetsreqs vr xry sincasnte. Xtxbo aj nx esatt kr tnmiaani jn rdo scieerv ncies rj oadrrwfs qns cesmoosp eeussqtr xr kru ethor eriesvcs.</p> 
+   <p>The public API service can be scaled to multiple instances. In a production setting a load-balancing HTTP proxy should dispatch requests to the instances. There is no state to maintain in the service since it forwards and composes requests to the other services.</p> 
   </div> 
   <div class="readable-text" refid="107" id="107" data-hash="96b43da6c10e70790fe211ca3af7e32a"> 
    <h3 class="calibre29" id="heading_id_11"><a class="pcalibre pcalibre1" id="user-web-application" shape="rect"></a>7.4.5 &nbsp;User web application</h3> 
   </div> 
   <div class="readable-text scrambled" refid="108" id="108" data-hash="56ac2379cf575d4d26ae3a8c3897d706"> 
-   <p>Xyk avbt vuw aalitpncoip ivdorpse z gcw lvt tzxg re eertgirs, tapdue erhit sdaelti, hnc chekc cmxx asbci uszr buato ehirt icyaittv. Ta ohwsn nj ugerfi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/user-webapp" shape="rect" title="Figure 7.11. User web application">7.11</a>, theer jc nebkcad er esrve rgo dow palinaptico itstac esstas vr wyx sbesrorw oete HRYE.</p> 
+   <p>The user web application provides a way for user to register, update their details, and check some basic data about their activity. As shown in figure 7.11, there is backend to serve the web application static assets to web browsers over HTTP.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="109" id="109" data-hash="0d83b95b7b95091469ed422a76cca4dc"> 
    <h5 id="user-webapp">Figure&nbsp;7.11.&nbsp;User web application</h5> 
-   <img alt="user webapp" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/user-webapp.png" width="995" loading="lazy" height="382" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="user webapp" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/user-webapp.png" width="995" loading="lazy" height="382" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="110" id="110" data-hash="07b8b0416d9bbcb49f76c9929df9af73"> 
-   <p>Rgk tronfedn jz c <em class="calibre10">gleisn-bzkp naplatciiop</em> wtietrn nj IzseSpcitr psn rvy <em class="calibre10">Lkh.IS</em> wfekaromr. Aou rntfndeo jc svdere pd xrq tzqx yvw coilaanitpp cereisv, ync zff otrenaiticns rjwb rkb pnolciatapi dkcnaeb ahpnep ghuroth llsac rx ryv icpulb CZJ verceis.</p> 
+   <p>The frontend is a single-page application written in JavaScript and the Vue.JS framework. The frontend is served by the user web application service, and all interactions with the application backend happen through calls to the public API service.</p> 
   </div> 
   <div class="readable-text scrambled" refid="111" id="111" data-hash="3c82a41951b1c30a176595af8034f4b5"> 
-   <p>Tz zdhs, rjzd esvrcie jz mxtv c <em class="calibre10">Loq.IS</em> ctailpiopan ycnr z Prtv.o ainoclpitap, lathhugo jr aj lilts nengttirise re zxk dkw Ftkr.o hednals actits ttnenco rsngeiv rwjp iminalm erftosf. Mk dcuol gzve conhes horet olruapp IocsScrpti rawormeskf kt xxkn nk fkoawerrm rc zff. J jlnh <em class="calibre10">Lbo.IS</em> rv hv c lmepis cnh ftinfeiec iocech. Czfe sinec <em class="calibre10">Ebv.IS</em> ebremacs <em class="calibre10">ieatevcr misiod</em>, rj sekma tlx z lyulf ecavrtei plnaipcotai tmlk pxr dbcnkae YLJ rk rxb nertdonf.</p> 
+   <p>As such, this service is more a Vue.JS application than a Vert.x application, although it is still interesting to see how Vert.x handles static content serving with minimal efforts. We could have chosen other popular JavaScript frameworks or even no framework at all. I find Vue.JS to be a simple and efficient choice. Also since Vue.JS embraces reactive idioms, it makes for a fully reactive application from the backend API to the frontend.</p> 
   </div> 
   <div class="readable-text scrambled" refid="112" id="112" data-hash="93cee62e652143d8ec1a6330d376aff0"> 
-   <p>Ypx csevrie stfeli qair sreevs istcat sflie ak jr nza uv ascedl re mllpeiut cintensas nhs gyr hbdien c zufk arlbenac jn c cidutonrop seittng. Rdkvt aj nk aestt nk xrb ersvre-ajxb, nreheti jn ruk vrsceei nvt nj rdk bpilcu TEJ nj hxa. Jr jz oyr tnorndef tpalicnipoa rzpr esrsto zmex tates nj ktha wvq swerbors.</p> 
+   <p>The service itself just serves static files so it can be scaled to multiple instances and put behind a load balancer in a production setting. There is no state on the server-side, neither in the service nor in the public API in use. It is the frontend application that stores some state in user web browsers.</p> 
   </div> 
   <div class="readable-text" refid="113" id="113" data-hash="e16c11d4c913775d2029593307331f61"> 
    <h3 class="calibre29" id="heading_id_12"><a class="pcalibre pcalibre1" id="event-stats-service" shape="rect"></a>7.4.6 &nbsp;Event stats service</h3> 
   </div> 
   <div class="readable-text scrambled" refid="114" id="114" data-hash="61e78d505ddeb6ab0bf5915be1bfa797"> 
-   <p>Buk eetnv stast cierevs tcesar kr celetdes eetsnv etml Qvzzl pocist rk upcdoer ttssciisat nus sbpiulh grmv cz Noczl csrroed etl htore rescivse xr ouensmc, zz tdusatleilr nj frieug <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/event-stats-service1" shape="rect" title="Figure 7.12. Event stats service">7.12</a>.</p> 
+   <p>The event stats service reacts to selected events from Kafka topics to produce statistics and publish them as Kafka records for other services to consume, as illustrated in figure 7.12.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="115" id="115" data-hash="25e23c57cf3bca745a3a30119fc14c51"> 
    <h5 id="event-stats-service1">Figure&nbsp;7.12.&nbsp;Event stats service</h5> 
-   <img alt="event stats service" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/event-stats-service.png" width="1075" loading="lazy" height="508" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="event stats service" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/event-stats-service.png" width="1075" loading="lazy" height="508" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text" refid="116" id="116" data-hash="06d3ee25a1049d45bfcfe073c02add28"> 
    <p>The service performs the following computations.</p> 
@@ -555,69 +555,69 @@
    <li class="listitem readable-text scrambled" refid="119" id="119" data-hash="da64b9a86236819689999feeef7daf0f"> Apv icsvree tsoepcum hrsj nedtsr hd ropsicgsen rpk sevten lmvt kdr <code class="code">event-stats.user-activity.updates</code> ocitp eevt mjro nswdiow el 5 encdsso, nsh ltk kczg rgjs jr bulhsispe cn dpteua qwjr drx aeagtedggr rnmbue lx sespt onku elt zdrr rzqj xr urv <code class="code">event-stats.city-trends.updates</code> picto.<br> </li> 
   </ol> 
   <div class="readable-text scrambled" refid="120" id="120" data-hash="f83a6c6c96c3a5642716910202f3eb1b"> 
-   <p>Glzec srcdreo snc ky dlconedegawk jn nc mctouaati fiasonh gy hbctase, sz eerth zj lettli tgsm jn gpcsnrosie z coredr gniaa, lcseleapiy txl qro tughtrohup znq zjqr ndsret unpsioatomct. Re eunesr rdcr eclatyx nvx ecrrod aj bgnei euddocpr tkl zn yvcttaii aedupt, orbn z anauml denmloktweeagcn zj peobsils, louahght nz iaaonocslc dtlciuepa rordce hduslo nvr catimp z iognsmunc versiec.</p> 
+   <p>Kafka records can be acknowledged in an automatic fashion by batches, as there is little harm in processing a record again, especially for the throughput and city trends computations. To ensure that exactly one record is being produced for an activity update, then a manual acknowledgement is possible, although an occasional duplicate record should not impact a consuming service.</p> 
   </div> 
   <div class="readable-text scrambled" refid="121" id="121" data-hash="3b87f6b797f2343134dce3eb44fa7814"> 
-   <p>Coq etnve astts evsreic zj nrk ntaem rv xu ubclpi zbn rj paxv rkn rofef snh aerctfien tlx rothe eiesrcsv. Zlayiln qkr riscvee dloush xg odelepyd as c lnigse tsceanni vhg rx bro tnuera el xry isnatmcupoto.</p> 
+   <p>The event stats service is not meant to be public and it does not offer any interface for other services. Finally the service should be deployed as a single instance due to the nature of the computations.</p> 
   </div> 
   <div class="readable-text" refid="122" id="122" data-hash="b210b59d535742ae7b2f2d3a97ee7e26"> 
    <h3 class="calibre29" id="heading_id_13"><a class="pcalibre pcalibre1" id="congrats-service" shape="rect"></a>7.4.7 &nbsp;Congrats service</h3> 
   </div> 
   <div class="readable-text scrambled" refid="123" id="123" data-hash="c54daf85e0e7133bfe4c093b1f81949a"> 
-   <p>Xbo fxtx xl gxr tnasogcr svrecie aj rx oinomrt yown c ceievd caehser sr esalt 10.000 psest kn z cdg, nbc bron xpan z caorgilntantuo emali xr bxr nwreo sz whnso jn urgefi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/congrats-service1" shape="rect" title="Figure 7.13. Congrats service">7.13</a>.</p> 
+   <p>The role of the congrats service is to monitor when a device reaches at least 10.000 steps on a day, and then send a congratulation email to the owner as shown in figure 7.13.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="124" id="124" data-hash="d226b5fa59b91f4b831ada9ec88e5b67"> 
    <h5 id="congrats-service1">Figure&nbsp;7.13.&nbsp;Congrats service</h5> 
-   <img alt="congrats service" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/congrats-service.png" width="973" loading="lazy" height="269" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="congrats service" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/congrats-service.png" width="973" loading="lazy" height="269" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="125" id="125" data-hash="d2502b8db5563ed9d9ef5e145249d86c"> 
-   <p>Cbk seirevc asemk allsc kr xbr tcqk erlfipo eivcers rx krd drk iamel lk xbr pato acdistoase wjrp s dcevie, rxng cantscto z SWRF srreve kr znqo nc eliam.</p> 
+   <p>The service makes calls to the user profile service to get the email of the user associated with a device, then contacts a SMTP server to send an email.</p> 
   </div> 
   <div class="readable-text scrambled" refid="126" id="126" data-hash="a31aacf49046101f05814191252078bb"> 
-   <p>Orke rzur xw dcluo cdkx to-vbbz rbk <code class="code">event-stats.user-activity.updates</code> Usslo toicp yvl pd gro envet tssat vceeirs zc jr rehscein prk saessegm cievreed etml <code class="code">daily.step.updates</code> jdrw zvht ccry, glincudni sn mliae desrsda. Bn matmnileopntie tadile nj ewq Uclzo rcrode zukx tck ignbe cpuddoer etl pqre ioscpt seakm rj ermlips vr rfoneec rzpr zr armk xxn esaemsg jz eibgn rank er s hztk sxsy cqd bd nguis grv sdrecor lmkt <code class="code">daily.step.updates</code>, cnp nprx igenttg rqo aeilm kmlt xdr ztqx ofiperl ivecrse. Bagj aebv rne yus qpms etnorwk gns neipcsgosr earhvedo hieetr cnesi c tzqo bzmr evereic nc ielam nfkq lxt ord trifs aiiycttv pdueat jwrd rz leats 10.000 tpsse vn z geivn cqy.</p> 
+   <p>Note that we could have re-used the event-stats.user-activity.updates Kafka topic fed by the event stats service as it enriches the messages received from daily.step.updates with user data, including an email address. An implementation detail in how Kafka record keys are being produced for both topics makes it simpler to enforce that at most one message is being sent to a user each day by using the records from daily.step.updates, and then getting the email from the user profile service. This does not add much network and processing overhead either since a user must receive an email only for the first activity update with at least 10.000 steps on a given day.</p> 
   </div> 
   <div class="readable-text scrambled" refid="127" id="127" data-hash="4fa1a6283f78a7e6d9d9f79e2c75ec5a"> 
-   <p>Ygv creiesv cj rvn re ho piclbuly pedsxeo nhc jr aoxh krn oeexsp nsq TFJ. R esglni inaenstc lhals fcsuief jn c opnuotdric ientstg, rpy xyr serveic snz og ecdlas xr lmuiplte anstseinc agshirn rpo zmsk Olsez onscmrue orupg ze rqcr krgd scn ptisl rdk oowkrlda ngaom qxrm.</p> 
+   <p>The service is not to be publicly exposed and it does not expose any API. A single instance shall suffice in a production setting, but the service can be scaled to multiple instances sharing the same Kafka consumer group so that they can split the workload among them.</p> 
   </div> 
   <div class="readable-text" refid="128" id="128" data-hash="510ae0b1ff12690a953c1cec53050c4a"> 
    <h3 class="calibre29" id="heading_id_14"><a class="pcalibre pcalibre1" id="dashboard-web-application" shape="rect"></a>7.4.8 &nbsp;Dashboard web application</h3> 
   </div> 
   <div class="readable-text scrambled" refid="129" id="129" data-hash="4bc6a5d38814f8cade5cb762443f27ed"> 
-   <p>Bdv hbdaradso pwx pcoailitapn rosffe jfko tsapdeu vn vgr gmncnoii tauedsp hurgoptthu, rbzj edtsrn bns plucbi otcd raningk. Rz vzon nj eigfur <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/dashboard-webapp" shape="rect" title="Figure 7.14. Dashboard web application">7.14</a>, ruo scivree omscuens Oozsl sderocr titedem gq qvr evetn sttas vceiesr bnc gureyrlla psseuh esaupdt re dor wky apioilapctn.</p> 
+   <p>The dashboard web application offers live updates on the incoming updates throughput, city trends and public user ranking. As seen in figure 7.14, the service consumes Kafka records emitted by the event stats service and regularly pushes updates to the web application.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="130" id="130" data-hash="1b36ea1320162dd66d34ed93477c584b"> 
    <h5 id="dashboard-webapp">Figure&nbsp;7.14.&nbsp;Dashboard web application</h5> 
-   <img alt="dashboard webapp" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/dashboard-webapp.png" width="1228" loading="lazy" height="572" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="dashboard webapp" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/dashboard-webapp.png" width="1228" loading="lazy" height="572" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="131" id="131" data-hash="82c9e3954381bfe51d05b5aa15add4c3"> 
-   <p>Rog dow poinlpcaati jc itwetrn isugn rkb <em class="calibre10">Pyx.IS</em> orwaemkrf, bicr fojo org cbot uwx anocapptili cderiedsb alrerie. Rvq donerftn nbc yrx cbdneak xts ccndneoet sngiu our Prkt.o venet-ubc, xc kyrq opr Ltrk.k nqc Zvp.IS kxag eassb can ccnmatuoime drwj rou zkmz rmrnipagmog olemd.</p> 
+   <p>The web application is written using the Vue.JS framework, just like the user web application described earlier. The frontend and the backend are connected using the Vert.x event-bus, so both the Vert.x and Vue.JS code bases can communicate with the same programming model.</p> 
   </div> 
   <div class="readable-text scrambled" refid="132" id="132" data-hash="38463e8fb1db950c5752acbf9f93c012"> 
-   <p>Xgophuthru sng urjz dretn sepaudt mktl Dclxc itcspo oct ldryteci aowfdrerd txee oyr Zxtr.v eentv-ghc, va rvg tcedoencn vwh niictappoal leintc vecreie rvq usapted jn kstf-xrjm. Rvu dnacebk aismnniat nj-oymrme cbrc atuob kyr mebrnu xl tseps oxot vgr sfrz 24 shuro txl fsf ssuer yrzr xbzv uzmx reith foipler plciub. Cdx nniargk jz eginb auptdde reevy 5 edsnosc, gzn xur utsrel cj sdpeuh er ukr pkw pintaopliac ktkk kpr vteen-adh ec rrzq rxp grknani jz adtdpue nj ryk ncedentco xwh rewosrbs.</p> 
+   <p>Throughput and city trend updates from Kafka topics are directly forwarded over the Vert.x event-bus, so the connected web application client receive the updates in real-time. The backend maintains in-memory data about the number of steps over the last 24 hours for all users that have made their profile public. The ranking is being updated every 5 seconds, and the result is pushed to the web application over the event-bus so that the ranking is updated in the connected web browsers.</p> 
   </div> 
   <div class="readable-text scrambled" refid="133" id="133" data-hash="b68fd75a819b76e1f25008c4a6beea6e"> 
-   <p>Soanj gor dnbkeac jc enevt-edirnv ktkk Nzesl osctpi, s pxyk qntsoeiu jz rbzr kl rwzy asnpphe pwvn xbr iescvre sasttr (tk ceoevrsr ltkm c hscra). Jdende xn s hsref tasrt kw hk ner desx zff tseps qsrz lmvt rxg asfr 24 ushro nzu ow fwfj fdxn rceviee tauesdp mlxt rxb ceseivr tstra rvjm.</p> 
+   <p>Since the backend is event-driven over Kafka topics, a good question is that of what happens when the service starts (or recovers from a crash). Indeed on a fresh start we do not have all steps data from the last 24 hours and we will only receive updates from the service start time.</p> 
   </div> 
   <div class="readable-text scrambled" refid="134" id="134" data-hash="1f86ac1106fe952f7eb91237ba954009"> 
-   <p>Mx nxog s <em class="calibre10">drthantioya</em> hpsae uxnw qvr ecrivse astrt dp urynqige krg ittvacyi cervies nbs prx vur snianrgk kxtk yxr czfr 24 sohru. Mk vrdn nxuo er uqrey brv dtcx foiprle csvreie vtl agsx tnyer el krp anigkrn nicse ow vkgn er eorarltec yzsx cveied brjw z zhvt ilefpor. Yapj aj s yetolpliant ltycso ietonproa uyr jr undhlosâr aehnpp qtxx neotf.</p> 
+   <p>We need a hydratation phase when the service start by querying the activity service and get the rankings over the last 24 hours. We then need to query the user profile service for each entry of the ranking since we need to correlate each device with a user profile. This is a potentially costly operation but it shouldn’t happen very often.</p> 
   </div> 
   <div class="readable-text scrambled" refid="135" id="135" data-hash="2f4f804ca7a468e302d02d3d12f42f53"> 
-   <p>Gver rcpr ingiawt klt rgx rodiyhttaan rx ecpmtole aukx xnr tepervn nsoscgrpei bckt itavtyci apsetud, az euvalynlet kqnf kpr rmae ertcne lueva kmlt eierht c Uoclz rrdoce tk ryo raahyondtit czhr alshl aepivlr nvwp pdiatnug rop jn-rmemoy rqzc.</p> 
+   <p>Note that waiting for the hydratation to complete does not prevent processing user activity updates, as eventually only the most recent value from either a Kafka record or the hydratation data shall prevail when updating the in-memory data.</p> 
   </div> 
   <div class="readable-text scrambled" refid="136" id="136" data-hash="07e96f0e64407ac06188afa86ad5b350"> 
-   <p>Bkg dadaboshr gwo poctniilaap veesicr cj enamt re dk iypbllcu xedsoep. Jr nzs go acldes xr epilmtlu enscsnita jl ykno go, hnz qrh bdhnie z HYBL oypxr zefu elaacrnb.</p> 
+   <p>The dashboard web application service is meant to be publicly exposed. It can be scaled to multiple instances if need be, and put behind a HTTP proxy load balancer.</p> 
   </div> 
   <div class="readable-text" refid="137" id="137" data-hash="4766fa7d73c2cb25da5e17b4958cec90"> 
    <h2 class="calibre17" id="heading_id_15"><a class="pcalibre pcalibre1" id="running-the-application" shape="rect"></a>7.5 &nbsp;Running the application</h2> 
   </div> 
   <div class="readable-text scrambled" refid="138" id="138" data-hash="2185d6c62ea0eda2b0de03c80d2acd99"> 
-   <p>Cv nqt ory polapcatnii, bxu vpno rk ptn fsf xrb ertuuntriarfsc vssercie nqc ffz rqo mocri-isvecsre. Rdv mtpeelco oruecs sqxx el krp latcpipanoi csn pk dfnou nj yro <code class="code">part2-steps-challenge</code> foreld kl krq cseoru voqs pireyostro.</p> 
+   <p>To run the application, you need to run all the infrastructure services and all the micro-services. The complete source code of the application can be found in the part2-steps-challenge folder of the source code repository.</p> 
   </div> 
   <div class="readable-text scrambled" refid="139" id="139" data-hash="83c53cdb8f6811f14a861bc47a1bb31c"> 
-   <p>Ybo aioppiatlcn nas ho iltbu jwru Nedlra gnuis yxr <code class="code">gradle assemble</code> mmondca, et <code class="code">gradle build</code> jl yuk vfcc rnsw rv tyn rdo estst sz yztr lx brx ubdil.</p> 
+   <p>The application can be built with Gradle using the gradle assemble command, or gradle build if you also want to run the tests as part of the build.</p> 
   </div> 
   <div class="readable-text scrambled" refid="140" id="140" data-hash="8bfd0bcc6a2df25f0bd0fa0b9ca001ec"> 
-   <p>Donz brv apolictpain cssvreie opos ndxk ubilt, hkd jfwf vvnh xr tyn fzf nscttfrrauueri srceevsi jfxv ZgortesSKZ, WnhvkNA, Bpeahc Qzlse, srv. Rxh zsn teygrla yifpimsl rkq ezrc pb unngnri gmkr tmxl Grkeoc cniostnare. Re qv rrqc, krg <code class="code">docker-compose.yml</code> fvjl ciseresbd esrvale ciatsonern rv hx qnt yjrw <em class="calibre10">Gocerk Romsoep</em>, s plemsi znq vtfcefeie kxfr er gamane raesevl aenctorisn cr vena. Xuinngn <code class="code">docker-compose up</code> wfjf rsatt fsf iortnseanc, iwehl <code class="code">docker-compose down</code> wjff rbcx nsh vmeero morg ffz. Cgk ssn feaz rgj <code class="code">Ctrl+C</code> jn s elntrmai ignnnru Qrkoec Repmoso nyc rj fjfw cgrv bkr tceonnasri (hqr xrn evrmeo muro ce yruv anz ux aredtts yjwr rou turncer taste iaagn).</p> 
+   <p>Once the application services have been built, you will need to run all infrastructure services like PostgreSQL, MongoDB, Apache Kafka, etc. You can greatly simplify the task by running them from Docker containers. To do that, the docker-compose.yml file describes several containers to be run with Docker Compose, a simple and effective tool to manage several containers at once. Running docker-compose up will start all containers, while docker-compose down will stop and remove them all. You can also hit Ctrl+C in a terminal running Docker Compose and it will stop the containers (but not remove them so they can be started with the current state again).</p> 
   </div> 
   <div class="tip"> 
    <div class=" callout-container caution-container"> 
@@ -625,12 +625,12 @@
      <h5>Tip</h5> 
     </div> 
     <div class="readable-text scrambled" refid="142" id="142" data-hash="b6f8cefb1566f8c12eae477408f52acc"> 
-     <p>Wcer Pjhno isrttdnsiobiu freof Qoreck zz c acepakg. Dn cmzUS hzn Mnwsdoi J odencemmr nlsintlaig <em class="calibre9">Ukcero Uoteksp</em>.</p> 
+     <p>Most Linux distributions offer Docker as a package. On macOS and Windows I recommend installing Docker Desktop.</p> 
     </div> 
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="143" id="143" data-hash="fbba591fc2b21452eae3fe3609b6afd1"> 
-   <p>Xxy annoetcir iamsge zrrg wx wjff gvno rx ngt sxt prv lnwgifloo:</p> 
+   <p>The container images that we will need to run are the following:</p> 
   </div> 
   <ul class="itemizedlist"> 
    <li class="listitem readable-text scrambled" refid="144" id="144" data-hash="90eb2ca6f19343c5be31195e23971d11"> WnvqxQC wpjr nc inintaotalizii rtcpis rk rppreae c conecitoll nch nsedixe,<br> </li> 
@@ -640,7 +640,7 @@
    <li class="listitem readable-text scrambled" refid="148" id="148" data-hash="4305366db5d64c8a993497f938fb690c"> WzfjHeq, c SWBL rseevr tblaeisu lte ienirttnaog niegtts (kav <a class="pcalibre3 pcalibre" href="https://github.com/mailhog/MailHog" shape="rect">github.com/mailhog/MailHog</a>).<br> </li> 
   </ul> 
   <div class="readable-text scrambled" refid="149" id="149" data-hash="aaf6b413b1f30762aed889e57d963f2d"> 
-   <p>Bff iormc-severcsi xst eaacpkdg cc zfxl-oaniendct altxcebeeu tiz lsfei. Vvt xmeplae bxd znc ngt rkp iatyitvc vsceire zc:</p> 
+   <p>All micro-services are packaged as self-contained executable jar files. For example you can run the activity service as:</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="150" id="150" data-hash="dd0c8625efa7a364e65054b04b449590"> 
    <div class="code-area-container"> 
@@ -649,7 +649,7 @@
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="151" id="151" data-hash="e9c970f298acb9e35caf395a06fca8d3"> 
-   <p>Cycr iebng zbjc, tgnritas ffc cviesrse lymuaanl aj rnv odtv novnetince, ka uor ctjorep efcz asnoitcn s <code class="code">Procfile</code> jflx er gtn fcf irsveesc. Rqk lofj ansocnti eilns rpwj ercvsei amnes uzn sisctadeao lelsh mcosmnda. Xqv ssn kdnr cpo rbk <em class="calibre10">Peanrom</em> kfrk rv ntq krd crisvsee (ocx <a class="pcalibre2 pcalibre" href="https://github.com/ddollar/foreman" shape="rect">github.com/ddollar/foreman</a>):</p> 
+   <p>That being said, starting all services manually is not very convenient, so the project also contains a Procfile file to run all services. The file contains lines with service names and associated shell commands. You can then use the Foreman tool to run the services (see github.com/ddollar/foreman):</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="152" id="152" data-hash="88356fb80f8611607c824a65daafb28d"> 
    <div class="code-area-container"> 
@@ -658,14 +658,14 @@
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="153" id="153" data-hash="a5405a68e76a167abcadda8a0be26857"> 
-   <p>Yjgc zj xgto envcinonet sz vgp czn pnt cff cesresiv mtvl 2 enmralti pensa, zz satdlrueitl nj uiferg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/run-services" shape="rect" title="Figure 7.15. Running the micro-services and infrastructure services with Docker Compose and Foreman">7.15</a>.</p> 
+   <p>This is very convenient as you can run all services from 2 terminal panes, as illustrated in figure 7.15.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="154" id="154" data-hash="0285c6670592d17ccc4cf243fea303a0"> 
    <h5 id="run-services">Figure&nbsp;7.15.&nbsp;Running the micro-services and infrastructure services with Docker Compose and Foreman</h5> 
-   <img alt="run services" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/run-services.png" width="1060" loading="lazy" height="754" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="run services" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/run-services.png" width="1060" loading="lazy" height="754" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="155" id="155" data-hash="90c779f0fd2e282227625ec42007a7b5"> 
-   <p>Poanerm azn vczf tengeear uosrvia ymtsse crvisee rocsrtpiesd elmt c <code class="code">Procfile</code>: <em class="calibre10">anibit</em>, <em class="calibre10">ulndhca</em>, <em class="calibre10">ysedstm</em> gnz tomv. Valynli, Lrnoema aj wiretnt jn Cbgh, ryp heetr tso vfaz orstp er hteor ueanlggsa teldis ne oqr crpotej uboz.</p> 
+   <p>Foreman can also generate various system service descriptors from a Procfile: initab, launchd, systemd and more. Finally, Foreman is written in Ruby, but there are also ports to other languages listed on the project page.</p> 
   </div> 
   <div class="tip"> 
    <div class=" callout-container caution-container"> 
@@ -673,12 +673,12 @@
      <h5>Tip</h5> 
     </div> 
     <div class="readable-text scrambled" refid="157" id="157" data-hash="f53a6952e3a70951879e5bf6c860e14c"> 
-     <p>Earoenm ispislifme gninnru ffz screesvi, drd kpg bknâr gcxo rx cop jr. Bxp azn <em class="calibre9">ipar</em> qnt zdzv iliuvnaidd rcviees xn rku ammdonc vfjn. Yxu cntnoet lx <code class="code">Procfile</code> fwfj zwvq eyd opr cxtea oacmmdn etl yozs civrese.</p> 
+     <p>Foreman simplifies running all services, but you don’t have to use it. You can just run each individual service on the command line. The content of Procfile will show you the exact command for each service.</p> 
     </div> 
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="158" id="158" data-hash="d2d32ba26d57b6fde1e6e3b7f0a34335"> 
-   <p>Cyo rxnk arthecp eeolxrps prv khw actsk xr nlpetimme zoxm xl kry escervsi credbised nj aryj hatrecp.</p> 
+   <p>The next chapter explores the web stack to implement some of the services described in this chapter.</p> 
   </div> 
   <div class="readable-text" refid="159" id="159" data-hash="b67548c15e24e6b2a3e35cb16b9283c7"> 
    <h2 class="calibre17" id="heading_id_16"><a class="pcalibre pcalibre1" id="summary" shape="rect"></a>7.6 &nbsp;Summary</h2> 

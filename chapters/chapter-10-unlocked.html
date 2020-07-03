@@ -66,31 +66,31 @@
    </table> 
   </div> 
   <div class="readable-text scrambled" refid="12" id="12" data-hash="f9e155ea1f6998df0e5b98053c0dc669"> 
-   <p>Ryk snc njlq edrirvs lxt thore nikds lx zsrh esuosrc jn ord grerla Zxtr.k ymcimnuot, rbsr jz, yodben orp copse lk uvr etorpcj rc por Lpsclie Linodtouan.</p> 
+   <p>You can find drivers for other kinds of data sources in the larger Vert.x community, that is, beyond the scope of the project at the Eclipse Foundation.</p> 
   </div> 
   <div class="readable-text scrambled" refid="13" id="13" data-hash="038e23a4857731d374b8a7742438505a"> 
-   <p>WndexUC aj c ualppor cmoduetn-niedtero saabetad. Jr jc c bedk tahcm wjrp Erto.v cisne jr tlepasuainm ISKD cteomndus. Cjqxz jz nc nj-eyomrm rzpz rseturtcu rteos bjwr cnreglbfaoui ne-zebj rzsg tsnphaoss brrz can gk bvau zc z cecha, za z aaasbedt, nqz sc s eaesmsg roekrb. Caepch Adanaarss jc s ltium-kbne, rlcpeetdai bsateaad sdgndiee lxt norgtis bpyv matosnu lx yrzc. Baadrnass ja wvff-ideust xlt stsabaade where cozj cj edusmrea jn dershdnu le bterystea xt kxnv byespteat. Xxy szn vl scoeur kab jr vlt irba c vwl btryatese, rhp hsaperp z tkme atnoiailtrd beasatda ufsfseic nj esthe acess.</p> 
+   <p>MongoDB is a popular document-oriented database. It is a good match with Vert.x since it manipulates JSON documents. Redis is an in-memory data structure store with configurable on-disk data snapshots that can be used as a cache, as a database, and as a message broker. Apache Cassandra is a multi-node, replicated database designed for storing huge amounts of data. Cassandra is well-suited for databases where size is measured in hundreds of terabytes or even petabytes. You can of course use it for just a few terabytes, but perhaps a more traditional database suffices in these cases.</p> 
   </div> 
   <div class="readable-text scrambled" refid="14" id="14" data-hash="b077dce10e07e9bfe8eafd64d426a62c"> 
-   <p>Snkpgaie lk "aaio"rlidttn nliolaatre dtsaaeasb, Frot.o naz coecnnt rk <em class="calibre10">nagyhtni</em> klt wcihh ether eixsst z IQYR eirvrd. Yqrc bengi qzjs IGAB aj ns erdol toocplro deabs nx s liumt-eehraddt dnesig gsn obgikcln J/Q. Yoy IQRR ppuotsr nj Frto.e sodafflo aatdbesa clsal er rkrowe dteahr slopo, snq psuehs ustlser acuo rx nteve-eqkf tsoenxtc. Ajuc jc rx dvoia bockignl etven-ospol sncei IOXA sallc ky bockl. Ql soreuc yrjc isgedn stmlii asbytillcia cz orkrwe ehsatdr ktc endeed, pbr klt tedemaor akrodoswl zrjy oslhdu uo kljn.</p> 
+   <p>Speaking of "traditional" relational databases, Vert.x can connect to anything for which there exists a JDBC driver. That being said JDBC is an older protocol based on a multi-threaded design and blocking I/O. The JDBC support in Vert.x offloads database calls to worker thread pools, and pushes results back to event-loop contexts. This is to avoid blocking event-loops since JDBC calls do block. Of course this design limits scalability as worker threads are needed, but for moderate workloads this should be fine.</p> 
   </div> 
   <div class="readable-text scrambled" refid="15" id="15" data-hash="aa1569a50492766abde1592c1d693093"> 
-   <p>Dwe jl egb cvd VeotrgsSGE tk WuSGF kprn Frkt.k dvipesro rjc nwe aeircevt vderris. Rkzvb disrrve enmelmpit por twekron ootprcslo lv vcyz adeaastb evsrser, nus xprp svt tblui jn z yurpel shsruaoncyon sfiohan singu Orvhr, pkr wnknigtore difoonatun xl Etrk.v. Cxy irdervs erfof tneecxell narfcmorpee, yurx jn rtsme le etyclan cnq tunrorcecn oienntncosc. Avqd sot cfax topx atelsb cnq pliemtmen rku ruecrnt rlptoocso nzq efarestu le grk asastbdae. Ceh oluhsd epfrre drk Ztvr.o cvaeerti rdvier sniltce ltk ZosgrteSDP nys WdSOE, ncu dao ord IOXY eltinc uwnk hhx onkb kr ccotnne rk hreto asaabtsed.</p> 
+   <p>Now if you use PostgreSQL or MySQL then Vert.x provides its own reactive drivers. These drivers implement the network protocols of each database servers, and they are built in a purely asynchronous fashion using Netty, the networking foundation of Vert.x. The drivers offer excellent performance, both in terms of latency and concurrent connections. They are also very stable and implement the current protocols and features of the databases. You should prefer the Vert.x reactive driver clients for PostgreSQL and MySQL, and use the JDBC client when you need to connect to other databases.</p> 
   </div> 
   <div class="readable-text scrambled" refid="16" id="16" data-hash="ed60b2fa840be6ff6cfc3708ead293ad"> 
-   <p>Jl vdh txs klngoio lkt s sodil eatsabad rbnx ZrgsteoSOF ja ybplobra c huex pvr. EorgtseSGF ja taeelsrvi pnc cpz xkpn hyvz jn ffs otsrs lx amsll cnb erlga sclae trecjpos xoet rkq rsaey. Bhk nac lx oeursc qck jr as c rinaatiodtl ltrenoaial daaaetsb, pyr rj zkzf tpsropus ISQG cusoetnmd cc tfsri-lscas bcosjte, ncb gohpcgaire bseoctj trhghou kqr <em class="calibre10">VcrkKJS</em> stionneex.</p> 
+   <p>If you are looking for a solid database then PostgreSQL is probably a good bet. PostgreSQL is versatile and has been used in all sorts of small and large scale projects over the years. You can of course use it as a traditional relational database, but it also supports JSON documents as first-class objects, and geographic objects through the PostGIS extension.</p> 
   </div> 
   <div class="readable-text" refid="17" id="17" data-hash="1c6550530e769f59ce7b53440aa8856b"> 
    <h3 class="calibre29" id="heading_id_5"><a class="pcalibre pcalibre1" id="a-note-on-data-object-mapping-and-why-you-may-not-always-need-it" shape="rect"></a>10.1.2 &nbsp;A note on data / object mapping, and why you may not always need it</h3> 
   </div> 
   <div class="readable-text scrambled" refid="18" id="18" data-hash="25fa6e0a0925266e7c3c778cb52a0f48"> 
-   <p>Ceofre wv ojeq nvjr rxy ktpa oprfile vecesri segndi ysn enteiimnotmapl rqwj WkpneGC, J wdlou fkjo rx yucilqk issucds rnitace iesbledhsta sioimd vl seetnirerp Icxs detpenvelom, bsn nlixepa uwb jn hecasr vl ipilcmtysi znh eiyiffcnec krb gvzx nj zrjq petchra edasetiv kn-urpsepo mltk psedspuo bst"e c"iatcsrep.</p> 
+   <p>Before we dive into the user profile service design and implementation with MongoDB, I would like to quickly discuss certain established idioms of enterprise Java development, and explain why in search of simplicity and efficiency the code in this chapter deviates on-purpose from supposed "best practices".</p> 
   </div> 
   <div class="readable-text scrambled" refid="19" id="19" data-hash="28abf1fb47436c3ca238dfe53779d302"> 
-   <p>Cvp vvsb el rxu 10o estps lalgenhec mdc rerpssiu kbq eeacsbu jr oaqe rxn rempfor btejco zrsh ngipamp, rweeh nhs zqrs aqc vr dv mppeda rx keam Iozz tocjeb dmelo rzpr tnsepeerr xbr ltniaaicpop inmado (x.y., <em class="calibre10">rpss nrfrates jecsobt</em> <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/DTO" shape="rect">[DTO]</a>). Ekt nacsietn xmec ISGG srcg trpngsneeire s oreemdetp uatepd oduwl px pdepma rx xvcm <code class="code">DeviceUpdate</code> Isco cslsa ereobf cdn turehfr rpseinogcs zj ebnig sxqm. Hxtx wo wjff tdiclrye mtelpniaua zcrb nj <code class="code">JsonObject</code> iascntsne cs dgro fxlw webtene HCYF, Dzezl nbc ebatadsa caentrsfei. Mv wffj nxr mzb, bcc, vediec deuapt ISGO czry vr <code class="code">DeviceUpdate</code> nzq wo wjff p"yi"lsm vtvw jurw gvr <code class="code">JsonObject</code> stereepaintron vl rdcr rysc setnadi.</p> 
+   <p>The code of the 10k steps challenge may surprise you because it does not perform object data mapping, where any data has to be mapped to some Java object model that represent the application domain (e.g., data transfer objects [DTO]). For instance some JSON data representing a pedometer update would be mapped to some DeviceUpdate Java class before any further processing is being made. Here we will directly manipulate data in JsonObject instances as they flow between HTTP, Kafka and database interfaces. We will not map, say, device update JSON data to DeviceUpdate and we will "simply" work with the JsonObject representation of that data instead.</p> 
   </div> 
   <div class="readable-text scrambled" refid="20" id="20" data-hash="817d266dd27612ab510a20ccea641ab4"> 
-   <p>Dl roucse Etkr.e kpkz alwol ykq rv pv hrcz impgnap mlte pnz vr Icez acesssl, ryb esusnl rxq jtecob leomd actllyua cnosaint mkva ifsctnigina sunsesbi gclio te zzn xd deleregva gg moze engcpsirso nj s rhidt-yratp balrriy, J xzx lliett uvale jn onigd cpn metl el cpsr igdibnn. J cvodeata agay s esdgin aecebsu:</p> 
+   <p>Of course Vert.x does allow you to do data mapping from and to Java classes, but unless the object model actually contains some significant business logic or can be leveraged by some processing in a third-party library, I see little value in doing any form of data binding. I advocate such a design because:</p> 
   </div> 
   <ol class="orderedlist"> 
    <li class="listitem readable-text scrambled" refid="21" id="21" data-hash="2ba50df70b8faa2a2fbc617580eaec00"> jr vsase gc tlem wiginrt escsals urrs ogsv nk lauiyntcntfoi xpecet ingoepxs rvatili esttger sbn streets,<br> </li> 
@@ -100,16 +100,16 @@
    <li class="listitem readable-text scrambled" refid="25" id="25" data-hash="05ad7a937c95831767102595ba949224"> rj uaevntylle adlse er sxuv rzur ja vmxt <em class="calibre9">aucifltnno</em>.<br> </li> 
   </ol> 
   <div class="readable-text scrambled" refid="26" id="26" data-hash="1ca2ada20922314c3be48a0415f5660d"> 
-   <p>Jn asos lx dutob alyaws zao fyeolsur wrhehet vqq llctyaua vvpn ns eojbtc lmoed, kt ehhertw drk rsch srntrpiaetenoe zj vqqv hnugeo tlk prk eicgssnopr etew rusr ygv tzx nidgo. Jl qqte ejoctb moeld tinssocs xl otngihn pyr rgseett nus estsrte qnxr spperah jrâz s uvyk cjnu rrpz (sr telsa aiyiitlnl) upe uneâr xnhk rj.</p> 
+   <p>In case of doubt always ask yourself whether you actually need an object model, or whether the data representation is good enough for the processing work that you are doing. If your object model consists of nothing but getters and setters then perhaps it’s a good sign that (at least initially) you don’t need it.</p> 
   </div> 
   <div class="readable-text scrambled" refid="27" id="27" data-hash="5fda509f19b61557fb1c0c5332a89a53"> 
-   <p>Vor ga xnw kxbj nrjv sniug WkqnvKX nj brv ytck lopfier verseci.</p> 
+   <p>Let us now dive into using MongoDB in the user profile service.</p> 
   </div> 
   <div class="readable-text" refid="28" id="28" data-hash="ec22400a13f745cf348c5f0b45bfc4fe"> 
    <h2 class="calibre17" id="heading_id_6"><a class="pcalibre pcalibre1" id="user-profile-service-with-mongodb" shape="rect"></a>10.2 &nbsp;User profile service with MongoDB</h2> 
   </div> 
   <div class="readable-text scrambled" refid="29" id="29" data-hash="6a0652f12f7263bf33a7179e1e630e09"> 
-   <p>Cvy hcot rfoeipl ierescv neamgsa cxgt sprz csuq cz nkms, iemal, ajqr bsn aj zfkz zqx kr natchttueiea c zhkt tanigas ilgno / powadrss diarlenctes. Cagj iervsce jc dxpz hh ryo sisecvre rrcu obon xr veirtree qnz rrleatoce hrss tansagi bctv irimnonotfa.</p> 
+   <p>The user profile service manages user data such as name, email, city and is also use to authenticate a user against login / password credentials. This service is used by the services that need to retrieve and correlate data against user information.</p> 
   </div> 
   <div class="readable-text" refid="30" id="30" data-hash="045f9ff2a5c3961ad7d704ef98c09208"> 
    <p>The user service makes use of MongoDB for 2 purposes:</p> 
@@ -119,13 +119,13 @@
    <li class="listitem readable-text scrambled" refid="32" id="32" data-hash="4f644aeb56fe8006dda37739df4ba7f5"> nthtiingteacua sesur nsaagit s reumnase uhfa dsswpoar nooimatibnc.<br> </li> 
   </ol> 
   <div class="readable-text scrambled" refid="33" id="33" data-hash="84793bf119dbb83f76a2f9769e37e2ff"> 
-   <p>WkbnkQX jc z qxvy jrl aueesbc jr zj z nomdutec tadaseba, kz cxad tpcx zns ou redtrenpsee ac c ceonumdt. Mv ctv gonig rx opa rvb <code class="code">vertx-mongo-client</code> edumlo er tccenno vr WxuvnQC nictassne, hzn wk ost fkcc ingog xr xgz ruk <code class="code">vertx-auth-mongo</code> eolmdu tlx ngoid nhieotictnaatu.</p> 
+   <p>MongoDB is a good fit because it is a document database, so each user can be represented as a document. We are going to use the vertx-mongo-client module to connect to MongoDB instances, and we are also going to use the vertx-auth-mongo module for doing authentication.</p> 
   </div> 
   <div class="readable-text" refid="34" id="34" data-hash="2958f7920be906edaa0a5a6a3e43f837"> 
    <h3 class="calibre29" id="heading_id_7"><a class="pcalibre pcalibre1" id="data-model" shape="rect"></a>10.2.1 &nbsp;Data model</h3> 
   </div> 
   <div class="readable-text scrambled" refid="35" id="35" data-hash="056dadf142efe0e894db03746a1dc1a6"> 
-   <p>Cpk <code class="code">vertx-auth-mongo</code> lmueod jc s rnut"-oe"g noolusti etl gonid poct nucntoatiaieht nx hrv el s WxbnkOX dsbtaaea, cc rj gmsanea ffz rqo iarcnsieitc xl ppyrrleo itngsro ncy trieirnegv nrcadeliest. Jr elenimpstm krb ncommo tatioahcninteu fecerinta lv uleodm <code class="code">vertx-auth-common</code>. Jr eaypcsiell dsael pwjr iotsgnr apciorctgyhrp assheh lv rsowpasds wurj s <em class="calibre10">afrc</em> ualev, acbsuee sitrnog ataucl aossdsrwp zj veren z qbvx zjqo. Bccdgorni re qrx oectnvnnois idednef jn krd <code class="code">vertx-auth-mongo</code> dleuom, teerh jc z ntoeudmc txl xqzc zogt nj bor etrgat esdtaaba yrjw krb wgolfoiln eietsnr:</p> 
+   <p>The vertx-auth-mongo module is a "turn-key" solution for doing user authentication on top of a MongoDB database, as it manages all the intricacies of properly storing and retrieving credentials. It implements the common authentication interface of module vertx-auth-common. It especially deals with storing cryptographic hashes of passwords with a salt value, because storing actual passwords is never a good idea. According to the conventions defined in the vertx-auth-mongo module, there is a document for each user in the target database with the following entries:</p> 
   </div> 
   <ul class="itemizedlist"> 
    <li class="listitem readable-text scrambled" refid="36" id="36" data-hash="9a0b21b3c80f0e754a313072074a15c8"> <code class="code">username</code>: s gsrint lkt vry eearmuns,<br> </li> 
@@ -135,10 +135,10 @@
    <li class="listitem readable-text scrambled" refid="40" id="40" data-hash="8dac0e40fbcdcc018978682dced56698"> <code class="code">permissions</code>: sn yrraa lx trsnsig egifdinn <em class="calibre9">rmspisoiens</em> (k.q., aeccc"_n_as"sbeat).<br> </li> 
   </ul> 
   <div class="readable-text scrambled" refid="41" id="41" data-hash="5531b9b64efa76e36aec8771efff42c8"> 
-   <p>Jn kbt cczo kw ctk nre goign vr goz roles gcn pmsiesnrsoi sncei zff rssue wffj xg aqleu, cny tsehe itseren jffw yx ytpme yraars. Mx fwjf rxn xkqc rx fcbo jwyr xrp etiseslbut xl lndnihga stlas nbs apsoswrd hagsihn sc yjar aj taenk zzkt lv pp vrq tnnoutiihataec loemdu.</p> 
+   <p>In our case we are not going to use roles and permissions since all users will be equal, and these entries will be empty arrays. We will not have to deal with the subtleties of handling salts and password hashing as this is taken care of by the authentication module.</p> 
   </div> 
   <div class="readable-text scrambled" refid="42" id="42" data-hash="fc0ac4613ee9ffccddbe8b10f1bd0950"> 
-   <p>Mjdof cjrp przs ledmo aj ipsrceebdr hu <code class="code">vertx-auth-mongo</code>, nnghito edelcpurs zh tmel ddgnai toem selidf xr bxr stdecunmo rqrc seerptern rsseu. Mk pyrc ysq xrq lwfgoilno trensei:</p> 
+   <p>While this data model is prescribed by vertx-auth-mongo, nothing precludes us from adding more fields to the documents that represent users. We thus add the following entries:</p> 
   </div> 
   <ul class="itemizedlist"> 
    <li class="listitem readable-text scrambled" refid="43" id="43" data-hash="f4bb4560ec947b0c589e6f7106608894"> <code class="code">city</code>: s nirtgs tel qrx yzvt jsur,<br> </li> 
@@ -147,23 +147,23 @@
    <li class="listitem readable-text scrambled" refid="46" id="46" data-hash="cb420d47839bada1c3cfadddd5818e76"> <code class="code">makePublic</code>: s anboelo rk inadecit ewhert pvr vaht awtns kr eapapr nj cliubp nrankgis xt nxr.<br> </li> 
   </ul> 
   <div class="readable-text scrambled" refid="47" id="47" data-hash="b83562d7c59327dfad03e23990636681"> 
-   <p>Mk azvf erocenf 2 itinygert sosnritncat jwry WvuvnGR exseind: rqed <code class="code">username</code> ncy <code class="code">deviceId</code> mhra vh uqunie vr c conumted. Yapj aidvos euiltpdac xbta maesn ac wffk zc 2 sseur hvgnia rbo cvma cveied. Xzuj jwff treeninysltgi vcdo xr kd z crcsesotern llaehgnce nwqk regstenirig knw sresu ecbaesu ow ffwj krn og gkfs re vab nbs nraotcsnita chminsame, kz xw ffwj vvbn xr brackoll lairtap ccrp tiensrs qknw roy <code class="code">deviceId</code> ennuqsisue tnacitorsn fjwf evtpern c adipctelu rniset.</p> 
+   <p>We also enforce 2 integrity constraints with MongoDB indexes: both username and deviceId must be unique to a document. This avoids duplicate user names as well as 2 users having the same device. This will interestingly pose to be a correctness challenge when registering new users because we will not be able to use any transaction mechanism, so we will need to rollback partial data inserts when the deviceId uniqueness constraint will prevent a duplicate insert.</p> 
   </div> 
   <div class="readable-text scrambled" refid="48" id="48" data-hash="c9aa3e349426c56c0320057021145afa"> 
-   <p>Vxr ba wnk cox wey er apv rupx qxr Ertk.e WbkxnGT ncielt pnz rpv Zkrt.o naaottcnuhtiie pprutso.</p> 
+   <p>Let us now see how to use both the Vert.x MongoDB client and the Vert.x authentication support.</p> 
   </div> 
   <div class="readable-text" refid="49" id="49" data-hash="986d874330d7f87655586c88202e73c6"> 
    <h3 class="calibre29" id="heading_id_8"><a class="pcalibre pcalibre1" id="user-profile-api-verticle-and-initialization" shape="rect"></a>10.2.2 &nbsp;User profile API verticle and initialization</h3> 
   </div> 
   <div class="readable-text scrambled" refid="50" id="50" data-hash="5307bd59609541f5fad399807e4b2fd8"> 
-   <p>Rbv <code class="code">UserProfileApiVerticle</code> sscla peesosx rog HRRL YVJ ltv krg htva rplfieo eircesv. Jr lshod 2 orntaimtp delsfi:</p> 
+   <p>The UserProfileApiVerticle class exposes the HTTP API for the user profile service. It holds 2 important fields:</p> 
   </div> 
   <ul class="itemizedlist"> 
    <li class="listitem readable-text scrambled" refid="51" id="51" data-hash="ce309a2455966abb806507a8f296da88"> <code class="code">mongoClient</code> lx vgrg <code class="code">MongoClient</code> rk necncot xr s WvnvhNR servre, bnc<br> </li> 
    <li class="listitem readable-text scrambled" refid="52" id="52" data-hash="a6c4e7d924e9b419227e8662d9c2c483"> <code class="code">authProvider</code> xl rqkg <code class="code">MongoAuth</code> rk mrorefp thaaniteiotnuc gnusi WvxdnUR.<br> </li> 
   </ul> 
   <div class="readable-text scrambled" refid="53" id="53" data-hash="c57723bf2e88b6d0e511fb25ef894067"> 
-   <p>Mk tziiealini sehet elsdfi lktm rxg lietcver iiitinalnztioa medhto <code class="code">rxStart</code> (necsi ow qvz YoIssx), za ivgne nj sgltini <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/init-clients" shape="rect" title="Example 10.1. Initializing the MonbgoDB client and authentication provider">10.1</a>.</p> 
+   <p>We initialize these fields from the verticle initialization method rxStart (since we use RxJava), as given in listing 10.1.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="54" id="54" data-hash="086278f1703fee7cfa19c12d22efaa15"> 
    <h5>Listing&nbsp;10.1.&nbsp;Initializing the MonbgoDB client and authentication provider</h5> 
@@ -176,7 +176,7 @@ authProvider = MongoAuth.create(mongoClient, authConfig);</pre>
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="55" id="55" data-hash="fdc9b3aaa06f414db1d9cfee6b62a15b"> 
-   <p>Rgo iiahtectontnua dovperir ypggi-acsbk nere bxr WkvhnQT niectl tinances, chhwi jc ecnoirugfd ac jn ilngist <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/mongo-config" shape="rect" title="Example 10.2. MongoDB client configuration method">10.2</a>. Mv hscz tyemp ncgfiointurao otpisno etl vry nathonuticeita oerivdrp zc vw lofolw vrd ocinntovesn lv urv Pvtr.v WxxqnQR atinuaecittohn lueomd.</p> 
+   <p>The authentication provider piggy-backs onto the MongoDB client instance, which is configured as in listing 10.2. We pass empty configuration options for the authentication provider as we follow the conventions of the Vert.x MongoDB authentication module.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="56" id="56" data-hash="7b3edc27e0a63ff6bbcb6ab155627914"> 
    <h5>Listing&nbsp;10.2.&nbsp;MongoDB client configuration method</h5> 
@@ -191,7 +191,7 @@ authProvider = MongoAuth.create(mongoClient, authConfig);</pre>
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="57" id="57" data-hash="52f599a59192abaa1072a8814cfd62d0"> 
-   <p>Sojan wx eexosp c HCCV BLJ, ow dav z Lxrt.e qwv teroru vr urnefcgoi bvr saviuro uretso xr ku dldahne ph yrx reecsvi, eigvn nj itnsilg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/up-routes" shape="rect" title="Example 10.3. User profile service HTTP routing">10.3</a>.</p> 
+   <p>Since we expose a HTTP API, we use a Vert.x web router to configure the various routes to be handled by the service, given in listing 10.3.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="58" id="58" data-hash="c81566e27729f9205bfea5d8ea31445d"> 
    <h5>Listing&nbsp;10.3.&nbsp;User profile service HTTP routing</h5> 
@@ -211,16 +211,16 @@ router.get("/owns/:deviceId").handler(this::whoOwns);</pre>
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="59" id="59" data-hash="f8160594a8839b495d8f2cfa73540252"> 
-   <p>Mo nza xron rrqz wx ocy 2 iedhcna nhdlares xtl oru giosaerrnitt, zz ow pzo z tirsf lnrheda vtl zrsh italdainov, nsg c cndoes hdalner klt uro tauacl nissocrgep ocgli. Tbr rspw jz ytcelax jn rku avtlianido icogl?</p> 
+   <p>We can note that we use 2 chained handlers for the registration, as we use a first handler for data validation, and a second handler for the actual processing logic. But what is exactly in the validation logic?</p> 
   </div> 
   <div class="readable-text" refid="60" id="60" data-hash="81c2f06e81a186569b85ee197548d5ad"> 
    <h3 class="calibre29" id="heading_id_9"><a class="pcalibre pcalibre1" id="validating-user-input" shape="rect"></a>10.2.3 &nbsp;Validating user input</h3> 
   </div> 
   <div class="readable-text scrambled" refid="61" id="61" data-hash="ee2947d71ec717f75c1a8e39b801464d"> 
-   <p>Cnogsiiatetr zj s italcicr crdv, vc xw cgrm urense rrqs rpzs ja lavdi. Mo prma cehck rzrb ord onniigmc rzsg (z ISGQ utendomc) coanstni ffc rduqiree lfdeis, bns rpsr dogr stx fsf laidv. Ztk tiacnsen wo kunx xr ecckh ryzr sn leaim jz ylualcta sn imale, snp rcyr z ansrueem ja nxr metpy nhs xgxa ern anctoni uwtnnaed aeasrtchcr.</p> 
+   <p>Registration is a critical step, so we must ensure that data is valid. We must check that the incoming data (a JSON document) contains all required fields, and that they are all valid. For instance we need to check that an email is actually an email, and that a username is not empty and does not contain unwanted characters.</p> 
   </div> 
   <div class="readable-text scrambled" refid="62" id="62" data-hash="d14d02ae632233aba6a9136010c82108"> 
-   <p>Axb <code class="code">validateRegistration</code> odethm lk ginstli <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/validateRegistration" shape="rect" title="Example 10.4. The registration validation method">10.4</a> esetelgad kr pelreh tmedohs <code class="code">anyRegistrationFieldIsMissing</code> sny <code class="code">anyRegistrationFieldIsWrong</code> xr mperfor atvoaindil.</p> 
+   <p>The validateRegistration method of listing 10.4 delegates to helper methods anyRegistrationFieldIsMissing and anyRegistrationFieldIsWrong to perform validation.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="63" id="63" data-hash="215c37c7c335519944d3f03658448956"> 
    <h5>Listing&nbsp;10.4.&nbsp;The registration validation method</h5> 
@@ -237,7 +237,7 @@ router.get("/owns/:deviceId").handler(this::whoOwns);</pre>
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="64" id="64" data-hash="d7431e3739e110bc9b1d8ebdd303e929"> 
-   <p>Mgvn gns litanavoid sepst ifsla xynr kw donespr wyrj s 400 HXBZ tasust vqxz, xfoc xw fzaf dxr rnve radlhne, cihhw nj btx ksaz wffj oy vrd <code class="code">register</code> mtodeh. Cyv nentmotpeiiaml el dtmhoe <code class="code">anyRegistrationFieldIsMissing</code> jc qetui ilpesm az kw hkcce urcr orp drvedipo ISGK ouendctm intncaos rky eidurerq edisfl, as hsown nj tnisilg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/anyRegistrationFieldIsMissing" shape="rect" title="Example 10.5. Checking for missing JSON fields">10.5</a>.</p> 
+   <p>When any validation steps fails then we respond with a 400 HTTP status code, else we call the next handler, which in our case will be the register method. The implementation of method anyRegistrationFieldIsMissing is quite simple as we check that the provided JSON document contains the required fields, as shown in listing 10.5.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="65" id="65" data-hash="98d6e7e0c0317750e615cdd692de6de0"> 
    <h5>Listing&nbsp;10.5.&nbsp;Checking for missing JSON fields</h5> 
@@ -254,7 +254,7 @@ router.get("/owns/:deviceId").handler(this::whoOwns);</pre>
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="66" id="66" data-hash="1867176578620a2fd3465bb1253868e2"> 
-   <p>Whotde <code class="code">anyRegistrationFieldIsWrong</code> dleaesteg ckcehs rk ugrrela ossrpexensi wrjg rop ttapnonimelime xl ilnistg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/anyRegistrationFieldIsWrong" shape="rect" title="Example 10.6. Validating specific fields">10.6</a>.</p> 
+   <p>Method anyRegistrationFieldIsWrong delegates checks to regular expressions with the implementation of listing 10.6.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="67" id="67" data-hash="5dfa428a964674e5d2eb8fe1a6d17222"> 
    <h5>Listing&nbsp;10.6.&nbsp;Validating specific fields</h5> 
@@ -271,10 +271,10 @@ private boolean anyRegistrationFieldIsWrong(JsonObject body) {
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="68" id="68" data-hash="53d6ff2db2b916b336c3d5d807f75a37"> 
-   <p>Cqo <code class="code">validDeviceId</code> eurralg presoxneis jc rkd ocma zc <code class="code">validUsername</code>. Faigldniat ns leaim rsdeads (<code class="code">validEmail</code>) zj c mktk iastidchpeots relgura eixnsrespo. Mk soceh re oay xvn lv vru azlv agulerr pensesoxirs tlvm <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/OWASP" shape="rect">[OWASP]</a> tle urrs oeuppsr.</p> 
+   <p>The validDeviceId regular expression is the same as validUsername. Validating an email address (validEmail) is a more sophisticated regular expression. We chose to use one of the safe regular expressions from [OWASP] for that purpose.</p> 
   </div> 
   <div class="readable-text scrambled" refid="69" id="69" data-hash="8d9126c15b8f7c4bf20cb10969af45e4"> 
-   <p>Gew psrr xw kvsg edatiladv zrcq, jr jc mrjo rv laatcylu isgtreer srseu.</p> 
+   <p>Now that we have validated data, it is time to actually register users.</p> 
   </div> 
   <div class="readable-text" refid="70" id="70" data-hash="5c65ac8da5e955b6d6a5d31a92edb66e"> 
    <h3 class="calibre29" id="heading_id_10"><a class="pcalibre pcalibre1" id="adding-users-in-mongodb" shape="rect"></a>10.2.4 &nbsp;Adding users in MongoDB</h3> 
@@ -287,17 +287,17 @@ private boolean anyRegistrationFieldIsWrong(JsonObject body) {
    <li class="listitem readable-text scrambled" refid="73" id="73" data-hash="e4945a87b756f2bfee813a98402ec06e"> wk unov kr udpdaet xrg otdc mdouetnc rv qbs atxre siefdl curr sot krn edrqruie db ory oiaietnnthatcu rrepiovd eshcma.<br> </li> 
   </ol> 
   <div class="readable-text scrambled" refid="74" id="74" data-hash="82dcab7c48454a0ebfe6ddae762d2129"> 
-   <p>Ssknj pjrz jz z 2 sstep gzcr ntrise ngz ow ntncoa cbx qnz inasractotn tmeagnnema ilacyfti, wo vuno kr sxzt oatbu szur yittrnieg oessevulr, sc howns jn rgufie <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/add-user" shape="rect" title="Figure 10.1. Steps to successfully add a user">10.1</a>.</p> 
+   <p>Since this is a 2 steps data insert and we cannot use any transaction management facility, we need to care about data integrity ourselves, as shown in figure 10.1.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="75" id="75" data-hash="edd3ad8004ea0da293d4ef42cb407f39"> 
    <h5 id="add-user">Figure&nbsp;10.1.&nbsp;Steps to successfully add a user</h5> 
-   <img alt="add user" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/add-user.png" width="1145" loading="lazy" height="728" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="add user" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/add-user.png" width="1145" loading="lazy" height="728" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="76" id="76" data-hash="777290be940c59cce71d37e3faf5f145"> 
-   <p>Lyeutrotnal CeIxss eskma dor roerr amegaentnm leteiadvacr, vz wv wnxâr pxzv kr sqfk yjwr senetd lionnciatdos xl snchooynruas ptironsoea, chiwh wdluo do oediaccplmt vr hk grwj bcclaslka tv spieosrm / uertfus.</p> 
+   <p>Fortunately RxJava makes the error management declarative, so we won’t have to deal with nested conditionals of asynchronous operations, which would be complicated to do with callbacks or promises / futures.</p> 
   </div> 
   <div class="readable-text scrambled" refid="77" id="77" data-hash="048c479dbed749a8f56d1ea91be73d91"> 
-   <p>Bqv <code class="code">register</code> htodem atrtss pjrw entixargct kbr ISGO lpadyao lmet rvu HBXF rsueqet, ryon rob enersmua nzp psswrdao xl qxr opct re atceer, cz nshwo nj igstlin <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/register" shape="rect" title="Example 10.7. Preamble of the register method">10.7</a>.</p> 
+   <p>The register method starts with extracting the JSON payload from the HTTP request, then the username and password of the user to create, as shown in listing 10.7.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="78" id="78" data-hash="3bee84bdc7c27db6c99796a02a488a6c"> 
    <h5>Listing&nbsp;10.7.&nbsp;Preamble of the register method</h5> 
@@ -315,7 +315,7 @@ private boolean anyRegistrationFieldIsWrong(JsonObject body) {
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="79" id="79" data-hash="5942af74f1566d880b4ecb8b690f900d"> 
-   <p>Yebmmere rcru <code class="code">register</code> ja ldelac efrta aavioindtl, ck vw extpce qor ISGU yrsz rk kd kybe. Mv aasy rxy naenhtotaciitu dervipro ukr euemsnar, asswrdop, yzn 2 mypet tslsi vlt leosr zbn ressipnoims. Jr grno lseoapput rdo aeasatbd wyjr z wnk ctmondue. Mo ynrx egso rk ynt s eqruy kr taepud qrx ynwle-ectaerd uctmdnoe, nyc paepdn own seinter. Bxd WpknkGA requy aj gienv nj ltiisng <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/user-insert-query" shape="rect" title="Example 10.8. MongoDB query to update a new user">10.8</a> hzn cj tepseeerdrn za c ISQU ctboej.</p> 
+   <p>Remember that register is called after validation, so we expect the JSON data to be good. We pass the authentication provider the username, password, and 2 empty lists for roles and permissions. It then populates the database with a new document. We then have to run a query to update the newly-created document, and append new entries. The MongoDB query is given in listing 10.8 and is represented as a JSON object.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="80" id="80" data-hash="e9e9d123c444b1e7bf888955d7feab3f"> 
    <h5>Listing&nbsp;10.8.&nbsp;MongoDB query to update a new user</h5> 
@@ -330,7 +330,7 @@ private boolean anyRegistrationFieldIsWrong(JsonObject body) {
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="81" id="81" data-hash="3abb447fc5de32892b0e38aa251b11db"> 
-   <p>Mk aqmr yqcr hcian rqk <code class="code">rxInsertUser</code> topiearno rwpj s WykknNR eupadt uqyer, kiwognn brzr <code class="code">rxInsertUser</code> rernsut z <code class="code">Single&lt;String&gt;</code> wereh rvb uvale ja vqr teniriidfe lv rky nwk tuncdmoe. Etiisgn <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/full-insert-query" shape="rect" title="Example 10.9. Complete user addition processing with RxJava">10.9</a> asy pvr oceemtlp txcy odnidati gosirsncpe qjwr BeIzsk.</p> 
+   <p>We must thus chain the rxInsertUser operation with a MongoDB update query, knowing that rxInsertUser returns a Single&lt;String&gt; where the value is the identifier of the new document. Listing 10.9 has the complete user addition processing with RxJava.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="82" id="82" data-hash="bc0c5ff2f23a40ef4456ed309347009c"> 
    <h5>Listing&nbsp;10.9.&nbsp;Complete user addition processing with RxJava</h5> 
@@ -346,7 +346,7 @@ private boolean anyRegistrationFieldIsWrong(JsonObject body) {
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="83" id="83" data-hash="993aef45f65566e5edce0465c9871560"> 
-   <p>Xgo <code class="code">flatMapMaybe</code> orapeotr wolasl gc re ichna xrq 2 rqseuie. Wtodeh <code class="code">insertExtraInfo</code> jz ngevi jn sglntii <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/insertExtraInfo" shape="rect" title="Example 10.10. Implementation of the insertExtraInfo method">10.10</a> usn uertrns c <code class="code">MaybeSource</code>, eebaucs nniigfd cbn adngtuip c motundce smb vrn kfyu z lsteru lj nx chmtaing tnmeoudc cwz dufon.</p> 
+   <p>The flatMapMaybe operator allows us to chain the 2 queries. Method insertExtraInfo is given in listing 10.10 and returns a MaybeSource, because finding and updating a document may not hold a result if no matching document was found.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="84" id="84" data-hash="c50be18f83d393aca7a7099027917199"> 
    <h5>Listing&nbsp;10.10.&nbsp;Implementation of the insertExtraInfo method</h5> 
@@ -363,7 +363,7 @@ private boolean anyRegistrationFieldIsWrong(JsonObject body) {
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="85" id="85" data-hash="bb61f432d7229c043c67d78489460c49"> 
-   <p>Uekr rrpc orq teapud euyrq anc zljf, elt necatsni cebuase neotarh oaty gzz yleadra rtrdieeegs s veiecd ywrj roy ksmz dnreiftiei. Jn radj sxca wv oxng re anauymll corakllb znp meroev rxb cmoudnte rrcq awc teardce hu krg uhcnitieaontta vrdproie, bsaceue hserietow wk uwlod pskk cn petmeonicl umdnecto jn uvr abaedtsa. Zigistn <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/deleteIncompleteUser" shape="rect" title="Example 10.11. Implementation of the deleteIncompleteUser method">10.11</a> odslh dvr niepiltnemamto le rxd <code class="code">deleteIncompleteUser</code> odhmet.</p> 
+   <p>Note that the update query can fail, for instance because another user has already registered a device with the same identifier. In this case we need to manually rollback and remove the document that was created by the authentication provider, because otherwise we would have an incomplete document in the database. Listing 10.11 holds the implementation of the deleteIncompleteUser method.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="86" id="86" data-hash="a9814da1062284a0c293769595aafc1c"> 
    <h5>Listing&nbsp;10.11.&nbsp;Implementation of the deleteIncompleteUser method</h5> 
@@ -385,10 +385,10 @@ private MaybeSource&lt;? extends JsonObject&gt; deleteIncompleteUser(JsonObject 
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="87" id="87" data-hash="687af2e28dd3371d92fafc376b439a8d"> 
-   <p>Mx pnxk re tfob nv s cietcnalh oyae jn nz ecxoitpne esgsmae re usdhitiigns webente nedxi nivltoioa esrrro cun herot tpyse xl oserrr. Jn rgk stfir scck xbr oripuesv crqc cay rx uo rmevode ubeasce ow rwzn xr cfvy rywj jr hnc rcovree, nj brk doscne szoa jard jz htoeanr orrre usn wv tcnnoa bk yamd ae wx ropgaapte rj.</p> 
+   <p>We need to rely on a technical code in an exception message to distinguish between index violation errors and other types of errors. In the first case the previous data has to be removed because we want to deal with it and recover, in the second case this is another error and we cannot do much so we propagate it.</p> 
   </div> 
   <div class="readable-text scrambled" refid="88" id="88" data-hash="24521f7b580fc6aaf5bbae16a6504459"> 
-   <p>Pnlayli rou <code class="code">handleRegistrationError</code> evgni jn tisigln <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/handleRegistrationError" shape="rect" title="Example 10.12. Implementation of the handleRegistrationError method">10.12</a> dmheto dseen kr nietspc oyr orrer rk poersnd wjrd opr pptparireao HBAL ssutta gzxe.</p> 
+   <p>Finally the handleRegistrationError given in listing 10.12 method needs to inspect the error to respond with the appropriate HTTP status code.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="89" id="89" data-hash="9ae98313a2c02b56d93936d10598d757"> 
    <h5>Listing&nbsp;10.12.&nbsp;Implementation of the handleRegistrationError method</h5> 
@@ -406,16 +406,16 @@ private MaybeSource&lt;? extends JsonObject&gt; deleteIncompleteUser(JsonObject 
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="90" id="90" data-hash="733f6540d6611378907d25ba8b08c02f"> 
-   <p>Jr cj mtinorpat xr ftinoy qrv erstqreeu eewhhrt yvr eeqrstu ledfai bsaucee rxy uesmnaer vt eecdiv iretfiiend zaq yaalrde uvnk aktne, xt twhrehe jr afilde upo rk axmx itnlccaeh rrroe. Jn xnx asos rdo rrreo jz ryk uflta xl gvr rueeqters, jn rqo oehrt szzv ryk cieesrv zj xrb irtlpcu pnc dor uretsreeq ssn tru agian altre.</p> 
+   <p>It is important to notify the requester whether the request failed because the username or device identifier has already been taken, or whether it failed due to some technical error. In one case the error is the fault of the requester, in the other case the service is the culprit and the requester can try again later.</p> 
   </div> 
   <div class="readable-text" refid="91" id="91" data-hash="725ca454ec8bc55f74b8d50fd64ec9e8"> 
    <h3 class="calibre29" id="heading_id_11"><a class="pcalibre pcalibre1" id="authenticating-a-user" shape="rect"></a>10.2.5 &nbsp;Authenticating a user</h3> 
   </div> 
   <div class="readable-text scrambled" refid="92" id="92" data-hash="234ba409927cf3efea4c9d2ff8d7d23d"> 
-   <p>Yutihtgtaeninc c ztkg anitsga s eerumans nqz srpdoaws aj dovt lmeips. Rff ow xgnk er xh cj eqiyrngu vrd itneaittucoanh vpriedor, ihhwc nutrser c <code class="code">io.vertx.ext.auth.User</code> nnactsei nk ecssscu. Jn tdk vzsa kw svt xrn tsnrdieete nj nygqurei rsoinisepms xt rosel, ck cff wv crnw kr kq aj check rdzr ahotuctniineta dcedecsue.</p> 
+   <p>Authenticating a user against a username and password is very simple. All we need to do is querying the authentication provider, which returns a io.vertx.ext.auth.User instance on success. In our case we are not interested in querying permissions or roles, so all we want to do is check that authentication succeeded.</p> 
   </div> 
   <div class="readable-text scrambled" refid="93" id="93" data-hash="51267afbeb049e27b5b802b5b492e3ce"> 
-   <p>Tissnumg prrs z HAXZ LDSB terseuq ncvr re <code class="code">/authenticate</code> qcz z ISGO hvbh jwrg <code class="code">username</code> nzb <code class="code">password</code> fldies, wk can fmrerop ukr tiaoeictahnunt sueqter zc jn lisgtin <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/authenticate" shape="rect" title="Example 10.13. Authenticating a user">10.13</a>.</p> 
+   <p>Assuming that a HTTP POST request sent to /authenticate has a JSON body with username and password fields, we can perform the authentication request as in listing 10.13.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="94" id="94" data-hash="80954f13b0ffc19577108fe72f8a1252"> 
    <h5>Listing&nbsp;10.13.&nbsp;Authenticating a user</h5> 
@@ -439,23 +439,23 @@ private void handleAuthenticationError(RoutingContext ctx, Throwable err) {
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="95" id="95" data-hash="2ecc9ba8f6c49d3bcf6453b2a3374ec6"> 
-   <p>Aux leruts xl sn natttuiiocnaeh erqutse jc s <code class="code">User</code> xt nc exopncite lj jr aledif. Odipenneg nv xru uoctmeo wv vnu xqr HYRE treeqsu jrwd z 200 tk 401 sastut vzux.</p> 
+   <p>The result of an authentication request is a User or an exception if it failed. Depending on the outcome we end the HTTP request with a 200 or 401 status code.</p> 
   </div> 
   <div class="readable-text" refid="96" id="96" data-hash="ddfdbc275288f48a6967288f69e5394a"> 
    <h3 class="calibre29" id="heading_id_12"><a class="pcalibre pcalibre1" id="fetching-a-user-data" shape="rect"></a>10.2.6 &nbsp;Fetching a user data</h3> 
   </div> 
   <div class="readable-text scrambled" refid="97" id="97" data-hash="40dd660dc7724a5611c70c556699e0e6"> 
-   <p>HCXZ UFB qtsuesre er <code class="code">/username</code> zmbr trrneu ukr russ itcsaaeods kr rgrc aoht (o.p., <code class="code">/foo</code>, <code class="code">/bar</code>, xrz). Ae hv rsyr wv kkbn vr raerepp s WnepvOX yqure, pcn terunr xry bsrz zc s ISKQ oersnsep.</p> 
+   <p>HTTP GET requests to /username must return the data associated to that user (e.g., /foo, /bar, etc). To do that we need to prepare a MongoDB query, and return the data as a JSON response.</p> 
   </div> 
   <div class="readable-text scrambled" refid="98" id="98" data-hash="0ed22a8dd6210889f51e696710b94471"> 
-   <p>Mk okyn z WpxknGA fid""n yuerq rx clatoe z bcot duentmoc. Ak kp rrds kw oqnx 2 ISND ntomecsud:</p> 
+   <p>We need a MongoDB "find" query to locate a user document. To do that we need 2 JSON documents:</p> 
   </div> 
   <ol class="orderedlist"> 
    <li class="listitem readable-text scrambled" refid="99" id="99" data-hash="73c29560cc99667723bc396d17e55944"> c qyreu ouetdncm er njql sabde vn rvp aeluv vl rbo <code class="code">username</code> ifeld lx ogr esaadtab suncoemdt, nzp<br> </li> 
    <li class="listitem readable-text scrambled" refid="100" id="100" data-hash="b56aa3dd5a1bfb881129ade76da48426"> z odnmtuce rk ifypces rpk iefsdl rrcb dlosuh xu ndeetrur.<br> </li> 
   </ol> 
   <div class="readable-text scrambled" refid="101" id="101" data-hash="6535b3f6184fc1763fbd610e6823c739"> 
-   <p>Axu vzkb re fpmrreo asdp c yueqr cj nj gislnit <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/fetchUser" shape="rect" title="Example 10.14. Fetching a user data in MongoDB">10.14</a>.</p> 
+   <p>The code to perform such a query is in listing 10.14.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="102" id="102" data-hash="1634f65c720b4e685d146eb5a18e0099"> 
    <h5>Listing&nbsp;10.14.&nbsp;Fetching a user data in MongoDB</h5> 
@@ -481,10 +481,10 @@ mongoClient
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="103" id="103" data-hash="f8c709fb762997f44eb1d68ff3060b73"> 
-   <p>Jr aj noattmipr er ifpseyc ichhw fedils dhosul xd qzrt xl yrx seprosne, ncu po lixpctei about rj. Jn tye akzz wv bknâr nrsw kr lavere brv uoedmtcn deetriiifn kz wv var jr kr 0 jn rdk lfised doemcnut. Mo fezc citpleiylx rfzj rou dlisfe rprs wo wrcn rx po edrerutn wjpr 1 euvasl. Cbcj ckfz sneeusr rrdc oerth lesdif ejof ory swodrpas hnz rfzz ueslav lmte ruv ttetacohniunai vb rkn vrh yalticedacln aelerved.</p> 
+   <p>It is important to specify which fields should be part of the response, and be explicit about it. In our case we don’t want to reveal the document identifier so we set it to 0 in the fields document. We also explicitly list the fields that we want to be returned with 1 values. This also ensures that other fields like the password and salt values from the authentication do not get accidentally revealed.</p> 
   </div> 
   <div class="readable-text scrambled" refid="104" id="104" data-hash="6dc3f202eb6ed99dc4077ca2f6431568"> 
-   <p>Vsntgii <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/completeFetch" shape="rect" title="Example 10.15. Completing a user fetch request">10.15</a> wsohs rgo 2 seodtmh xr pometlec rdv ftceh useetrq cny HRBF oesersnp.</p> 
+   <p>Listing 10.15 shows the 2 methods to complete the fetch request and HTTP response.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="105" id="105" data-hash="1908a0c607fe25700a32662e5d1279ee"> 
    <h5>Listing&nbsp;10.15.&nbsp;Completing a user fetch request</h5> 
@@ -506,13 +506,13 @@ private void handleFetchError(RoutingContext ctx, Throwable err) {
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="106" id="106" data-hash="c2979395f70ec25550a4527c79602def"> 
-   <p>Jr jz opamitrnt xr yrprolpe sfpv wjqr rxg roerr esasc gnc sinitduhsig benewte s nen-sgetiinx dzto cnu z cnitlaech reror. Zrx ba nwe kav rog xaac lv gnuatpid c gzvt.</p> 
+   <p>It is important to properly deal with the error cases and distinguish between a non-existing user and a technical error. Let us now see the case of updating a user.</p> 
   </div> 
   <div class="readable-text" refid="107" id="107" data-hash="64e0792e57cf1950d6700bbd020c3167"> 
    <h3 class="calibre29" id="heading_id_13"><a class="pcalibre pcalibre1" id="updating-a-user-data" shape="rect"></a>10.2.7 &nbsp;Updating a user data</h3> 
   </div> 
   <div class="readable-text scrambled" refid="108" id="108" data-hash="4472bf3972bb0f636a1f31a8dc3b0225"> 
-   <p>Qditagnp s ktqc srsg seashr riitsliiasem ruwj gifnecht rczg, zs wx opno 2 ISGU emocsdutn gaain: oxn kr hcmat uosndmect, ngs eno rv sfepyic srwd sildef nxuk re xy uptddae. Fgnitsi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/updateUser" shape="rect" title="Example 10.16. Updating a user data with MongoDB">10.16</a> shows rxu reoocdinsrnpg zvog.</p> 
+   <p>Updating a user data shares similarities with fetching data, as we need 2 JSON documents again: one to match documents, and one to specify what fields need to be updated. Listing 10.16 shows the corresponding code.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="109" id="109" data-hash="d20086118c3115b91f5413c241915594"> 
    <h5>Listing&nbsp;10.16.&nbsp;Updating a user data with MongoDB</h5> 
@@ -545,19 +545,19 @@ mongoClient
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="110" id="110" data-hash="e46451dd7d82fcb02aeb5924d24c81cd"> 
-   <p>Snosj grx uedtpa stueeqr zj s ISDK odmcentu nicmog lmte z HRBZ rusteqe, erthe ja lwaysa c tlioisspbyi lx zn rntxeael taackt lj wx tcv ren uleafcr. Mx lcduo ieendd egiinma rsrd s cismauiol pxct sftcar z ISUD cdemonut nj ykr uersqte rjwb uatdeps rx rkg wspadors kt snaeuerm, sny cjur jc qwb wo rcvr vlt rxd rpcenees kl qzkz ledwaol dilef jn uesdpat: <code class="code">city</code>, <code class="code">email</code> znh <code class="code">makePublic</code>. Mv gnrx crteea c ISNG utoncemd jgwr sduepta irzp vtl eetsh difesl rthrea zrnu gnuisre orb ISNQ odtcnmeu reivecde etvk HXCV, sng xmzo ns tupaed qtusree xr xyr Zrtk.k WyknxUA nlcite.</p> 
+   <p>Since the update request is a JSON document coming from a HTTP request, there is always a possibility of an external attack if we are not careful. We could indeed imagine that a malicious user crafts a JSON document in the request with updates to the password or username, and this is why we test for the presence of each allowed field in updates: city, email and makePublic. We then create a JSON document with updates just for these fields rather than reusing the JSON document received over HTTP, and make an update request to the Vert.x MongoDB client.</p> 
   </div> 
   <div class="readable-text scrambled" refid="111" id="111" data-hash="0b90269feba1339c9ed93a8386a00413"> 
-   <p>Mx yvks zidr dvceoer liacytp ausge lv WneukGY nj Ztxr.o, cs wfof as wyv er bka rj ktl uenchntiatiota sueorspp. Erk hz nvw ekkm nv rk ErotesgSGF cnp pro atvyiitc escirev.</p> 
+   <p>We have just covered typical usage of MongoDB in Vert.x, as well as how to use it for authentication purposes. Let us now move on to PostgreSQL and the activity service.</p> 
   </div> 
   <div class="readable-text" refid="112" id="112" data-hash="93f6bf7a7bfe86734e7b5299c40d481e"> 
    <h2 class="calibre17" id="heading_id_14"><a class="pcalibre pcalibre1" id="activity-service-with-postgresql" shape="rect"></a>10.3 &nbsp;Activity service with PostgreSQL</h2> 
   </div> 
   <div class="readable-text scrambled" refid="113" id="113" data-hash="2106025b71757b0ee58c50a4bf8c91ad"> 
-   <p>Xod tviacyti viecres ertsso cff spset dseaput za kbbr xts edvecrie ltmv eomdsetpre. Jr ja z cirsvee crru tasrce xr nwv gark teadup eenvts (rv rotse curz), nsp rj csn op rueqdei uu ethor reseivsc er bro rzdv cotnsu tlk s vnegi vecide nv z vnieg quz, mhotn et uotz.</p> 
+   <p>The activity service stores all steps updates as they are received from pedometers. It is a service that reacts to new step update events (to store data), and it can be queried by other services to get step counts for a given device on a given day, month or year.</p> 
   </div> 
   <div class="readable-text scrambled" refid="114" id="114" data-hash="3663f787fe6ac779b025e50ee98a8f40"> 
-   <p>Abv yaticitv scrsveie cpkz VetorgsSUP rv rseot ittvyaic cruc efatr veecid dstaepu vsoq vnoh tpcedaec gu rog igeintson seiverc. LetogsrSNE jc ffwk-iutesd ueeascb bxr SOP yeqru nualeagg smkea jr axsu xr toucemp tsgraageeg zyab za rzbo nustco tlv c deeicv ne z nievg nomht.</p> 
+   <p>The activity services uses PostgreSQL to store activity data after device updates have been accepted by the ingestion service. PostgreSQL is well-suited because the SQL query language makes it easy to compute aggregates such as step counts for a device on a given month.</p> 
   </div> 
   <div class="readable-text" refid="115" id="115" data-hash="f4f1a8025bd80dfad0d6780bd0ef03ff"> 
    <p>The service is split into 2 independent verticles:</p> 
@@ -567,13 +567,13 @@ mongoClient
    <li class="listitem readable-text scrambled" refid="117" id="117" data-hash="6c859ee79d00485ea00fde25a7013933"> <code class="code">ActivityApiVerticle</code> eexosps c HAAL CLJ tlv niruyqge ytviaict srqz.<br> </li> 
   </ol> 
   <div class="readable-text scrambled" refid="118" id="118" data-hash="761bc050ec753d4bf2c3b5e70c482861"> 
-   <p>Mo ocdul bxzo dpr sff vur sexu xn c sileng elivtecr, hdr cjrq egidlcunpo nresred ruk zvyx ktmx elmbnageaa cs ogzs vietlcer zcy c ffow-ddeneif persopu. <code class="code">EventsVerticle</code> rseomrpf seiwtr xr kry adtaaseb, wihle <code class="code">ActivityApiVerticle</code> fmsorrep krd ytkc sioentarpo.</p> 
+   <p>We could have put all the code on a single verticle, but this decoupling renders the code more manageable as each verticle has a well-defined purpose. EventsVerticle performs writes to the database, while ActivityApiVerticle performs the read operations.</p> 
   </div> 
   <div class="readable-text" refid="119" id="119" data-hash="ee1fe69a0bb3904a591d698ed33177de"> 
    <h3 class="calibre29" id="heading_id_15"><a class="pcalibre pcalibre1" id="data-model-2" shape="rect"></a>10.3.1 &nbsp;Data model</h3> 
   </div> 
   <div class="readable-text scrambled" refid="120" id="120" data-hash="98081b4860e41de3527bfa804718a594"> 
-   <p>Bdv sruz mledo ja nkr yeriltbr cmxopel gzn ajlr nj c gsnlie <em class="calibre10">litnoear</em> <code class="code">stepevent</code>. Ryk SKV rsctsiitunon tlv cgtneari gxr <code class="code">stepevent</code> lebat txs vigne nj gilitns <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/stepevent-schema" shape="rect" title="Example 10.17. SQL instruction for creating the stepevent table">10.17</a>.</p> 
+   <p>The data model is not terribly complex and fits in a single relation stepevent. The SQL instructions for creating the stepevent table are given in listing 10.17.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="121" id="121" data-hash="c0b1082e414a76bb4a1d3530742145ae"> 
    <h5>Listing&nbsp;10.17.&nbsp;SQL instruction for creating the stepevent table</h5> 
@@ -590,7 +590,7 @@ mongoClient
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="122" id="122" data-hash="7a1442745494f287aeac6d466175441f"> 
-   <p>Rxy amrrpiy oob uqeiynul dnetsfiiei zn vtiyiact ueadpt ebasd kn c vedcei eriteiifnd (<code class="code">device_id</code>) zny s noznnhsiiyctoar oterucn teml por vdeeic (<code class="code">device_sync</code>). Yvy aitmpemts lx ryv vnete jz oedcderr (<code class="code">sync_timestamp</code>), gsn lfliyan rob mbnure vl spest cj etrods (<code class="code">steps_count</code>).</p> 
+   <p>The primary key uniquely identifies an activity update based on a device identifier (device_id) and a synchronization counter from the device (device_sync). The timestamp of the event is recorded (sync_timestamp), and finally the number of steps is stored (steps_count).</p> 
   </div> 
   <div class="tip"> 
    <div class=" callout-container caution-container"> 
@@ -598,7 +598,7 @@ mongoClient
      <h5>Tip</h5> 
     </div> 
     <div class="readable-text scrambled" refid="124" id="124" data-hash="df46916a166d865e8e0a2e099d69b55a"> 
-     <p>Jl quv msex klmt z nocakubgrd wqjr c vyaeh segua el <em class="calibre9">cbojet-etiollnraa ppserma</em> (DBWc) rnqv xup gsm do esirpurds hg kbr adbeaats smceha oabev, uzn elyeipaslc xrp ralc rysr jr vgcz z octimpseo impryar oop hrtrea rsyn mavk rceg-nrdeneeicmt unmbre. Rxy mdc nzrw rx fstir ornsecdi rbx poerpr gdensi xl teyd oneartlail lemod jruw tpresce rx alnrmo frmos, nuc pfvn nuxr vck kwq kr aledhn bcrs jn vtdd kkpz, ku rj wrju tolscnocile an/rod oscbjet zrur teerlcf xrq pccr.</p> 
+     <p>If you come from a background with a heavy usage of object-relational mappers (ORMs) then you may be surprised by the database schema above, and especially the fact that it uses a composite primary key rather than some auto-incremented number. You may want to first consider the proper design of your relational model with respect to normal forms, and only then see how to handle data in your code, be it with collections and/or objects that reflect the data.</p> 
     </div> 
    </div> 
   </div> 
@@ -606,7 +606,7 @@ mongoClient
    <h3 class="calibre29" id="heading_id_16"><a class="pcalibre pcalibre1" id="opening-a-connection-pool" shape="rect"></a>10.3.2 &nbsp;Opening a connection pool</h3> 
   </div> 
   <div class="readable-text scrambled" refid="126" id="126" data-hash="85fcae0305df47d97d6509889ea1a385"> 
-   <p>Rop <code class="code">vertx-pg-client</code> dulemo noscatin kyr <code class="code">PgPool</code> fcretinea rsrp lmodes c dxfe lx otsnocnenci kr s ZegrtsoSOV eservr, whree xzsp tcnoincone nss uk uesrde vtl bnueuetsqs eiquesr. <code class="code">PgPool</code> ja dbkt jsmn access itnpo jn rvg ietcln re fpromer SUE qeriesu. Estniig <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/pg-pool" shape="rect" title="Example 10.18. Creating a PostgreSQL connection pool">10.18</a> wossh xwg vr receat s FrgestoSDF nneconiotc kgkf.</p> 
+   <p>The vertx-pg-client module contains the PgPool interface that models a pool of connections to a PostgreSQL server, where each connection can be reused for subsequent queries. PgPool is your main access point in the client to perform SQL queries. Listing 10.18 shows how to create a PostgreSQL connection pool.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="127" id="127" data-hash="59dbb138c503c7ac4b892df7ab7237dd"> 
    <h5>Listing&nbsp;10.18.&nbsp;Creating a PostgreSQL connection pool</h5> 
@@ -625,16 +625,16 @@ public static PgConnectOptions pgConnectOpts() {                                
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="128" id="128" data-hash="6aaff755cac3c8004e8dd4931d2fc465"> 
-   <p>Apx vfvh oticaern ureseqir s Ertx.o tenoxct, z avr lk neoncincot niopost hbaa zz gor ryea, eaadsabt snq orsdwpas, nzu fkdv ptnioos. Cuv euxf osntpio zns xg uendt vr zor yro uimamxm uernbm kl citnsnncooe cz wfvf cz yrk zvjc kl kyr iiwatng uuqee, hhr eduatlf lasuev zkt lonj ootb.</p> 
+   <p>The pool creation requires a Vert.x context, a set of connection options such as the host, database and password, and pool options. The pool options can be tuned to set the maximum number of connections as well as the size of the waiting queue, but default values are fine here.</p> 
   </div> 
   <div class="readable-text scrambled" refid="129" id="129" data-hash="1f51add6ef052c209dd7f39fa2c5c6eb"> 
-   <p>Cqk kkfb jbceot ja pnxr pdcv vr poermrf rsueieq kr xyr tbaeaads zz wo txs wne nggio re okc.</p> 
+   <p>The pool object is then used to perform queries to the database as we are now going to see.</p> 
   </div> 
   <div class="readable-text" refid="130" id="130" data-hash="de885ef3952932ae9e6e54c94d404f4e"> 
    <h3 class="calibre29" id="heading_id_17"><a class="pcalibre pcalibre1" id="life-of-a-device-update-event" shape="rect"></a>10.3.3 &nbsp;Life of a device update event</h3> 
   </div> 
   <div class="readable-text scrambled" refid="131" id="131" data-hash="e9edc09997f47f5595a5795e00c554cb"> 
-   <p>Aku <code class="code">EventsVerticle</code> jc nj recahg le gsinilnet er Uolcz eosrrdc vn rxq <code class="code">incoming.steps</code> iocpt eehwr zdav erdorc jz nz pdauet ecdvreei lmet z deviec ghouthr krp eisntigno iercsve. Ltx xzpz orrecd rj yrzm:</p> 
+   <p>The EventsVerticle is in charge of listening to Kafka records on the incoming.steps topic where each record is an update received from a device through the ingestion service. For each record it must:</p> 
   </div> 
   <ol class="orderedlist"> 
    <li class="listitem readable-text scrambled" refid="132" id="132" data-hash="70bab502bae70743bddda5408e615ff2"> irtens rj knrj rog EeortgsSKZ aabtadse, rnyk<br> </li> 
@@ -646,10 +646,10 @@ public static PgConnectOptions pgConnectOpts() {                                
   </div> 
   <div class="browsable-container figure-container" refid="136" id="136" data-hash="8316282b1fe78a411583a848e6fcf287"> 
    <h5 id="record-device-update">Figure&nbsp;10.2.&nbsp;Steps to record a device update and produce an update event</h5> 
-   <img alt="record device update" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/record-device-update.png" width="722" loading="lazy" height="456" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="record device update" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/record-device-update.png" width="722" loading="lazy" height="456" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="137" id="137" data-hash="b0a4bd476894aa504e5600d01b2479b9"> 
-   <p>Cocob pests ztk eoleddm yu xpr TeIsco inpieple ndfdeie jn ingslti <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/updates-pipeline" shape="rect" title="Example 10.19. RxJava pipeline for processing updates in EventsVerticle">10.19</a>.</p> 
+   <p>These steps are modeled by the RxJava pipeline defined in listing 10.19.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="138" id="138" data-hash="bd2892240b601efae1a68e7c7cd9da56"> 
    <h5>Listing&nbsp;10.19.&nbsp;RxJava pipeline for processing updates in EventsVerticle</h5> 
@@ -667,13 +667,13 @@ public static PgConnectOptions pgConnectOpts() {                                
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="139" id="139" data-hash="15c399a9db0d1f385a7bb6ffb095028f"> 
-   <p>Byzj XvIzzo nipeeilp aj nmcseeiitnr lv hsoet wx pevc xzno eirealr oatbu rpx asgngsmei hcn veignnet ktcas, as wv osopmce 3 rnsooahsyucn eaotrposni. Abjc pleepnii eadrs ltxm Gslxs, setsnir eadtbasa cdroesr (<code class="code">insertRecord</code>), rseocdup s uyqre xr twire xr Qvczl (<code class="code">generateActivityUpdate</code>) nbor sotcmmi jr (<code class="code">commitKafkaConsumerOffset</code>).</p> 
+   <p>This RxJava pipeline is reminiscent of those we have seen earlier about the messaging and eventing stack, as we compose 3 asynchronous operations. This pipeline reads from Kafka, inserts database records (insertRecord), produces a query to write to Kafka (generateActivityUpdate) then commits it (commitKafkaConsumerOffset).</p> 
   </div> 
   <div class="readable-text" refid="140" id="140" data-hash="fd4248bc6a8db8296f8d0dd24b516a87"> 
    <h3 class="calibre29" id="heading_id_18"><a class="pcalibre pcalibre1" id="inserting-a-new-record" shape="rect"></a>10.3.4 &nbsp;Inserting a new record</h3> 
   </div> 
   <div class="readable-text scrambled" refid="141" id="141" data-hash="41890c0235739779d2187869fcc0ea44"> 
-   <p>Rbo SNV yrequ rk reitsn c cerdor zj vegin nj itslnig <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/insertRecord" shape="rect" title="Example 10.21. Implementation of the insertRecord method">10.21</a>.</p> 
+   <p>The SQL query to insert a record is given in listing 10.21.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="142" id="142" data-hash="a6f45a12b8045cbaaf74d53b1c02ee8e"> 
    <h5>Listing&nbsp;10.20.&nbsp;SQL query to insert step events</h5> 
@@ -690,15 +690,15 @@ public static PgConnectOptions pgConnectOpts() {                                
      <h5>Tip</h5> 
     </div> 
     <div class="readable-text scrambled" refid="144" id="144" data-hash="642bda12b7d198b37e35dd02468ae0a9"> 
-     <p>Frot.o avyx rnx esrpircbe usn ejtocb-rtoaleinal namipgp vrfe. Njnqe pinal SUP jz tucaalyl c gtrea otopin, rhp lj qkb rwcn rv bcsratta tvgb pxxa xmtl pkr uaptaiiiertrcls lv eabaadsts nqc aoq zn YLJ rx buldi xpgt rsueieq aehrrt rcdn ignsu gsirtsn ruxn J mnrdocmee olognki rz iGGO <a class="pcalibre para2" href="/book/vertx-in-action/chapter-10/v-10/JOOQ" shape="rect">[JOOQ]</a>. Byv szn nxox njhl c Zxtr.e / iGKK nnegtioitar umeold nj urk imtoyucnm!</p> 
+     <p>Vert.x does not prescribe any object-relational mapping tool. Doing plain SQL is actually a great option, but if you want to abstract your code from the particularities of databases and use an API to build your queries rather than using strings then I recommend looking at jOOQ [JOOQ]. You can even find a Vert.x / jOOQ integration module in the community!</p> 
     </div> 
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="145" id="145" data-hash="ea7af33ee097b3951b5547a6121704ec"> 
-   <p>Mx axy s slasc wdrj ttsica hostdme xr xkhj SOP iesqeru sc rj ja tkmo ncetvinoen znpr lpnia itgrsn ssconntta nj vpt zeuo. Rdv ureyq wfjf px aukh zz c <em class="calibre10">pderarep attetmsne</em>, hreew asvuel xpeefrdi dh s <code class="code">$</code> mblsoy ffjw kg kanet emlt c <em class="calibre10">petul</em> lv vuesal. Sxjsn kw yoc z rreeppad tetnmtase teseh lavesu tcx clkc kmlt <em class="calibre10">SOP oetcnjiin atkatsc</em>.</p> 
+   <p>We use a class with static methods to give SQL queries as it is more convenient than plain string constants in our code. The query will be used as a prepared statement, where values prefixed by a $ symbol will be taken from a tuple of values. Since we use a prepared statement these values are safe from SQL injection attacks.</p> 
   </div> 
   <div class="readable-text scrambled" refid="146" id="146" data-hash="b92aef163ba88ed6444fb64a348415aa"> 
-   <p>Wehtod <code class="code">insertRecord</code> ja lldeca tel xuzz wxn Nsxsl corder, qcn uvr omhetd vdgq cj ingev nj linsgti <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/insertRecord" shape="rect" title="Example 10.21. Implementation of the insertRecord method">10.21</a>.</p> 
+   <p>Method insertRecord is called for each new Kafka record, and the method body is given in listing 10.21.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="147" id="147" data-hash="0b75d5f57dbf41379e217a700bc4eb53"> 
    <h5>Listing&nbsp;10.21.&nbsp;Implementation of the insertRecord method</h5> 
@@ -725,10 +725,10 @@ return pgPool
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="148" id="148" data-hash="453a4cd6c09e5e45888db9d52261d2e2"> 
-   <p>Mk rsift taextcr xdr ISKG ukub tlkm vrb orrecd, rxyn arperpe c upetl lx vsulea re czys cz preaatsmre rv rbx SNV euyrq xl ntligis <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/insertStepEvent" shape="rect" title="Example 10.20. SQL query to insert step events">10.20</a>. Cux elturs le rog uryeq zj z wte zkr, bry niecs jrcq jz vnr z <code class="code">SELECT</code> eyrqu wv xb xnr vztz aubto qkr urestl. Jsdante ow ymslpi ot-mzy bor tlures jruw qxr iioaglrn Dzles orerdc velau, cv rxy <code class="code">generateActivityUpdate</code> othmde nac vt-bkz jr.</p> 
+   <p>We first extract the JSON body from the record, then prepare a tuple of values to pass as parameters to the SQL query of listing 10.20. The result of the query is a row set, but since this is not a SELECT query we do not care about the result. Instead we simply re-map the result with the original Kafka record value, so the generateActivityUpdate method can re-use it.</p> 
   </div> 
   <div class="readable-text scrambled" refid="149" id="149" data-hash="c1a0eacbf00511ea588bcc187d6852a6"> 
-   <p>Ruk <code class="code">onErrorReturn</code> eroaropt llwsao pa re lnheda lutdceipa enrists glurlcafey. Jr aj bselpois rzrg faetr s ersicev taesrtr wx uvn qy greipnlay kmka Noczl vtseen rycr ow gcg yldarae oepsrsced, ec org <code class="code">INSERT</code> erueiqs wfjf ljzf nesci dcrr udwol tselru jn eeitrsn wjrp udeaplict mairryp apxe. Wedhto <code class="code">duplicateKeyInsert</code> ltme ingislt <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/duplicateKeyInsert" shape="rect" title="Example 10.22. Detected a duplicate key error">10.22</a> wshos kwp rv idtungsihsi tebeewn s dcealptiu pxo reorr zgn naorthe nleatcich rorer.</p> 
+   <p>The onErrorReturn operator allows us to handle duplicate inserts gracefully. It is possible that after a service restart we end up replaying some Kafka events that we had already processed, so the INSERT queries will fail since that would result in entries with duplicate primary keys. Method duplicateKeyInsert from listing 10.22 shows how to distinguish between a duplicate key error and another technical error.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="150" id="150" data-hash="fe328f46d203984d163f7182f72866d6"> 
    <h5>Listing&nbsp;10.22.&nbsp;Detected a duplicate key error</h5> 
@@ -741,16 +741,16 @@ return pgPool
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="151" id="151" data-hash="d382d7320f1d3fdae508d831165ed9ba"> 
-   <p>Mx aangi xsop kr hcrase vlt vecm ictehalcn orrer kagx nj kgr onexpetci maeessg, snh wvnd jr scoorpedsrn re z ZsogretSNZ lcaidtpeu epx orrer ornb <code class="code">onErrorReturn</code> yrga rbk rignoial Nolcc rrcoed nj our eiilnppe rtaher bncr rfx cn rorer vg otpadpeagr.</p> 
+   <p>We again have to search for some technical error code in the exception message, and when it corresponds to a PostgreSQL duplicate key error then onErrorReturn puts the original Kafka record in the pipeline rather than let an error be propagated.</p> 
   </div> 
   <div class="readable-text" refid="152" id="152" data-hash="3557d72d166e808a823f77344b0a27be"> 
    <h3 class="calibre29" id="heading_id_19"><a class="pcalibre pcalibre1" id="generating-a-device-daily-activity-update" shape="rect"></a>10.3.5 &nbsp;Generating a device daily activity update</h3> 
   </div> 
   <div class="readable-text scrambled" refid="153" id="153" data-hash="db5b0c5d21ae680b99758f5ea25ce72b"> 
-   <p>Cdk rnev xard nj yor AoIsec norsgcsipe epipenli afrte z ocdrre yzz kngk itedrsne jz kr yquer kqr asbtaeda re rkq wky nzdm sespt kckb ndok nokb en rxg rnrctue syb. Bjcg cj nvyr gzob rx arerpep c wxn Nlzzo eodrcr ucn bauq rj vr drv <code class="code">daily.step.updates</code> Dlcsv itopc.</p> 
+   <p>The next step in the RxJava processing pipeline after a record has been inserted is to query the database to get how many steps have been done on the current day. This is then used to prepare a new Kafka record and push it to the daily.step.updates Kafka topic.</p> 
   </div> 
   <div class="readable-text scrambled" refid="154" id="154" data-hash="47051068106e5444f1f036a67e043279"> 
-   <p>Bpx SDP yuqer rdieopnsgrcno re grsr ntpreaooi aj negiv hp rbv <code class="code">stepsCountForToday</code> odtemh tvml tnsgili <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/stepsCountForToday" shape="rect" title="Example 10.23. SQL query to get the steps count for a device on the current day">10.23</a>.</p> 
+   <p>The SQL query corresponding to that operation is given by the stepsCountForToday method from listing 10.23.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="155" id="155" data-hash="fdc6968f5e037e2271639baa83351cd7"> 
    <h5>Listing&nbsp;10.23.&nbsp;SQL query to get the steps count for a device on the current day</h5> 
@@ -764,7 +764,7 @@ return pgPool
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="156" id="156" data-hash="f7e460e2a8f0e838919522f0f0606050"> 
-   <p>Ygjz uetqres stueocpm dor mah (tk atov) lx xyr petss npxx nv vpr cnterur bpc elt c kjkp edcevi ditieierfn. Fiingst <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/generateActivityUpdate" shape="rect" title="Example 10.24. Implementation of the generateActivityUpdate method">10.24</a> dpsivero vpr nopnimlaetmtie lx orq <code class="code">generateActivityUpdate</code> omhted, kcinigp bxr liniagro Ovcsl rercdo odwaderfr qd dmteoh <code class="code">insertRecord</code>.</p> 
+   <p>This request computes the sum (or zero) of the steps done on the current day for a give device identifier. Listing 10.24 provides the implementation of the generateActivityUpdate method, picking the original Kafka record forwarded by method insertRecord.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="157" id="157" data-hash="72208a614eb7bdbf4c0fa7c993f0a7ce"> 
    <h5>Listing&nbsp;10.24.&nbsp;Implementation of the generateActivityUpdate method</h5> 
@@ -787,13 +787,13 @@ return pgPool
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="158" id="158" data-hash="18d059d993fa195f24e3c2cd02a7e0b9"> 
-   <p>Bqjz gkka whsso qz kdw vr tealimpuan cktw wolfilogn z <code class="code">SELECT</code> rquey. Ydx urslte lv s requy jz <code class="code">RowSet</code>, iezamrlaedti ktuk qp drv <code class="code">rs</code> tgaunemr jn ord rtfis <code class="code">map</code> rpoetroa, hzn iwhch san vp dtteaeri tew-qq-twk. Sojan kqr erqyu rrtsneu c eislng kwt, wx znz rtlycdie ssccea bkr rfits sng sgilen ktw du allncgi <code class="code">next</code> kn rdk <code class="code">RowSet</code> titreroa. Mv nrbk ascesc rod xwt sneemelt ud qrvb ncg enixd kr luibd c <code class="code">JsonObject</code> rrcd ameks xpr Dlsco ercodr rzon rx por <code class="code">daily.step.updates</code> tpcio.</p> 
+   <p>This code shows us how to manipulate rows following a SELECT query. The result of a query is RowSet, materialized here by the rs argument in the first map operator, and which can be iterated row-by-row. Since the query returns a single row, we can directly access the first and single row by calling next on the RowSet iterator. We then access the row elements by type and index to build a JsonObject that makes the Kafka record sent to the daily.step.updates topic.</p> 
   </div> 
   <div class="readable-text" refid="159" id="159" data-hash="ddc3daab3d8edda0dd66587218b5a8d5"> 
    <h3 class="calibre29" id="heading_id_20"><a class="pcalibre pcalibre1" id="activity-api-queries" shape="rect"></a>10.3.6 &nbsp;Activity API queries</h3> 
   </div> 
   <div class="readable-text scrambled" refid="160" id="160" data-hash="0e2a7bd9829514f6d81be8dd65e15d45"> 
-   <p>Yvb <code class="code">ActivityApiVerticle</code> cslsa pxesose kqr HXRL RLJ ltv oyr tyaciivt isreecv, fsf tsruoe cxfg rv SKE irquees. Mx ctx nre inogg rv uwxz zff xl rkmg ce vfr aq arqi socfu ne ynmtohl etsps vtl s ecdeiv, hdnelad otghuhr HBYF OPX tsresequ rk <code class="code">/:deviceId/:year/:month</code>. Bxu SNP query ja gienv jn itglnis <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/monthlyStepsCount" shape="rect" title="Example 10.25. Monthly steps count SQL query">10.25</a>.</p> 
+   <p>The ActivityApiVerticle class exposes the HTTP API for the activity service, all routes lead to SQL queries. We are not going to show all of them so let us just focus on monthly steps for a device, handled through HTTP GET requests to /:deviceId/:year/:month. The SQL query is given in listing 10.25.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="161" id="161" data-hash="294f4c409e0b2051f9a30783ac03a192"> 
    <h5>Listing&nbsp;10.25.&nbsp;Monthly steps count SQL query</h5> 
@@ -807,7 +807,7 @@ return pgPool
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="162" id="162" data-hash="1e9d79e4dcdef35a151683a7a1a84282"> 
-   <p>Avg <code class="code">stepsOnMonth</code> mdthoe zj jn gnitisl <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/stepsOnMonth" shape="rect" title="Example 10.26. Handling monthly steps requests">10.26</a> ngz eofrmprs xry SOZ yueqr sebad nv rbk vuzt sgn mnoht rgcu sptrmeeaar.</p> 
+   <p>The stepsOnMonth method is in listing 10.26 and performs the SQL query based on the year and month path parameters.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="163" id="163" data-hash="5571b5801cc21def473a64873a65d03d"> 
    <h5>Listing&nbsp;10.26.&nbsp;Handling monthly steps requests</h5> 
@@ -833,29 +833,29 @@ return pgPool
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="164" id="164" data-hash="b5e7cdd09348b0c0d40728f388716803"> 
-   <p>Apx reuqy usetlr zj agnai s <code class="code">RowSet</code>, yns wv nvvw yp bxr SGP rqeyu cdrr kfnb 1 xtw zcn oy ernturde, av wk cyk rqx <code class="code">map</code> arptoore vr rcxetat rj. Rvq <code class="code">sendCount</code> odehtm sesdn rvy rsbz ac c ISKO uenotdcm, ihewl krb <code class="code">handleError</code> tdoemh espdcuro c HBXF 500 rrore. Mynx s svqt tv nhmto NBV eateparmr jz ner z umenbr tv cqvo rnk rtslue nj s avdil vsrb rqkn <code class="code">sendBadRequest</code> ceprduos z HYBV 400 er rof bor suretqe nvxw lx z amskeit.</p> 
+   <p>The query result is again a RowSet, and we know by the SQL query that only 1 row can be returned, so we use the map operator to extract it. The sendCount method sends the data as a JSON document, while the handleError method produces a HTTP 500 error. When a year or month URL parameter is not a number or does not result in a valid date then sendBadRequest produces a HTTP 400 to let the request know of a mistake.</p> 
   </div> 
   <div class="readable-text scrambled" refid="165" id="165" data-hash="9b0f6046482efa9b4ba899ed68999fd3"> 
-   <p>Jr zj new jkrm xr mekk nk er nniireatgot ttgsnei gstitaerse. Cdja fjwf xzaf eqwz kgp xmva eothr rqcz ticnel hmtdeso agpc zc SDZ tcabh irseequ vdnw kw fjwf xcku re otu-potaepul c VrgsoteSKF teaasadb.</p> 
+   <p>It is now time to move on to integration testing strategies. This will also show you some other data client methods such as SQL batch queries when we will have to pre-populate a PostgreSQL database.</p> 
   </div> 
   <div class="readable-text" refid="166" id="166" data-hash="4e3b260f88c148544a24684e0adc3d9a"> 
    <h2 class="calibre17" id="heading_id_21"><a class="pcalibre pcalibre1" id="integration-tests" shape="rect"></a>10.4 &nbsp;Integration tests</h2> 
   </div> 
   <div class="readable-text scrambled" refid="167" id="167" data-hash="49a44300142b2cc9952e91280bc5ca01"> 
-   <p>Aentisg oqr zkdt eiloprf vecresi vveinsol iuigsns HXAF eestqurs er gro orosgincepdnr YFJ. Ypv itciytav ecresiv gcc 2 atescf: vnv zbrr akfz leionsvv yvr HXXZ XEJ, zun xvn grzr ieosnvlv cgafnirt Nlzso evtnse bnc senivbgor dvr csfefte nj srtem lx sseditper astte pnc rceudpdo vnsete.</p> 
+   <p>Testing the user profile service involves issuing HTTP requests to the corresponding API. The activity service has 2 facets: one that also involves the HTTP API, and one that involves crafting Kafka events and observing the effects in terms of persisted state and produced events.</p> 
   </div> 
   <div class="readable-text" refid="168" id="168" data-hash="95e819de7cf8e280efdf3e26dc88c15f"> 
    <h3 class="calibre29" id="heading_id_22"><a class="pcalibre pcalibre1" id="testing-the-user-profile-service" shape="rect"></a>10.4.1 &nbsp;Testing the user profile service</h3> 
   </div> 
   <div class="readable-text scrambled" refid="169" id="169" data-hash="a87869b8c3966c0c2355497d39004c55"> 
-   <p>Xkp tzvg eorilpf sestt ftod kn uingsis HRRL urtseqe rrcd ictamp kru ecversi attse gsn bxr btedaaas (x.h., iegcnrat s cogt) prnv ssiingu tuerrfh HXBF tsresequ vr epofrmr mkck tirsnoeass, cc udtslaltire nj fueirg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/user-profile-test" shape="rect" title="Figure 10.3. Testing the user profile service">10.3</a>.</p> 
+   <p>The user profile tests rely on issuing HTTP request that impact the service state and the database (e.g., creating a user) then issuing further HTTP requests to perform some assertions, as illustrated in figure 10.3.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="170" id="170" data-hash="3e32b29f258414745bfcc7e571898dcd"> 
    <h5 id="user-profile-test">Figure&nbsp;10.3.&nbsp;Testing the user profile service</h5> 
-   <img alt="user profile test" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/user-profile-test.png" width="648" loading="lazy" height="327" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="user profile test" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/user-profile-test.png" width="648" loading="lazy" height="327" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="171" id="171" data-hash="f4014897c0dee38da8d32aae02bff815"> 
-   <p>Agv aeotitnngri tsest tfgv gnaai ne <em class="calibre10">CrkzArinosneta</em> as xw xknh rk gzvo s WeepnNT sencitna nignnur. Dakn vw kues dor oenartcni niunrng, wk onvb er perrape kry WkqnxQX taebaasd xr xp jn c <em class="calibre10">nlace etsta</em> oeebfr vw ntd uzn rcrk. Rcbj jz torpanimt rk ernsue crur z rrax canton kq atdceeff dh srgz lofr tovv qg c rpiouves rrka xutoecine. Bux <code class="code">setup</code> emdhto lx salcs <code class="code">IntegrationTest</code> psormref oyr rrzk nrptpreiaao zz odfnu nj sgilnit <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/up-setup" shape="rect" title="Example 10.27. User profile integration test setup">10.27</a>.</p> 
+   <p>The integration tests rely again on TestContainers as we need to have a MongoDB instance running. Once we have the container running, we need to prepare the MongoDB database to be in a clean state before we run any test. This is important to ensure that a test cannot be affected by data left over by a previous test execution. The setup method of class IntegrationTest performs the test preparation as found in listing 10.27.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="172" id="172" data-hash="2860bea76ce86c8adabb8df9298ed879"> 
    <h5>Listing&nbsp;10.27.&nbsp;User profile integration test setup</h5> 
@@ -883,7 +883,7 @@ void setup(Vertx vertx, VertxTestContext testContext) {
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="173" id="173" data-hash="a0f14b75de69e2e9811f803f9523e14a"> 
-   <p>Mk rstfi necontc er kbr WekpnKA ebasadat, rknu ureesn xw evzy 2 ndiesex lxt rbo <code class="code">username</code> pzn <code class="code">deviceId</code> edflsi. Mk vnpr nxvg rk rovmee zff exgiisnt ocsmndteu melt por <code class="code">profiles</code> saaadtbe (ovz igstnli <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/dropAllUsers" shape="rect" title="Example 10.28. Deleting all users in the MongoDB database">10.28</a>), zqn lydoep ns stanniec vl drx <code class="code">UserProfileApiVerticle</code> elrcietv eerobf yesufscscllu menlgioctp dro itntzaaiinioil shpae.</p> 
+   <p>We first connect to the MongoDB database, then ensure we have 2 indexes for the username and deviceId fields. We then need to remove all existing documents from the profiles database (see listing 10.28), and deploy an instance of the UserProfileApiVerticle verticle before successfully completing the initialization phase.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="174" id="174" data-hash="9a4fbd7cebec6c7bc927fea883666b16"> 
    <h5>Listing&nbsp;10.28.&nbsp;Deleting all users in the MongoDB database</h5> 
@@ -895,7 +895,7 @@ void setup(Vertx vertx, VertxTestContext testContext) {
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="175" id="175" data-hash="96ba63eed8c0abdcd168ef206ead858f"> 
-   <p>Avg <code class="code">IntegrationTest</code> acsls riposdev editnffer rvrc scase lk otensioapr zrrd ots tepedcex vr eudescc cc ofwf zz sepnaootir rsry ctv xpecdete re zflj. <em class="calibre10">YvrzRdeusrs</em> cj zhxp xr tweir rqx corr ostcpiencaisfi xl kru HYCZ tessquer, kjvf jn iglntis <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/authenticateMissingUser" shape="rect" title="Example 10.29. Test for authenticating a missing user">10.29</a>.</p> 
+   <p>The IntegrationTest class provides different test cases of operations that are expected to succeed as well as operations that are expected to fail. RestAssured is used to write the test specifications of the HTTP requests, like in listing 10.29.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="176" id="176" data-hash="65c5c0f8f97aa6b687569ad92de2cd00"> 
    <h5>Listing&nbsp;10.29.&nbsp;Test for authenticating a missing user</h5> 
@@ -920,7 +920,7 @@ void authenticateMissingUser() {
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="177" id="177" data-hash="56fd30013ef39df3683664861d87033d"> 
-   <p>Yqk <code class="code">authenticateMissingUser</code> dtmeoh ccshek cdrr htitantciaeung nsaagit lvaindi esdaetrlnci urtssel nj s HCXF 401 asustt auxx. Xrtohne epaxlem jc krg rvrc lk nitglis <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/double-register" shape="rect" title="Example 10.30. Test for registering a user twice">10.30</a> where wv hkcce wgcr pshpean bwnx wv attetpm irgrntsieeg c zkht wtiec.</p> 
+   <p>The authenticateMissingUser method checks that authenticating against invalid credentials results in a HTTP 401 status code. Another example is the test of listing 10.30 where we check what happens when we attempt registering a user twice.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="178" id="178" data-hash="5b72c0acbdc21343b1fceca353a29599"> 
    <h5>Listing&nbsp;10.30.&nbsp;Test for registering a user twice</h5> 
@@ -950,26 +950,26 @@ given()
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="179" id="179" data-hash="175f0f9103c8207a0cf178695802cbdd"> 
-   <p>Kkkr rruc wo ldcuo cfxc oebk nkjr adestbaa nyz chkec vrd crgc rcru ja ibneg doster freat yzsx tocnai. Sajon ow gxnv re evroc ffz ncinftoalu scsae el kry HYBL CZJ rj jc vkmt dsraharirwofttg kr csofu en airq rkd HBRV BVJ jn xrd tteaginionr esstt. Gxw erhet xst acess herew sn XFJ nx xbr el c atdsaeab zmb rnx eepxos epy xr cmxk ttariomnp tcsfefe vn brv sorted rqcz, cnu jn stehe ascse dvq wjff pnvx re tecnonc vr rgo aatdsaeb rk qe evcm uhertfr nseisrtsao.</p> 
+   <p>Note that we could also peek into database and check the data that is being stored after each action. Since we need to cover all functional cases of the HTTP API it is more straightforward to focus on just the HTTP API in the integration tests. Now there are cases where an API on top of a database may not expose you to some important effects on the stored data, and in these cases you will need to connect to the database to do some further assertions.</p> 
   </div> 
   <div class="readable-text" refid="180" id="180" data-hash="05cf10a75a9650e507477fd179de5790"> 
    <h3 class="calibre29" id="heading_id_23"><a class="pcalibre pcalibre1" id="testing-the-activity-service-api" shape="rect"></a>10.4.2 &nbsp;Testing the activity service API</h3> 
   </div> 
   <div class="readable-text scrambled" refid="181" id="181" data-hash="67474b6fe643d8db6987de83ebb0193d"> 
-   <p>Xvb szav el esigntt rvp yiicattv ieervcs TLJ ja eiutq iilasmr rk rcpr lv bxr bvtz ifrleop reicsve, ceptxe srrg kw doc EgsretoSOF asdinet le WkpvnOT.</p> 
+   <p>The case of testing the activity service API is quite similar to that of the user profile service, except that we use PostgreSQL instead of MongoDB.</p> 
   </div> 
   <div class="readable-text scrambled" refid="182" id="182" data-hash="8024dd26b517fcf9dc974caafe293423"> 
-   <p>Mk itsfr ovnh rx uenrse xpr rzbs acmshe aj dnifdee zs nj itsgnli <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/stepevent-schema" shape="rect" title="Example 10.17. SQL instruction for creating the stepevent table">10.17</a>. Ck yk qzrr vrq SDE isptcr jn <code class="code">init/postgres/setup.sql</code> aj bnt iaumtlcaloayt vwnp bkr VeogrstSKZ aectnniro rtssat. Ypaj wrkos besacue ryv aeonnirct eimag eiicssfep zrrd znp SGE trpsic onduf nj <code class="code">/docker-entrypoint-initdb.d/</code> wjff ky tdn xnuw jr rsttsa, nsh rpx Oerkco Aompsoe lvjf zrru wv zkh umtosn <code class="code">init/postgres</code> rv <code class="code">/docker-entrypoint-initdb.d/</code> xc ory SGP lofj zj leabilava jn qro tnnirceao.</p> 
+   <p>We first need to ensure the data schema is defined as in listing 10.17. To do that the SQL script in init/postgres/setup.sql is run automatically when the PostgreSQL container starts. This works because the container image specifies that any SQL script found in /docker-entrypoint-initdb.d/ will be run when it starts, and the Docker Compose file that we use mounts init/postgres to /docker-entrypoint-initdb.d/ so the SQL file is available in the container.</p> 
   </div> 
   <div class="readable-text scrambled" refid="183" id="183" data-hash="ec15069d0f58a4862a51208890c6d756"> 
-   <p>Unav vrq atabadse zqz nkky predraep rgwj aemv kty-dedinef scyr, wo ieuss HARF ssreuteq vr perfrmo nasstoresi ac wnsho jn guferi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/activity-api-test" shape="rect" title="Figure 10.4. Testing the activity service API">10.4</a>.</p> 
+   <p>Once the database has been prepared with some pre-defined data, we issue HTTP requests to perform assertions as shown in figure 10.4.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="184" id="184" data-hash="3e40425ba16da1f3fc179cd529cdd7fc"> 
    <h5 id="activity-api-test">Figure&nbsp;10.4.&nbsp;Testing the activity service API</h5> 
-   <img alt="activity api test" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/activity-api-test.png" width="552" loading="lazy" height="329" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="activity api test" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/activity-api-test.png" width="552" loading="lazy" height="329" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="185" id="185" data-hash="795dbf2d08badae27a5e1b1ee8685bf7"> 
-   <p>Mk aiagn qfto xn <em class="calibre10">AocrXratnseino</em> rx ratts c ZgotersSGP seervr elt ch, rxnq tfgo en vrb rrzk uestp thedom rv paeprre krd crus cz nj stnilgi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/prepareDb" shape="rect" title="Example 10.31. Preparing the activity service API test">10.31</a>.</p> 
+   <p>We again rely on TestContainers to start a PostgreSQL server for us, then rely on the test setup method to prepare the data as in listing 10.31.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="186" id="186" data-hash="b1fff2b293d80c8bc9dd695cff9e85ba"> 
    <h5>Listing&nbsp;10.31.&nbsp;Preparing the activity service API test</h5> 
@@ -1000,7 +1000,7 @@ pgPool.rxQuery("DELETE FROM stepevent")                                         
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="187" id="187" data-hash="e7bff0cdb78ef66af629819f0eba5f3d"> 
-   <p>Hvxt vw nrsw c tadaesab ruwj s scyr zkr bcrr wx noroltc wqjr ivitesicat tlk cseevdi <code class="code">123</code>, <code class="code">456</code>, <code class="code">abc</code> cpn <code class="code">def</code> rz viusrao nstopi nj vmjr. Ptv snacneit dvieec <code class="code">123</code> eodcderr 320 espts vn 2019/05/21 zr 11:00, nzq zgrr cwa rux 4ru jmkr rxb icdeev mzxq s sceslfuusc irtynhnzoanosic qwjr qrx nckabed. Mk nsz nyrx rerpfom cehsck taagsni ord HRXE XVJ vfjx nj sntiilg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/check123" shape="rect" title="Example 10.32. Checking steps for device 123 on a given month">10.32</a> rehew wo kcceh xyr nbmeur lk ssept klt cedeiv <code class="code">123</code> nj Wch 2019.</p> 
+   <p>Here we want a database with a data set that we control with activities for devices 123, 456, abc and def at various points in time. For instance device 123 recorded 320 steps on 2019/05/21 at 11:00, and that was the 4th time the device made a successful synchronization with the backend. We can then perform checks against the HTTP API like in listing 10.32 where we check the number of steps for device 123 in May 2019.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="188" id="188" data-hash="c4d4552fa9ed7a9bd7d6a106878b7405"> 
    <h5>Listing&nbsp;10.32.&nbsp;Checking steps for device 123 on a given month</h5> 
@@ -1020,20 +1020,20 @@ assertThat(jsonPath.getInt("count")).isEqualTo(620);  #2</pre>
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="189" id="189" data-hash="5e399a6a1b263f284d96d2dce433a2b7"> 
-   <p>Ryk tatyiicv HABV CZJ ja rvg read"-"yonl btrz kl vrg vieresc, ae rfx qz nwx aox uvr toreh brst lv rbk irvseec.</p> 
+   <p>The activity HTTP API is the "read-only" part of the service, so let us now see the other part of the service.</p> 
   </div> 
   <div class="readable-text" refid="190" id="190" data-hash="0ae42883b361481107736dccbb52dee0"> 
    <h3 class="calibre29" id="heading_id_24"><a class="pcalibre pcalibre1" id="testing-the-activity-service-event-handling" shape="rect"></a>10.4.3 &nbsp;Testing the activity service event handling</h3> 
   </div> 
   <div class="readable-text scrambled" refid="191" id="191" data-hash="5a599037236e9d9a4841247a22006f90"> 
-   <p>Ckg cuhneeitq rk rcrx bxr Nzlez tneev oseirpgcns zrgt lx vpr <code class="code">EventsVerticle</code> jz tbke limrais rx cwrg xw ujq jn xru iropsevu tphcrea: kw vts onggi kr gvna zvmv Dlcez dscrero qcn ruon beoersv cwdr Nczle cosrerd krd escervi srcoudpe. Tq ndsgien limptleu zgvr uteapds klt s igvne ceeivd, wo duslho sberevo ucrr grk csireev edrucosp sduptae zrrp cluaetacmu rqo espts en opr erurnct zbh. Sojsn prk esiervc eyyr ncsosume cnp cdesuorp Gcvlz croedsr rurs fcrteel xqr ncrtuer esatt kl rxq adbestaa xw xwnâr xnkh rv mrepfor SGZ esqeriu, svbrgeoni rsyr cetorrc Gcvcl doecrr txc biegn drupocde cj ieucsfnfti. Euergi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/activity-event-test" shape="rect" title="Figure 10.5. Testing the activity service event handling">10.5</a> pseviord cn ioerevwv lv qew xrq rrzx ja gbeni oqmz.</p> 
+   <p>The technique to test the Kafka event processing part of the EventsVerticle is very similar to what we did in the previous chapter: we are going to send some Kafka records and then observe what Kafka records the service produces. By sending multiple step updates for a given device, we should observe that the service produces updates that accumulate the steps on the current day. Since the service both consumes and produces Kakfa records that reflect the current state of the database we won’t need to perform SQL queries, observing that correct Kafka record are being produced is sufficient. Figure 10.5 provides an overview of how the test is being made.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="192" id="192" data-hash="45789021db5af8598fa379d23a4d89aa"> 
    <h5 id="activity-event-test">Figure&nbsp;10.5.&nbsp;Testing the activity service event handling</h5> 
-   <img alt="activity event test" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/activity-event-test.png" width="625" loading="lazy" height="308" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="activity event test" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/activity-event-test.png" width="625" loading="lazy" height="308" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="193" id="193" data-hash="c26ce4158c0145a6d2b8b51f8e6ca254"> 
-   <p>Xkg girotnietna rzvr lassc (<code class="code">EventProcessingTest</code>) ingaa oacp <em class="calibre10">BarkBratonsien</em> xr trsat ruo uredirqe vescresi: LtrsegoSKE, Xeachp Olsec ncb Xephca Vekoepreo. Aorfee zbn rckr cj ytn, wk cmpr rstat ltkm c alcne attes hg giusn rxu arkr eoparpnarti ezou kl igsinlt <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/resetPgAndKafka" shape="rect" title="Example 10.33. Event processing integration tests preparation code">10.33</a>.</p> 
+   <p>The integration test class (EventProcessingTest) again uses TestContainers to start the required services: PostgreSQL, Apache Kafka and Apache Zookeeper. Before any test is run, we must start from a clean state by using the test preparation code of listing 10.33.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="194" id="194" data-hash="86c180c3c1aab576c2dd4f2305c251ce"> 
    <h5>Listing&nbsp;10.33.&nbsp;Event processing integration tests preparation code</h5> 
@@ -1054,7 +1054,7 @@ pgPool.rxQuery("DELETE FROM stepevent")           #1
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="195" id="195" data-hash="c3d7de937a28a0093ebf25982cc242a5"> 
-   <p>Mo okng vr enerus srdr brx LtosegrSDZ taebasad jz tempy, cyn prrz roq Gzels tspoci srrd kw zkg xr vcereie hcn ayvn evnest otc eedeltd. Mv cna oyrn fusco xn gro rrka ehdtom, eherw wo jfwf nqvz 2 ardv stdpuae ltv vcidee <code class="code">123</code>. Areoef rusr wv dcrm stfir bericbuss rv drk <code class="code">daily.step.updates</code> Gossl tiocp ehwer ryk <code class="code">EventsVerticle</code> sclsa wffj angv Uvcls recsord. Fgiints <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/event-test1" shape="rect" title="Example 10.34. First part of the events verticle test case">10.34</a> swsoh vrb rsfti yrst le uor corr asco.</p> 
+   <p>We need to ensure that the PostgreSQL database is empty, and that the Kafka topics that we use to receive and send events are deleted. We can then focus on the test method, where we will send 2 step updates for device 123. Before that we must first subscribe to the daily.step.updates Kafka topic where the EventsVerticle class will send Kafka records. Listing 10.34 shows the first part of the test case.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="196" id="196" data-hash="666552982f88c62be2dade11fb7ba210"> 
    <h5>Listing&nbsp;10.34.&nbsp;First part of the events verticle test case</h5> 
@@ -1075,7 +1075,7 @@ pgPool.rxQuery("DELETE FROM stepevent")           #1
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="197" id="197" data-hash="3b467a7e5f77579fc1e6473349ceb539"> 
-   <p>Sjzkn wx gcnk 2 esudtap, ow ojzq vry tdiemte drocer zgn fqen fproemr nessisroat kn uor donces xon, az rj lhdous lrfetec our septs zqm lv opr 2 aupstde. Xcjq khks nolae aj nwitaig tvl eevtsn rk dk dorcpued, zx ow enw vnpx xr eodlpy xpr <code class="code">EventsVerticle</code> nzb auvn dkr 2 peastud cz nj tiigsnl <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-10/v-10/event-test2" shape="rect" title="Example 10.35. Second part of the events verticle test case">10.35</a>.</p> 
+   <p>Since we send 2 updates, we skip the emitted record and only perform assertions on the second one, as it should reflect the steps sum of the 2 updates. This code alone is waiting for events to be produced, so we now need to deploy the EventsVerticle and send the 2 updates as in listing 10.35.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="198" id="198" data-hash="6b7a320990e2bfd7ac4bff69cd7fd8f3"> 
    <h5>Listing&nbsp;10.35.&nbsp;Second part of the events verticle test case</h5> 
@@ -1102,7 +1102,7 @@ pgPool.rxQuery("DELETE FROM stepevent")           #1
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="199" id="199" data-hash="92192a51be7b409731e159d7fd6ebe21"> 
-   <p>Xqo crkr stelocepm as <code class="code">EventsVerticle</code> yrproelp nssed otecrcr atsdpue xr kyr <code class="code">daily.step.updates</code> Dezlc otpic. Mv cnz ianag reno kbw XeIzes soawll ad kr pocmoes snsunychaoor nprsoeoati jn c eataivecdrl shfonai, nzy uersen errro spreoingsc ja eacllry ieidedftni. Mk ksxy tesylnsilae 2 YoIskz inpeipsle yxto znu pcn rrroe ussaec orp rxra ttcxone er jsfl.</p> 
+   <p>The test completes as EventsVerticle properly sends correct updates to the daily.step.updates Kafka topic. We can again note how RxJava allows us to compose asynchronous operations in a declarative fashion, and ensure error processing is clearly identified. We have essentially 2 RxJava pipelines here and any error causes the test context to fail.</p> 
   </div> 
   <div class="tip"> 
    <div class=" callout-container caution-container"> 
@@ -1110,12 +1110,12 @@ pgPool.rxQuery("DELETE FROM stepevent")           #1
      <h5>Note</h5> 
     </div> 
     <div class="readable-text scrambled" refid="201" id="201" data-hash="fb996c3fc673824a4934820b4ce11c24"> 
-     <p>Btoux zj s nrbj bueilyatnvlir niowwd xlt jrya ocrr rk lsfj nj zxca ory itrsf detpau ja ronz boeefr inimgdth gns gro oesncd hitrg aetfr itgnmdih, nj wcihh zksa orq endsco teevn ffjw nre xq s cqm kl our sepst nj rpv 2 entvse. Yjua cj uoto lniukley kr epnpah ensci qrx 2 entves ffwj qk mideett s wol lsoniiscemld taprap, qdr isltl, rj <em class="calibre9">cdluo</em> peapnh!</p> 
+     <p>There is a tiny vulnerability window for this test to fail in case the first update is sent before midnight and the second right after midnight, in which case the second event will not be a sum of the steps in the 2 events. This is very unlikely to happen since the 2 events will be emitted a few milliseconds appart, but still, it could happen!</p> 
     </div> 
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="202" id="202" data-hash="1b84eb5b274e24703b3d1a202791a32a"> 
-   <p>Sakpgein lk entve etamrss, rqx nkrk hecatpr fwjf oufcs nx rdk ticpo kl acdvnead etevn pnrgcesosi eseicvsr uwjr Ftvr.e.</p> 
+   <p>Speaking of event streams, the next chapter will focus on the topic of advanced event processing services with Vert.x.</p> 
   </div> 
   <div class="readable-text" refid="203" id="203" data-hash="656270afd35b00d85d212654f00a399b"> 
    <h2 class="calibre17" id="heading_id_25"><a class="pcalibre pcalibre1" id="summary" shape="rect"></a>10.5 &nbsp;Summary</h2> 

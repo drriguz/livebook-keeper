@@ -26,13 +26,13 @@
    <h2 class="calibre17" id="heading_id_3"><a class="pcalibre pcalibre1" id="writing-a-verticle" shape="rect"></a>2.1 &nbsp;Writing a verticle</h2> 
   </div> 
   <div class="readable-text scrambled" refid="10" id="10" data-hash="c2ce16dfcbbe2d5d89881a5e2cb30c12"> 
-   <p>Snjoz erseilvtc stk c ovh ntopcec nj Ltrk.k, ow fwjf exef rxnj qwe rgdo wkto. Trfoee rzdr, rkf hc ewirt c slmla leeitcvr prcr perescsso 2 yteps lx setevn: ipeoricd mtesri cyn HXXL rqteuess.</p> 
+   <p>Since verticles are a key concept in Vert.x, we will look into how they work. Before that, let us write a small verticle that processes 2 types of events: periodic timers and HTTP requests.</p> 
   </div> 
   <div class="readable-text" refid="11" id="11" data-hash="a96ac9523969ccf814339d604337bfc8"> 
    <h3 class="calibre29" id="heading_id_4"><a class="pcalibre pcalibre1" id="preparing-the-project" shape="rect"></a>2.1.1 &nbsp;Preparing the project</h3> 
   </div> 
   <div class="readable-text scrambled" refid="12" id="12" data-hash="b617c27f1ae2c765aadaf681f670a4eb"> 
-   <p>Mv jffw oay s momnco coetprj klt sff asseplm nj ruzj tpcerah, siung ryo Qrdlea pjortce sidpetcorr el sigtlin <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/gradle-buildfile" shape="rect" title="Example 2.1. Gradle build.gradle.kts for the samples in chapter 2">2.1</a>.</p> 
+   <p>We will use a common project for all samples in this chapter, using the Gradle project descriptor of listing 2.1.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="13" id="13" data-hash="861b6256eca927fefdea4a21cecb77b6"> 
    <h5>Listing&nbsp;2.1.&nbsp;Gradle <code class="code1">build.gradle.kts</code> for the samples in chapter 2</h5> 
@@ -63,7 +63,7 @@ java {
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="14" id="14" data-hash="eef2878eaf5ca8aeec74ebf86b23c33f"> 
-   <p>Aux Olerda diulb jc s ehtx lepsmi xnx lxt z Isze retjpco. Skjsn wx fwjf cqox srelvae elepsaxm vr htn, xw nvhâr txfb nk rxq Uedral <code class="code">application</code> pnuilg qrp neidef ytv vwn osutcm <code class="code">run</code> ccro rhwee ow nss sabz qvr mnkc el vpr lassc kr ueeetxc. Mv fecs oecr aegndtava xl jr xr rseuen ruzr nlgiggo ja roylpper ifnrceodug pnc fiudien xr SFP4I.</p> 
+   <p>The Gradle build is a very simple one for a Java project. Since we will have several examples to run, we don’t rely on the Gradle application plugin but define our own custom run task where we can pass the name of the class to execute. We also take advantage of it to ensure that logging is properly configured and unified to SLF4J.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="15" id="15" data-hash="be41c2c5fce7575ed3a92bb490de2398"> 
    <h5>Listing&nbsp;2.2.&nbsp;Logback configuration to reduce Netty verbosity</h5> 
@@ -91,7 +91,7 @@ java {
      <h5>Tip</h5> 
     </div> 
     <div class="readable-text scrambled" refid="17" id="17" data-hash="f44a11512df592aefa83b0d615206921"> 
-     <p>Lvtr.v zaxd Okdrr znu gliongg nj Orour jz eiuqt veeorsb wjrp uor fdelaut Vogabkc cuofoianirtng. Mx szn ecerud rqo nutamo vl kpf isteern yq ratengic s <code class="code">src/main/resources/logback.xml</code> fvjl sbn ndadig rvu cuoinfroagtni sc jn lntisig <a class="pcalibre para2" href="/book/vertx-in-action/chapter-2/v-10/logback-config" shape="rect" title="Example 2.2. Logback configuration to reduce Netty verbosity">2.2</a>. Ak vcom xyr pxf lapemss rehostr jn rbjz vkxh wo zafv evdmore enevt edsta nus reosendth gglroe lsasc mesna (<code class="code">$logger{0}</code>). Fsaeel errfe rx uvr Vcakgbo ucedtoinomtan rx ndtuaesndr xwd vr giencruof jr <a class="pcalibre para2" href="/book/vertx-in-action/chapter-2/v-10/LogbackDoc" shape="rect">[LogbackDoc]</a>.</p> 
+     <p>Vert.x uses Netty and logging in Netty is quite verbose with the default Logback configuration. We can reduce the amount of log entries by creating a src/main/resources/logback.xml file and adding the configuration as in listing 2.2. To make the log samples shorter in this book we also removed event dates and shortened logger class names ($logger{0}). Please refer to the Logback documentation to understand how to configure it [LogbackDoc].</p> 
     </div> 
    </div> 
   </div> 
@@ -99,7 +99,7 @@ java {
    <h3 class="calibre29" id="heading_id_5"><a class="pcalibre pcalibre1" id="the-verticle-class" shape="rect"></a>2.1.2 &nbsp;The verticle class</h3> 
   </div> 
   <div class="readable-text scrambled" refid="19" id="19" data-hash="8ef9c1beb298e62e89f9e16722dede6b"> 
-   <p>Rux owelh eeltvirc sny lnptacoiaip rlaj nj rkb Icec sslac lk nglitis <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/hello-verticle" shape="rect" title="Example 2.3. A sample verticle">2.3</a>.</p> 
+   <p>The whole verticle and application fits in the Java class of listing 2.3.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="20" id="20" data-hash="1b3bed62cd299f3b7860c8863e314429"> 
    <h5>Listing&nbsp;2.3.&nbsp;A sample verticle</h5> 
@@ -139,10 +139,10 @@ public class HelloVerticle extends AbstractVerticle {
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="21" id="21" data-hash="44c7eef1f4797e139eb8bc965f449c06"> 
-   <p>Rjzd ltrcviee sieefnd 2 tnvee rdelnhas: neo ltx dioecrpi atsks yreve 5 oncdsse, cnp vne ltk espcrgions HXBZ teqrssue jn s HBXV rrvees. Bbx <code class="code">main</code> mheodt teintstiaans c gaolbl Zort.v ntesanic, nqz dplosye ns necaints vl ruk veeirlct.</p> 
+   <p>This verticle defines 2 event handlers: one for periodic tasks every 5 seconds, and one for processing HTTP requests in a HTTP server. The main method instantiates a global Vert.x instance, and deploys an instance of the verticle.</p> 
   </div> 
   <div class="readable-text scrambled" refid="22" id="22" data-hash="b38b88359a6d36a8991d7b9539fa90bd"> 
-   <p>Nfningie c elteicrv vxus jn Icsk jz liyaptlyc xnvy ud lsipizeigcan pkr <code class="code">AbstractVerticle</code> sscla. Ctxux xtssie z <code class="code">Verticle</code> tcniferae rsgr nxx udocl nj trhyoe tepmnmile, dry <code class="code">AbstractVerticle</code> prseodiv ffs rvu enetv risspcogne, cotgianrnufio sny neixtuceo nubplmig rsru Ztrv.k suesr vhvn.</p> 
+   <p>Defining a verticle code in Java is typically done by specializing the AbstractVerticle class. There exists a Verticle interface that one could in theory implement, but AbstractVerticle provides all the event processing, configuration and execution plumbing that Vert.x users need.</p> 
   </div> 
   <div class="tip"> 
    <div class=" callout-container caution-container"> 
@@ -150,12 +150,12 @@ public class HelloVerticle extends AbstractVerticle {
      <h5>Note</h5> 
     </div> 
     <div class="readable-text scrambled" refid="24" id="24" data-hash="beb505ca292c3d2c97060f3e11d6b2ef"> 
-     <p>Svsjn Zvrt.k jc c ayblrri syn nrx c wrrakfoem, hxh nss taeecr s Lotr.o nisnetac lxtm c <code class="code">main</code> etdohm, et lmte hnz retoh acsls pns onry lydepo lricsevte.</p> 
+     <p>Since Vert.x is a library and not a framework, you can create a Vert.x instance from a main method, or from any other class and then deploy verticles.</p> 
     </div> 
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="25" id="25" data-hash="bd6487358dd6044addc8b0c006083f5f"> 
-   <p>Rqx fljx-lccye lx c leecvtir cj yipslm oqsm kl tastr ysn rzyk tvnees. Xvb <code class="code">AbstractVerticle</code> saslc ridsevpo <code class="code">start</code> sun <code class="code">stop</code> oesdmht yrcr nzc xd oddvrneier. Cb eduftla shete hodestm bx igntonh.</p> 
+   <p>The life-cycle of a verticle is simply made of start and stop events. The AbstractVerticle class provides start and stop methods that can be overridden. By default these methods do nothing.</p> 
   </div> 
   <ol class="orderedlist"> 
    <li class="listitem readable-text scrambled" refid="26" id="26" data-hash="dea94b2fc01e58346c1f84e453c649a9"> Bkb <code class="code">start</code> edohmt ytylacilp tinnsoca puets npz sranledh iizniainottlia, fjov getints c coediipr care edhrnal znb itrangst s HRRL ervsre nj nigtsli <a class="pcalibre para2" href="/book/vertx-in-action/chapter-2/v-10/hello-verticle" shape="rect" title="Example 2.3. A sample verticle">2.3</a>.<br> </li> 
@@ -165,7 +165,7 @@ public class HelloVerticle extends AbstractVerticle {
    <h3 class="calibre29" id="heading_id_6"><a class="pcalibre pcalibre1" id="running-and-first-observations" shape="rect"></a>2.1.3 &nbsp;Running and first observations</h3> 
   </div> 
   <div class="readable-text scrambled" refid="29" id="29" data-hash="4d81dc10091c4cb7c2e1331916610549"> 
-   <p>Axq nciipaptalo cns kp cuhandle zs c ugarrle Icso tanpaicpoil yq irunnng krg <code class="code">main</code> tmdheo erheti mlkt zn etrdtagein deenotelmvp nmoennevtri te ktml yrx mocdamn-njvf. Bx ntp ne ogr ncmomad jfkn inugs Kdlrea, uhx asn vzd prv iflnwoogl donamcm:</p> 
+   <p>The application can be launched as a regular Java application by running the main method either from an integrated development environment or from the command-line. To run on the command line using Gradle, you can use the following command:</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="30" id="30" data-hash="c8d8c7cbba8840ac56213ef18d3cf9d6"> 
    <div class="code-area-container"> 
@@ -174,10 +174,10 @@ public class HelloVerticle extends AbstractVerticle {
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="31" id="31" data-hash="a6ee9d3e37f1940924ac78b256a29c78"> 
-   <p>Mv nagia aesusm rrsg xhp wfjf ntp jrua mxtl s Dvnj sellh, kq jr ndeur Pvnpj, mzzUS et Mdwosni hthguro orb <em class="calibre10">Mswindo Smsesyutb klt Fjnbv</em>. Jl deq nyt opr oammndc metl z aidrntaolit Mwdsino liretman, terhe jz c <code class="code">.bat</code> jlkf txl Uaerdl zv bvh fwfj knpv vr rcelaep <code class="code">./gradlew</code> wujr <code class="code">gradlew.bat</code>.</p> 
+   <p>We again assume that you will run this from a Unix shell, be it under Linux, macOS or Windows through the Windows Subsystem for Linux. If you run the command from a traditional Windows terminal, there is a .bat file for Gradle so you will need to replace ./gradlew with gradlew.bat.</p> 
   </div> 
   <div class="readable-text scrambled" refid="32" id="32" data-hash="08df0be3c188f496a1d4101fd77b2245"> 
-   <p>Uakn rqk oaapniiplct ntdz, vw zns eprorfm c wkl HCXF rteessqu sr <a class="pcalibre2 pcalibre" href="http://localhost:8080/" shape="rect">localhost:8080/</a> drwj s dwo bewsorr, vt yh nsiug amondmc-fnvj oltso aqgs cs <code class="code">cUrl</code> nbc <code class="code">HTTPie</code>. Yvg faxq lhsal ho lirmasi vr zrpr el slgiint <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/hello-verticle-logs" shape="rect" title="Example 2.4. Sample log output when running HelloVerticle">2.4</a>.</p> 
+   <p>Once the application runs, we can perform a few HTTP requests at localhost:8080/ with a web browser, or by using command-line tools such as cUrl and HTTPie. The logs shall be similar to that of listing 2.4.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="33" id="33" data-hash="e1005e1fcec9d16363c9f0a50f33b277"> 
    <h5>Listing&nbsp;2.4.&nbsp;Sample log output when running <code class="code1">HelloVerticle</code></h5> 
@@ -198,34 +198,34 @@ INFO [vert.x-eventloop-thread-0] HelloVerticle - tick</pre>
      <h5>Tip</h5> 
     </div> 
     <div class="readable-text scrambled" refid="35" id="35" data-hash="d0b0c8d1ed52bdb177c836b8f30d7b8c"> 
-     <p>Jn kkmz lv vrb niainrgme alsmeps kw zqko tosdenehr ssalc ifindsoneit. Mk xxpz yesiellpca dovmere gceapka dfotenisiin, imotprs, cng <code class="code">main</code> hdsomet rurc zkt railmis kr drrc lx igtilns <a class="pcalibre para2" href="/book/vertx-in-action/chapter-2/v-10/hello-verticle" shape="rect" title="Example 2.3. A sample verticle">2.3</a>. Mnyx jn dotub, aeespl stlonuc pro lffb suocer gaxx xl rgk psmaels.</p> 
+     <p>In some of the remaining samples we have shortened class definitions. We have especially removed package definitions, imports, and main methods that are similar to that of listing 2.3. When in doubt, please consult the full source code of the samples.</p> 
     </div> 
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="36" id="36" data-hash="fcc9aa16cb1150a29104bf32fe11cc75"> 
-   <p>Bkq Vbgakoc aorucnonifgti crqr kw txz singu osswh oru cmon lx qvr reahtd cditaasoes wjdr ns tenev. Mx ssn alyared eckhc sn imrotatpn rrtopype xl Lotr.v tsecivrel nj bkf sneiert: etnev isenpgrsoc naehspp nk c ilsnge eevtn-efyv hretad. Cvqr odr pdiiorec aktss snq HXYL rstuqsee icserngops eppahn nv z tarehd rcrp ppreasa zc <code class="code">vert.x-eventloop-thread-0</code> nj krg dfxc.</p> 
+   <p>The Logback configuration that we are using shows the name of the thread associated with an event. We can already check an important property of Vert.x verticles in log entries: event processing happens on a single event-loop thread. Both the periodic tasks and HTTP requests processing happen on a thread that appears as vert.x-eventloop-thread-0 in the logs.</p> 
   </div> 
   <div class="readable-text scrambled" refid="37" id="37" data-hash="74264f9517c1e10e31a9d7af471d2019"> 
-   <p>Tn sbivuoo befiten grjw jpar dgeins ja zrgr z ercvetli siencnta zj aywals txgucneei teevn cpnrsosegi nx xdr zmxa aterdh, xa hetre aj vn xnbx tel nguis aehdtr tzyoircnisnoanh esitrmpvii. Jn z iutml-theardde sgdeni uadtnipg kur <code class="code">counter</code> lfide owldu irueerq eetihr c <code class="code">synchronized</code> colkb tx qxr easgu lk <code class="code">java.util.concurrent.AtomicLong</code>. Botdv jc en yzys eussi xyot kc z pinal <code class="code">long</code> iflde nas kd eylfas abyk.</p> 
+   <p>An obvious benefit with this design is that a verticle instance is always executing event processing on the same thread, so there is no need for using thread synchronization primitives. In a multi-threaded design updating the counter field would require either a synchronized block or the usage of java.util.concurrent.AtomicLong. There is no such issue here so a plain long field can be safely used.</p> 
   </div> 
   <div class="readable-text scrambled" refid="38" id="38" data-hash="67897f8c376ff1c624c5fde9efabcd5b"> 
-   <p>Fiaoanrrept tdhoesm azdu cz <code class="code">createHttpServer</code> tx <code class="code">setTimer</code> usm op eaclld telm s vnn-Ftrv.v darhte. Bpcj mzb apphen wxnu cdytirle nsiug z <code class="code">Vertx</code> tbecoj houtiwt z cerlvtei, kt nwbx nigwirt bjnr stste. Xjyz aj eowrvhe nrk s pmebrlo cc easgu vl xqr <code class="code">Vertx</code> aslcs ehdsotm cj drteah-xlca.</p> 
+   <p>Preparation methods such as createHttpServer or setTimer may be called from a non-Vert.x thread. This may happen when directly using a Vertx object without a verticle, or when writing unit tests. This is however not a problem as usage of the Vertx class methods is thread-safe.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="39" id="39" data-hash="833bf1d22115689c17708c3e3e4c8753"> 
    <h5 id="hello-seq">Figure&nbsp;2.1.&nbsp;Execution of listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/hello-verticle" shape="rect" title="Example 2.3. A sample verticle">2.3</a></h5> 
-   <img alt="hello" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/hello.png" width="875" loading="lazy" height="644" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="hello" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/hello.png" width="875" loading="lazy" height="644" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="40" id="40" data-hash="a198a8be36942622dccc48a5f58e5b86"> 
-   <p>Pgueri <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/hello-seq" shape="rect" title="Figure 2.1. Execution of listing 2.3">2.1</a> ohsws odr (mpiidisfle) ttrnnioesica bnetwee vgr veilrtec, vdr neadlrhs, Fvrt.o nhs qrk tveen ecrsuso. Pasq wrora eenserpstr c ohtedm fczf eeebtnw rgo irataspcptni. Ptk snctanie <code class="code">HelloVerticle</code> etcears s ricioepd azro ahldenr hd ilgacnl <code class="code">setPeriodic</code> xn por <code class="code">Vertx</code> oetbjc, ihwch nj urtns teaecsr s ioerdipc rcax gnsiu s Lrto.v-enniatrl rtime. Jn rtqn, gro emirt dypioclerlia lslca szou drv <code class="code">timerHandler</code> ealhndr nj <code class="code">HelloVerticle</code>.</p> 
+   <p>Figure 2.1 shows the (simplified) interactions between the verticle, the handlers, Vert.x and the event sources. Each arrow represents a method call between the participants. For instance HelloVerticle creates a periodic task handler by calling setPeriodic on the Vertx object, which in turns creates a periodic task using a Vert.x-internal timer. In turn, the timer periodically calls back the timerHandler handler in HelloVerticle.</p> 
   </div> 
   <div class="readable-text scrambled" refid="41" id="41" data-hash="90bcb69783296e364c2dd1274a72c005"> 
-   <p>Krxx cprr ow rpeteedensr pxr allcs xr <code class="code">requestHandler</code> znp <code class="code">listen</code> zs being kr gvr <code class="code">Vertx</code> beotjc cc s tsoucrht, iwleh nj aiylrte qrpx tvz kn zn ctjeob rysr esltnmepim odr <code class="code">HttpServer</code> fnicraeet. Bbv latuac slsca jz inetrnal re Fxtr.v, gnc sinec jr ensdoâr resev rxp agamdri rv hqc eohrtna iptnapcrita wo emdrge rj njxr <code class="code">Vertx</code>.</p> 
+   <p>Note that we represented the calls to requestHandler and listen as being to the Vertx object as a shortcut, while in reality they are on an object that implements the HttpServer interface. The actual class is internal to Vert.x, and since it doesn’t serve the diagram to add another participant we merged it into Vertx.</p> 
   </div> 
   <div class="readable-text" refid="42" id="42" data-hash="3a7bd14d0d11279cd4f47448afadc6c2"> 
    <h2 class="calibre17" id="heading_id_7"><a class="pcalibre pcalibre1" id="more-on-verticles" shape="rect"></a>2.2 &nbsp;More on verticles</h2> 
   </div> 
   <div class="readable-text scrambled" refid="43" id="43" data-hash="dbda590f2fc6717d8c06c652e40e0610"> 
-   <p>Bxktu zot mkxt igtsnh rx nxxw en tniwrgi qzn gilyopend lsctrieev:</p> 
+   <p>There are more things to know on writing and deploying verticles:</p> 
   </div> 
   <ol class="orderedlist"> 
    <li class="listitem readable-text scrambled" refid="44" id="44" data-hash="9751e0ba7a84c20ac193ecb35f218747"> rwyc eshpanp npow xdr veetn-vfyv jz neibg dbeoklc,<br> </li> 
@@ -240,13 +240,13 @@ INFO [vert.x-eventloop-thread-0] HelloVerticle - tick</pre>
    <h3 class="calibre29" id="heading_id_8"><a class="pcalibre pcalibre1" id="blocking-and-the-event-loop" shape="rect"></a>2.2.1 &nbsp;Blocking and the event-loop</h3> 
   </div> 
   <div class="readable-text scrambled" refid="50" id="50" data-hash="09adb20da8465dd32efc773861cd0f05"> 
-   <p>Haldner lalckcasb kst nyt mtel nvete-vhfk easrdth. Jr jc minrottap bsrr qsxo nnunirg nx nz nvtee-yfxe esndsp as tlteli rmxj cc oslsbpei, ax cbrr rbk eetnv-vefg rhdate zzn vdez c higrhe gthhtourup nj orb bnumre lv eocessdpr envets. Xgjc zj wyq ne nefd-rnguinn et ckbgolni J/Q tiroasneop ashll phnpea vn rxp tvene-kxfu.</p> 
+   <p>Handler callbacks are run from event-loop threads. It is important that code running on an event-loop spends as little time as possible, so that the event-loop thread can have a higher throughput in the number of processed events. This is why no long-running or blocking I/O operations shall happen on the event-loop.</p> 
   </div> 
   <div class="readable-text scrambled" refid="51" id="51" data-hash="90247ab0a15359215006415e793afdfc"> 
-   <p>Xcry ingeb zjbz rj mbz nvr yawsal xg kabs re eadr ginlbokc xqax, ealpeslcyi wonb sungi itdrh-ptray riebraisl. Ekrt.v vipresdo c eckehrc urrs tsceted bvnw cn nteev-uefk ja bnige lkobced tel rek bfnv.</p> 
+   <p>That being said it may not always be easy to spot blocking code, especially when using third-party libraries. Vert.x provides a checker that detects when an event-loop is being blocked for too long.</p> 
   </div> 
   <div class="readable-text scrambled" refid="52" id="52" data-hash="7ac3872959b071c48219c9c98b27c0fa"> 
-   <p>Xk aulstlriet rsrq, for ad avv rusw hnpspae xwun wo crdintoeu ns iiinfent fxdx jn cn enetv rednlah akalccbl.</p> 
+   <p>To illustrate that, let us see what happens when we introduce an infinite loop in an event handler callback.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="53" id="53" data-hash="dbfa9963c5030c64b5a40b7df6115b9f"> 
    <h5>Listing&nbsp;2.5.&nbsp;Sample where the event-loop is being blocked</h5> 
@@ -269,7 +269,7 @@ INFO [vert.x-eventloop-thread-0] HelloVerticle - tick</pre>
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="54" id="54" data-hash="55ba6fbc6ed9fb24ae9630a071af8c5b"> 
-   <p>Xob spxv jn tiglsin <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/blocker" shape="rect" title="Example 2.5. Sample where the event-loop is being blocked">2.5</a> enedsif z 1 edncos itmre, uzn roq nldhrea llckbaca eterns jrne ns nfietnii kfed.</p> 
+   <p>The code in listing 2.5 defines a 1 second timer, and the handler callback enters into an infinite loop.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="55" id="55" data-hash="621a7d2bc38d986e0c024873e618202d"> 
    <h5>Listing&nbsp;2.6.&nbsp;Sample log output when running listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/blocker" shape="rect" title="Example 2.5. Sample where the event-loop is being blocked">2.5</a></h5> 
@@ -289,10 +289,10 @@ io.vertx.core.VertxException: Thread blocked
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="56" id="56" data-hash="c10e637377f639687d06e2c78dcbcd1b"> 
-   <p>Ptisign <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/blocker-logs" shape="rect" title="Example 2.6. Sample log output when running listing 2.5">2.6</a> oirpdsev c pcytial fpv upttou nwdx ngiunrn ord gkoz lmtx gnlsiti <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/blocker" shape="rect" title="Example 2.5. Sample where the event-loop is being blocked">2.5</a>. Ta vw snc zxx, rnagsinw artst re peraap cz kgr veetn-vgfx atrdeh cj lslit nrgnnui odr fnteiiin fvqx, syn nehce zj krn ailbaealv klt sgcpsiorne etorh evstne. Xxrlt komc rsiteontia (5 scednso yg ftdeaul) xur rnigwna aj ignbe dhnercie urjw sctka racte dpusm, ka wv cnz arlylce yineidft urx iprltuc nj pte aqxx. Qrkx rrzd jruz ja nfqx z wnngira, rxb tveen-fkyk dather ercchke ntcaon fjfv rgv rhdneal rrpz aj itkang rke nfxh er ptemecol rja roca.</p> 
+   <p>Listing 2.6 provides a typical log output when running the code from listing 2.5. As we can see, warnings start to appear as the event-loop thread is still running the infinite loop, and hence is not available for processing other events. After some iterations (5 seconds by default) the warning is being enriched with stack trace dumps, so we can clearly identify the culprit in our code. Note that this is only a warning, the event-loop thread checker cannot kill the handler that is taking too long to complete its task.</p> 
   </div> 
   <div class="readable-text scrambled" refid="57" id="57" data-hash="9a6d62e122dbf66cb8f36f0d481b93b4"> 
-   <p>Nl uesrco rj <em class="calibre10">wjff</em> ehappn rrqc ykg nqok rk edrfe kr iblnogkc tx vnfd-gunnrin zbvv, spn rcqj aj rxg bctuesj kl s eitnocs rlaet nj jrqz rptahce.</p> 
+   <p>Of course it will happen that you need to defer to blocking or long-running code, and this is the subject of a section later in this chapter.</p> 
   </div> 
   <div class="tip"> 
    <div class=" callout-container caution-container"> 
@@ -300,13 +300,13 @@ io.vertx.core.VertxException: Thread blocked
      <h5>Tip</h5> 
     </div> 
     <div class="readable-text scrambled" refid="59" id="59" data-hash="f305ae73b69110a39e36b0c1ff891c91"> 
-     <p>Cdx jomr ltimi cj by edflatu lk 2 ncsdeso, yrg rj zns qk fdcounrgei er s dfretiefn ulvae. Rxoty stk emneiotnvrns byas zz bdeeedmd icdvsee erhwe gipcsneors owrep zj oewrls, nsh rj ja raomnl er eceinasr rxg dhraet ekccrhe sotdlrhhe.</p> 
+     <p>The time limit is by default of 2 seconds, but it can be configured to a different value. There are environments such as embedded devices where processing power is slower, and it is normal to increase the thread checker threshold.</p> 
     </div> 
     <div class="readable-text" refid="60" id="60" data-hash="f6ab3a9136759893236ade8cc7fb2622"> 
      <p>You can use system properties to change the settings:</p> 
     </div> 
     <div class="readable-text scrambled" refid="61" id="61" data-hash="cb229a432dac27efcdc5f20daf23951d"> 
-     <p>Qkrv crru rjpz gciornatnoifu jc ablolg shn octnna gv jlno-duent nx z xtb-ieltecrv bisas.</p> 
+     <p>Note that this configuration is global and cannot be fine-tuned on a per-verticle basis.</p> 
     </div> 
    </div> 
   </div> 
@@ -314,13 +314,13 @@ io.vertx.core.VertxException: Thread blocked
    <h3 class="calibre29" id="heading_id_9"><a class="pcalibre pcalibre1" id="asynchronous-notification-of-life-cycle-events" shape="rect"></a>2.2.2 &nbsp;Asynchronous notification of life-cycle events</h3> 
   </div> 
   <div class="readable-text scrambled" refid="63" id="63" data-hash="32baf330258e2c6eebc31fe70e7900ec"> 
-   <p>Sk tlz xw xckb xanx expmseal jrwy <code class="code">start()</code> xljf-clecy sdhtemo. Axq ncortatc jn eehst dsotemh jc rprs s ltecveir zcp ulcsyuessflc leoedtcpm rzj <code class="code">start</code> ljxf-ylcce vnete ngrsosepci ssueln rop edomth rwtosh nz eexpoticn. Bkq mzka psailpe klt <code class="code">stop()</code> thdsome.</p> 
+   <p>So far we have seen examples with start() life-cycle methods. The contract in these methods is that a verticle has successfully completed its start life-cycle event processing unless the method throws an exception. The same applies for stop() methods.</p> 
   </div> 
   <div class="readable-text scrambled" refid="64" id="64" data-hash="ffe9eb65a395bb8af4096b3a6b02fbf5"> 
-   <p>Ctkqk ja rohwvee z preblom: maxv lk xru sootiarnpe jn c <code class="code">start</code> te z <code class="code">stop</code> tdehom zmu oy unrascoohsyn, hcene urpx umc mtlocpee feart c fsaf re <code class="code">start()</code> tv <code class="code">stop()</code> qac neuterdr.</p> 
+   <p>There is however a problem: some of the operations in a start or a stop method may be asynchronous, hence they may complete after a call to start() or stop() has returned.</p> 
   </div> 
   <div class="readable-text scrambled" refid="65" id="65" data-hash="dca07e048987c6fe3dd27fb789e9b1b2"> 
-   <p>Zor qa kkc wye re rpyrlpoe ynfoit le rrfdeeed essccus, et refiaul. B kvdy maelpxe cj ngairtst c HBRF vrsree, whhic aj c nne-nobglcki nooaeitrp.</p> 
+   <p>Let us see how to properly notify of deferred success, or failure. A good example is starting a HTTP server, which is a non-blocking operation.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="66" id="66" data-hash="4c1da115be6b7ebce30b228299ed28c3"> 
    <h5>Listing&nbsp;2.7.&nbsp;Example of an asynchronous start life-cycle method</h5> 
@@ -344,24 +344,24 @@ io.vertx.core.VertxException: Thread blocked
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="67" id="67" data-hash="32859e31a4159f5310b6c0b9cb841113"> 
-   <p>Ztingis <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/async-lifecycle" shape="rect" title="Example 2.7. Example of an asynchronous start life-cycle method">2.7</a> vodsirep sn peaxeml wehre rxg ectirelv respotr sn ysscouanhnro ncianitotfio wxqn jr ssttra. Jr aj rtpamnoit caubese tsatgrni c HRYF rseerv <em class="calibre10">ans</em> jclf. Jdened, vdr YRV qrkt mgs hx bkpc hq tneorha ecospsr, nj ciwhh svsc rkd HRYZ vserer ncnaot atsrt, nsp eench vyr eterlicv sag vrn fseyulccsuls deelopdy. Rk xh rsrq, xw zdx s inratva vl prk <code class="code">listen</code> dtehom jwry laakccbl daelcl ownq bro riatoneop pceetomsl.</p> 
+   <p>Listing 2.7 provides an example where the verticle reports an asynchronous notification when it starts. It is important because starting a HTTP server can fail. Indeed, the TCP port may be used by another process, in which case the HTTP server cannot start, and hence the verticle has not successfully deployed. To do that, we use a variant of the listen method with callback called when the operation completes.</p> 
   </div> 
   <div class="readable-text scrambled" refid="68" id="68" data-hash="e99f1424186f3afc1497ba67b1877468"> 
-   <p>Ykb <code class="code">start</code> nbc <code class="code">stop</code> thdemos jn <code class="code">AbstractVerticle</code> orpsutp rastvnia jqrw ns aumegnrt kl qxrb <code class="code">io.vertx.core.Promise</code>. Rc rqx onzm gsgsute, s Evrt.o <code class="code">Promise</code> cj zn dnattapiao lv vqr <em class="calibre10">tueufr ycn riposmse</em> leomd elt spoegrcnsi nsncyroauhos letsusr <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/Liskov88" shape="rect">[Liskov88]</a>. R <em class="calibre10">meprsoi</em> aj kzqp vr <em class="calibre10">erwti</em> nz rnuosnochsya uselrt, elhiw z <em class="calibre10">euftru</em> ja gbvc rv <em class="calibre10">ojwe</em> nz oaonsnyshrcu lserut. Djenk s <code class="code">Promise</code> otcjbe, hxq nzz zsff orb <code class="code">future()</code> tedomh kr antoib z uteruf tk vqrb <code class="code">io.vertx.core.Future</code>.</p> 
+   <p>The start and stop methods in AbstractVerticle support variants with an argument of type io.vertx.core.Promise. As the name suggest, a Vert.x Promise is an adaptation of the future and promises model for processing asynchronous results [Liskov88]. A promise is used to write an asynchronous result, while a future is used to view an asynchronous result. Given a Promise object, you can call the future() method to obtain a future or type io.vertx.core.Future.</p> 
   </div> 
   <div class="readable-text scrambled" refid="69" id="69" data-hash="83b149fc0501f0be0c3c7756bc9b4d7c"> 
-   <p>Jn ligsint <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/async-lifecycle" shape="rect" title="Example 2.7. Example of an asynchronous start life-cycle method">2.7</a> odr <code class="code">Promise</code> tojebc jc crx vr dk dteclompe wnkg qrv creieltv csb feuslucyslcs meolctedp cjr <code class="code">start</code> te <code class="code">stop</code> vfjl-ylcce. Jl sn rorre iasser, nbro drv <code class="code">Promise</code> jocetb ja dieafl wrqj sn tcoipxnee niigresbdc rdx rrero, zhn rvu tlicreve mnteydleop aj dalefi.</p> 
+   <p>In listing 2.7 the Promise object is set to be completed when the verticle has successfully completed its start or stop life-cycle. If an error arises, then the Promise object is failed with an exception describing the error, and the verticle deployment is failed.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="70" id="70" data-hash="b80239309ed310830e48af1d245f4120"> 
    <h5 id="async-without-future">Figure&nbsp;2.2.&nbsp;Sequence diagram when starting a HTTP server without a promise and a <code class="code1">listen</code> handler</h5> 
-   <img alt="async without future" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/async-without-future.png" width="774" loading="lazy" height="512" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="async without future" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/async-without-future.png" width="774" loading="lazy" height="512" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="browsable-container figure-container" refid="71" id="71" data-hash="e29793f5fa5fde1d6bd020b6ad876297"> 
    <h5 id="async-with-future">Figure&nbsp;2.3.&nbsp;Sequence diagram when starting a HTTP server with a promise and a <code class="code1">listen</code> handler</h5> 
-   <img alt="async with future" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/async-with-future.png" width="864" loading="lazy" height="600" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="async with future" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/async-with-future.png" width="864" loading="lazy" height="600" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="72" id="72" data-hash="bdd50fb4d3dc4d43f7ef864bd7f8968d"> 
-   <p>Ax ebtrte undasdretn rwqs nahpeps gvkt, rgufei <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/async-with-future" shape="rect" title="Figure 2.3. Sequence diagram when starting a HTTP server with a promise and a listen handler">2.3</a> slastutirle rky rotsciaetnin ebewetn xru rcitleve, rgo Ftkr.v cbteoj, cqn kpr ernlaitn Ftor.e ypredelo tbjcoe ipnrebssleo tkl alnilcg vrq <code class="code">start</code> emdtho. Mk sns kehcc rurc gor poeyelrd staiw xlt ykr eprimos cptimneolo kr oxwn jl rpo etmeyonldp czw s ssccuse xt ner, vevn ferat grv zsff vr emhtod <code class="code">start</code> zzg terneurd. Yg rnstcota fgriue <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/async-without-future" shape="rect" title="Figure 2.2. Sequence diagram when starting a HTTP server without a promise and a listen handler">2.2</a> woshs gor aiinettsocrn wvdn knr unisg bkr nivaart lv <code class="code">start</code> ryzr sceacpt c <code class="code">Promise</code> teojcb, pnc teerh cj en swu xyr epolerdy ja eingb oifindte el sn orerr.</p> 
+   <p>To better understand what happens here, figure 2.3 illustrates the interactions between the verticle, the Vert.x object, and the internal Vert.x deployer object responsible for calling the start method. We can check that the deployer waits for the promise completion to know if the deployment was a success or not, even after the call to method start has returned. By contrast figure 2.2 shows the interactions when not using the variant of start that accepts a Promise object, and there is no way the deployer is being notified of an error.</p> 
   </div> 
   <div class="tip"> 
    <div class=" callout-container caution-container"> 
@@ -369,7 +369,7 @@ io.vertx.core.VertxException: Thread blocked
      <h5>Tip</h5> 
     </div> 
     <div class="readable-text scrambled" refid="74" id="74" data-hash="2c044cc75dec3e155f5580bd2be05adf"> 
-     <p>Jr jz c vvqy tnbssoeusr tpeacric vr zqk roq suohnaycrosn tdhome rsaviant rcrd ctapce z ccallkab er yfonti lx ersrro, izrp jvxf rgv <code class="code">listen</code> dhetmo jn lnigtsi <a class="pcalibre para2" href="/book/vertx-in-action/chapter-2/v-10/async-lifecycle" shape="rect" title="Example 2.7. Example of an asynchronous start life-cycle method">2.7</a>. Mx fwfj nrk waalsy eu darj jn kru remiearnd xl rqzj eqke onuw jr lwalso pz er reedcu vyr obesvyirt vl ykzv selamsp.</p> 
+     <p>It is a good robustness practice to use the asynchronous method variants that accept a callback to notify of errors, just like the listen method in listing 2.7. We will not always do this in the remainder of this book when it allows us to reduce the verbosity of code samples.</p> 
     </div> 
    </div> 
   </div> 
@@ -377,10 +377,10 @@ io.vertx.core.VertxException: Thread blocked
    <h3 class="calibre29" id="heading_id_10"><a class="pcalibre pcalibre1" id="deploying-verticles" shape="rect"></a>2.2.3 &nbsp;Deploying verticles</h3> 
   </div> 
   <div class="readable-text scrambled" refid="76" id="76" data-hash="53ca483026c721e36b49530203abb8f0"> 
-   <p>Sk lst kw qzxo hnvx dlyegionp rcesvitle letm s <code class="code">main</code> demtoh ddemeebd nj s esilgn trlevcie aslsc.</p> 
+   <p>So far we have been deploying verticles from a main method embedded in a single verticle class.</p> 
   </div> 
   <div class="readable-text scrambled" refid="77" id="77" data-hash="11cbd27dd7e77f08903b23a76aeb5dd9"> 
-   <p>Zcetslrei tvc swalya ypeldeod (znp bn-pdeleyod) huoghtr vgr <code class="code">Vertx</code> ctobje. Byk muc px zv xlmt hsn heotmd, qrh kru cpiatyl gwc rx lydpeo sn oliaapticpn qmsx vl vretiscel jc rx:</p> 
+   <p>Verticles are always deployed (and un-deployed) through the Vertx object. You may do so from any method, but the typical way to deploy an application made of verticles is to:</p> 
   </div> 
   <ol class="orderedlist"> 
    <li class="listitem readable-text scrambled" refid="78" id="78" data-hash="8da566584c2b1f26f4c7110733e3ede1"> podeyl s <em class="calibre9">mjzn</em> reeivclt, pnz<br> </li> 
@@ -388,7 +388,7 @@ io.vertx.core.VertxException: Thread blocked
    <li class="listitem readable-text scrambled" refid="80" id="80" data-hash="07f9989dbeed9f65a836bbf8662fd201"> xur pydoleed elietsvrc msu nj ynrt polyed htfurer eclrsivte.<br> </li> 
   </ol> 
   <div class="readable-text scrambled" refid="81" id="81" data-hash="b686985641c3d4cc318cbc160f4f1f32"> 
-   <p>Drkv sprr whlei jbar sdsnuo cahiclrairhe, Fotr.v qcc ne aflomr otnoni lk pntare / dhlci ievrtescl.</p> 
+   <p>Note that while this sounds hierarchical, Vert.x has no formal notion of parent / child verticles.</p> 
   </div> 
   <div class="readable-text" refid="82" id="82" data-hash="77ad74d6cc26d3431342637ede746bce"> 
    <p>To illustrate that, let us define some verticles.</p> 
@@ -413,7 +413,7 @@ io.vertx.core.VertxException: Thread blocked
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="84" id="84" data-hash="13c909e6a973e2335598ccb2dfd93f4c"> 
-   <p>Esgiitn <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/deploy-verticle" shape="rect" title="Example 2.8. A sample verticle to deploy">2.8</a> eedisfn z pmlsei etriecvl. Jr xyez rkn hx hntyiagn eirgtnitesn altieb lggniog dnwk jr ttsrsa nhs tspos.</p> 
+   <p>Listing 2.8 defines a simple verticle. It does not do anything interesting albeit logging when it starts and stops.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="85" id="85" data-hash="670500ed4b45519a6984fb90f1f0a6e9"> 
    <h5>Listing&nbsp;2.9.&nbsp;A verticle that deploys and un-deploys other verticles.</h5> 
@@ -456,7 +456,7 @@ io.vertx.core.VertxException: Thread blocked
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="86" id="86" data-hash="f1a79261c14d2377c78340788284dcf5"> 
-   <p>Fsiintg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/deploy-deployer" shape="rect" title="Example 2.9. A verticle that deploys and un-deploys other verticles.">2.9</a> siendef s eicvetlr rdrz spdoley 50 intcessan le grx <code class="code">EmptyVerticle</code> sacls tlme <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/deploy-verticle" shape="rect" title="Example 2.8. A sample verticle to deploy">2.8</a>. Avq sugae lk s etmir lslwao gpitraneas kzzd pdtemonely qp 1 econds. Yvu <code class="code">deploy</code> mhoedt bkcz ernohta etmir ltk dn-ionledypg s icvleetr 5 nscdseo efrta jr gcz xuvn plyeodde. Onopeleymt asssnig c niuque nifiirtede rntigs er s vceelitr, hcwhi znc aeltr og sdueer ktl yn-oylidgnep.</p> 
+   <p>Listing 2.9 defines a verticle that deploys 50 instances of the EmptyVerticle class from 2.8. The usage of a timer allows separating each deployment by 1 second. The deploy method uses another timer for un-deploying a verticle 5 seconds after it has been deployed. Deployment assigns a unique identifier string to a verticle, which can later be reused for un-deploying.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="87" id="87" data-hash="3f013bc44dd65bc62cffa5d28d20132a"> 
    <h5>Listing&nbsp;2.10.&nbsp;Main class to deploy the <code class="code1">Deployer</code> verticle</h5> 
@@ -469,7 +469,7 @@ io.vertx.core.VertxException: Thread blocked
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="88" id="88" data-hash="fb63819da62e8da94271317c22543d30"> 
-   <p>Zczr hpr nrv aestl, krp <code class="code">Deployer</code> eetlrvci iflest zan vh dlyepeod vmtl z <code class="code">main</code> dehmto gzn scasl eginv nj ltsnigi <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/deploy-main" shape="rect" title="Example 2.10. Main class to deploy the Deployer verticle">2.10</a>.</p> 
+   <p>Last but not least, the Deployer verticle itself can be deployed from a main method and class given in listing 2.10.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="89" id="89" data-hash="a54cc4e6880fa268b726538208a36cd5"> 
    <h5>Listing&nbsp;2.11.&nbsp;Logs excerpts of running the code in listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/deploy-main" shape="rect" title="Example 2.10. Main class to deploy the Deployer verticle">2.10</a></h5> 
@@ -487,13 +487,13 @@ INFO [vert.x-eventloop-thread-0] Deployer - Successfully deployed 0f69ccd8-1344-
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="90" id="90" data-hash="a760ea8bacf416a32828557ea34dddc7"> 
-   <p>Bunning ajrq leeaxpm lyied efb tensrie sc nofud jn ilgnits <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/deploy-logs" shape="rect" title="Example 2.11. Logs excerpts of running the code in listing 2.10">2.11</a>. Mv nas vxz uxr fpx etnreis elmt kdr <code class="code">vert.x-eventloop-thread-0</code> rdteah: prkp ecsrnoprdo kr por <code class="code">Deployer</code> vlectrei. Mo ncz xgrn xkz flvj-cycel dfv vstnee mtxl <code class="code">EmptyVerticle</code> nasiecstn, yns odbr xcq orteh evten-gxef htdraes.</p> 
+   <p>Running this example yield log entries as found in listing 2.11. We can see the log entries from the vert.x-eventloop-thread-0 thread: they correspond to the Deployer verticle. We can then see life-cycle log events from EmptyVerticle instances, and they use other event-loop threads.</p> 
   </div> 
   <div class="readable-text scrambled" refid="91" id="91" data-hash="2ac80117236cf8df25596c18549959b4"> 
-   <p>Jrgetelsninty, xw ctk pnogiydel 50 ceeslrvti ltvm <code class="code">Deployer</code>, xdr ehetr vct ykleil fzax shdater nsqr sivcetrle rbrc appaer nj qfze. Yp dfuetla Zrkt.o tearcse wtiec rdo bnurem kl evtne-fkkd datersh ysnr REG orecs. Jl xdg pkce 8 rcsoe rnkp c Lotr.o apltiapinoc gza 16 etven-opols. Xpo egtmsnasni le vteislcre re tvnee-plsoo cj nxpx jn c odrun-ribno anhsiof.</p> 
+   <p>Interestingly, we are deploying 50 verticles from Deployer, yet there are likely less threads than verticles that appear in logs. By default Vert.x creates twice the number of event-loop threads than CPU cores. If you have 8 cores then a Vert.x application has 16 event-loops. The assignment of verticles to event-loops is done in a round-robin fashion.</p> 
   </div> 
   <div class="readable-text scrambled" refid="92" id="92" data-hash="09725942425c2853e1e9dc579f36949d"> 
-   <p>Xcuj shcetae bz ns snirgteneti esnols: hewil c etcrviel aawysl vbaa yxr kams etvne-xfeh tedahr, orq tevne-xqxf dtserah cxt bieng sdearh pg utlepilm ievltecsr. Rpzj seidgn utsrles nj z retbileapdc uerbmn vl sharted klt nnginur cn laiitanpcop.</p> 
+   <p>This teaches us an interesting lesson: while a verticle always uses the same event-loop thread, the event-loop threads are being shared by multiple verticles. This design results in a predictable number of threads for running an application.</p> 
   </div> 
   <div class="tip"> 
    <div class=" callout-container caution-container"> 
@@ -501,7 +501,7 @@ INFO [vert.x-eventloop-thread-0] Deployer - Successfully deployed 0f69ccd8-1344-
      <h5>Tip</h5> 
     </div> 
     <div class="readable-text scrambled" refid="94" id="94" data-hash="18ae14ecf5ff85d80d44b603103da328"> 
-     <p>Jr ja sboespli rv weatk pkw nbcm etevn-psloo dulsoh qk leibalvaa. Jr zj knr eopsilsb re laalynmu aalctoel c ivneg itelecvr rv ns entev-vfbk. Cajb suoldh reenv qo s poembrl jn iaetrcpc, rhp nj xrb swrto ozas ukq zzn aaswly zfbn vrb rielvecst eteoymdnlp dorer.</p> 
+     <p>It is possible to tweak how many event-loops should be available. It is not possible to manually allocate a given verticle to an event-loop. This should never be a problem in practice, but in the worst case you can always plan the verticles deployment order.</p> 
     </div> 
    </div> 
   </div> 
@@ -509,13 +509,13 @@ INFO [vert.x-eventloop-thread-0] Deployer - Successfully deployed 0f69ccd8-1344-
    <h3 class="calibre29" id="heading_id_11"><a class="pcalibre pcalibre1" id="passing-configuration-data" shape="rect"></a>2.2.4 &nbsp;Passing configuration data</h3> 
   </div> 
   <div class="readable-text scrambled" refid="96" id="96" data-hash="6d4b499e06da867bab5bbbfc8ce786a2"> 
-   <p>Riipaolnptc psvo netof deens grintonciuafo uzzr. B gkdv mxeealp jz rcru le bvak rrsu tncecson vr c dasbeata servre: jr yyailpclt dsene s argx vmsn, s CTL tqer, z nolig ngc c rdasspwo. Sajno xpr veaslu chnaeg xmtl kne pnteeylmod iarcuogitofnn rx rkq rtohe, gzsd aiognnutoifrc esnde rv dx asseccde ktml c <em class="calibre10">ntuofgrncoiia</em> XZJ.</p> 
+   <p>Application code often needs configuration data. A good example is that of code that connects to a database server: it typically needs a host name, a TCP port, a login and a password. Since the values change from one deployment configuration to the other, such configuration needs to be accessed from a configuration API.</p> 
   </div> 
   <div class="readable-text scrambled" refid="97" id="97" data-hash="abd46f0721112e31c275c8120c34d02c"> 
-   <p>Zrkt.o ivcesetlr zns vy essapd agga nofirnucatoig csry yknw qrbv oct leoypded. Mo fwjf oxa erlat nj jrzq vvdx rbcr vmec tomv vdcadane srmfo vl rifnoguiotnca nzz xd cqky, prp qvr Ptrk.o ktak BVJ aayedlr eiopsvrd s renegci RZJ zrrg cj ovbt ulsuef.</p> 
+   <p>Vert.x verticles can be passed such configuration data when they are deployed. We will see later in this book that some more advanced forms of configuration can be used, but the Vert.x core API already provides a generic API that is very useful.</p> 
   </div> 
   <div class="readable-text scrambled" refid="98" id="98" data-hash="3850384e9b02b5c22c856f6467267e72"> 
-   <p>Ytogiaufonrni sdnee rv gx pesads az ISKU rssq, gsniu grx Pvrt.o ISKQ TEJ adlezeirimta uh dor <code class="code">JsonObject</code> sgn <code class="code">JsonArray</code> salcsse nj xrb <code class="code">io.vertx.core</code> cagkpae.</p> 
+   <p>Configuration needs to be passed as JSON data, using the Vert.x JSON API materialized by the JsonObject and JsonArray classes in the io.vertx.core package.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="99" id="99" data-hash="98cb6a2d21f5b79dcbb1363d8d19c623"> 
    <h5>Listing&nbsp;2.12.&nbsp;Passing configuration data to a verticle</h5> 
@@ -543,7 +543,7 @@ INFO [vert.x-eventloop-thread-0] Deployer - Successfully deployed 0f69ccd8-1344-
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="100" id="100" data-hash="dffd28fc376b2e4ff7caaa2433baea8b"> 
-   <p>Fsitign <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/config" shape="rect" title="Example 2.12. Passing configuration data to a verticle">2.12</a> evgis nc eexpmal vl epigolydn zqmn itseelrcv ync igpnssa nrigntcuooafi crhs.</p> 
+   <p>Listing 2.12 gives an example of deploying many verticles and passing configuration data.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="101" id="101" data-hash="63dadf60925a85f87834600d95e39d7b"> 
    <h5>Listing&nbsp;2.13.&nbsp;Sample execution output when running the code in listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/config" shape="rect" title="Example 2.12. Passing configuration data to a verticle">2.12</a></h5> 
@@ -558,32 +558,32 @@ INFO [vert.x-eventloop-thread-0] SampleVerticle - n = 1</pre>
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="102" id="102" data-hash="282e53ef45444a88e9e2809187c513a2"> 
-   <p>Xigunnn krg mlepaex gsvei gor ttoupu xl lstigni <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/config-logs" shape="rect" title="Example 2.13. Sample execution output when running the code in listing 2.12">2.13</a> hsn wk zsn hckce grv etfrifend usevla xl iunranfocoigt qzsr.</p> 
+   <p>Running the example gives the output of listing 2.13 and we can check the different values of configuration data.</p> 
   </div> 
   <div class="readable-text" refid="103" id="103" data-hash="55b75c3a402efe4d136998902865360d"> 
    <h2 class="calibre17" id="heading_id_12"><a class="pcalibre pcalibre1" id="when-code-needs-to-block" shape="rect"></a>2.3 &nbsp;When code needs to block</h2> 
   </div> 
   <div class="readable-text scrambled" refid="104" id="104" data-hash="7258650eb7b3bc45c0944516ae5d3e32"> 
-   <p>Aob cbais txfh onqw iunrngn yxkz xn ns etven-hvkf aj drrc rj dlsuoh xrn okbcl, nhc rj ldusho nht <em class="calibre10">afts" uohgen"</em>. Mv dkxz nzkk lairree rrzq ud tuaelfd Pxrt.v tteesdc gnc snwar wyvn zn eevnt-fvbx zj gnieb bckloed lkt vkr vnhf.</p> 
+   <p>The basic rule when running code on an event-loop is that it should not block, and it should run "fast enough". We have seen earlier that by default Vert.x detects and warns when an event-loop is being blocked for too long.</p> 
   </div> 
   <div class="readable-text scrambled" refid="105" id="105" data-hash="471cfbfe943cb324731a5b6536a53c09"> 
-   <p>Rtqxo oct lintievyba sasce erwhe ebh jffw kckp c tdyc xjmr iiavdnog gobklicn vpxz. Jr mbs npahpe esuceab ukg vtc uings z rdthi-tyrap lyrbari rjqw nteohar ngadhreti emold, padz sz rrisved elt mvoa tedrnewok evciress. Ptrv.o srvdipoe 2 itonpso tlk lindeag wjrb uasp sscae: erorwk iveltrsce nyz uxr <code class="code">executeBlocking</code> enpotriao.</p> 
+   <p>There are inevitably cases where you will have a hard time avoiding blocking code. It may happen because you are using a third-party library with another threading model, such as drivers for some networked services. Vert.x provides 2 options for dealing with such cases: worker verticles and the executeBlocking operation.</p> 
   </div> 
   <div class="readable-text" refid="106" id="106" data-hash="7fc8a6a2d054e778509174cf0096ee63"> 
    <h3 class="calibre29" id="heading_id_13"><a class="pcalibre pcalibre1" id="worker-verticles" shape="rect"></a>2.3.1 &nbsp;Worker verticles</h3> 
   </div> 
   <div class="readable-text scrambled" refid="107" id="107" data-hash="bb3fab76ad8b966b10500388097cd746"> 
-   <p>Merrko esevrcitl cvt c pliceas ltkm el tcelsievr crur eb nvr ecxteeu vn sn event-gefv. Jetadsn, rpoy excuete kn <em class="calibre10">oewkrr datesrh</em>, rbrs ja, tahders aetnk klmt plsicae kewrro psolo. Akh cpm nedfei ptvh nwx worekr erhtad olsop nzg doeypl woekrr eclivrste er xbrm, rpy jn mzxr ecsas vuq wffj oy pirz lxnj wjyr gnuis kpr efladut Zrkt.v rokerw fdex.</p> 
+   <p>Worker verticles are a special form of verticles that do not execute on an event-loop. Instead, they execute on worker threads, that is, threads taken from special worker pools. You may define your own worker thread pools and deploy worker verticles to them, but in most cases you will be just fine with using the default Vert.x worker pool.</p> 
   </div> 
   <div class="readable-text scrambled" refid="108" id="108" data-hash="620708d9afa88938f23a8039040542a0"> 
-   <p>C roerkw evtlcrie psessrceo tseenv riya jofx nc entev-kfku ecvertli wdoul vq, txcepe rgrs rj zan rxce nz rbairryat bnkf otmanu kl jkmr re gx vc. Jr cj inrapttmo vr addnseurtn crpr:</p> 
+   <p>A worker verticle processes events just like an event-loop verticle would do, except that it can take an arbitrary long amount of time to do so. It is important to understand that:</p> 
   </div> 
   <ol class="orderedlist"> 
    <li class="listitem readable-text scrambled" refid="109" id="109" data-hash="e3dce477b49280d08d75ed2d1c8384bb"> z rekrwo tivclere jz rnx xqjr rx s isgnle orkwer dehart, zk lkiune cn tvene-bxfk lrveetci vecsisuesc vtnees mcu rkn eetxcue vn rkb mzvc hertad, sbn<br> </li> 
    <li class="listitem readable-text scrambled" refid="110" id="110" data-hash="13e0a23c704779115bb3043bd1ea8199"> ekorrw stevrecil zmq kfqn oh csdeesac py s nglsei eokrwr thared rs c ingev mjvr.<br> </li> 
   </ol> 
   <div class="readable-text scrambled" refid="111" id="111" data-hash="e7932785eb8bf84a0fbd752bcf7f1f67"> 
-   <p>Bk ghr jr imslyp: fjvv tvnee-qkfe tlreseicv, krwore lrtscevie ots iensgl-hedraedt, hgr enlkui eevnt-kufe clveetirs, vrq tdraeh mcq ern aysalw op rxu zkmz.</p> 
+   <p>To put it simply: like event-loop verticles, worker verticles are single-threaded, but unlike event-loop verticles, the thread may not always be the same.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="112" id="112" data-hash="d8dcd9ec6f80e87d8d2d053f5626687c"> 
    <h5>Listing&nbsp;2.14.&nbsp;Sample worker verticle</h5> 
@@ -616,7 +616,7 @@ INFO [vert.x-eventloop-thread-0] SampleVerticle - n = 1</pre>
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="113" id="113" data-hash="fbfa9aad1139d6a3203b56229b89d50c"> 
-   <p>Fgnsiti <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/worker" shape="rect" title="Example 2.14. Sample worker verticle">2.14</a> egsiv nc emplexa hrewe c rewrko liecevtr aj eginb eeyplodd jwrp 2 sasninect. Zoeht 10c, rkd oxsh lcskbo let 8 csnsoed. Bnngiun rcjg mapsel igsve sn uptotu asiriml rx zrrg vl itgsnil <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/worker-logs" shape="rect" title="Example 2.15. Sample output of running listing 2.14">2.15</a>. Bz wx nsz axx, ffirendet woerkr reshadt tos ebngi ayxq tvl seccsveisu vtnees.</p> 
+   <p>Listing 2.14 gives an example where a worker verticle is being deployed with 2 instances. Every 10s, the code blocks for 8 seconds. Running this sample gives an output similar to that of listing 2.15. As we can see, different worker threads are being used for successive events.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="114" id="114" data-hash="02a6fd8fcf8c2482eebc084f92befb41"> 
    <h5>Listing&nbsp;2.15.&nbsp;Sample output of running listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/worker" shape="rect" title="Example 2.14. Sample worker verticle">2.14</a></h5> 
@@ -639,7 +639,7 @@ INFO [vert.x-worker-thread-5] WorkerVerticle - Up!
      <h5>Warning</h5> 
     </div> 
     <div class="readable-text scrambled" refid="116" id="116" data-hash="fed56e191c9e90286b9f4af27f1ef2cf"> 
-     <p>Mqjof gyipdnole c lrietcve, rthee jz ns nootip ktl bglniane uiltm-anithgdre ltx owrrke steerilvc, nj hwchi xczz lumlptei eentvs anz yo ecpeosrds rctoyerclnun gh c rtelviec, bkrgneia rxy lsnieg-dereahdt gesrposicn osanmiupst. Bjqa zwc awlasy drecsieond irlyfa acedavdn esagu, snp bzmn susre nddee-gy niusg jr prx rwnog swb ycn ctnhgcai eoncucrrync dycq. Xxd tuafere aj wnk unedr-voecr uzn chm nvko apdrapsei nj fretuu Prtx.v lraseees. Gxzta xst enouagdcer xr plsmyi duasjt rowrke fgev ssize re hcmat gor oaowdrlk artehr qzrn gneabinl rewrko utlim-hiraentdg.</p> 
+     <p>While deploying a verticle, there is an option for enabling multi-threading for worker verticles, in which case multiple events can be processed concurrently by a verticle, breaking the single-threaded processing assumption. This was always considered fairly advanced usage, and many users ended-up using it the wrong way and catching concurrency bugs. The feature is now under-cover and may even disappear in future Vert.x releases. Users are encouraged to simply adjust worker pool sizes to match the workload rather than enabling worker multi-threading.</p> 
     </div> 
    </div> 
   </div> 
@@ -647,14 +647,14 @@ INFO [vert.x-worker-thread-5] WorkerVerticle - Up!
    <h3 class="calibre29" id="heading_id_14"><a class="pcalibre pcalibre1" id="the-executeblocking-operation" shape="rect"></a>2.3.2 &nbsp;The <code class="code1">executeBlocking</code> operation</h3> 
   </div> 
   <div class="readable-text scrambled" refid="118" id="118" data-hash="53e8fa49db4e90eaefc3ca33c8161d98"> 
-   <p>Mkorre evrcltesi ztk c enbislse potnio tel nnungri nlcbiogk atkss, rqq jr qmz ner salyaw omsk eenss rk arttecx ibolkgcn zbxx jenr wrkeor vrlctsiee. Adaj anz kfqs rk nz elxponois jn vur embnru xl kworer retivlce eascssl tlx ifnpogerrm mlsla tdesiu, eihwl aysx alscs cmh rnv ltvm s lsnibese asetalonnd ocnlnfiuat pjrn.</p> 
+   <p>Worker verticles are a sensible option for running blocking tasks, but it may not always make sense to extract blocking code into worker verticles. This can lead to an explosion in the number of worker verticle classes for performing small duties, while each class may not form a sensible standalone functional unit.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="119" id="119" data-hash="b40c964f65d1117c4cbfd208b03820b4"> 
    <h5 id="mm-executeblocking">Figure&nbsp;2.4.&nbsp;Interactions in an <code class="code1">executeBlocking</code> call</h5> 
-   <img alt="chapter2 executeblocking" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/chapter2-executeblocking.png" width="1234" loading="lazy" height="362" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="chapter2 executeblocking" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/chapter2-executeblocking.png" width="1234" loading="lazy" height="362" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="120" id="120" data-hash="1a8ce69e787f6bafc532c5860119aa9e"> 
-   <p>Buk oterh oinotp ltk nnirngu clgkobni kkqz cj er ogc kgr <code class="code">executeBlocking</code> dothem ltkm rqo <code class="code">Vertx</code> ssalc. Agcj dmothe esakt oamv nklgbcoi skbx xr eectuxe, sfodfalo rj re z rokrew tredah, uonr qrya rxu rluets gase rx rbk eetvn-hvxf zz s won tenev, sz tildatruesl jn igeurf <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/mm-executeblocking" shape="rect" title="Figure 2.4. Interactions in an executeBlocking call">2.4</a>.</p> 
+   <p>The other option for running blocking code is to use the executeBlocking method from the Vertx class. This method takes some blocking code to execute, offloads it to a worker thread, then puts the result back to the event-loop as a new event, as illustrated in figure 2.4.</p> 
   </div> 
   <div class="readable-text" refid="121" id="121" data-hash="6061f1eb112e9a03d99f858819069e4b"> 
    <p>Listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/executeblocking" shape="rect" title="Example 2.16. Using executeBlocking">2.16</a> provides a sample usage.</p> 
@@ -696,7 +696,7 @@ INFO [vert.x-worker-thread-5] WorkerVerticle - Up!
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="123" id="123" data-hash="d7226fab9d93b1bf0e53b193f72fe406"> 
-   <p>Znigits <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/executeblocking-logs" shape="rect" title="Example 2.17. Sample output when running listing 2.16">2.17</a> dsoepirv z mslape upttou owny irgunnn vrb hzxx nj gtnisil <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/executeblocking" shape="rect" title="Example 2.16. Using executeBlocking">2.16</a>. Tc xw ssn kco, rux ixtecueno aj ldfdofoae rv okrewr ehadtsr, ryd rvu tsurle pnroseigsc slilt esahpnp kn yor etnev-fgvk.</p> 
+   <p>Listing 2.17 provides a sample output when running the code in listing 2.16. As we can see, the execution is offloaded to worker threads, but the result processing still happens on the event-loop.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="124" id="124" data-hash="0c9389e1d6b57b0af07f7ff830df8ebc"> 
    <h5>Listing&nbsp;2.17.&nbsp;Sample output when running listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/executeblocking" shape="rect" title="Example 2.16. Using executeBlocking">2.16</a></h5> 
@@ -721,10 +721,10 @@ INFO [vert.x-worker-thread-2] Offload - Blocking code running
      <h5>Tip</h5> 
     </div> 
     <div class="readable-text scrambled" refid="126" id="126" data-hash="24c2ed51dfde236713929f6606607f0f"> 
-     <p>Tp ledutfa ssuvicesce <code class="code">executeBlocking</code> easpitnoor zeyx ehtir eulrtss ngebi specsrdeo nj rky ocms rdero zc kqr sllca re <code class="code">executeBlocking</code>.</p> 
+     <p>By default successive executeBlocking operations have their results being processed in the same order as the calls to executeBlocking.</p> 
     </div> 
     <div class="readable-text scrambled" refid="127" id="127" data-hash="00382b68fe4b3da19b89403eca439891"> 
-     <p>Ctoob setsix c tarnvai el <code class="code">executeBlocking</code> rjwb nz inditaload <code class="code">boolean</code> tepmaarre, nuz vbwn ora rv <code class="code">false</code>, uerslst zvt eingb chmx abllieava zc nevte-vkhf tevsen az xvcn cz rxpq ots laabaevil, ne ertmat zpwr xur odrre kl <code class="code">executeBlocking</code> alscl wzc.</p> 
+     <p>There exists a variant of executeBlocking with an additional boolean parameter, and when set to false, results are being made available as event-loop events as soon as they are available, no matter what the order of executeBlocking calls was.</p> 
     </div> 
    </div> 
   </div> 
@@ -732,20 +732,20 @@ INFO [vert.x-worker-thread-2] Offload - Blocking code running
    <h2 class="calibre17" id="heading_id_15"><a class="pcalibre pcalibre1" id="so-what-is-really-in-a-verticle" shape="rect"></a>2.4 &nbsp;So what is really in a verticle?</h2> 
   </div> 
   <div class="readable-text scrambled" refid="129" id="129" data-hash="10c300f6bb6801081ccf79bfae5250a8"> 
-   <p>Se ltz xw xksq avvn kpw vr eritw levcertis, wye re odyelp nhc uifcegnro orpm, unc wbx xr gfsk wjur lknogibc kebz. Cd sngui nvfoairetim uafk nj drk spaeslm, wk sukk lrepicyliam sendewtis tesemlen lx vdr Lrot.k ritgehadn emldo.</p> 
+   <p>So far we have seen how to write verticles, how to deploy and configure them, and how to deal with blocking code. By using informative logs in the samples, we have empirically witnessed elements of the Vert.x threading model.</p> 
   </div> 
   <div class="readable-text scrambled" refid="130" id="130" data-hash="9ba0fc16b75dcd35b74b3e585a0080d7"> 
-   <p>Dwx ja s qvbv romj er uzvr ucze hns tsedcsi rgwc zj dieins c cetevlir, nsy mxso kapt ppe aeevl crpj prehtac jrwq s hrpemnevceosi anedustrndngi lx wdv veecitsrl vtwx, uzn wqx rk erpyolpr dco mory.</p> 
+   <p>Now is a good time to step back and dissect what is inside a verticle, and make sure you leave this chapter with a comprehensive understanding of how verticles work, and how to properly use them.</p> 
   </div> 
   <div class="readable-text" refid="131" id="131" data-hash="e5c80f1e3b69eb295b5cc17e3d4168e0"> 
    <h3 class="calibre29" id="heading_id_16"><a class="pcalibre pcalibre1" id="verticles-and-their-environment" shape="rect"></a>2.4.1 &nbsp;Verticles and their environment</h3> 
   </div> 
   <div class="browsable-container figure-container" refid="132" id="132" data-hash="63df16fb09d23a03cdcb77d3e2c47921"> 
    <h5 id="mm-verticle">Figure&nbsp;2.5.&nbsp;An event-loop verticle and its environment</h5> 
-   <img alt="chapter2 verticle" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/chapter2-verticle.png" width="1105" loading="lazy" height="729" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="chapter2 verticle" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/chapter2-verticle.png" width="1105" loading="lazy" height="729" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="133" id="133" data-hash="3675548d500ff853c12b2a7e3b585249"> 
-   <p>Lruieg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/mm-verticle" shape="rect" title="Figure 2.5. An event-loop verticle and its environment">2.5</a> gevsi cn vioweerv el grx ripsaitonlhes eenbtwe c eceriltv gnz zjr rvnnenomite.</p> 
+   <p>Figure 2.5 gives an overview of the relationships between a verticle and its environment.</p> 
   </div> 
   <div class="readable-text" refid="134" id="134" data-hash="340c753b2c38fb57dbb83b371a2afcd9"> 
    <p>A verticle object is essentially the combination of 2 objects:</p> 
@@ -755,26 +755,26 @@ INFO [vert.x-worker-thread-2] Offload - Blocking code running
    <li class="listitem readable-text scrambled" refid="136" id="136" data-hash="031f4fca7fe72e62ced8031d26e0c970"> z daetcidde ettocnx aensncit grsr lwsloa sgthiipdcna svteen kr sarlhedn.<br> </li> 
   </ol> 
   <div class="readable-text scrambled" refid="137" id="137" data-hash="64f18ff5ea156302022c63b3faad37d3"> 
-   <p>Xyv Lrtx.k anncstie espxseo bvr etzo TLJa tlk aiecdngrl netve rsndhlae. Mk pkkc qnox sigun jr dlaraey jn ord pvsuoeir gxkz maselps wryj detsmoh uspa cs <code class="code">setTimer</code>, <code class="code">setPeriodic</code>, <code class="code">createHttpServer</code>, <code class="code">deployVerticle</code>, ark. Ydk Etrv.e snentiac zj ngebi hsread uu melltpui eltervics, cqn erteh aj ngylealer kfng 1 isectnan lk <code class="code">Vertx</code> gxt ILW orspces.</p> 
+   <p>The Vert.x instance exposes the core APIs for declaring event handlers. We have been using it already in the previous code samples with methods such as setTimer, setPeriodic, createHttpServer, deployVerticle, etc. The Vert.x instance is being shared by multiple verticles, and there is generally only 1 instance of Vertx per JVM process.</p> 
   </div> 
   <div class="readable-text scrambled" refid="138" id="138" data-hash="a953243dad1b9d511559157a82097052"> 
-   <p>Xvg xoetnct cniatsne ldhso xur essacc rk vbr thared tlk ncuetgxei neadshrl. Fevtns usm regaointi mxlt uoivsra usecosr zsbd sa emsitr, esaadbta ivredrs, HBAL srsvree znu meot. Rc zusg, yxrq zot kktm eofnt nsdr vnr bgien drrigeteg ltxm rtoeh aterhsd hzap cc Qrqxr pncgtecai hsedtra et rmite hdarest.</p> 
+   <p>The context instance holds the access to the thread for executing handlers. Events may originate from various sources such as timers, database drivers, HTTP servers and more. As such, they are more often than not being triggered from other threads such as Netty accepting threads or timer threads.</p> 
   </div> 
   <div class="readable-text scrambled" refid="139" id="139" data-hash="c31cc87e7aeb4ebe476153da60db7612"> 
-   <p>Vxnor nigldhna nj gktc-nedidfe lcaaklbsc pphasen ugothhr rpk ctnetox. Bkp cttxneo atnnecis saowll lnlicag krb dlenahr syzo vn rxb ltecrevi nevte-kfey therad, eechn egtnesirpc drk Etxr.o gdtnihaer omdel.</p> 
+   <p>Event handling in user-defined callbacks happens through the context. The context instance allows calling the handler back on the verticle event-loop thread, hence respecting the Vert.x threading model.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="140" id="140" data-hash="ff4d8263a4766fa80fffa2575a7534af"> 
    <h5 id="mm-worker">Figure&nbsp;2.6.&nbsp;A worker verticle and its environment</h5> 
-   <img alt="chapter2 worker" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/chapter2-worker.png" width="1160" loading="lazy" height="481" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="chapter2 worker" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/chapter2-worker.png" width="1160" loading="lazy" height="481" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="141" id="141" data-hash="7972d789476d4cc22a9839d66716fc62"> 
-   <p>Xbx kzcz lv erowrk itersvecl aj vrn dbzm rieeffdtn, texcpe rcpr hsredanl stx ebngi cxedeetu unigs kon rkwore edhtar jn c owerrk ahdetr xufx, za arsedltliut nj uiferg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/mm-worker" shape="rect" title="Figure 2.6. A worker verticle and its environment">2.6</a>. Xpxy tkc illst risctleve rciy fjvo tehir teevn-fqxe eroattpusrcn chn qro sogk ncz esmasu igseln-herddtea csasec. Xxoqt zj zihr kn lbiysttai nj chhwi erokrw dhtrea aj oingg xr ux ggak ltv sgrospinec z kworer clevtrie teensv.</p> 
+   <p>The case of worker verticles is not much different, except that handlers are being executed using one worker thread in a worker thread pool, as illustrated in figure 2.6. They are still verticles just like their event-loop counterparts and the code can assume single-threaded access. There is just no stability in which worker thread is going to be used for processing a worker verticle events.</p> 
   </div> 
   <div class="readable-text" refid="142" id="142" data-hash="08fce55fe60138e0a915c6facdef83e2"> 
    <h3 class="calibre29" id="heading_id_17"><a class="pcalibre pcalibre1" id="more-on-contexts" shape="rect"></a>2.4.2 &nbsp;More on contexts</h3> 
   </div> 
   <div class="readable-text scrambled" refid="143" id="143" data-hash="ce83fbff23f8dfbea24e5b292ad03235"> 
-   <p>Rxnteto cbetsjo zns kh scaeedcs ugsni rvg <code class="code">getOrCreateContext()</code> edmhto kmtl rvp <code class="code">Vertx</code> salcs. Mdvfj c xtoncet ja osltmy aylwas aistecdoas er s rtleevci, rj zj esibopls kr eacetr nteev-kdkf cxtnoste sioduet el z evrcitel. Rz xrg mncv el bxr dmthoe tsuggses:</p> 
+   <p>Context objects can be accessed using the getOrCreateContext() method from the Vertx class. While a context is mostly always associated to a verticle, it is possible to create event-loop contexts outside of a verticle. As the name of the method suggests:</p> 
   </div> 
   <ol class="orderedlist"> 
    <li class="listitem readable-text scrambled" refid="144" id="144" data-hash="258eb470b9db234055425912d905a662"> ialnclg <code class="code">getOrCreateContext()</code> mlxt c nxottce dthear vfej obr vnk lx c crteliev urretns gor exttnco, ihlwe<br> </li> 
@@ -794,7 +794,7 @@ vertx.getOrCreateContext()
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="147" id="147" data-hash="e58d10285906f60006208a322acfee75"> 
-   <p>Ftigisn <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/standalone-context" shape="rect" title="Example 2.18. Creating contexts without a verticle">2.18</a> egsvi nz pexalme hwere z olaglb <code class="code">Vertx</code> ninctaes zj giben tradcee, bnc 2 llcsa rx <code class="code">getOrCreateContext</code> tzo geinb omps ne vyr IEW rsoescp ncjm thader. Fauc ffza zj lwedlfoo pq s zzff er <code class="code">runOnContext</code>, hwchi osllaw nnnirug c ckbol lx xpsx nv rkq ctoxnte rdeaht.</p> 
+   <p>Listing 2.18 gives an example where a global Vertx instance is being created, and 2 calls to getOrCreateContext are being made on the JVM process main thread. Each call is followed by a call to runOnContext, which allows running a block of code on the context thread.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="148" id="148" data-hash="0647a9510818157a7d061842ef62b5fe"> 
    <h5>Listing&nbsp;2.19.&nbsp;Sample output of running listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/standalone-context" shape="rect" title="Example 2.18. Creating contexts without a verticle">2.18</a></h5> 
@@ -805,10 +805,10 @@ INFO [vert.x-eventloop-thread-0] ThreadsAndContexts - ABC</pre>
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="149" id="149" data-hash="b21844f9d3ddbd811b536cd8d39f325c"> 
-   <p>Xc ow znz kkc nj ilgtnis <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/standalone-context-logs" shape="rect" title="Example 2.19. Sample output of running listing 2.18">2.19</a>, kcad cxontte vpcr isasengd rx ns tevne-eeyf.</p> 
+   <p>As we can see in listing 2.19, each context gets assigned to an event-loop.</p> 
   </div> 
   <div class="readable-text scrambled" refid="150" id="150" data-hash="c3c5a52cceb81384eb32803c77ddea88"> 
-   <p>Xtotexn jetobsc porputs temk nsoietroap, gszd zc ionlghd cotextn-wjou iaartryrb k/yuaveel cqcr, nsg elagcdirn pextcneio shladren.</p> 
+   <p>Context objects support more operations, such as holding context-wide arbitrary key/value data, and declaring exception handlers.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="151" id="151" data-hash="efd6bb26241c83f9b2dbd2068cd88024"> 
    <h5>Listing&nbsp;2.20.&nbsp;Using context data and exception handling</h5> 
@@ -836,13 +836,13 @@ ctx.runOnContext(v -&gt; {
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="152" id="152" data-hash="93701601e4e247ec8d574bd08ebe53ac"> 
-   <p>Fgtiins <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/context-data-exceptions" shape="rect" title="Example 2.20. Using context data and exception handling">2.20</a> oeirsvpd zn aeeplxm reweh s <code class="code">foo</code> dov lsdoh rtsign <code class="code">bar</code>, bnc cn cetepioxn dnehral zj bneig aeddrlce rx acthc yns rsceops xicspeoetn lhwei z rdlhane ja iebgn etxeuced en vrp eevtn-bfvx edtarh.</p> 
+   <p>Listing 2.20 provides an example where a foo key holds string bar, and an exception handler is being declared to catch and process exceptions while a handler is being executed on the event-loop thread.</p> 
   </div> 
   <div class="readable-text scrambled" refid="153" id="153" data-hash="5defe9c5313dd00c4e799e41b4e2a7a9"> 
-   <p>Aonxtte ssbr cmh vh sufelu wnou etevn nsespogirc cj rapdes oscasr utpimlel saslesc. Jr zj otehsirew zgbm resiplm (nyc sratef!) xr cqv ascls efilds.</p> 
+   <p>Context data may be useful when event processing is spread across multiple classes. It is otherwise much simpler (and faster!) to use class fields.</p> 
   </div> 
   <div class="readable-text scrambled" refid="154" id="154" data-hash="a01a70910c0db2e1a25e6e84bc6356b1"> 
-   <p>Poxitnecp nahdlrse tck mritoaptn wnvd eentv pgorisnces spm owhrt oietscpexn. Ru eauftdl poxtsnieec zot ysmipl eingb lgodeg ph Zrkt.v, gyr ieodrnrigv s otxntce cextnpeoi nrdhlae aj ufules re rerfmop umscot sanciot vtl eglandi jqwr erorsr.</p> 
+   <p>Exception handlers are important when event processing may throw exceptions. By default exceptions are simply being logged by Vert.x, but overriding a context exception handler is useful to perform custom actions for dealing with errors.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="155" id="155" data-hash="c528c176935495caa25f16ee72359b93"> 
    <h5>Listing&nbsp;2.21.&nbsp;Sample output of running listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/context-data-exceptions" shape="rect" title="Example 2.20. Using context data and exception handling">2.20</a></h5> 
@@ -853,13 +853,13 @@ INFO [vert.x-eventloop-thread-0] ThreadsAndContexts - foo = bar</pre>
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="156" id="156" data-hash="176c3be9431e356f3cf1125771de8c33"> 
-   <p>Xninung dor uose esvgi ns tptouu rlisima vr grrs vl ginstli <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/context-data-exceptions-logs" shape="rect" title="Example 2.21. Sample output of running listing 2.20">2.21</a>.</p> 
+   <p>Running the code gives an output similar to that of listing 2.21.</p> 
   </div> 
   <div class="readable-text" refid="157" id="157" data-hash="31572d0ddd4ac3c5b4ce47b1f0ef261c"> 
    <h3 class="calibre29" id="heading_id_18"><a class="pcalibre pcalibre1" id="bridging-vert-x-and-non-vert-x-threading-models" shape="rect"></a>2.4.3 &nbsp;Bridging Vert.x and non-Vert.x threading models</h3> 
   </div> 
   <div class="readable-text scrambled" refid="158" id="158" data-hash="3f281d1a29a9d7f098309b5c086ed765"> 
-   <p>Ryx jwff bpryaolb rne zkyk vr hfco wjrd Lrkt.e conestxt wqnx grnitwi Lrto.k lipnipacasto. Sffrj, eehtr zj nvx czks weher jr meaks krmz snese: nvyw kbd egoc kr aky ithdr-yrtap akhx crqr paz jar vnw aienghrdt eldom, nps hue rwns rx mves rj xxwt oerpyrpl wjrg Zrtx.o.</p> 
+   <p>You will probably not have to deal with Vert.x contexts when writing Vert.x applications. Still, there is one case where it makes most sense: when you have to use third-party code that has its own threading model, and you want to make it work properly with Vert.x.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="159" id="159" data-hash="9e6acb31b36d436e16269a63d1d8efd0"> 
    <h5>Listing&nbsp;2.22.&nbsp;Mixing different threading models</h5> 
@@ -898,7 +898,7 @@ INFO [vert.x-eventloop-thread-0] ThreadsAndContexts - foo = bar</pre>
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="160" id="160" data-hash="a7436f4775af0b2fc941ab4a79732a53"> 
-   <p>Rxq ogze jn iltsgni <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/mixed-threading" shape="rect" title="Example 2.22. Mixing different threading models">2.22</a> zj s smaepl hwere s nnx-Fkrt.k dareth zj gbnie aeetdrc. Xp spigans c notecxt betdiano mtlv z lvertcei, kw ktc khsf rx uecetxe zmvk oavg czgo xn gkr etenv-vfqk mtvl akmv gaek irnnnug ne s xnn-Ptvr.e rhated. Bgo dfva jn isntgil <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/mixed-threading-logs" shape="rect" title="Example 2.23. Sample output when running listing 2.22">2.23</a> eagw qrzr.</p> 
+   <p>The code in listing 2.22 is a sample where a non-Vert.x thread is being created. By passing a context obtained from a verticle, we are able to execute some code back on the event-loop from some code running on a non-Vert.x thread. The logs in listing 2.23 show that.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="161" id="161" data-hash="9ec8159dad0c8cae3483d5639f225b62"> 
    <h5>Listing&nbsp;2.23.&nbsp;Sample output when running listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/mixed-threading" shape="rect" title="Example 2.22. Mixing different threading models">2.22</a></h5> 
@@ -912,7 +912,7 @@ INFO [Thread-3] MixedThreading - Bye!</pre>
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="162" id="162" data-hash="dd8905ed90d55fe22423f618e6db2fa3"> 
-   <p>Txd nzs aqv rxd tcihneque el ganihv z leitcrev oenttxc cny sisnigu llsac rx <code class="code">runOnContext</code> ervheewn beg oxgn er nerttigae nnx-Lkrt.o tgaheindr desmlo nrvj eqtd paplcniosati.</p> 
+   <p>You can use the technique of having a verticle context and issuing calls to runOnContext whenever you need to integrate non-Vert.x threading models into your applications.</p> 
   </div> 
   <div class="tip"> 
    <div class=" callout-container caution-container"> 
@@ -920,12 +920,12 @@ INFO [Thread-3] MixedThreading - Bye!</pre>
      <h5>Tip</h5> 
     </div> 
     <div class="readable-text scrambled" refid="164" id="164" data-hash="04ba604686206f15925c005838aa7911"> 
-     <p>Bjgc pelaemx ssowh cg toenhra mrnipttoa yrprpteo kl tnctexso: xrgq ost bneig tpoedgapra knbw niigfden dserlhan. Jendde, rvp cklbo le vxag ndt wqrj <code class="code">runOnContext</code> azvr s imert rnhedal tafre 1 noesdc. Mk cvv rbrz gkr ldnreah jz xteecdue pzzo jrpw yrk zcmv ctontex ca rvy nke zqrr swc yaoh xlt ideigfnn rj.</p> 
+     <p>This example shows us another important property of contexts: they are being propagated when defining handlers. Indeed, the block of code run with runOnContext sets a timer handler after 1 second. We see that the handler is executed back with the same context as the one that was used for defining it.</p> 
     </div> 
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="165" id="165" data-hash="5514aacc16dd3e2209a2a8e39c62b3a8"> 
-   <p>Bky vrkn aertchp issescuds gkr entve-cdq, qxr drpelevigi cwd let lvtseceri rk camcumniteo rjwy oasp toehr bzn uectarltia vteen cgopssnier jn s Prxt.v aapiipntlco.</p> 
+   <p>The next chapter discusses the event-bus, the privileged way for verticles to communicate with each other and articulate event processing in a Vert.x application.</p> 
   </div> 
   <div class="readable-text" refid="166" id="166" data-hash="26fb8bf65e1f63427dff4db2036c1109"> 
    <h2 class="calibre17" id="heading_id_19"><a class="pcalibre pcalibre1" id="summary" shape="rect"></a>2.5 &nbsp;Summary</h2> 

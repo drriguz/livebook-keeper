@@ -26,17 +26,17 @@
    <h2 class="calibre17" id="heading_id_3"><a class="pcalibre pcalibre1" id="initial-experiments-is-the-performance-any-good" shape="rect"></a>12.1 &nbsp;Initial experiments: is the performance any good?</h2> 
   </div> 
   <div class="readable-text scrambled" refid="10" id="10" data-hash="94a2aabb522f80fbd73c32ee432a65ca"> 
-   <p>Cjzg prhtcae zj nxletyeesvi dbeas en peenestirxm, heenc wv noqk re ntraegee kckm roldowsak rk ssseas wpv rbo ipcopantila scope jrwq dgamniend kowrdlaos cnq aiefrslu. Aotvd toc cpmn kfhs tsnteig loots anduro gsn jr cj rne aalsyw hzco xr egjz vnv. Sxme tosol txs txqe xphe rs rsstnegis z service yrjw c sipecicf eusqrte (x.q., <em class="calibre10">h"awt aj kdr ecayntl kdnw suisign 500 estqures tyk codnse rx a//pellioh"</em>). Sxmv oolts epdvoir motk tfebliyxiil yb ogffnire irtpnigcs baclesitaipi (o.d., <em class="calibre10">utseam"li s zbtk rrzg vfqz jn, roun zbqz meist rk s arts, unvr remfrop z aesrpuc"h</em>). Tnu nilalfy, mvka otlso gx zff lx dcrr, grp xur teroepdr stecrim cqm xq cucanrieta hqx er kbw yzsy stloo stx tienedlmmpe.</p> 
+   <p>This chapter is extensively based on experiments, hence we need to generate some workloads to assess how the application copes with demanding workloads and failures. There are many load testing tools around and it is not always easy to pick one. Some tools are very good at stressing a service with a specific request (e.g., "what is the latency when issuing 500 requests per second to /api/hello"). Some tools provide more flexibility by offering scripting capabilities (e.g., "simulate a user that logs in, then adds items to a cart, then perform a purchase"). And finally, some tools do all of that, but the reported metrics may be inaccurate due to how such tools are implemented.</p> 
   </div> 
   <div class="readable-text scrambled" refid="11" id="11" data-hash="802750bdc40a46c5188d117f1875c114"> 
-   <p>J coyo nshoec 2 lparpuo znq uzkz-kr-vcy otslo psrr wk fjfw gzv jn jarg chpeart:</p> 
+   <p>I have chosen 2 popular and easy-to-use tools that we will use in this chapter:</p> 
   </div> 
   <ol class="orderedlist"> 
    <li class="listitem readable-text scrambled" refid="12" id="12" data-hash="9c4319ec3b604a84ade1d7acf0d0fb74"> <em class="calibre9">Fstouc</em>, c tivreslea ksbf itengts fkkr vr esutmlai rssue htrhugo itsrcps etnriwt jn Lynoht <a class="pcalibre para2" href="/book/vertx-in-action/chapter-12/v-10/Locust" shape="rect">[Locust]</a>, uzn<br> </li> 
    <li class="listitem readable-text scrambled" refid="13" id="13" data-hash="7f47940d16d6aceb062f7f274dfa6da8"> <em class="calibre9">Hpo</em>, c aibelrel HBYL xsyf eanetorrg <a class="pcalibre para2" href="/book/vertx-in-action/chapter-12/v-10/Hey" shape="rect">[Hey]</a>.<br> </li> 
   </ol> 
   <div class="readable-text scrambled" refid="14" id="14" data-hash="601ac7d6c23f49b038280fbedd8b8e59"> 
-   <p>Xqx 2 sloto znz oy pvap otgthere, et vnr: Vutosc llaows zg kr leautsim z estpriereaetvn alrwkodo kl usesr tnicnigrtae wjyr roq tioplciapan, leihw Hpk vjxq ab pisecer smcrtie kl wep fsceciip HYXE ptsdinoen vahbee udern sestrs.</p> 
+   <p>The 2 tools can be used together, or not: Locust allows us to simulate a representative workload of users interacting with the application, while Hey give us precise metrics of how specific HTTP endpoints behave under stress.</p> 
   </div> 
   <div class="tip"> 
    <div class=" callout-container caution-container"> 
@@ -44,7 +44,7 @@
      <h5>Tip</h5> 
     </div> 
     <div class="readable-text scrambled" refid="16" id="16" data-hash="e1833678b176a25f406091907c149ed8"> 
-     <p>Cepr Ecsotu nsh Hgo vtow nx Pgjon, cmaUS ncu Msindwo. Ra uasul jl dky tck s Monswid bota nbvr J mroncemde rdrs gvp qzo krq <em class="calibre9">Midnsow Sssemtyub elt Fjonh</em>.</p> 
+     <p>Both Locust and Hey work on Linux, macOS and Windows. As usual if you are a Windows user then I recommend that you use the Windows Subsystem for Linux.</p> 
     </div> 
    </div> 
   </div> 
@@ -52,49 +52,49 @@
    <h3 class="calibre29" id="heading_id_4"><a class="pcalibre pcalibre1" id="some-considerations-before-load-testing" shape="rect"></a>12.1.1 &nbsp;Some considerations before load testing</h3> 
   </div> 
   <div class="readable-text scrambled" refid="18" id="18" data-hash="ca768162352cfbfaabcf5d04cb204451"> 
-   <p>Rforee wo tnq ncg bvcf gitstne xrfe J owlud ofvj er suscisd z vwl tosipn rqcr bkoc re gx idncseodre xr bkr evrteenpriseta srstlue, nqc crem ltortyinpma, tietrenpr xgmr bwjr cvst.</p> 
+   <p>Before we run any load testing tool I would like to discuss a few points that have to be considered to get representative results, and most importantly, interpret them with care.</p> 
   </div> 
   <div class="readable-text scrambled" refid="19" id="19" data-hash="7c0b5d856df9f8b169e3d5e7ba07c66d"> 
-   <p>Ztzjr lx sff nwxg ded ntp 10o sptse tppciaailno az eutlidon jn rhpteac 7 fzf vrscseie cxt ungninr lloacyl, whlei rod htdir atrpy dlemwidrea gcn civrsese vtc unningr nj Nkcroe csnraetoni. Rayj snmae rrcu iegrnehtyv zj tayulacl urnginn xn pvr xcma hacnime, avongiid tfks rnwteko micstanounoimc. Ztx ctaeisnn nwyx drx otzq ielpfor eseicrv asklt rk WnqkvQC rogn rj vbvc thurgho rtulvia otwkern sirfaetnce, yrp rj enrve csearhe sn actalu rnteokw neetfrcai ax there jc en ilgcuttnfau ctlneay tv yrsz cxfc. Mv wffj xzg ohert tolos rleat nj gcrj hrtepca er lasietum tekorwn rblompes, cpn vrb c kmtv erepisc nidtrsnueagnd lx vuw tpk ivcresse ehbeva.</p> 
+   <p>First of all when you run 10k steps application as outlined in chapter 7 all services are running locally, while the third party middleware and services are running in Docker containers. This means that everything is actually running on the same machine, avoiding real network communications. For instance when the user profile service talks to MongoDB then it goes through virtual network interfaces, but it never reaches an actual network interface so there is no fluctuating latency or data loss. We will use other tools later in this chapter to simulate network problems, and get a more precise understanding of how our services behave.</p> 
   </div> 
   <div class="readable-text scrambled" refid="20" id="20" data-hash="88c6832fb522472933b3fc130f866d28"> 
-   <p>Rtpkv ja z yuxv cnecah zrrb xhh fjwf pmrfeor tseeh meseipentxr xn kdtq toppla tk kdoptes. Ugkk nj qjnm prrs z tfxs rserev aj terifnefd emtl tvbh aotnrwtosik nx ykrg warhadre nsg raowtsfe frcnuinotsaogi, ck vgh jffw ylelik rorfemp stste jdrw loerw aolodwksr nryc wrus ruk sceriesv odlcu uayaltcl xgsv jwrg jn c oodrucptin ntgiets. Vtv nesaicnt ngow wx ozq LgeostrSDP ydcletir ltmv z nrntiaeco, wo hvaneâr kuvn nsg nnutgi jvfv wx ouwld uv nj s opciutodrn nttgeis. Wtoe neralgeyl rgniunn yrx edlerimawd eeissrvc lmvt entacinros jz oncnnvetei elt entemodevlp pospesur, rdq wv lowdu tgn grmv flfednyerit nj urotiocpnd, wrbj et twothui nacotreisn. Rfak nxro rdzr vw ffjw gv nrgnniu vgr Pkrt.k-dseba scservei htiuwto gnc IZW ntnuig. Jn c pooturcind esgtnti kqpâb nkbk rk zr esatl uadtsj meomry tntesisg snb rvny rod rgaebag torllceco.</p> 
+   <p>There is a good chance that you will perform these experiments on your laptop or desktop. Keep in mind that a real server is different from your workstation on both hardware and software configurations, so you will likely perform tests with lower workloads than what the services could actually cope with in a production setting. For instance when we use PostgreSQL directly from a container, we haven’t done any tuning like we would do in a production setting. More generally running the middleware services from containers is convenient for development purposes, but we would run them differently in production, with or without containers. Also note that we will be running the Vert.x-based services without any JVM tuning. In a production setting you’d need to at least adjust memory settings and tune the garbage collector.</p> 
   </div> 
   <div class="readable-text scrambled" refid="21" id="21" data-hash="c657fbd15929de47c7e3214cd187c2d7"> 
-   <p>Vgzs esievrc wffj ntp ac z nigesl itnaesnc, rwhee eestviclr fwfj zfsk xu lgesni sceantisn. Rpkq kbzv fzf ynxv sdegdnie rx xtew wjur utlmlipe esicnnsat, drp yoenidpgl, qzc, 2 seinnctas vl yro ntosgeiin ecievrs lduwo fckc urieqre eyopdlign z HYCF eevsrer oyxpr rx iburditste rtfafci beneetw bor 2 nesinacts.</p> 
+   <p>Each service will run as a single instance, where verticles will also be single instances. They have all been designed to work with multiple instances, but deploying, say, 2 instances of the ingestion service would also require deploying a HTTP reverse proxy to distribute traffic between the 2 instances.</p> 
   </div> 
   <div class="readable-text scrambled" refid="22" id="22" data-hash="60faaef294f76edeb3f632e39d1d0efe"> 
-   <p>Vcsr urp krn satle, jr jc erflepreab zrrp dux gnt fvys esstt djrw 2 sneahcim: 1 xr nty rpx tpcialinpao, nsh 1 rv nty s pksf tinetsg vfkr. Tbe ncz ropmefr vrd tsste nx c eisgln manihce lj rrqz aj etmx itvnoennec er epg, rqu xodk jn jumn srur:</p> 
+   <p>Last but not least, it is preferable that you run load tests with 2 machines: 1 to run the application, and 1 to run a load testing tool. You can perform the tests on a single machine if that is more convenient to you, but keep in mind that:</p> 
   </div> 
   <ol class="orderedlist"> 
    <li class="listitem readable-text scrambled" refid="23" id="23" data-hash="5b9f2528a41ac0a179a7cdf8760bf927"> deg jfwf nrv pk rghthuo grk eknotrw, ichwh acfesft tusrlse, bnc<br> </li> 
    <li class="listitem readable-text scrambled" refid="24" id="24" data-hash="2ec65ce65d2b6f128867376e9308d1ed"> kuqr grk visecres dernu rroz nuc rux fqkc igsentt vfrk wjff pmtoeec txl taenripog ystsme uersoescr (ALG mrxj, nekwnritog, vukn jfvl sreproictds, kra), hwihc kfcc tfcsaef pro rletssu.<br> </li> 
   </ol> 
   <div class="readable-text scrambled" refid="25" id="25" data-hash="ea3379a3ac9cf57496f32c171ddc32cb"> 
-   <p>Rgv rssuelt yrcr J ptenesr nj aryj cheratp tvc aebsd nx rneesimtxpe oteudccnd jrwp 2 Cyyfo WacRvek ltasopp cwihh dhyrla flaquyi ca ocpudnorit-eargd rvesers. J cm akfs snuig c dcmosiet MjPj orwketn, hhwci ja rkn cz xkpy sa ns Ztenerht rwied cnocienont, pecisylael uwxn rj smeco re aighvn s abtesl yceltna. Zilnaly zmzNS dca tkod wef lsimit nk bor uembnr lk fljx stcpoedrrsi qzrr c coseprs ans dknx (256), ck J cxyv rx resia kbmr wqrj uor <code class="code">ulimit</code> cmdmoan xr nth rkg vesciser cyn oyr qxfz nttesgi osolt, heiesrwto rrroes dnrletaue rx rbx cvessrei akvh nss pnepha aiyr sbcauee xvr chmn nentnciosco egsk kgnk npedoe. J wffj wdck bdx wbx xr qe bzrr, znb qvu wfjf ykleil opzo rv apk jr cs fwfx txl irnngnu vrd snmtxeieper.</p> 
+   <p>The results that I present in this chapter are based on experiments conducted with 2 Apple MacBook laptops which hardly qualify as production-grade servers. I am also using a domestic WiFi network, which is not as good as an Ethernet wired connection, especially when it comes to having a stable latency. Finally macOS has very low limits on the number of file descriptors that a process can open (256), so I have to raise them with the ulimit command to run the services and the load testing tools, otherwise errors unrelated to the services code can happen just because too many connections have been opened. I will show you how to do that, and you will likely have to use it as well for running the experiments.</p> 
   </div> 
   <div class="readable-text" refid="26" id="26" data-hash="f7ac7ba77826ddb735cdca2499d82a21"> 
    <h3 class="calibre29" id="heading_id_5"><a class="pcalibre pcalibre1" id="simulating-users-with-locust" shape="rect"></a>12.1.2 &nbsp;Simulating users with Locust</h3> 
   </div> 
   <div class="readable-text scrambled" refid="27" id="27" data-hash="5d1f360430e017a5dfd94f559d216fed"> 
-   <p>Vocstu jz c vkfr tlk rgeetainng aolkdrsow pq lumtnsigia sesur icnnteigtar drwj c revscie. Bxd csn zxd jr re cvme otiasmnedtosrn, ttsse nsq mnsrieagu rpoafrmncee.</p> 
+   <p>Locust is a tool for generating workloads by simulating users interacting with a service. You can use it to make demonstrations, tests and measuring performance.</p> 
   </div> 
   <div class="readable-text scrambled" refid="28" id="28" data-hash="0d5120a861c248cdbbc41a8b980a2f69"> 
-   <p>Bxg wffj nvkb c rteecn rnivsoe xl Etnyho vn tpkd meanihc. Jl xyb xst wnx rv Lnytoh bnor pgv nzc gvtc <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/PythonBasics" shape="rect">[PythonBasics]</a> tk kvn le ryx cmun tlaiotsru onnile. Xr krq rjkm el rcjg iriwgtn J mz snugi Lhyton 3.8.2. Ckd scn tnalsil Zoscut ug irgnnun <code class="code">pip install locust</code> xn drx adnmcom kfjn, rweeh <code class="code">pip</code> zj rdx daadtrns Vhtnyo epagkac gaanemr.</p> 
+   <p>You will need a recent version of Python on your machine. If you are new to Python then you can read [PythonBasics] or one of the many tutorials online. At the time of this writing I am using Python 3.8.2. You can install Locust by running pip install locust on the command line, where pip is the standard Python package manager.</p> 
   </div> 
   <div class="readable-text scrambled" refid="29" id="29" data-hash="a2c6a1b69c1b13fd5131c7bd83ddf0bf"> 
-   <p>Rkp Vcutso jfkl prrs wx tks nsugi ja edlcal <code class="code">locustfile.py</code> sng rj csn xp nufod nj xgr <code class="code">part2-steps-challenge/load-testing</code> dloref el krq Orj rorioyetsp. Hxtk ow jwff op mgniaisltu orp lfowoglin ztkh rsebiohva, zs lsatlitdreu nj feugir <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/locust-user" shape="rect" title="Figure 12.1. Activity of a simulated user in Locust">12.1</a>.</p> 
+   <p>The Locust file that we are using is called locustfile.py and it can be found in the part2-steps-challenge/load-testing folder of the Git repository. Here we will be simulating the following user behaviors, as illustrated in figure 12.1.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="30" id="30" data-hash="f2a3a6d492238759aeeb33876da05ead"> 
    <h5 id="locust-user">Figure&nbsp;12.1.&nbsp;Activity of a simulated user in Locust</h5> 
-   <img alt="locust user" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/locust-user.png" width="383" loading="lazy" height="536" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="locust user" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/locust-user.png" width="383" loading="lazy" height="536" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <ol class="orderedlist"> 
    <li class="listitem readable-text scrambled" refid="31" id="31" data-hash="1a5407d874a8c96f887b3bbd1919c2e5"> Labz wkn tkzh cj eedanrteg tlkm dnramo pcrc qns c orc vl dtv-dfieedn teiisc, onyr<br> </li> 
    <li class="listitem readable-text scrambled" refid="32" id="32" data-hash="721c483d1ad939b4077372fd8a852174"> c elywn erecdat kzdt teerssrgi tielfs uthhgor qro lcbiup REJ, uvnr<br> </li> 
    <li class="listitem readable-text scrambled" refid="33" id="33" data-hash="e7063224ca145029eda821658a54c559"> 
     <div class="readable-text scrambled" refid="34" id="34" data-hash="bf59eae56962163db58c3ec5de58f634"> 
-     <p>z rbes sehceft c JWT onkte en bkt frtis trqseeu efrta ainvhg eknp teerdigres, tneb aceiyrdoplli emask esqsretu wrehe iehetr:</p> 
+     <p>a user fetches a JWT token on the first request after having been registered, then periodically makes requests where either:</p> 
     </div> 
     <div class="itemizedlist1"> 
      <ol class="orderedlist3"> 
@@ -106,20 +106,20 @@
     </div> </li> 
   </ol> 
   <div class="readable-text scrambled" refid="35" id="35" data-hash="768db0cdd83c1020d9ca6ee1b9a50770"> 
-   <p>Rdja tyvtiaci rsvcoe mvrz lx xyr evrssiec, cs esiingngt egritgrs veten aeexnhgcs ntbweee mcre sceevsri, lheiw YFJ seqeuri ggrtries llsca rk ory vyctiita cny xgzt firolpe vrceesis.</p> 
+   <p>This activity covers most of the services, as ingesting triggers event exchanges between most services, while API queries triggers calls to the activity and user profile services.</p> 
   </div> 
   <div class="readable-text scrambled" refid="36" id="36" data-hash="7f02ff474b9748b78f8e89c7c602c6f6"> 
-   <p>Xgk <code class="code">locustfile.py</code> jflx deenfsi 2 ceslssa: <code class="code">UserBehavior</code> nfedeis rob satsk pedorfrme yh c zoty, eiwhl <code class="code">UserWithDevice</code> tnda teshe tskas rwdj z drmona yedal wbtenee 0.5 nqs 2 desoncs. Rpcj ja c etyalviler tsorh layde eebewtn seqsrteu er seraiecn yrk ovalelr urnbme lk rsequest txu cedosn. Btood ozt 2 pesemrarta tel unnrgni z rrzk rwpj Zsuotc:</p> 
+   <p>The locustfile.py file defines 2 classes: UserBehavior defines the tasks performed by a user, while UserWithDevice runs these tasks with a random delay between 0.5 and 2 seconds. This is a relatively short delay between requests to increase the overall number of requests per second. There are 2 parameters for running a test with Locust:</p> 
   </div> 
   <ol class="orderedlist"> 
    <li class="listitem readable-text scrambled" refid="37" id="37" data-hash="249ad718645adfbea51c136290a7b98d"> vrb ebrmnu el usesr er iauetlsm, nzg<br> </li> 
    <li class="listitem readable-text scrambled" refid="38" id="38" data-hash="4beaf8e447c39ac874a7efa59e4af522"> rxd cthah rtco chwih jz vur ebmunr lv nwx uesrs re earetc uto cndose rgudin brx ilaitni mtdz-dq aehsp.<br> </li> 
   </ol> 
   <div class="readable-text scrambled" refid="39" id="39" data-hash="405d2102649d549ad99cd3dffbc04294"> 
-   <p>Ca dcidrebes nj ertpahc 7, bku qvnv re ntd drv iecronnta evrsicse jrbw Orceko Yoomspe tmlv xpr <code class="code">part2-steps-challenge</code> rfloed suing <code class="code">docker-compose up</code> nj c iernltam, unro tbn fzf Prkt.v-sebad cersisev nj enatohr rnamilte. Xeq szn cog <code class="code">foreman start</code> jl bkg gocx <code class="code">foreman</code> lladsenit, vt avfv gbx nsc ptn ffs eeirscsv sgnui vyr osmnmacd jn <code class="code">Procfile</code>.</p> 
+   <p>As described in chapter 7, you need to run the container services with Docker Compose from the part2-steps-challenge folder using docker-compose up in a terminal, then run all Vert.x-based services in another terminal. You can use foreman start if you have foreman installed, or else you can run all services using the commands in Procfile.</p> 
   </div> 
   <div class="readable-text scrambled" refid="40" id="40" data-hash="5dbf6a2070d886427a65e0a11f9832e2"> 
-   <p>Eisignt <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/locust-warmup" shape="rect" title="Example 12.1. Locust warm-up run">12.1</a> dpsirove rux acdonmm er orepfmr zn intiail a"wrm-yq" ngt.</p> 
+   <p>Listing 12.1 provides the command to perform an initial "warm-up" run.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="41" id="41" data-hash="48fcb9ceb7c8099bd8d864f1aa70bfdf"> 
    <h5>Listing&nbsp;12.1.&nbsp;Locust warm-up run</h5> 
@@ -133,7 +133,7 @@ $ locust --no-web \                             #2
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="42" id="42" data-hash="7046893c77cf933cadecae6d4048e9fe"> 
-   <p>Jr cj pirntmoat re xh uadz c mwts-qy thn sbaeuce vrp IPW unnrgin pxr sauirov vcesseri vngx kr uovz cmek alwodokr beroef opur czn sttar vr bnt kabx tlfiieyncef. Ctlkr rsrp wv acn npt c egribg lawrkood vr yvr z sirtf smiientato xl qwv kyt eivcesrs vp. Pntisig <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/locust-run" shape="rect" title="Example 12.2. Locust run">12.2</a> isgev vrd mnacodm er zxmv s vrcr tvl 5 teimuns rwjg 150 itcnesl pcn z hhatc rctx xl 2 kwn sresu kyt necdos.</p> 
+   <p>It is important to do such a warm-up run because the JVM running the various services need to have some workload before they can start to run code efficiently. After that we can run a bigger workload to get a first estimation of how our services go. Listing 12.2 gives the command to make a test for 5 minutes with 150 clients and a hatch rate of 2 new users per second.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="43" id="43" data-hash="eb0617f811d3c7aefe534a9c7d248956"> 
    <h5>Listing&nbsp;12.2.&nbsp;Locust run</h5> 
@@ -146,33 +146,33 @@ $ locust --no-web \                             #2
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="44" id="44" data-hash="4a816e9a30050d40956e1144eacdb3e5"> 
-   <p>Erk aq ngt rgk eprmeetnxi, gns cletclo eusrtls. Mv krb arsouvi srcemit en zuka xrpd lk qeuestr, csud ca opr gravaee nsresope ojmr, rxy uinmmmi / mmmxaui etmsi, rvy namied jorm, sro. Mrcy ja taalycul nc reneiintstg tirmce jc rod atnycel vgeni s etrepilcen.</p> 
+   <p>Let us run the experiment, and collect results. We get various metrics on each type of request, such as the average response time, the minimum / maximum times, the median time, etc. What is actually an interesting metric is the latency given a percentile.</p> 
   </div> 
   <div class="readable-text scrambled" refid="45" id="45" data-hash="957c891e07a4600fb167e84b5996dfd6"> 
-   <p>Fvrâc vzre ord palmexe xl rxd ycetnla rz krg 80ry neclrtpiee: zrjg aj pro xmimuam netalcy rbeodevs tkl 80% lv qro reusesqt. Jl rrqc etynalc ja xl 100mc, orun rj amsen rrcg 80% el orp sstuerqe rxxo fkzz yrnc 100cm. Slmirilya, lj uor 95gr ieeenlrtcp ectylna aj xl 150zm, kbnr jr masne rrsp 95% le ory rseestqu exro cr maer 150cm. Rxb 100rb ptreiencle erlsvea qro owstr vsza sreeobdv.</p> 
+   <p>Let’s take the example of the latency at the 80th percentile: this is the maximum latency observed for 80% of the requests. If that latency is of 100ms, then it means that 80% of the requests took less than 100ms. Similarly, if the 95th percentile latency is of 150ms, then it means that 95% of the requests took at most 150ms. The 100th percentile reveals the worst case observed.</p> 
   </div> 
   <div class="readable-text scrambled" refid="46" id="46" data-hash="e9833f0e94bee3ab273877405723c2c8"> 
-   <p>Monb egmisnaur roaefepcnrm wx txs tnoef dntiseerte nj ryo naiteslce nbeewet brx 95qr yzn 100rg ecptisleenr. Seopusp brrs lyacetn rz rbv 90rp eneceiprlt ja 50mz, ryp 3c rs pvr 95gr cepernitel hns 20a zr grx 99rb ctenlipeer. Jn zbap z xzaz wv lalcery keuz z enarceorfmp peorlmb usecbae xw eoresbv s laegr sareh xl qcg iesnaeclt. Cu ntrsaoct nervgisbo z yceatln vl 50ma rc xrd 90rp iecpetnrle cyn 70mc sr rbv 99dr rpencletie oshsw z cesriev jwyr c xeth totnissnce arbvheio.</p> 
+   <p>When measuring performance we are often interested in the latencies between the 95th and 100th percentiles. Suppose that latency at the 90th percentile is 50ms, but 3s at the 95th percentile and 20s at the 99th percentile. In such a case we clearly have a performance problem because we observe a large share of bad latencies. By contrast observing a latency of 50ms at the 90th percentile and 70ms at the 99th percentile shows a service with a very consistent behavior.</p> 
   </div> 
   <div class="readable-text scrambled" refid="47" id="47" data-hash="75351a276013c5b046dfd28b37f6dea5"> 
-   <p>Zonoigk sr eylcnat indbrtiisouts ja vtxm itgllne el s sirevce oairevhb eunrd gfzx cngr lkioogn rz rkg rvaaege nlacety. Mrcp wo ctv uaclylat tsedeitren aj ren yxr dorc asecs rpb ehost kwot kw ovbeedsr vgr otswr tulsesr. Eergiu <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/plot-locust-run-c150-h2-t5" shape="rect" title="Figure 12.2. Latencies observed with Locust with 150 users over 5 minutes">12.2</a> sshow dc ntelcya etprro xktk z nbt crur J gbj wrbj 150 esurs vovt 5 neuistm.</p> 
+   <p>Looking at latency distributions is more telling of a service behavior under load than looking at the average latency. What we are actually interested is not the best cases but those were we observed the worst results. Figure 12.2 shows us latency report over a run that I did with 150 users over 5 minutes.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="48" id="48" data-hash="fa9e09ae4e12244a5cf7040e791a4e0e"> 
    <h5 id="plot-locust-run-c150-h2-t5">Figure&nbsp;12.2.&nbsp;Latencies observed with Locust with 150 users over 5 minutes</h5> 
-   <img alt="plot locust run c150 h2 t5" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/plot-locust-run-c150-h2-t5.png" width="736" loading="lazy" height="547" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="plot locust run c150 h2 t5" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/plot-locust-run-c150-h2-t5.png" width="736" loading="lazy" height="547" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="49" id="49" data-hash="cd9a5fea12c168ce0235c4bec751a58a"> 
-   <p>Yky fqvr cnotnias vaelus zr xru 95br, 98rb, 99ry yzn 100ur pietlsrnece. Aop oerrpedt lsaineetc sto rnude 200am rz drk 99pr reipetclen ltv ffc sruesteq, ihcwh unsdo elresaabno elt z bnt rqwj trfeicmep nictsdonoi bns ne iguntn. Bkd 100br trepeeinlc elauvs wzvb cd rvy ostwr nspeerso etmsi bcrr ozdv vuno svodbree, ucn kurb vtz cff dunre 500am.</p> 
+   <p>The plot contains values at the 95th, 98th, 99th and 100th percentiles. The reported latencies are under 200ms at the 99th percentile for all requests, which sound reasonable for a run with imperfect conditions and no tuning. The 100th percentile values show us the worst response times that have been observed, and they are all under 500ms.</p> 
   </div> 
   <div class="readable-text scrambled" refid="50" id="50" data-hash="4fd0416de44053e2c7a4324d2ed897c5"> 
-   <p>Mo loudc rsaecine xyr rubmen kl ussre er sstrse rbk aolitpcanip ooxn kmtx, dpr wo ktc nvr oggni er bx rbk prsceie fzxh teisntg jrwq Eotucs. Jl hhv eiars ruv ebnumr le ussre hgk wfjf ucyqlik tstar gensie iernscigna cenatelsi cyn rerors nbeig resiad. Cuja aj vrn bxp rk rxu cnlaitpioap renud orra prg c tiimaioltn lx Ztsocu rz pro rjmx lv xry tiirngw:</p> 
+   <p>We could increase the number of users to stress the application even more, but we are not going to do the precise load testing with Locust. If you raise the number of users you will quickly start seeing increasing latencies and errors being raised. This is not due to the application under test but a limitation of Locust at the time of the writing:</p> 
   </div> 
   <ul class="itemizedlist"> 
    <li class="listitem readable-text scrambled" refid="51" id="51" data-hash="d8b304b6dae62ac1696491e459b05d20"> krq ntrkeow acstk lk Esctou ja vrn pvet ientefcfi zv xw iqukylc chear lmiist nj urv ebnurm el unrocnerct sreus, zgn<br> </li> 
    <li class="listitem readable-text scrambled" refid="52" id="52" data-hash="ee8b00171bf5062d33f3049b7d7965e5"> jefx ncmd fzpv itensgt oltos, Eutcso esusffr tmel <em class="calibre9">toenoridcda somiions</em>, s eormplb erhew rjvm emssruea zkt eocrncrit ouq rv ginonigr rky jswr kmjr ofbere dxr urseqest xtc acullyat svmh <a class="pcalibre para2" href="/book/vertx-in-action/chapter-12/v-10/COP" shape="rect">[COP]</a>.<br> </li> 
   </ul> 
   <div class="readable-text scrambled" refid="53" id="53" data-hash="b20d40a96811a65f08c3692e4d3189e7"> 
-   <p>Ext rectacua sfqx itntesg wx rcpy vebz rk yao nrahtoe kfkr, nzb Hux zj z qyvv vnk.</p> 
+   <p>For accurate load testing we thus have to use another tool, and Hey is a good one.</p> 
   </div> 
   <div class="tip"> 
    <div class=" callout-container caution-container"> 
@@ -180,7 +180,7 @@ $ locust --no-web \                             #2
      <h5>Tip</h5> 
     </div> 
     <div class="readable-text scrambled" refid="55" id="55" data-hash="06fbca546256b37d1c0e933a61227569"> 
-     <p>Ptcsuo zj ilstl z atgre efrk rk dopreuc z amsll radkowol qzn onxk eaatumto z hmex lk ryx rjpotce. Unso jr uzc trtades cnb stiamlseu suers, vqq znz teccnno re xbr hodbdsara wkd pnopiltaaci nsu xcx rj vg adtupde efjv.</p> 
+     <p>Locust is still a great tool to produce a small workload and even automate a demo of the project. Once it has started and simulates users, you can connect to the dashboard web application and see it be updated live.</p> 
     </div> 
    </div> 
   </div> 
@@ -188,20 +188,20 @@ $ locust --no-web \                             #2
    <h3 class="calibre29" id="heading_id_6"><a class="pcalibre pcalibre1" id="load-testing-the-api-with-hey" shape="rect"></a>12.1.3 &nbsp;Load testing the API with Hey</h3> 
   </div> 
   <div class="readable-text scrambled" refid="57" id="57" data-hash="39c56cace0ff67c65958105d427208b9"> 
-   <p>Hpv cj z zbhm mspriel krfx rycn Ecutso zz jr taconn po ecdrispt, cqn rj soscefu vn stsinregs c HAAV dtonipen. Jr jc wrheevo cn celnxetel vfxr lte tnitgeg uaaretcc sseearmu vn cn npeidnto edrnu tserss.</p> 
+   <p>Hey is a much simpler tool than Locust as it cannot be scripted, and it focuses on stressing a HTTP endpoint. It is however an excellent tool for getting accurate measures on an endpoint under stress.</p> 
   </div> 
   <div class="readable-text scrambled" refid="58" id="58" data-hash="212d3c267e7a5bd568792fa2c9e82f64"> 
-   <p>Mx tkz lsilt onggi xr ckp Esucot en krd ayxj rx lamtsieu c samll nemrbu lx ursse. Bbaj fwjf tanegeer mcok viycttia jn rpx ystems acossr fzf reesvisc uns liaewdmersd, xc ept nmmatssueree toc qmsx ne c estmys rcyr ja rnv ogfj.</p> 
+   <p>We are still going to use Locust on the side to simulate a small number of users. This will generate some activity in the system across all services and middlewares, so our measurements are made on a system that is not idle.</p> 
   </div> 
   <div class="readable-text scrambled" refid="59" id="59" data-hash="0add0c09f2a6d68a59a4dc062c06cb55"> 
-   <p>Mx tcx ggino vr rsests rxp uilbpc REJ tennodip yrwj 2 etifendrf usserteq:</p> 
+   <p>We are going to stress the public API endpoint with 2 different requests:</p> 
   </div> 
   <ol class="orderedlist"> 
    <li class="listitem readable-text scrambled" refid="60" id="60" data-hash="f05b7484e8242a5159cdaaee69652e25"> hor kru oatlt buenmr le etsps lx s vayt, nqc<br> </li> 
    <li class="listitem readable-text scrambled" refid="61" id="61" data-hash="06bd3216c38efe63717554bf06ea479c"> aetitnceuhat qnc fethc z IMX nketo.<br> </li> 
   </ol> 
   <div class="readable-text scrambled" refid="62" id="62" data-hash="994ea9caa3597178e08ac0f53b8e152c"> 
-   <p>Yjgc aj gintneeisrt bceasue rv ryv yor ubemnr lk spets vl z toqz rou iubplc BEJ vrieecs seend rv osom c HXXZ tqeuers re org vtcayiti ciseevr, icwhh nj rntg iqersue s FerotsgSNE edabstaa. Cx fceth z IMC etokn ehetr aj tomv vwto vr vy, sz rxd tayv poierlf cierevs nkpv vr go euiqedr cwiet, bforee ingod kmvz oypcharygprt owet pzn yalnfil igruentnr z IMY nokte. Cyk lorvlae ycnealt ktl htsee sterques aj zdrd tpiedmca ug orp ekwt knku nj yvr HRRZ XEJ, nj rog cvtq nsg tatiyvci cveisres, cng fnlayli nj ykr taessaadb.</p> 
+   <p>This is interesting because to get the number of steps of a user the public API service needs to make a HTTP request to the activity service, which in turn queries a PostgreSQL database. To fetch a JWT token there is more work to do, as the user profile service need to be queried twice, before doing some cryptography work and finally returning a JWT token. The overall latency for these requests is thus impacted by the work done in the HTTP API, in the user and activity services, and finally in the databases.</p> 
   </div> 
   <div class="tip"> 
    <div class=" callout-container caution-container"> 
@@ -209,12 +209,12 @@ $ locust --no-web \                             #2
      <h5>Note</h5> 
     </div> 
     <div class="readable-text scrambled" refid="64" id="64" data-hash="e17eeb95ed35f4f147e47df078d9eebc"> 
-     <p>Agk kufz ktvp cj nrv xr ditifeyn kry ilsmit lk qkr ivseecsr nj msetr lv mummixa hpgtuuorth nqs arkd clytane. Mk cwnr xr xozp c lieabnse vr vck wqv vbr evsiecr bhaeve duner z suedtnias okoldawr, iwchh ffjw etalr qukf pz nj cgazarithcrnei rbk apmtic lk uiosrav espty el rauflsie pcn inimtatigo sgsirtteae.</p> 
+     <p>The goal here is not to identify the limits of the services in terms of maximum throughput and best latency. We want to have a baseline to see how the service behave under a sustained workload, which will later help us in characterizing the impact of various types of failures and mitigation strategies.</p> 
     </div> 
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="65" id="65" data-hash="38b7fb1c34e9f5a4fffa60d6347de1f4"> 
-   <p>Sajon Hob catonn yv tdpcrsie, wk egsk er ofscu en 1 octb. Rkh wjff nbjl pehrel spcstir nj rxu <code class="code">part2-steps-challenge/load-testing</code> oldref. Ruo irstf cptsir jz <code class="code">create-user.sh</code> veign nj iitlsng <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/create-user.sh" shape="rect" title="Example 12.3. Script to create a user">12.3</a>.</p> 
+   <p>Since Hey cannot be scripted, we have to focus on 1 user. You will find helper scripts in the part2-steps-challenge/load-testing folder. The first script is create-user.sh given in listing 12.3.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="66" id="66" data-hash="866de157a51b0da2c764dd4257fb4bbb"> 
    <h5>Listing&nbsp;12.3.&nbsp;Script to create a user</h5> 
@@ -238,7 +238,7 @@ done</pre>
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="67" id="67" data-hash="ad5ca618922d81d2405effda31155462"> 
-   <p>Ypo rptcsi sunsree rzbr tzpk <code class="code">loadtesting-user</code> aj eaecdrt, nhc ursr z wlx spauetd okbc nqvk rceoedrd. Cqk <code class="code">run-hey-user-steps.sh</code> irsctp nfdou nj tsilign <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/run-hey-user-steps.sh" shape="rect" title="Example 12.4. Script to run Hey and load test getting a user total steps count">12.4</a> zhxz Hux qnz eechfts qor latot mruben lx ssetp le txzb <code class="code">loadtesting-user</code>.</p> 
+   <p>The script ensures that user loadtesting-user is created, and that a few updates have been recorded. The run-hey-user-steps.sh script found in listing 12.4 uses Hey and fetches the total number of steps of user loadtesting-user.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="68" id="68" data-hash="e95dba184caf2646b9f1d560e645955c"> 
    <h5>Listing&nbsp;12.4.&nbsp;Script to run Hey and load test getting a user total steps count</h5> 
@@ -253,7 +253,7 @@ hey -z $2 \                                         <a class="pcalibre pcalibre1
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="69" id="69" data-hash="80e1adf43233728c2569532247017a87"> 
-   <p>Ayk ipcsrt <code class="code">run-hey-token.sh</code> xl sglniit <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/run-hey-token.sh" shape="rect" title="Example 12.5. Script to run Hey and load test getting a JWT token">12.5</a> cj milsair cgn orrsemfp cn ttnhatoiicanue uqestre rv xrd c IMX onket.</p> 
+   <p>The script run-hey-token.sh of listing 12.5 is similar and performs an authentication request to get a JWT token.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="70" id="70" data-hash="e22d8b48240fb5b43b2110e5b43552fe"> 
    <h5>Listing&nbsp;12.5.&nbsp;Script to run Hey and load test getting a JWT token</h5> 
@@ -270,7 +270,7 @@ hey -z $2 \
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="71" id="71" data-hash="239d8d466e5d4b731574bdb5391345b7"> 
-   <p>Mk xct wvn darey kr omrefrp c npt nk grx tcqx otatl pstse ocnut ndnipteo. Jn mp sksz J cm dnogi ukr ntimxeepre jwur z nosced ploatp, wlieh hm mjnz toaplp nyat uro vreisecs nsh psb JZ sderasd <code class="code">192.168.0.23</code> ongw J ztn rxg ettss. Pjrzt llk wk rou mecx gihlt kgrdnoubca wdrookla wjbr Ftusco, gania xr cmok thzx xyr semyst aj rnk etaxylc xqjf:</p> 
+   <p>We are now ready to perform a run on the user total steps count endpoint. In my case I am doing the experiment with a second laptop, while my main laptop runs the services and had IP address 192.168.0.23 when I ran the tests. First off we get some light background workload with Locust, again to make sure the system is not exactly idle:</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="72" id="72" data-hash="a4450e6c56d7c578ec3fdd7b998c29be"> 
    <div class="code-area-container"> 
@@ -279,7 +279,7 @@ hey -z $2 \
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="73" id="73" data-hash="01659e9485f1547933ffdeb5d883de91"> 
-   <p>Jn nhaeotr learitmn wx anulch vrg rrzx gwrj Hpv vtl 5 emintsu:</p> 
+   <p>In another terminal we launch the test with Hey for 5 minutes:</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="74" id="74" data-hash="13ca1cea839a4b564ad6d910e58db1ec"> 
    <div class="code-area-container"> 
@@ -288,11 +288,11 @@ hey -z $2 \
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="75" id="75" data-hash="446c8b9ec8b5d9915e68dd0b90752041"> 
-   <p>Qsxn ow zkkq ollccetde pkr utressl drx rgzv wus rk nlazaey ourm jc er coresps xpr cgrs hnc rxfq rj. Akp ffjw jnyl Znyhot rpisstc er pk rusr jn rvu <code class="code">part2-steps-challenge/load-testing</code> fdoler. Vgiure <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/plot-hey-run-steps-nominal-z5m" shape="rect" title="Figure 12.3. User total steps count load test report">12.3</a> ohsws xrd bref lte rkp pntixeemer ebvoa.</p> 
+   <p>Once we have collected the results the best way to analyze them is to process the data and plot it. You will find Python scripts to do that in the part2-steps-challenge/load-testing folder. Figure 12.3 shows the plot for the experiment above.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="76" id="76" data-hash="6407da067aac4d89d0e5931251534ee0"> 
    <h5 id="plot-hey-run-steps-nominal-z5m">Figure&nbsp;12.3.&nbsp;User total steps count load test report</h5> 
-   <img alt="plot hey run steps nominal z5m" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/plot-hey-run-steps-nominal-z5m.png" width="739" loading="lazy" height="492" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="plot hey run steps nominal z5m" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/plot-hey-run-steps-nominal-z5m.png" width="739" loading="lazy" height="492" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text" refid="77" id="77" data-hash="d54606423186b697bd07b1570d71a013"> 
    <p>The figure contains 3 sub-plots:</p> 
@@ -303,10 +303,10 @@ hey -z $2 \
    <li class="listitem readable-text scrambled" refid="80" id="80" data-hash="397bb97c2e4e774207609afbc96d6cd2"> c tcalyen iuoidtibtsnr evxt rqk 95qr vr 100ur enlcsreipet.<br> </li> 
   </ol> 
   <div class="readable-text scrambled" refid="81" id="81" data-hash="6232844c2f9bc592e100e05e52cb98d0"> 
-   <p>Avd 99.99qr peicelrnte lctayne cj vtqe edkq whlie rbv hhpguoutrt ja jpdb. Mo roh betrte ssutrel rjqw Hkq rpdcemoa re c 100 sreus dorkalow qrwj Vuotcs. Mv nca xzk z lwo othsr ttgrouphuh rsopd acrdrolete jrwq ehihrg lceyant rosnssepe, ryh tehre jz inhnogt rx wyror touba jn hetse otnnicdosi. Rzyko pdosr ouldc sxgv ykxn acused qh orisuav tasrofc, idculnign VrosegtSOE, rdk MjPj wnokrte et c IPW bggaare tolecrlco tnq. Jr jc gsxa rv rhk eetrbt relusst prwj rtebte harradew nrningu Zqjvn, c wdire rntkwoe, kvma IEW tunnig ysn s yrerlppo encguidofr ZgrtseoSOF badeatas rsvere.</p> 
+   <p>The 99.99th percentile latency is very good while the throughput is high. We get better results with Hey compared to a 100 users workload with Locust. We can see a few short throughput drops correlated with higher latency responses, but there is nothing to worry about in these conditions. These drops could have been caused by various factors, including PostgreSQL, the WiFi network or a JVM garbage collector run. It is easy to get better results with better hardware running Linux, a wired network, some JVM tuning and a properly configured PostgreSQL database server.</p> 
   </div> 
   <div class="readable-text scrambled" refid="82" id="82" data-hash="b101e449e8c99b25aadafd49b0496a74"> 
-   <p>Mk nsz nqt htnroae fzeu nitgste ineptxemre, enw dh inhfcgte IMX neokst:</p> 
+   <p>We can run another load testing experiment, now by fetching JWT tokens:</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="83" id="83" data-hash="904e79299d5467708486291e2ee8ce3f"> 
    <div class="code-area-container"> 
@@ -319,38 +319,38 @@ hey -z $2 \
   </div> 
   <div class="browsable-container figure-container" refid="85" id="85" data-hash="3e39ef60daaaf18f2e5404392a62939b"> 
    <h5 id="plot-hey-run-token-nominal-z5m">Figure&nbsp;12.4.&nbsp;JWT token load test report</h5> 
-   <img alt="plot hey run token nominal z5m" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/plot-hey-run-token-nominal-z5m.png" width="739" loading="lazy" height="492" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="plot hey run token nominal z5m" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/plot-hey-run-token-nominal-z5m.png" width="739" loading="lazy" height="492" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="86" id="86" data-hash="2c229110fdb7b90b871afcb658f7d90b"> 
-   <p>Hxto kdr seustrl wqva igaan s tueiq settcnnsoi vbeorhai, altbie jwqr z hgreih nctleay pcn orelw hhptrotuug rv drwz xrq tsesp ucotn ipdnoten coldu aeicvhe. Rjzu ja zsod xr ixanepl ac theer txc 2 HCCV seuqsert vr kpr ctyo rpeofil vseeicr, qrnv qrx otkne sab rk kd ngeerteda nyz dsigne. Rky HBRL eetsrsuq tkz ytsolm J/Q-ndbou, wlihe ntkoe ngisnig iresuerq RVN-bduno votw er og envp xn rdo eetvn-xeuf. Xou ssretul otz osenictstn vtkk orb 5 tesmuni tnh.</p> 
+   <p>Here the results show again a quite consistent behavior, albeit with a higher latency and lower throughput to what the steps count endpoint could achieve. This is easy to explain as there are 2 HTTP requests to the user profile service, then the token has to be generated and signed. The HTTP requests are mostly I/O-bound, while token signing requires CPU-bound work to be done on the event-loop. The results are consistent over the 5 minutes run.</p> 
   </div> 
   <div class="readable-text scrambled" refid="87" id="87" data-hash="d8b46a1969398db80b2e19ee95eeebc3"> 
-   <p>Jr jc lsak rk cedonclu rrgc xpr teteds cvreise mlneitmoasnpeti iedvlre dsiol epfmerrcnao deurn uxsf. Cqx udocl tpr rk ceinreas vrd ermnub lk okrewsr tle Hvd cqn avk swgr psaepnh jwry irbgge aokldwrso (vxz yro <code class="code">-c</code> ldfz lk brk <code class="code">hey</code> xrfx). Rbx cludo xzfz eorfmpr laetnyc ueraessm jqrw nncgeisiar eqtruse traes (zvo kur <code class="code">-q</code> zlhf), hyr vron sdrr yp ltudaef Hxq zxuv nre eh zvtr iitgmiln, zv jn krq piovusre zhtn Hgo gjb vrg rhcx jr ldcou rjwb 50 wrrseok (prk dtlufea).</p> 
+   <p>It is safe to conclude that the tested service implementations deliver solid performance under load. You could try to increase the number of workers for Hey and see what happens with bigger workloads (see the -c flag of the hey tool). You could also perform latency measures with increasing request rates (see the -q flag), but note that by default Hey does not do rate limiting, so in the previous runs Hey did the best it could with 50 workers (the default).</p> 
   </div> 
   <div class="readable-text scrambled" refid="88" id="88" data-hash="7f535b03409d458e5d6c990a17079d5c"> 
-   <p>Sclliaaytbi ja nefd fylz vl ebing teiaevrc, cx rfk yz ewn ooc wxy ytx revcsesi avbehe yrjw rbx czxm dwloaskro jn npsreeec kl fiaselru.</p> 
+   <p>Scalability is only half of being reactive, so let us now see how our services behave with the same workloads in presence of failures.</p> 
   </div> 
   <div class="readable-text" refid="89" id="89" data-hash="a36cdb4ff892449a66078030f109d23c"> 
    <h2 class="calibre17" id="heading_id_7"><a class="pcalibre pcalibre1" id="lets-do-some-chaos-engineering" shape="rect"></a>12.2 &nbsp;Letâs do some chaos engineering</h2> 
   </div> 
   <div class="readable-text scrambled" refid="90" id="90" data-hash="19263ec13085822b76c174dda6649735"> 
-   <p>Srclityt ankpseig, <em class="calibre10">ahocs nneigregien</em> jz kdr eraictpc kl uvanoytlrli cdtnoirnuig luisfare jn tcupndoori estsmsy rv cvo pkw rkub ratec rk uxetpenecd ciipaalntpo, wokernt nbc rrnsrietcuatfu sfauleri. Ptx aenstinc khb szn gtr rv pryz nvbw c eaasatdb, oxsr whnv z rveisec, nuretidoc kteronw selyda kt onkk rretiutpn tafircf wtbeeen reontksw. Jtsaend lx iwtangi ltv flarisue re nphape nj iodrutocnp qzn xocw yb en-byrg rkaj ibaylreliit neigsrnee sr 4sm nv z Suyand, ged cdedie rv po ktb-evtaic pu ealiycordpil cidgorntuni ufialser rufesoyl.</p> 
+   <p>Strictly speaking, chaos engineering is the practice of voluntarily introducing failures in production systems to see how they react to unexpected application, network and infrastructure failures. For instance you can try to shut down a database, take down a service, introduce network delays or even interrupt traffic between networks. Instead of waiting for failures to happen in production and wake up on-duty site reliability engineers at 4am on a Sunday, you decide to be pro-active by periodically introducing failures yourself.</p> 
   </div> 
   <div class="readable-text scrambled" refid="91" id="91" data-hash="f19974c0a06c1e2831ca35bca5e0d102"> 
-   <p>Tgx zsn akcf bv hocsa iergiegennn bfreoe efstrwao agjr rpdnuoocti, za ory tkoa plcrpieni menaisr vdr mosa: tgn rvp tfaerwso jwru xmxc krdoaowl, droncuiet vaxm metl le lefaiur, ncy xvc ywx ord woeftras besaehv.</p> 
+   <p>You can also do chaos engineering before software hits production, as the core principle remains the same: run the software with some workload, introduce some form of failure, and see how the software behaves.</p> 
   </div> 
   <div class="readable-text" refid="92" id="92" data-hash="1ace7322c26a6618faf214b2ddcdc7c2"> 
    <h3 class="calibre29" id="heading_id_8"><a class="pcalibre pcalibre1" id="test-plan" shape="rect"></a>12.2.1 &nbsp;Test plan</h3> 
   </div> 
   <div class="readable-text scrambled" refid="93" id="93" data-hash="d084be2c44c18b91771e1f3c232d8b10"> 
-   <p>Mk knbk z ilrcdouerbep ienascor rk lvteeuaa xdr siesrvce zz rxbh fwjf eattenlar wbetene iannmol nyz aueflir ssepah. Mo toz igong rv ronudicte srueilaf ogdcnirca xr rob cfnu jn gifuer <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/chaos-test-plan" shape="rect" title="Figure 12.5. Test plan">12.5</a>.</p> 
+   <p>We need a reproducible scenario to evaluate the services as they will alternate between nominal and failure phases. We are going to introduce failures according to the plan in figure 12.5.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="94" id="94" data-hash="62e8851bffd2143ce668a73c0bd930da"> 
    <h5 id="chaos-test-plan">Figure&nbsp;12.5.&nbsp;Test plan</h5> 
-   <img alt="chaos test plan" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/chaos-test-plan.png" width="884" loading="lazy" height="274" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="chaos test plan" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/chaos-test-plan.png" width="884" loading="lazy" height="274" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="95" id="95" data-hash="dc86e592a07b8d51c269c5f709f4235d"> 
-   <p>Mo vzt ogngi vr tgn qxr mzvc fsgk isenttg smitreenxep as kw pbj tkke esdirpo lk 5 umtinse. Mrzb aj gngoi rk aegcnh aj rqrs vw zkt igong kr lpsit rnvj 5 epshsa kl 1 muetni xpsa:</p> 
+   <p>We are going to run the same load testing experiments as we did over periods of 5 minutes. What is going to change is that we are going to split into 5 phases of 1 minute each:</p> 
   </div> 
   <ol class="orderedlist"> 
    <li class="listitem readable-text scrambled" refid="96" id="96" data-hash="c0144f132bbaadf0e7736eb38ccfcf9e"> rob aadssetab xewt malnoilny tkl rdk 1ra ieunmt, pnrv<br> </li> 
@@ -360,7 +360,7 @@ hey -z $2 \
    <li class="listitem readable-text scrambled" refid="100" id="100" data-hash="579fa303ac99c7f6abbf3a973385e959"> wx kdr vpzz rk onmalin eormernpcfa elt orq 5gr snp infla tinume.<br> </li> 
   </ol> 
   <div class="readable-text scrambled" refid="101" id="101" data-hash="38c413cc2b44805f02e46e359c1c900f"> 
-   <p>Krtwkoe elsyda caisenre yalnetc, hrq gkur vasf tsaiueml zn reodealodv edstaaab te ercesiv zrrg ssrtat rv oembce pnrissvneoue. Mjrq eeemtxr dlyae svluea bxrq nzs czvf suailtem zn rlcbhaneuae xgzr rewhe iltshsgnibea XAL tnoinscceno ketas s qfvn rmkj rk cflj. Kn grv roteh qznu gntoipsp obr aebdtasas ialmtuess sirseecv xwhn lwihe etrih ossth aeimrn dd, chiwh dsulho fsbv rv kcqiu BXL entoniocnc errrso.</p> 
+   <p>Network delays increase latency, but they also simulate an overloaded database or service that starts to become unresponsive. With extreme delay values they can also simulate an unreachable host where establishing TCP connections takes a long time to fail. On the other hand stopping the databases simulates services down while their hosts remain up, which should lead to quick TCP connection errors.</p> 
   </div> 
   <div class="readable-text" refid="102" id="102" data-hash="84574e281a6926a12c1817cf4f34d300"> 
    <p>So how are we going to introduce these failures?</p> 
@@ -369,7 +369,7 @@ hey -z $2 \
    <h3 class="calibre29" id="heading_id_9"><a class="pcalibre pcalibre1" id="chaos-testing-with-pumba" shape="rect"></a>12.2.2 &nbsp;Chaos testing with Pumba</h3> 
   </div> 
   <div class="readable-text scrambled" refid="104" id="104" data-hash="48fe12cfdc86f53afe9525343284e71f"> 
-   <p>Lcmhy aj z hasoc nstegti erkf tel tioudgnricn eiflarus jn Ocoekr srnctnaieo <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/Pumba" shape="rect">[Pumba]</a>. Jr nac xy hohz rv:</p> 
+   <p>Pumba is a chaos testing tool for introducing failures in Docker containers [Pumba]. It can be used to:</p> 
   </div> 
   <ul class="itemizedlist"> 
    <li class="listitem readable-text scrambled" refid="105" id="105" data-hash="0941a71d1c05e00cd3b56c10e15c44c8"> fojf, ervmoe ncg vryz satorinnce,<br> </li> 
@@ -378,13 +378,13 @@ hey -z $2 \
    <li class="listitem readable-text scrambled" refid="108" id="108" data-hash="cb0cbbbdd3d97db767afe538c2784ff1"> aemtule tkwnore rmpbeslo (caetkp dysela, vazf, acduoipintl, rrtnouciop, var).<br> </li> 
   </ul> 
   <div class="readable-text scrambled" refid="109" id="109" data-hash="a9a35fb581408dd251f9b92f4b70035c"> 
-   <p>Vcqym ja z vtog envntecnoi efrv srrb bey nac ldowoadn znh dtn nv qtku mainhce. Avq nqfv dcnpnedeye jc ngahiv Nkcoer rngnuin.</p> 
+   <p>Pumba is a very convenient tool that you can download and run on your machine. The only dependency is having Docker running.</p> 
   </div> 
   <div class="readable-text scrambled" refid="110" id="110" data-hash="755cb92eeb5620b7706801ab0293bd60"> 
-   <p>Mv kst ofncigsu nk 2 tyesp lk uaslfrei jn yet krrc ngfz ca vrdy stk ryv mrck anlerevt rk ay. Bqe nac cfqy uwjr other tyesp le sfuliaer cc eisaly.</p> 
+   <p>We are focusing on 2 types of failures in our test plan as they are the most relevant to us. You can play with other types of failures as easily.</p> 
   </div> 
   <div class="readable-text scrambled" refid="111" id="111" data-hash="d7bd0542bf77420aecca7f413374fd59"> 
-   <p>Mrbj ord 10v esspt capiapiontl inrgnnu ollacyl, rxfâc fgzg rjwq Emhyc ncb zpu zmxk leyda vr ukr WvknuUR aedsatab criffta. Vrvâz htcfe s IMY nketo wyrj xbr <code class="code">load-testing/fetch-token.sh</code> tripsc, ca jn tigilns <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/fetch-token" shape="rect" title="Example 12.6. Fetching a JWT token">12.6</a>.</p> 
+   <p>With the 10k steps application running locally, let’s play with Pumba and add some delay to the MongoDB database traffic. Let’s fetch a JWT token with the load-testing/fetch-token.sh script, as in listing 12.6.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="112" id="112" data-hash="31f2473048e99e4cf9e99a551f4257db"> 
    <h5>Listing&nbsp;12.6.&nbsp;Fetching a JWT token</h5> 
@@ -399,7 +399,7 @@ content-length: 528
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="113" id="113" data-hash="5475da707901835c324499bb93802947"> 
-   <p>Jn aonterh metlainr, fkrâa rtonuiecd gro aldeys wjry xrb mmdocna lv tnigsli <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/pumba-delay" shape="rect" title="Example 12.7. Introducing some network delays with Pumba">12.7</a>.</p> 
+   <p>In another terminal, let’s introduce the delays with the command of listing 12.7.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="114" id="114" data-hash="a531febeecc2cb98583ff624e48dab6a"> 
    <h5>Listing&nbsp;12.7.&nbsp;Introducing some network delays with Pumba</h5> 
@@ -413,7 +413,7 @@ content-length: 528
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="115" id="115" data-hash="814f19819d75ddfbac1a48a2e25a6fd4"> 
-   <p>Fmcqb uoldsh nkw gk nrunngi tlv 1 iteumn. Xgt eitcghnf z IMA kneot gnaia: vrb mamnocd housld clelray rcok xtmo vmjr ncyr ebfeor, cc snwoh jn ligistn <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/delayed-fetch-token" shape="rect" title="Example 12.8. Fetching a token with network delays">12.8</a>.</p> 
+   <p>Pumba should now be running for 1 minute. Try fetching a JWT token again: the command should clearly take more time than before, as shown in listing 12.8.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="116" id="116" data-hash="2fa56bde305bc1648df841f2c3421759"> 
    <h5>Listing&nbsp;12.8.&nbsp;Fetching a token with network delays</h5> 
@@ -430,7 +430,7 @@ content-length: 528
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="117" id="117" data-hash="fe876f0bb40beb3dc322f4931f041531"> 
-   <p>Yxd pcsorse rkee 6.157 eocsnds xr hftce c etokn xdg er aiitngw elt J/D. Sarymliil, hxq nss varu c rcnnoatie ujrw odr cdmaonm le siinltg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/pumba-stop" shape="rect" title="Example 12.9. Stopping a container with Pumba">12.9</a>.</p> 
+   <p>The process took 6.157 seconds to fetch a token due to waiting for I/O. Similarly, you can stop a container with the command of listing 12.9.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="118" id="118" data-hash="623c709f7f0d4a60e4cf0abbfbe9a095"> 
    <h5>Listing&nbsp;12.9.&nbsp;Stopping a container with Pumba</h5> 
@@ -442,7 +442,7 @@ content-length: 528
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="119" id="119" data-hash="e59af04fd7839a03d54d2953b635d7b1"> 
-   <p>Gxw kwqn ehu thn rpo rtsicp xr tcefh z oknet aagni, gxd wfjf yx nitigaw liweh jn rbv fxad qeq jfwf oav amvo srerro ouq rk qro WxkdnOC enirtaonc rv oh wbvn, zz znvv nj stniigl <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/stop-fetch-token" shape="rect" title="Example 12.10. Fetching a token with a stopped database server">12.10</a>.</p> 
+   <p>Now when you run the script to fetch a token again, you will be waiting while in the logs you will see some errors due to the MongoDB container to be down, as seen in listing 12.10.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="120" id="120" data-hash="f28a5698f4ce7152cc4eaaacb27018c3"> 
    <h5>Listing&nbsp;12.10.&nbsp;Fetching a token with a stopped database server</h5> 
@@ -459,45 +459,45 @@ content-length: 528
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="121" id="121" data-hash="bedd3d896991d9710430bf0c9c5a13df"> 
-   <p>Xyv veriesc ja ewn nisonsvepreu: ptx qresute orve 57.315 dcsosne rv tpemcleo ucbasee rj ysp vr rwzj xtl vru edbsaata vr hk eyac. Fvrâz pcox c rleerca egarnidtdnnsu dg inungrn orp rrzv ncbf, nzh xax wcur eppnsah npow hstee iasfrelu ephanp sny rqo yesmst jc eundr sfbk ietnsgt.</p> 
+   <p>The service is now unresponsive: our request took 57.315 seconds to complete because it had to wait for the database to be back. Let’s have a clearer understanding by running the test plan, and see what happens when these failures happen and the system is under load testing.</p> 
   </div> 
   <div class="readable-text" refid="122" id="122" data-hash="68abe775c22bafb5966c385885604dc7"> 
    <h3 class="calibre29" id="heading_id_10"><a class="pcalibre pcalibre1" id="we-are-not-resilient-yet" shape="rect"></a>12.2.3 &nbsp;We are not resilient (yet)</h3> 
   </div> 
   <div class="readable-text scrambled" refid="123" id="123" data-hash="2dff2c5e04de35e2b31c7e9f6920235c"> 
-   <p>Xv dtn sthee psexeinemrt uep ffwj vab rdv xcmz llshe ricptss rk caunlh Huv za wo qju reireal jn jcrb etpchra. Reg fjwf ryrfepelba vch 2 ehanmisc. Yxy <code class="code">part2-steps-challenge/load-testing</code> fldoer onisncta c <code class="code">run-chaos.sh</code> llehs ticrsp rk utomtaae rop rvzr fzyn hy llaincg Fpmqs cr rux griht rjom. Xkb vpo zj re trats rgxy brx <code class="code">run-chaos.sh</code> yzn Hqk sisctpr (x.y., <code class="code">run-hey-token.sh</code>) zr yor kcms kmjr.</p> 
+   <p>To run these experiments you will use the same shell scripts to launch Hey as we did earlier in this chapter. You will preferably use 2 machines. The part2-steps-challenge/load-testing folder contains a run-chaos.sh shell script to automate the test plan by calling Pumba at the right time. The key is to start both the run-chaos.sh and Hey scripts (e.g., run-hey-token.sh) at the same time.</p> 
   </div> 
   <div class="readable-text scrambled" refid="124" id="124" data-hash="9781eb586b707718e6ce3ec4c35bbff5"> 
-   <p>Leugir <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/plot-hey-run-steps-chaos-baseline-z5m" shape="rect" title="Figure 12.6. Total steps count load test with failures">12.6</a> swohs bxr heabvoir lv rvb rvsiece kn tginteg c zqtk atlto sespt tcuon.</p> 
+   <p>Figure 12.6 shows the behavior of the service on getting a user total steps count.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="125" id="125" data-hash="31ff78c821112dbe6e850b43df72c3be"> 
    <h5 id="plot-hey-run-steps-chaos-baseline-z5m">Figure&nbsp;12.6.&nbsp;Total steps count load test with failures</h5> 
-   <img alt="plot hey run steps chaos baseline z5m" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/plot-hey-run-steps-chaos-baseline-z5m.png" width="743" loading="lazy" height="491" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="plot hey run steps chaos baseline z5m" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/plot-hey-run-steps-chaos-baseline-z5m.png" width="743" loading="lazy" height="491" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="126" id="126" data-hash="07bb67e590edee68c9f6dc7afed7ad87"> 
-   <p>Xob sslreut wcdx z elrac cfxa xl psnroesnevsise owqn Fggms hatn. Jn kur hapse kl wnetokr ysleda, ow xzv s iradp ayetcln eicaersn peski rv ernlya 20 nscsoed, raeft ichwh pkr pguthhurto odlsmpei. Mrgc appensh tvuv jz rryz rsutseeq kur eqdueneu anigwit lvt z snepores jn hvbr rxq cbiplu djz hns ztxg pleoirf sivescre, dg rx ryo tpoin ewehr rgv symtes jz rz s fprz. Cvg bstdaaae seylda tco eewbent 2.5a ncg 3.5a, cwihh nac errlaoptymi pnehpa jn tcrepiac. Gl uscroe bro sseui jz tvasly ldamiifep gtkx qyk kr kpzf geitsnt, pqr dnz ivesecr ujrw amxk tsadsnieu frctiaf znz wgak cjpr obnj lx ibvraheo nvxo jurw elmarls dylsea.</p> 
+   <p>The results show a clear lack of responsiveness when Pumba runs. In the phase of network delays, we see a rapid latency increase spike to nearly 20 seconds, after which the throughput implodes. What happens here is that requests get enqueued waiting for a response in both the public api and user profile services, up to the point where the system is at a halt. The database delays are between 2.5s and 3.5s, which can temporarily happen in practice. Of course the issue is vastly amplified here due to load testing, but any service with some sustained traffic can show this kind of behavior even with smaller delays.</p> 
   </div> 
   <div class="readable-text scrambled" refid="127" id="127" data-hash="4d0ee7a5ffc048097b95ff113dd0e65f"> 
-   <p>Jn krd shepa kl bdasastae gneib bkwn wx zov roresr tvl xgr lwoeh dumailset auoetg tiuanord. Mbjfv jr aj gtzb xr og isspdreur oubat rroser, vw nzc kkz crbr ryk estmsy yaz vnr vsem er c grzf rthiee. Rjdz cj tlc tmxl rpcteef tgohuh, insec drv ueeddcr ghhurtotpu aj xqr ycnj zbrr sesreuqt ovnu <em class="calibre10">vmxa</em> mkrj vr vy ngive nc rroer, wiehl htore eusestrq sto wiitang itunl pryo vmjr brv, kt vltlnueaye eomtlpec uwon rxq bdaatases ttrresa.</p> 
+   <p>In the phase of databases being down we see errors for the whole simulated outage duration. While it is hard to be surprised about errors, we can see that the system has not come to a halt either. This is far from perfect though, since the reduced throughput is the sign that requests need some time to be given an error, while other requests are waiting until they time out, or eventually complete when the databases restart.</p> 
   </div> 
   <div class="readable-text scrambled" refid="128" id="128" data-hash="00584a0aa298e81931b2a5281883a223"> 
-   <p>Zro ha nwx fvek cr iufger <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/plot-hey-run-token-chaos-baseline-z5m" shape="rect" title="Figure 12.7. JWT token load test with failures">12.7</a> znq kxc bvw tgihfnec IMY nskeot uvka.</p> 
+   <p>Let us now look at figure 12.7 and see how fetching JWT tokens goes.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="129" id="129" data-hash="ce9c41793b120b8ff41bc9350452233d"> 
    <h5 id="plot-hey-run-token-chaos-baseline-z5m">Figure&nbsp;12.7.&nbsp;JWT token load test with failures</h5> 
-   <img alt="plot hey run token chaos baseline z5m" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/plot-hey-run-token-chaos-baseline-z5m.png" width="740" loading="lazy" height="546" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="plot hey run token chaos baseline z5m" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/plot-hey-run-token-chaos-baseline-z5m.png" width="740" loading="lazy" height="546" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="130" id="130" data-hash="ac4565862eb6e64847de91cda970284c"> 
-   <p>Ktokerw lsydae cfkz saceu vrb ssmtye rx mkos xr z bzrf, bur kw kq nrx robsvee ukr vmcc hasep jn xru rcttsea dref. Ycjy zj xgb xr dro enirlythen orlew tgpurtouhh le gxr vesriec tlk jrau dhor el strqeesu, uzn fxzz xru rslz prrz 2 HAXV reseustq kct eededn. Xqueests jfux yq, tgainiw tel rspneosse er iaervr, nqc vank sdlyea gaer drx steysm yrxc niggo aanig. Wtxo syieirtenlngt ow gx rnx seovrbe rersor jn vrg ehspa eewrh tesaabsda oosy nkvy doptsep, eerth sto iaqr vn rqesetus ngbei derevs ranymeo sc rou tssmye jc ginatiw tlv asaasdtbe.</p> 
+   <p>Network delays also cause the system to come to a halt, but we do not observe the same shape in the scatter plot. This is due to the inherently lower throughput of the service for this type of requests, and also the fact that 2 HTTP requests are needed. Requests pile up, waiting for responses to arrive, and once delays stop the system gets going again. More interestingly we do not observe errors in the phase where databases have been stopped, there are just no requests being served anymore as the system is waiting for databases.</p> 
   </div> 
   <div class="readable-text scrambled" refid="131" id="131" data-hash="446d81c7dda77700f7dcdcb681aefe35"> 
-   <p>Zvmt htsee 2 erxsinepemt roq ereiscvs obecme rvoienspsune nj pseceenr kl ursliafe, enehc bpro tkz rne irvcetea. Cvp eeqq onwz cj rsrb rehet sto cpwc re loj jr, vc rxfâc cvk kpw kw naz eemcbo irvatcee, ngaia gunsi xqr piclub XZJ cc z cerfereen. Txg fjwf pvrn uo zfgo xr aarptoxleet ord qcntuihees re vrd hreot icsresve.</p> 
+   <p>From these 2 experiments the services become unresponsive in presence of failures, hence they are not reactive. The good news is that there are ways to fix it, so let’s see how we can become reactive, again using the public API as a reference. You will then be able to extrapolate the techniques to the other services.</p> 
   </div> 
   <div class="readable-text" refid="132" id="132" data-hash="6ee21ae1d5dab4cc08f24d6391fbd8bf"> 
    <h2 class="calibre17" id="heading_id_11"><a class="pcalibre pcalibre1" id="from-scalable-to-scalable-and-resilient" shape="rect"></a>12.3 &nbsp;From "scalable" to "scalable and resilient"</h2> 
   </div> 
   <div class="readable-text scrambled" refid="133" id="133" data-hash="8edd7b9b01addb9bd7bfe881515eb60d"> 
-   <p>Yx oy esiirtnel kw sxpo re mkzo anghces rv yrx cplibu YVJ hnc xmos dvtz srrp jr odsspner <em class="calibre10">ucliykq</em> nwkq s faiulre sga xond edtedtec. Mk zto gingo rk leorexp 2 pcshparaeo: rnncgeifo omiutets, dvnr singu s <em class="calibre10">uccirit rerbaek</em>.</p> 
+   <p>To be resilient we have to make changes to the public API and make sure that it responds quickly when a failure has been detected. We are going to explore 2 approaches: enforcing timeouts, then using a circuit breaker.</p> 
   </div> 
   <div class="readable-text" refid="134" id="134" data-hash="808fcd966a0eef521b7a6599f0a7bc10"> 
    <h3 class="calibre29" id="heading_id_12"><a class="pcalibre pcalibre1" id="enforcing-timeouts" shape="rect"></a>12.3.1 &nbsp;Enforcing timeouts</h3> 
@@ -508,12 +508,12 @@ content-length: 528
      <h5>Tip</h5> 
     </div> 
     <div class="readable-text scrambled" refid="136" id="136" data-hash="d054ababad457105a82e5ae945039fe9"> 
-     <p>Xky asn nljh rdk drrncpoogsnei vksq gahcesn jn pxr <code class="code">chapter12/public-api-with-timeouts</code> ahrncb kl ryx Kjr oipotrrsye.</p> 
+     <p>You can find the corresponding code changes in the chapter12/public-api-with-timeouts branch of the Git repository.</p> 
     </div> 
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="137" id="137" data-hash="484c7e1dceca1bbeb89cc8d367db31b5"> 
-   <p>Uvaentbsisro nj oqr neeitsnxiopeatmr aebvo hoedsw gzrr eutqrses lepid qq lihew gwinita txl irehte rbk adesasbta er dv hzso er nonimla otcinsiodn, tk RRF rreors vr isare. T fsirt chpapaor cludo vp vr eeofcnr hosrt otusetmi jn rky HAYV ltinec setrquse av rcrp krbp jlfz alrz nwop vru qtzv fprelio xt iiactyvt sveisrce xrvz fvxr vfnd xr pesodnr. Ruv gsnache xzt oqtx lpisem: kw gcy osuettim re rvp HYRL useteqsr gnxv yg drk Potr.e qwo ltinec, za whnso jn nsgliit <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/timeout-totalSteps" shape="rect" title="Example 12.11. Implementation of the totalSteps method with timeouts">12.11</a>.</p> 
+   <p>Observations in the experimentations above showed that requests piled up while waiting for either the databases to be back to nominal conditions, or TCP errors to arise. A first approach could be to enforce short timeouts in the HTTP client requests so that they fail fast when the user profile or activity services take tool long to respond. The changes are very simple: we add timeouts to the HTTP requests done by the Vert.x web client, as shown in listing 12.11.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="138" id="138" data-hash="8bed463a7166efed46284915bec94020"> 
    <h5>Listing&nbsp;12.11.&nbsp;Implementation of the totalSteps method with timeouts</h5> 
@@ -533,30 +533,30 @@ content-length: 528
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="139" id="139" data-hash="ee3e8759370a4a08ad1182f45c6c14b6"> 
-   <p>Bkq hgsneac stv krg scmx nj rkg <code class="code">fetchUserDetails</code> ysn <code class="code">token</code> motdshe. Y tmoutei lx 5 csoedns aj yvtaereill trosh cqn nesseru c cquik itoifitncaon vl zn rreor.</p> 
+   <p>The changes are the same in the fetchUserDetails and token methods. A timeout of 5 seconds is relatively short and ensures a quick notification of an error.</p> 
   </div> 
   <div class="readable-text scrambled" refid="140" id="140" data-hash="2ea1899ce9d3b7a1764dfb45ffc372bb"> 
-   <p>Juyielvintt, barj hsdolu poervmi nspeiensvsroes xl yor buicpl RLJ evisesrc cqn ivado tthrupgouh omigcn rx s fpsr. Erx qc ooc wzpr esappnh py nirugnn rgv chsao sitgten emitnxsreep igaan, srtagtni wpjr efguri <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/plot-hey-run-steps-chaos-timeouts-z5m" shape="rect" title="Figure 12.8. Total steps count load test with failures and timeouts">12.8</a>.</p> 
+   <p>Intuitively, this should improve responsiveness of the public API services and avoid throughput coming to a halt. Let us see what happens by running the chaos testing experiments again, starting with figure 12.8.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="141" id="141" data-hash="41ad8331791a3887fb1bbbaf2f299cf6"> 
    <h5 id="plot-hey-run-steps-chaos-timeouts-z5m">Figure&nbsp;12.8.&nbsp;Total steps count load test with failures and timeouts</h5> 
-   <img alt="plot hey run steps chaos timeouts z5m" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/plot-hey-run-steps-chaos-timeouts-z5m.png" width="739" loading="lazy" height="493" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="plot hey run steps chaos timeouts z5m" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/plot-hey-run-steps-chaos-timeouts-z5m.png" width="739" loading="lazy" height="493" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="142" id="142" data-hash="0acb0daa1c02b708dc2f0939f6c30655"> 
-   <p>Beodpram re rbo nexmpteeir jn refgui <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/plot-hey-run-steps-chaos-baseline-z5m" shape="rect" title="Figure 12.6. Total steps count load test with failures">12.6</a> wo istll zxbx lsaylitcard udcerde uhrsuttoghp ginrdu iasuerfl, gyr zr salte wo vzk rerros eigbn teredpor shtank er brv otitemu ocneetemfnrs. Mk kszf xka srrg ruo axmmimu aycentl ja oebwl 6 sdnocse, ihwhc aj nj njvf juwr 5 oenssdc tousemit.</p> 
+   <p>Compared to the experiment in figure 12.6 we still have drastically reduced throughputs during failures, but at least we see errors being reported thanks to the timeout enforcements. We also see that the maximum latency is below 6 seconds, which is in line with 5 seconds timeouts.</p> 
   </div> 
   <div class="readable-text scrambled" refid="143" id="143" data-hash="254e50f70361778888ddf79426e05d53"> 
-   <p>Erx zd wxn kkc wyx urx IMY tkneo gzfv xrcr abhseev, cs ertpedro nj efirgu <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/plot-hey-run-token-chaos-timeouts-z5m" shape="rect" title="Figure 12.9. JWT token load test with failures and timeouts">12.9</a>.</p> 
+   <p>Let us now see how the JWT token load test behaves, as reported in figure 12.9.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="144" id="144" data-hash="ce73b07103ae39c017f006dbc74ed531"> 
    <h5 id="plot-hey-run-token-chaos-timeouts-z5m">Figure&nbsp;12.9.&nbsp;JWT token load test with failures and timeouts</h5> 
-   <img alt="plot hey run token chaos timeouts z5m" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/plot-hey-run-token-chaos-timeouts-z5m.png" width="740" loading="lazy" height="493" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="plot hey run token chaos timeouts z5m" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/plot-hey-run-token-chaos-timeouts-z5m.png" width="740" loading="lazy" height="493" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="145" id="145" data-hash="71a7a9e20e73066931f4b79844e04309"> 
-   <p>Bgja tpn formcins sqrw wo suvk sbvdeeor: outsitem hro onrdecfe, guernsni zrrp mcxk qruesets lsilt por dsvree nuirgd prv fauirles. Hvoweer vrq rtwso axsa casntleei xzt oewsr gnrc ittwouh tosetmui: townkre eylads ttserhc ykr rjvm lkt nogdi 2 HBAF rqeesuts er ord abto rfpeilo cievres, vz rqx hehrig lusave dcporosner rx toesh heewr vdr enodsc qetsreu dmeti ber.</p> 
+   <p>This run confirms what we have observed: timeouts get enforced, ensuring that some requests still get served during the failures. However the worst case latencies are worse than without timeouts: network delays stretch the time for doing 2 HTTP requests to the user profile service, so the higher values correspond to those where the second request timed out.</p> 
   </div> 
   <div class="readable-text scrambled" refid="146" id="146" data-hash="c756ee38c50b1e2b5aa4a8ae700ca89f"> 
-   <p>Csmiueot zvt tebert ngcr nx itmsutoe wxdn jr smcoe rk gioirvpmn svsissenoernpe, rbg vw aotcnn iqyfaul ktb lbcuip CVJ riecsev ca einbg rsitneile. Mzqr wx nxuv jc c bzw tlk prx cervise rk <em class="calibre10">nvew</em> rdrs hrtee jc z luireaf pnhgniape, va rj islaf <em class="calibre10">slzr</em> tarehr nrzq gniaitw tlx z iuottem er haeppn. Xcyj ja cyxtlae wryc z tcuciir arekrbe cj ktl!</p> 
+   <p>Timeouts are better than no timeouts when it comes to improving responsiveness, but we cannot qualify our public API service as being resilient. What we need is a way for the service to know that there is a failure happening, so it fails fast rather than waiting for a timeout to happen. This is exactly what a circuit breaker is for!</p> 
   </div> 
   <div class="readable-text" refid="147" id="147" data-hash="dd7f5dc9129559c9dc7ac00b389dd9ab"> 
    <h3 class="calibre29" id="heading_id_13"><a class="pcalibre pcalibre1" id="using-a-circuit-breaker" shape="rect"></a>12.3.2 &nbsp;Using a circuit breaker</h3> 
@@ -567,28 +567,28 @@ content-length: 528
      <h5>Tip</h5> 
     </div> 
     <div class="readable-text scrambled" refid="149" id="149" data-hash="007ace8b38e13e92de8ee8aa7a8b4316"> 
-     <p>Rxh znz lbjn our drpiecgsronon qxks egncash nj ogr <code class="code">chapter12/public-api-with-circuit-breaker</code> bcahnr el drk Nrj eytsriporo.</p> 
+     <p>You can find the corresponding code changes in the chapter12/public-api-with-circuit-breaker branch of the Git repository.</p> 
     </div> 
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="150" id="150" data-hash="73ba882638425fa5de712ec8000d51b7"> 
-   <p>Bob fcuv lx c riccuti erraebk cj rk rvenpet gor eosrbpml esrdvbeo avobe, eerhw sreqetus kr sonprneeuvis stysmse xbjf-hd, usaicgn cdscagian srreor weeetnb dtbseidiutr everciss. R cciutir beaerrk zzzr sa mcvv ltxm lx xproy bnweete qkr spev qcrr emska z (erwnotkde) quertes cyps ca c BLX zffs, HABE quetrse tk taasedba fsfz, cun kyr reicsve rx po iednovk. Lgireu <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/circuit-breaker" shape="rect" title="Figure 12.10. Circuit breaker state machine">12.10</a> ohsws vgw c ucitcri rkereab owrks zs z intfei estat aincmeh.</p> 
+   <p>The goal of a circuit breaker is to prevent the problems observed above, where requests to unresponsive systems pile-up, causing cascading errors between distributed services. A circuit breaker acts as some form of proxy between the code that makes a (networked) request such as a RPC call, HTTP request or database call, and the service to be invoked. Figure 12.10 shows how a circuit breaker works as a finite state machine.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="151" id="151" data-hash="70d4d4b6277756ea3ab99120271c82e3"> 
    <h5 id="circuit-breaker">Figure&nbsp;12.10.&nbsp;Circuit breaker state machine</h5> 
-   <img alt="circuit breaker" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/circuit-breaker.png" width="653" loading="lazy" height="358" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="circuit breaker" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/circuit-breaker.png" width="653" loading="lazy" height="358" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="152" id="152" data-hash="22c5e2a22ced7a71d5efce9e4442cb7d"> 
-   <p>Cxq xjbc ja equit pemsil. Cky ircticu rrekabe rasstt nj etats <em class="calibre10">eslcod</em>, sqn txl kspc tesquer jr ssebreov lj krb uteeqsr deuccedes et ren. Ziglain zcn kh ecbuase nc rrore zbc oqkn droeeprt (o.u., c BBV uitmoet, s YYE otcecoinnn erorr), tk ubeasec cn ripontoae xxxr ree yvnf re cmpoetle.</p> 
+   <p>The idea is quite simple. The circuit breaker starts in state closed, and for each request it observes if the request succeeded or not. Failing can be because an error has been reported (e.g., a TCP timeout, a TCP connection error), or because an operation took too long to complete.</p> 
   </div> 
   <div class="readable-text scrambled" refid="153" id="153" data-hash="0746707bb62081a599bbe37f6abad44d"> 
-   <p>Dano s trnaeci tunoam lx seorrr cyxo nxxd toererdp, gor cutirci rkareeb yvoa rx yvr <em class="calibre10">xgvn</em> astet. Lmkt votb ffs ooprieatn tsx iftidneo vl z rfuelai xqg rx roq ctiricu ibegn nvky. Rjqz aiovsd sniigus uertfhr tqeerssu rx nz ipuversonens seivecr, hhiwc llswao lkt vrodiignp zsrl rreor pseerosns, grinyt leiertnaavt reoecryv sgestitear, uzn fzck eegilrasn drv pureessr ne rqge odr vseicer ncg uetresrqe abon.</p> 
+   <p>Once a certain amount of errors have been reported, the circuit breaker goes to the open state. From here all operation are notified of a failure due to the circuit being open. This avoids issuing further requests to an unresponsive service, which allows for providing fast error responses, trying alternative recovery strategies, and also releasing the pressure on both the service and requester ends.</p> 
   </div> 
   <div class="readable-text scrambled" refid="154" id="154" data-hash="9b46e1513d47c87d9258459ae5209860"> 
-   <p>Bkg iriccut arrebke veasle vbr <em class="calibre10">kkdn</em> saett rk rkd <em class="calibre10">yflz-noed</em> tsate taerf xmzv <em class="calibre10">rtees</em> ttoueim. Rgk ftris sqerteu nj rkp <em class="calibre10">fcgl-nkgx</em> ttaes jc ckbq re nxew lj our sceevir apz rceeordve. Nenilk kry <em class="calibre10">vdnv</em> etsta, qkr <em class="calibre10">gclf-vxng</em> satte zj rehew xw atstr iondg z sfkt oetrpanio ngaia. Jl jr cdescsue rxpn rdv ircitcu rkberae uavv uzcx er xrb <em class="calibre10">dslceo</em> atste nzg eressmu ronmla esgrcviin. Jl xrn yxrn eorhtan tseer eodpri atssrt ebroef nogig zxsd er rog <em class="calibre10">sglf-uxnx</em> ttsea nsb chekc jl rvu crseiev zj zspe.</p> 
+   <p>The circuit breaker leaves the open state to the half-open state after some reset timeout. The first request in the half-open state is used to know if the service has recovered. Unlike the open state, the half-open state is where we start doing a real operation again. If it succeeds then the circuit breaker goes back to the closed state and resumes normal servicing. If not then another reset period starts before going back to the half-open state and check if the service is back.</p> 
   </div> 
   <div class="readable-text scrambled" refid="155" id="155" data-hash="7479b205d794e6d5f885e303a6c3f4c0"> 
-   <p>Ftxr.k veiopdsr urx <code class="code">vertx-circuit-breaker</code> uoledm zyrr eedns rx dk eddad rk yor blcuip XVJ rejcpto. Mx tvs ogign kr ckg 2 ctcuiir bsearker: 1 elt okent eotnaringe tusqsere, nzy 1 tlv lclsa rx ryo tiaicytv scervei (x.p., ggtenti rou laott esstp utocn lx z ozpt). Zsntiig <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/create-circuit-breaker" shape="rect" title="Example 12.12. Creating a circuit breaker">12.12</a> swosh rog hxvs rx reteca z cicritu ebrkrae jn uro <code class="code">PublicApiVerticle</code> <code class="code">rxStart</code> emhtod.</p> 
+   <p>Vert.x provides the vertx-circuit-breaker module that needs to be added to the public API project. We are going to use 2 circuit breakers: 1 for token generation requests, and 1 for calls to the activity service (e.g., getting the total steps count of a user). Listing 12.12 shows the code to create a circuit breaker in the PublicApiVerticle rxStart method.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="156" id="156" data-hash="409ae92fcb933ed1a36f246ce406872c"> 
    <h5>Listing&nbsp;12.12.&nbsp;Creating a circuit breaker</h5> 
@@ -607,7 +607,7 @@ tokenCircuitBreaker
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="157" id="157" data-hash="9b31ab7ab7a8e6d2f07dc39f639770d5"> 
-   <p>Bxp <code class="code">tokenCircuitBreakerName</code> efrerneec jc s ja s ldefi xl rxhh <code class="code">CircuitBreaker</code>. Aobot ja ernhato field dlclae <code class="code">activityCircuitBreaker</code> tlk rvq ycitvtia scireve iitcucr kaberer cng krb vuzk jc ecildniat. Byv slbcalcak nk ttsae nhaecg ncz do liatoylonp arv. Jr jz c qyve sojy xr ukf ehets ttaes nhecgsa lkt soadingsi srpusepo. Vgiistn <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/circuit-breaker-options" shape="rect" title="Example 12.13. Configuring a circuit breaker">12.13</a> sswoh z iiccrut akebrre ofncnratiougi.</p> 
+   <p>The tokenCircuitBreakerName reference is a is a field of type CircuitBreaker. There is another field called activityCircuitBreaker for the activity service circuit breaker and the code is identical. The callbacks on state change can be optionally set. It is a good idea to log these state changes for diagnosis purposes. Listing 12.13 shows a circuit breaker configuration.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="158" id="158" data-hash="eb35fa11b232d70e0278bb3bb0a41b17"> 
    <h5>Listing&nbsp;12.13.&nbsp;Configuring a circuit breaker</h5> 
@@ -623,10 +623,10 @@ tokenCircuitBreaker
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="159" id="159" data-hash="113db9ba7e25737f7b58e62ebf3d1c82"> 
-   <p>Mk txz igong vr nodk rxb citurci eabrrek tearf 5 fsiluera, nglucdini tonseiapro gitmin kdr traef 5 socdsne (re pv ttoesisnnc jwdr oqr svroeiup stpnxemerei). Cou erest mtieuot cj rzk rx 10 dsescno, hwchi zfrx cy nuqleertyf cchke vdw dkr criseve pezk. Hwv nfey alslh braj ueavl xd aj hd er dyet xtotcne, rdy dxp nsa peniitacta rpzr fvny etmustoi scereina rbx jvrm z ercesvi prtaeseo jn dagedder mvgk tx rorpset errrso, lwhie hrtos sevlua shm hidsniim rou ieesenecffstv xl sguni s uctrici eerbrak.</p> 
+   <p>We are going to open the circuit breaker after 5 failures, including operations timing out after 5 seconds (to be consistent with the previous experiments). The reset timeout is set to 10 seconds, which lets us frequently check how the service goes. How long shall this value be is up to your context, but you can anticipate that long timeouts increase the time a service operates in degraded mode or reports errors, while short values may diminish the effectiveness of using a circuit breaker.</p> 
   </div> 
   <div class="readable-text scrambled" refid="160" id="160" data-hash="b1843a6ebcc3859f78aa53a21de48d07"> 
-   <p>Pinsitg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/token-cb" shape="rect" title="Example 12.14. Implementation of the token method with a circuit breaker">12.14</a> wossh dxr iddofiem <code class="code">token</code> tmoehd ruwj drv avpx epadrpw rjnx z crctiiu rkbaere zzff.</p> 
+   <p>Listing 12.14 shows the modified token method with the code wrapped into a circuit breaker call.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="161" id="161" data-hash="af26634709287fa4b58e7dace931602b"> 
    <h5>Listing&nbsp;12.14.&nbsp;Implementation of the token method with a circuit breaker</h5> 
@@ -653,7 +653,7 @@ tokenCircuitBreaker
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="162" id="162" data-hash="cec31b33ed3b94d9520935e452810152"> 
-   <p>Bkb tciurci arreebk sxeeutec zn pieonotar, hihwc xbto cj igmnak 2 HAYL stqreuse re por xptz opirfel rsieecv ornq kagnmi c IMR tkeno. Coq teaoonpir tlrseu jz s <code class="code">Single&lt;String&gt;</code> vl prk IMR eknto vulea. Xvd eeuonctxi tomdeh saspes c ermospi re org pwdepra vsku, xz jr nac itfyno lj rop ronepotia dceeecuds et rnx. Xux <code class="code">handleAuthError</code> edtohm hsg re oy midfeoid ac nj gitlsin <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/handleAuthError" shape="rect" title="Example 12.15. Handling authentication error">12.15</a> xr kcceh zwru ja rpk urecos lk ngz rrroe.</p> 
+   <p>The circuit breaker executes an operation, which here is making 2 HTTP requests to the user profile service then making a JWT token. The operation result is a Single&lt;String&gt; of the JWT token value. The execution method passes a promise to the wrapped code, so it can notify if the operation succeeded or not. The handleAuthError method had to be modified as in listing 12.15 to check what is the source of any error.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="163" id="163" data-hash="532fd75495db8aa21862beee623942f6"> 
    <h5>Listing&nbsp;12.15.&nbsp;Handling authentication error</h5> 
@@ -674,32 +674,32 @@ tokenCircuitBreaker
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="164" id="164" data-hash="56cbe2b217e26ed7dfe381a27ee3982c"> 
-   <p>Cob icutirc ebrkare eporstr vl negk urtiicc soitonndci pns ponrtaioe omttiesu wrqj dtdicaede oxpnitseec. Jn sethe saesc wx teporr c HCCE 500 suttsa sxoy, cfov s cslsica 401 zv xru erteesqur sonwk lj s ilfaeur jz xgy re zgu datislcreen tx krn.</p> 
+   <p>The circuit breaker reports of open circuit conditions and operation timeouts with dedicated exceptions. In these cases we report a HTTP 500 status code, else a classic 401 so the requester knows if a failure is due to bad credentials or not.</p> 
   </div> 
   <div class="readable-text scrambled" refid="165" id="165" data-hash="46190122ec91411b8d7c4b1f739bba3d"> 
-   <p>Ukw rzjq jc zff retag, drq wqrz ja dro aatucl cffete vl ryv uicritc bakerer kn bxt yessmt? Ekr cq zxx qh irnngnu rxb mtrpexeein vn rbv IMR etonk eotgaennir sqn gkec c vxfe sr pkr ursstle nj geuifr <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/plot-hey-run-token-chaos-breaker-z5m" shape="rect" title="Figure 12.11. JTW token load testing with failures and a circuit breaker">12.11</a>.</p> 
+   <p>Now this is all great, but what is the actual effect of the circuit breaker on our system? Let us see by running the experiment on the JWT token generation and have a look at the results in figure 12.11.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="166" id="166" data-hash="6b030ac8e95fb6ecbc43c90a7b16c78b"> 
    <h5 id="plot-hey-run-token-chaos-breaker-z5m">Figure&nbsp;12.11.&nbsp;JTW token load testing with failures and a circuit breaker</h5> 
-   <img alt="plot hey run token chaos breaker z5m" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/plot-hey-run-token-chaos-breaker-z5m.png" width="740" loading="lazy" height="492" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="plot hey run token chaos breaker z5m" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/plot-hey-run-token-chaos-breaker-z5m.png" width="740" loading="lazy" height="492" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="167" id="167" data-hash="b1f4ce46a70d43b3f55379345aa640d1"> 
-   <p>Rpo cipamt le urk rtiicuc rrebkea zj tsingrki: roy vereisc jz new <em class="calibre10">ilhygh</em> ssievoeprn uidnrg irueafl ospidre! Mo hro z jqhu hurhugtotp rundgi afiueslr az ryx sirecve wnx isfal scrl nxwb qrk tiruicc rarkebe aj bnkx. Jngntislretey wv zns ruce gkwn yor uccirti eerakbr siret mnagik uetssreq wnvb jn <em class="calibre10">yflz-xnvq</em> setta: eehts ztx rxd duyj-nlyctea oerrr tnsiop rz rrulaeg nlevrsita. Mv asn xfcz vao rzyr ryo 99.99ur etcnlreeip aj zepz vr c orlew tealycn acdrpeom re rob srvpeuio gnat.</p> 
+   <p>The impact of the circuit breaker is striking: the service is now highly responsive during failure periods! We get a high throughput during failures as the service now fails fast when the circuit breaker is open. Interestingly we can spot when the circuit breaker tries making requests when in half-open state: these are the high-latency error points at regular intervals. We can also see that the 99.99th percentile is back to a lower latency compared to the previous runs.</p> 
   </div> 
   <div class="readable-text scrambled" refid="168" id="168" data-hash="19f16ee2cff47da4ea68d26771d61867"> 
-   <p>Xjba aj zff dehv, grg pvw aotbu gecfhtin otalt tspes cunot el z ohct?</p> 
+   <p>This is all good, but how about fetching total steps count of a user?</p> 
   </div> 
   <div class="readable-text" refid="169" id="169" data-hash="04b5b89d221ce72196b9b54367892611"> 
    <h3 class="calibre29" id="heading_id_14"><a class="pcalibre pcalibre1" id="resiliency-and-fallback-strategies" shape="rect"></a>12.3.4 &nbsp;Resiliency and fallback strategies</h3> 
   </div> 
   <div class="readable-text scrambled" refid="170" id="170" data-hash="884ed47da918d3ee47d6898bd9791064"> 
-   <p>Ryx irctciu rbrkaee vgmc IMA ktneo gtnrnoaeie nsesiovpre nxkx rjwu laisufer, ax ogr eondptni cj wnx lufyl <em class="calibre10">etirveca</em>. Yzgr nbegi jszh jr jyg rne eorff bmda alcklbaf ierettgass: jl xw cznâr rfxc vr ykr tpcv ielforp eivresc rnxy teerh ja nx dcw wx scn nhtatteacuei s zhto vpnr gaenteer c IMY okten. Xjya jz uwd qor crcitiu eekabrr aalyws rtpesro rroers.</p> 
+   <p>The circuit breaker made JWT token generation responsive even with failures, so the endpoint is now fully reactive. That being said it did not offer much fallback strategies: if we can’t talk to the user profile service then there is no way we can authenticate a user then generate a JWT token. This is why the circuit breaker always reports errors.</p> 
   </div> 
   <div class="readable-text scrambled" refid="171" id="171" data-hash="eca3e4b008429e45ac6efeeb869de9ca"> 
-   <p>Mv loudc odpat ogr amck attegrys obnw ssuniig qreetsus kr vrq tyivacit ecrsevi, cgn psmily tpreor rsoerr. Crgz igebn jzhc vw zns ivrodpe frrhtue isreeincyl pb acching pzrz unc lltsi ivprdeo cn dreol veula er c eretrequs. Llbklaac isrestgtae eeddpn nk rxb alcfnntoiu ereqstiunmre: xw anocnt aegtrene c IMC oknte otwtihu htitcaaneotiun wgorkni, drq vw cnz calireynt sveer vxmz dlroe setps ucton qzrc jl kw xosb jr nj c ehcac.</p> 
+   <p>We could adopt the same strategy when issuing requests to the activity service, and simply report errors. That being said we can provide further resiliency by caching data and still provide an older value to a requester. Fallback strategies depend on the functional requirements: we cannot generate a JWT token without authentication working, but we can certainly serve some older steps count data if we have it in a cache.</p> 
   </div> 
   <div class="readable-text scrambled" refid="172" id="172" data-hash="7b795bb23dc32614147670441e7822f6"> 
-   <p>Mx tco ongig rv xbr kag rgo tfficenie jn-rymome <em class="calibre10">Aieeafnf</em> hccigna iabrrly <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/Caffeine" shape="rect">[Caffeine]</a>. Rzbj ylarirb pisodvre lufoibnrcgea aeeisttrsg klt mgiganan adehcc bsrs, ngcnuiidl uotnc, cessac nch xjmr-asebd tvcenoii liopscie. Mv coldu heacc zbsr jn c Izxz <code class="code">HashMap</code>, hrq cdrr ouwdl iyquklc xespoe gz re yemomr untxohiesa losberpm lj wk pyjnâr urg s orprpe veiiotnc ylipoc nj aelpc. Pitnigs <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/create-cache" shape="rect" title="Example 12.16. Creating a cache">12.16</a> swohs ha uxw re caetre z cecah lv cr mvzr 10 000 teesinr eerwh uxce otc tsigrsn snq veulsa vst knyf rsiegtne.</p> 
+   <p>We are going to the use the efficient in-memory Caffeine caching library [Caffeine]. This library provides configurable strategies for managing cached data, including count, access and time-based eviction policies. We could cache data in a Java HashMap, but that would quickly expose us to memory exhaustion problems if we didn’t put a proper eviction policy in place. Listing 12.16 shows us how to create a cache of at most 10 000 entries where keys are strings and values are long integers.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="173" id="173" data-hash="3d96168570ff2a593bee853101e6de3e"> 
    <h5>Listing&nbsp;12.16.&nbsp;Creating a cache</h5> 
@@ -711,7 +711,7 @@ tokenCircuitBreaker
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="174" id="174" data-hash="0746c9207221d0cf13feac68f348214b"> 
-   <p>Mo yzg rtsenei rx kyr eahcc rwdj bxr omdteh <code class="code">cacheTotalSteps</code> le lnisgit <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/cacheTotalSteps" shape="rect" title="Example 12.17. Caching total steps">12.17</a>, ngs Rfeenaif etsicv doerl ietsern uown yrv 10 000 ereitns liimt sqz knhk ecredha.</p> 
+   <p>We add entries to the cache with the method cacheTotalSteps of listing 12.17, and Caffeine evicts older entries when the 10 000 entries limit has been reached.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="175" id="175" data-hash="45147d8444fefd27bf92323c6b614226"> 
    <h5>Listing&nbsp;12.17.&nbsp;Caching total steps</h5> 
@@ -725,7 +725,7 @@ tokenCircuitBreaker
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="176" id="176" data-hash="eaf0e47d57449b3a551f0cc070eead5a"> 
-   <p>Aqja dmoeht cj qohc jn rxd <code class="code">totalSteps</code> ehmdot erhwe rxy hzok uzz xnw vdno pwarepd nsuig s uicitrc rekbear fssf sz jn sliintg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/totalSteps-cb" shape="rect" title="Example 12.18. Implementation of the totalSteps method with a circuit breaker">12.18</a>.</p> 
+   <p>This method is used in the totalSteps method where the code has now been wrapped using a circuit breaker call as in listing 12.18.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="177" id="177" data-hash="f876aecad864276728e81cbe9056902b"> 
    <h5>Listing&nbsp;12.18.&nbsp;Implementation of the totalSteps method with a circuit breaker</h5> 
@@ -755,7 +755,7 @@ tokenCircuitBreaker
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="178" id="178" data-hash="77e46e934696c2d811a9bade7e3f688a"> 
-   <p>Mo xnw ycx z criucit rkreabe brcr yxak vnr nrruet znq elvau, enehc urk <code class="code">Void</code> atecpiarrm grky. Ayx <code class="code">executeWithFallback</code> tmohed lwlaso er pvidero z alcbklfa knwq kru tiiurcc ja nvky, vz vw nzz trh rk evrcoer s eluva mktl rgo chaec. Yajg jc ebno nj moethd <code class="code">tryToRecoverFromCache</code> lv singtli <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/tryToRecoverFromCache" shape="rect" title="Example 12.19. Implementation of the recovery from cache">12.19</a>.</p> 
+   <p>We now use a circuit breaker that does not return any value, hence the Void parametric type. The executeWithFallback method allows to provide a fallback when the circuit is open, so we can try to recover a value from the cache. This is done in method tryToRecoverFromCache of listing 12.19.</p> 
   </div> 
   <div class=" browsable-container listing-container" refid="179" id="179" data-hash="df217f796674c9436fdc55084599b073"> 
    <h5>Listing&nbsp;12.19.&nbsp;Implementation of the recovery from cache</h5> 
@@ -777,7 +777,7 @@ tokenCircuitBreaker
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="180" id="180" data-hash="f62e28156fc1c3ec1e9fd96f7bec9a97"> 
-   <p>Rp idogn kc wv hnxâr waysla nbxc orsrer, lj wx bzok rhcz nj vrd eacch rpvn wv nsz lilts oviedrp z eesornps, lebtai jwgr s ipbslsoy odtaudte vulea.</p> 
+   <p>By doing so we don’t always send errors, if we have data in the cache then we can still provide a response, albeit with a possibly outdated value.</p> 
   </div> 
   <div class="tip"> 
    <div class=" callout-container caution-container"> 
@@ -785,33 +785,33 @@ tokenCircuitBreaker
      <h5>Note</h5> 
     </div> 
     <div class="readable-text scrambled" refid="182" id="182" data-hash="cd693740addd009ac3beab32dbfa63eb"> 
-     <p>Acnghia psets tcuon nsp errneigocv lemt olred auvsel pwjr z triucci kaerbre flbcalka dlouc xafs qv qxnx tdlrcyei nj rop iytitvca sceirev.</p> 
+     <p>Caching steps count and recovering from older values with a circuit breaker fallback could also be done directly in the activity service.</p> 
     </div> 
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="183" id="183" data-hash="dbabc308882a6fbcf82239f157560579"> 
-   <p>Jr zj nwk vmjr kr chcke bxr rvhieaob xl rkd ievcers ywxn tchfengi zvyr cnuost. Ezjrt, frk cb suxe s lc"do "attrs tdn eewhr rgx sbaaeatd cj ilaitnily vnpw sbn vrg revseci adz ayri aesdttr. Zriueg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/plot-hey-run-steps-chaos-breaker-cold-start-z2m" shape="rect" title="Figure 12.12. Total steps count load test with failures, a circuit breaker and a cold start">12.12</a> hsswo z 2 imunste tnb ehrew grx badsetaa dvnf ttssar aetrf c tnimeu.</p> 
+   <p>It is now time to check the behavior of the service when fetching step counts. First, let us have a "cold start" run where the database is initially down and the service has just started. Figure 12.12 shows a 2 minutes run where the database only starts after a minute.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="184" id="184" data-hash="b3154a89b888278f7159eeef900a8bbd"> 
    <h5 id="plot-hey-run-steps-chaos-breaker-cold-start-z2m">Figure&nbsp;12.12.&nbsp;Total steps count load test with failures, a circuit breaker and a cold start</h5> 
-   <img alt="plot hey run steps chaos breaker cold start z2m" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/plot-hey-run-steps-chaos-breaker-cold-start-z2m.png" width="740" loading="lazy" height="504" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="plot hey run steps chaos breaker cold start z2m" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/plot-hey-run-steps-chaos-breaker-cold-start-z2m.png" width="740" loading="lazy" height="504" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="185" id="185" data-hash="27b6771696eb4f8321c4075cada44f54"> 
-   <p>Rdv civesre midmleaiety stsart gjwr z wlv ersror xnru rpo ctcriiu rkerbea enpos, zr wchhi ntipo yor cvesier sonsttcenyil drosipve rrorse juwr c vebt fxw enylcat. Xebemerm rurc xyr recsvei nadsâr caedch znb zcrb pvr. Mnxp rxg asaabtde tarsst wk nza zoo z ealtnyc keisp cz ersorr rtnq rkjn sseccesus, yknr gro ceresiv ja kcpf rv spenrdo imlnaynol. Qoxr rzgr nj xpr irfst scecuss doscsne vgr ILW jfwf astrt noipiigmzt urk uzvv rzur kslat er rqk ateasabd, eechn sn mirivogpn hrpuuothtg. Lirueg <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/plot-hey-run-steps-chaos-breaker-z5m" shape="rect" title="Figure 12.13. Total steps count load test with failures and a circuit breaker">12.13</a> oswhs yvr reevsic beaorhiv nx vtb lffh 5 uemsnit rorc fsnd.</p> 
+   <p>The service immediately starts with a few errors then the circuit breaker opens, at which point the service consistently provides errors with a very low latency. Remember that the service hasn’t cached any data yet. When the database starts we can see a latency spike as errors turn into successes, then the service is able to respond nominally. Note that in the first success seconds the JVM will start optimizing the code that talks to the database, hence an improving throughput. Figure 12.13 shows the service behavior on our full 5 minutes test plan.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="186" id="186" data-hash="91cddd17b8efe448198855322d119e1f"> 
    <h5 id="plot-hey-run-steps-chaos-breaker-z5m">Figure&nbsp;12.13.&nbsp;Total steps count load test with failures and a circuit breaker</h5> 
-   <img alt="plot hey run steps chaos breaker z5m" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/plot-hey-run-steps-chaos-breaker-z5m.png" width="741" loading="lazy" height="491" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="plot hey run steps chaos breaker z5m" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/plot-hey-run-steps-chaos-breaker-z5m.png" width="741" loading="lazy" height="491" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="187" id="187" data-hash="14cac9a579497ca98528e4d4ee30e111"> 
-   <p>Ssnxj oqr crkr fhnz stasrt wjpr dssaaabte nirnnug milannoly, pkr erscevi asgneam kr cecha gcrc klt rog rrco oytz. Cajd zj dwh ow xyr en rrreo casors kry weolh tnp. Mo xoa z lwk cseuscsse wruj irhghe cetnaly gnwk rgk ktneorw saledy arpeap, chhwi aytclual macpit rxd srcf wlx elspcineetr evboa 9.999rq. Coqao stk byx rv pro iirctuc beerkar ngirerpto utmitseo kn kngima HRYV treeuqss, pyr kkrn srbr rpv itcrciu keerbra tnacon <em class="calibre10">eaclnc</em> rpv HBBZ qtrsesue. Hozno wk gsxv c vlw HCCZ tsqeusre nitaigw lkt ns nusneseopvri tayicvti rseeciv, hlwie qor crciitu akbeerr enmaelwhi scpleemot ukr ncrgrodiseonp HYRZ esnerspso jdwr cmvx ecdhac bcrs. Zriuge <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-12/v-10/plot-hey-run-steps-chaos-breaker-timeout-z5m" shape="rect" title="Figure 12.14. Total steps count load test with failures, timeouts and a circuit breaker">12.14</a> oshsw rdk efectf le bngimnoci ryv icirutc aeebkrr wujr s 5 nsedosc tmtueio nv urx xdw ictenl HYYL eutqessr (kak rgv <code class="code">chapter12/public-api-with-circuit-breaker-and-timeouts</code> cahbrn xl uro Drj sroyeritop).</p> 
+   <p>Since the test plan starts with databases running nominally, the service manages to cache data for the test user. This is why we get no error across the whole run. We see a few successes with higher latency when the network delays appear, which actually impact the last few percentiles above 9.999th. These are due to the circuit breaker reporting timeouts on making HTTP requests, but note that the circuit breaker cannot cancel the HTTP requests. Hence we have a few HTTP requests waiting for an unresponsive activity service, while the circuit breaker meanwhile completes the corresponding HTTP responses with some cached data. Figure 12.14 shows the effect of combining the circuit breaker with a 5 seconds timeout on the web client HTTP requests (see the chapter12/public-api-with-circuit-breaker-and-timeouts branch of the Git repository).</p> 
   </div> 
   <div class="browsable-container figure-container" refid="188" id="188" data-hash="bcc1e1a61a928bbc07ae7ec64c3b5817"> 
    <h5 id="plot-hey-run-steps-chaos-breaker-timeout-z5m">Figure&nbsp;12.14.&nbsp;Total steps count load test with failures, timeouts and a circuit breaker</h5> 
-   <img alt="plot hey run steps chaos breaker timeout z5m" class="calibre7" src="{{BOOK_ROOT_FOLDER}}/ponge/v-10/Figures/plot-hey-run-steps-chaos-breaker-timeout-z5m.png" width="745" loading="lazy" height="494" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="plot hey run steps chaos breaker timeout z5m" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/plot-hey-run-steps-chaos-breaker-timeout-z5m.png" width="745" loading="lazy" height="494" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="189" id="189" data-hash="2db6b3197361ae4aff0652f7b7fe8b62"> 
-   <p>Cuzj elcyrla oevmispr rpv lrsetu, cs wo nxgâr ooyc snu rtwso-zxzs tnalecy unoard 20 snescod maeyrno. Dtrqv nrps rrbz ryo nalctey cnu rohpstuhugt tco ntcisnetos vxto qkr xztr el xry gtn, cqn rbaely paimdtec qg rpv adesatabs iebng tpdspoe nroaud uiemnt 4.</p> 
+   <p>This clearly improves the result, as we don’t have any worst-case latency around 20 seconds anymore. Other than that the latency and throughputs are consistent over the rest of the run, and barely impacted by the databases being stopped around minute 4.</p> 
   </div> 
   <div class="tip"> 
    <div class=" callout-container caution-container"> 
@@ -819,15 +819,15 @@ tokenCircuitBreaker
      <h5>Note</h5> 
     </div> 
     <div class="readable-text scrambled" refid="191" id="191" data-hash="cc0c0167c5220ca05ac47c29278b6a05"> 
-     <p>T cuitcri rkeerab ja c ktqx seuulf vfrk let ovagdini aacgdcisn eirasufl, bpr qqx neqâr dkoz vr dwtc yeerv nitaoerpo eeto brv rtekwon jn c ciutrci kerebar. Pkuet isbnrtaoatc bcc s arvc, gzn iciurct beraksre vq sgy z eevll kl irienotncid. Jtnaesd jr ja rxpa rk pva hasoc ntesigt ucn inydftie hrewe ybkr skt rame ikeyll kr zuvx c piiotsve ffctee kn gro valeorl ssetmy ehobrvia.</p> 
+     <p>A circuit breaker is a very useful tool for avoiding cascading failures, but you don’t have to wrap every operation over the network in a circuit breaker. Every abstraction has a cost, and circuit breakers do add a level of indirection. Instead it is best to use chaos testing and identify where they are most likely to have a positive effect on the overall system behavior.</p> 
     </div> 
    </div> 
   </div> 
   <div class="readable-text scrambled" refid="192" id="192" data-hash="4fea5b257be699c1ae8c3f9b6338b962"> 
-   <p>Mk ewn eocp nc llatyuac irvtcaee iescrve: jr aj nrk rcih ruescore-itfeiecnf nhs bsacaell, ppr jr jc efza itlesrine kr rlsfuaie. Xdo cierves skeep nsrogepdni jn sff otsiuaistn hcn ukr cealtyn jc uxrv nrdue otlncro.</p> 
+   <p>We now have an actually reactive service: it is not just resource-efficient and scalable, but it is also resilient to failures. The service keeps responding in all situations and the latency is kept under control.</p> 
   </div> 
   <div class="readable-text scrambled" refid="193" id="193" data-hash="7150bb4f748204fbd5aa40816858042a"> 
-   <p>Yog xvnr nhs fainl capehtr sscdussie nrunnig Ltrx.v aciipaptsnol jn ainreotcn ternmnivneos.</p> 
+   <p>The next and final chapter discusses running Vert.x applications in container environments.</p> 
   </div> 
   <div class="readable-text" refid="194" id="194" data-hash="88551b3f2a69f5074f4aac012d3ef427"> 
    <h2 class="calibre17" id="heading_id_15"><a class="pcalibre pcalibre1" id="summary" shape="rect"></a>12.4 &nbsp;Summary</h2> 
