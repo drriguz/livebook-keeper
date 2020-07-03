@@ -1,0 +1,1161 @@
+<html>
+ <head></head>
+ <body>
+  <div class="readable-text" refid="1" id="1" data-hash="7223717cdc2c6b0c251aa5d3efa7c3e3"> 
+   <h1 class="chaptertitle" id="heading_id_24">8 <a class="pcalibre pcalibre1" id="the-web-stack" shape="rect"></a>The web stack</h1> 
+  </div> 
+  <div class=" introduction-summary"> 
+   <h3 class="intro-header">This chapter covers:</h3> 
+   <ul> 
+    <li class=" readable-text" refid="2" id="2" data-hash="45973f3fb878e78fa691358ed1a97424"> the construction of a edge-service and a public API,<br> </li> 
+    <li class=" readable-text" refid="3" id="3" data-hash="20a628de8dd56634e0d2d4139ad5b44e"> the Vert.x web client,<br> </li> 
+    <li class=" readable-text" refid="4" id="4" data-hash="73bf2f5b3f8043e832942be2ea6ee460"> JSON web tokens and cross-origin resource sharing,<br> </li> 
+    <li class=" readable-text" refid="5" id="5" data-hash="7e06f1fa3e470b748686deff111f4370"> serving and integrating a Vue.js reactive application with Vert.x,<br> </li> 
+    <li class=" readable-text" refid="6" id="6" data-hash="959788fa351d51984d7bd1c2fbb27182"> testing an HTTP API with REST Assured.<br> </li> 
+   </ul> 
+  </div> 
+  <div class="readable-text" refid="7" id="7" data-hash="89df262c36f90dc99dc19d66ccdb7b5f"> 
+   <p>The Vert.x web stack provides many tools to build web application backends. This includes advanced routing, authentication, a HTTP client, and more. This chapter will guide you through exposing a HTTP API with <em class="calibre10">JSON web tokens (JWT)</em> for access control, making HTTP requests to other services, and building a reactive single-page application that connects to the HTTP API.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="8" id="8" data-hash="f35a087d0dc71beb3a7204d91c1c49e4"> 
+     <h5>Note</h5> 
+    </div> 
+    <div class="readable-text" refid="9" id="9" data-hash="3642ccef4e043d3b7d37ca452f0e87f8"> 
+     <p>This book does not cover the following noteworthy elements from the Vert.x web stack that are not needed to build the application in part 2: routing with regular expressions, cookies, server-side sessions, server-side template rendering and cross-site request forgery protection. You can get more details in the official documentation at <a class="pcalibre3 pcalibre" href="https://vertx.io/" shape="rect">vertx.io/</a>.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="10" id="10" data-hash="96d04821fea1af0096f026dcec82b4bb"> 
+   <h2 class="calibre17" id="heading_id_3"><a class="pcalibre pcalibre1" id="exposing-a-public-api" shape="rect"></a>8.1 &nbsp;Exposing a public API</h2> 
+  </div> 
+  <div class="readable-text" refid="11" id="11" data-hash="a339d9e9a6e806e9fb0f3fb529c5357d"> 
+   <p>Let us start with a reminder of what the public API service does, as illustrated in figure <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/api-overview" shape="rect" title="Figure 8.1. Public API overview">8.1</a>.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="12" id="12" data-hash="ab2121cb62122fdf132e0195671c1ba1"> 
+   <h5 id="api-overview">Figure&nbsp;8.1.&nbsp;Public API overview</h5> 
+   <img alt="public api" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/public-api.png" width="752" loading="lazy" height="264" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="13" id="13" data-hash="3213f030f3e777afb6627f3df9624360"> 
+   <p>This service is a edge service (or service gateway depending on how you prefer to name it) as it exposes an HTTP API, but it essentially composes functionality found in other services. In this case the user profile and activity services are being used. These 2 services are internal to the application and not publicly exposed. They also lack any form of authentication and access-control, which is something the public API cannot afford for most operations.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="14" id="14" data-hash="26e147486df0aeadbb7b0865d772e9f2"> 
+   <p>The following Vert.x modules are needed to implement the public API:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="15" id="15" data-hash="677bb7b56a0e40eb20afa3376fee80e0"> <code class="code">vertx-web</code> rx rpveodi dacnaved HCAZ eteqsur essocngirp inyutfaocnitl,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="16" id="16" data-hash="94d3af8d66049fa56bb0fd1cbf2dd448"> <code class="code">vertx-web-client</code> rv seius HXYL tsuereqs re xrp xcty olpeirf cnp cvaytiti cvesesri,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="17" id="17" data-hash="8cb81b412765198d99db4b82e5e2ccba"> <code class="code">vertx-auth-jwt</code> rx eenrgeat nzu sersocp <em class="calibre9">ISDG hwv esontk</em>, cng permorf cscase-ntocolr.<br> </li> 
+  </ol> 
+  <div class="readable-text scrambled" refid="18" id="18" data-hash="bc489abaac4ec9652ba066f89d9a959a"> 
+   <p>The complete source code of the public API service can be found in the part2-steps-challenge/public-api folder of the book source code repository.</p> 
+  </div> 
+  <div class="readable-text" refid="19" id="19" data-hash="7169d59d45ae2ae4f4817ca14952bf9d"> 
+   <p>Let us start with the Vert.x web router.</p> 
+  </div> 
+  <div class="readable-text" refid="20" id="20" data-hash="06055b7a1d4f05870446cfc1cb7f1387"> 
+   <h3 class="calibre29" id="heading_id_4"><a class="pcalibre pcalibre1" id="routing-http-requests" shape="rect"></a>8.1.1 &nbsp;Routing HTTP requests</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="21" id="21" data-hash="fdd2e2b25b34a0653c132c41809eec93"> 
+   <p>Vert.x core provides a very low-level HTTP server API, where you need to pass a request handler for all types of HTTP requests. If you just use Vert.x core, you need to manually check what is the requested path and method. This is fine for simple cases as we did in some earlier chapters, but it can be quickly complicated.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="22" id="22" data-hash="a27bbf2197235d54e55f50a838701acc"> 
+   <p>The vertx-web module provides a router that can act as a Vert.x HTTP server request handler, and manages the dispatch of HTTP requests to suitable handlers based on request paths (e.g., /foo) and HTTP methods (e.g., POST), as illustrated in figure 8.2.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="23" id="23" data-hash="f8a478a68be828a7a9fcdc1029494842"> 
+   <h5 id="routing">Figure&nbsp;8.2.&nbsp;Routing HTTP requests</h5> 
+   <img alt="routing" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/routing.png" width="932" loading="lazy" height="338" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="24" id="24" data-hash="42210e7e2ff3aac757c1a262ede42df5"> 
+   <p>Listing 8.1 shows how to initialize then set up a router as a HTTP request handler:</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="25" id="25" data-hash="613d6fa09d005564244891c6363c6ca2"> 
+   <h5>Listing&nbsp;8.1.&nbsp;Initializing and using a router as a HTTP request handler</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">Router router = Router.router(vertx);
+// (...)  #1
+
+vertx.createHttpServer()
+  .requestHandler(router)   #2
+  .listen(8080);</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRGVmaW5lIHJvdXRlcy4KIzIgQSByb3V0ZXIgaXMganVzdCBhbm90aGVyIEhUVFAgcmVxdWVzdCBoYW5kbGVyLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="26" id="26" data-hash="bb8396e5e67d8f8e65bb45a7d0307765"> 
+   <p>The Router class provides a fluent API to describe routes based on HTTP methods and paths, as seen in listing 8.2.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="27" id="27" data-hash="18f5332fb88a155d0e4f6998c2b0015f"> 
+   <h5>Listing&nbsp;8.2.&nbsp;Defining routes</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">BodyHandler bodyHandler = BodyHandler.create(); #1
+router.post().handler(bodyHandler); #2
+router.put().handler(bodyHandler);
+
+String prefix = "/api/v1";
+
+router.post(prefix + "/register").handler(this::register);  #3
+router.post(prefix + "/token").handler(this::token);
+// (...)
+
+router.get(prefix + "/:username/:year/:month")  #4
+  .handler(jwtHandler)  #5
+  .handler(this::checkUser)
+  .handler(this::monthlySteps);
+// (...)</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQm9keUhhbmRsZXIgaXMgYSBwcmUtZGVmaW5lZCBoYW5kbGVyIHRoYXQgZXh0cmFjdHMgSFRUUCByZXF1ZXN0IGJvZHkgcGF5bG9hZHMuCiMyIEhlcmUgYm9keUhhbmRsZXIgaXMgYmVpbmcgY2FsbGVkIGZvciBhbGwgSFRUUCBQT1NUIGFuZCBQVVQgcmVxdWVzdHMuCiMzIFRoZSByZWdpc3RlciBtZXRob2QgaGFuZGxlcyAvYXBpL3YxL3JlZ2lzdGVyIFBPU1QgcmVxdWVzdHMuCiM0IFdlIGNhbiBleHRyYWN0IHBhdGggcGFyYW1ldGVycyBieSBwcmVmaXhpbmcgZWxlbWVudHMgd2l0aCAiOiIuCiM1IEhhbmRsZXJzIGNhbiBiZSBjaGFpbmVkLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="28" id="28" data-hash="cebc0371495453941511db26b2880af4"> 
+   <p>An interesting property of the Vert.x router is that handlers can be chained. With the definitions from listing 8.2 a POST request to /api/v1/register first goes through a BodyHandler instance. This handler is useful for easily decoding a HTTP request body payload. The next handler is the register method.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="29" id="29" data-hash="843f174e6e4012e0afa047ec8412fc42"> 
+   <p>We also have the definition of the route for GET requests to monthlySteps where the request first goes through jwtHandler then checkUser, as illustrated in figure 8.3. This is useful for decomposing a HTTP request processing concerns in several steps: jwtHandler checks that a valid JWT token is in the request, checkUser checks that the JWT token grants permissions to access the resource, and finally monthlySteps gives how many steps a user has done in a month.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="30" id="30" data-hash="dc09b861d7d2737d2f7e3f0289ca3193"> 
+   <h5 id="routing-chain">Figure&nbsp;8.3.&nbsp;Routing chain for the monthly steps endpoint</h5> 
+   <img alt="routing chain" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/routing-chain.png" width="1204" loading="lazy" height="574" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="31" id="31" data-hash="1c51fd3d1d39f9dba0a14ea9f290386d"> 
+   <p>Note that the both checkUser and jwtHandler will be detailed in the section about JWT tokens.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="32" id="32" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+     <h5>Tip</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="33" id="33" data-hash="037a1ed3a04924de7a56d4c4ae49939d"> 
+     <p>The io.vertx.ext.web.handler package contains useful utility handlers including BodyHandler. You will especially find handlers for HTTP authentication, CORS, CSRF, favicon, HTTP sessions, static files serving, virtual hosts and template rendering.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="34" id="34" data-hash="dab58fff26ff5553c6cd95a10afdc1bf"> 
+   <h3 class="calibre29" id="heading_id_5"><a class="pcalibre pcalibre1" id="making-http-requests" shape="rect"></a>8.1.2 &nbsp;Making HTTP requests</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="35" id="35" data-hash="44e751dab98ceac7a8333f8e40a0fdfc"> 
+   <p>Let us now dive into the implementation of a handler. Since the public API service forwards requests to the user profile and activity services, we need to use the Vert.x web client. Again the Vert.x core APIs offer a low-level HTTP client, while the WebClient class from the vertx-web-client module offers a richer API.</p> 
+  </div> 
+  <div class="readable-text" refid="36" id="36" data-hash="fb681c62f2348e47d7a21cc08e088c57"> 
+   <p>Creating a web client instance is as simple as:</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="37" id="37" data-hash="4437450ffd4ad65255cd1655b2141c7e"> 
+   <div class="code-area-container"> 
+    <pre class="code-area">WebClient webClient = WebClient.create(vertx);</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="38" id="38" data-hash="7c5fcd65ad6d83187d385eded20de776"> 
+   <p>A WebClient instance is typically used a private field in a verticle, as it can be used to perform multiple concurrent HTTP requests. The whole application uses the RxJava 2 bindings, so we can take advantage of them to compose asynchronous operations. As we will see in later examples, the RxJava bindings sometime bring additional functionality for dealing with error management.</p> 
+  </div> 
+  <div class="readable-text" refid="39" id="39" data-hash="a25f7b5713603cfa7ee1259f756111b8"> 
+   <p>Listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/use-webclient" shape="rect" title="Example 8.3. Using the Vert.x web client in a route handler">8.3</a> shows the implementation of the <code class="code">register</code> route handler.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="40" id="40" data-hash="78f4db6e7bc0b596ebb52c5cc4d3dd3a"> 
+   <h5>Listing&nbsp;8.3.&nbsp;Using the Vert.x web client in a route handler</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void register(RoutingContext ctx) {
+  webClient
+    .post(3000, "localhost", "/register") #1
+    .putHeader("Content-Type", "application/json")  #2
+    .rxSendJson(ctx.getBodyAsJson())  #3
+    .subscribe(
+      response -&gt; sendStatusCode(ctx, response.statusCode()), #4
+      err -&gt; sendBadGateway(ctx, err));
+}
+
+private void sendStatusCode(RoutingContext ctx, int code) {
+  ctx.response().setStatusCode(code).end();
+}
+
+private void sendBadGateway(RoutingContext ctx, Throwable err) {
+  logger.error("Woops", err);
+  ctx.fail(502);
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgTWV0aG9kcyBtYXRjaCB0aGUgSFRUUCBtZXRob2RzIChHRVQsIFBPU1QsIGV0YykuCiMyIEhUVFAgaGVhZGVycyBjYW4gYmUgcGFzc2VkLgojMyBUaGlzIGNvbnZlcnRzIHRoZSByZXF1ZXN0IGZyb20gYSBWZXJ0LnggQnVmZmVyIHRvIGEgSnNvbk9iamVjdC4KIzQgU3Vic2NyaXB0aW9uIGluIFJ4SmF2YSB0cmlnZ2VycyB0aGUgcmVxdWVzdC4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="41" id="41" data-hash="a384f7593f762b0d7a57b04c0bb80ab9"> 
+   <p>This example teaches us both how to handle a HTTP request with a router, and how to use the web client. The RoutingContext class encapsulates details about the HTTP request, and provides the HTTP response object via the response method. HTTP headers can be set in both requests and responses. The response is sent once the end method has been called. A status code can be specified, although by default it will be 200 (ok). We can see that the getBodyAsJson transforms the HTTP request body to a JsonObject, while rxSendJson sends a HTTP request with a JsonObject as body. By default Vert.x Buffer objects carry bodies in both requests and responses, but there are helpers methods to convert from or to String, JsonObject and JsonArray.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="42" id="42" data-hash="2c36c8e780cb3f6ca7e54d067db90030"> 
+   <p>Listing 8.4 offers another router handler method for HTTP GET requests to /api/v1/:username where :username is a path parameter.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="43" id="43" data-hash="800c2ea7a57ed92dbf50470f278bd0f8"> 
+   <h5>Listing&nbsp;8.4.&nbsp;Fetching and forwarding a user details</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void fetchUser(RoutingContext ctx) {
+  webClient
+    .get(3000, "localhost", "/" + ctx.pathParam("username"))  <a class="pcalibre pcalibre1" id="CO4-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    .as(BodyCodec.jsonObject()) <a class="pcalibre pcalibre1" id="CO4-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    .rxSend()
+    .subscribe(
+      resp -&gt; forwardJsonOrStatusCode(ctx, resp),
+      err -&gt; sendBadGateway(ctx, err));
+}
+
+private void forwardJsonOrStatusCode(RoutingContext ctx, HttpResponse&lt;JsonObject&gt; resp) {
+  if (resp.statusCode() != 200) {
+    sendStatusCode(ctx, resp.statusCode());
+  } else {
+    ctx.response()
+      .putHeader("Content-Type", "application/json")
+      .end(resp.body().encode()); <a class="pcalibre pcalibre1" id="CO4-3" shape="rect"></a><span class="pcalibre1">#3</span>
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRXh0cmFjdCBhIHBhdGggcGFyYW1ldGVyLgojMiBDb252ZXJ0cyB0aGUgcmVzcG9uc2UgdG8gYSBKc29uT2JqZWN0LgojMyBFbmQgdGhlIHJlc3BvbnNlIHdpdGggc29tZSBjb250ZW50Lg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="44" id="44" data-hash="a25f3e75533e7c070b70c68766394771"> 
+   <p>This example shows the as method that converts HTTP responses to another type than Buffer using a BodyCodec. We also see that the HTTP response end method can also take an argument which is the response content. It can be a String or a Buffer. While it is often the case that the response is sent in a single end method call, you can send intermediary fragments using the write method until a final end call closes the HTTP response, as in:</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="45" id="45" data-hash="af60fc55f9d5523e1bb8c4afe05270fc"> 
+   <div class="code-area-container"> 
+    <pre class="code-area">response.write("hello").write(" world").end();</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="46" id="46" data-hash="b3aacf6d1d818f71b3d8e3564cf52e03"> 
+   <h2 class="calibre17" id="heading_id_6"><a class="pcalibre pcalibre1" id="access-control-with-jwt-tokens" shape="rect"></a>8.2 &nbsp;Access control with JWT tokens</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="47" id="47" data-hash="f007de3ad25718b205445542367741c3"> 
+   <p>JSON Web Tokens (JWT) is an open specification for securely transmitting JSON-encoded data between parties [JWT]. JWT tokens are signed with either a symmetric shared secret, or an asymmetric public / private key pair, so it is always possible to verify that the information that they contain has not been modified. This is very interesting as a JWT token can be used to hold claims such as identity and authorization grants. JWT tokens can be exchanged as part of HTTP requests using the Authorization HTTP header.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="48" id="48" data-hash="89a68c93179679bc434c5cd3eb19f128"> 
+   <p>Let us dissect how to use JWT tokens, what data they contain, and next how to both validate and issue them with Vert.x.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="49" id="49" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+     <h5>Tip</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="50" id="50" data-hash="93f5a0d3480172e91d6a329e0ed173ae"> 
+     <p>JWT is only one protocol supported by Vert.x. Vert.x offers the vertx-auth-oauth2 module for OAuth2 which is a popular protocol among public service providers like Google, GitHub or Twitter. You will be interested in using it if your application needs to integrate with such service (e.g., accessing a user GMail account data), or when your application wants to expose to grant access to third-party services with OAuth2.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="51" id="51" data-hash="ec9dd077deed7a2aedd1eb5043331e8f"> 
+   <h3 class="calibre29" id="heading_id_7"><a class="pcalibre pcalibre1" id="using-jwt-tokens" shape="rect"></a>8.2.1 &nbsp;Using JWT tokens</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="52" id="52" data-hash="d91475216036a8ca1e9db6db691f13fb"> 
+   <p>To illustrate that, let us interact with the public API and authenticate as user foo with password 123, and get a JWT token. Listing 8.5 shows the HTTP response.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="53" id="53" data-hash="c71f003d71801ed07f8bf9fb898e10a9"> 
+   <h5>Listing&nbsp;8.5.&nbsp;Getting a JWT token</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ http :4000/api/v1/token username=foo password=123 #1
+HTTP/1.1 200 OK
+Content-Type: application/jwt
+content-length: 496
+
+eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJkZXZpY2VJZCI6ImExYjIiLCJpYXQiOjE1NjUxNjc0NzUsImV4cCI6MTU2NTc3MjI3NSwiaXNzIjoiMTBrLXN0ZXBzLWFwaSIsInN1YiI6ImZvbyJ9.J_tn2BjMNYE6eFSHwSJ9e8DoCEUr_xMSlYAyBSy1-E_pouvDq4lp8QjG51cJoa5Gbrt1bgtDHinJsLncG1RIsGr_cz1rQw8_GlI_-GdhqFBw8dVjlsgykSf5tfaiiRwORmz7VH_AAk-935aVlxMg4mxkbOvN4YDxRLhLb4Y78TA47F__ivNsM4gLD8CHzOUmTEta_pjpZGzsErmYvzDOV6F7rOZcRhZThJxLvR3zskrtx83iaNHTwph53bkHNOQzC66wxNMar_T4HMRWzqnrr-sFIcOwLFsWJKowc1rQuadjv-ew541YQLaVmkEcai6leZLwCfCTcsxMX9rt0AmOFg</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQXV0aGVudGljYXRpbmcgYXMgdXNlciBmb28gd2l0aCBwYXNzd29yZCAxMjMu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="54" id="54" data-hash="d3549f03d9c8437f083b400ebde9e003"> 
+   <p>A JWT token has type MIME type application/jwt, which is plain text. We can pass the token to make a request as in listing 8.6.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="55" id="55" data-hash="0c430732817d4fa4dc2e17733e1ef425"> 
+   <h5>Listing&nbsp;8.6.&nbsp;Using a JWT token to access a resource</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">http :4000/api/v1/foo Authorization:'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJkZXZpY2VJZCI6ImExYjIiLCJpYXQiOjE1NjUxNjc0NzUsImV4cCI6MTU2NTc3MjI3NSwiaXNzIjoiMTBrLXN0ZXBzLWFwaSIsInN1YiI6ImZvbyJ9.J_tn2BjMNYE6eFSHwSJ9e8DoCEUr_xMSlYAyBSy1-E_pouvDq4lp8QjG51cJoa5Gbrt1bgtDHinJsLncG1RIsGr_cz1rQw8_GlI_-GdhqFBw8dVjlsgykSf5tfaiiRwORmz7VH_AAk-935aVlxMg4mxkbOvN4YDxRLhLb4Y78TA47F__ivNsM4gLD8CHzOUmTEta_pjpZGzsErmYvzDOV6F7rOZcRhZThJxLvR3zskrtx83iaNHTwph53bkHNOQzC66wxNMar_T4HMRWzqnrr-sFIcOwLFsWJKowc1rQuadjv-ew541YQLaVmkEcai6leZLwCfCTcsxMX9rt0AmOFg'
+HTTP/1.1 200 OK #1
+Content-Type: application/json
+content-length: 90
+
+{
+    "city": "Lyon",
+    "deviceId": "a1b2",
+    "email": "foo@bar.com",
+    "makePublic": true,
+    "username": "foo"
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgV2UgY2FuIGFjY2VzcyB0aGUgcmVzb3VyY2Ugc2luY2Ugd2UgaGF2ZSBhIHZhbGlkIHRva2VuIGZvciB1c2VyIGZvby4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="56" id="56" data-hash="485009a5da1c7f4aed6d952b9eb40382"> 
+   <p>The token is passed with the Authorization HTTP header, and the value is prefixed with Bearer. Here the token allows use to access the resource /api/v1/foo since the token was generated for user foo. Now if we try to do the same without a token, or if we try to access the resource of another use as in listing 8.7, then we get denied.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="57" id="57" data-hash="99b441582688feba95036757cc5e6542"> 
+   <h5>Listing&nbsp;8.7.&nbsp;Accessing a resource without a matching JWT token</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">http :4000/api/v1/abc Authorization:'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJkZXZpY2VJZCI6ImExYjIiLCJpYXQiOjE1NjUxNjc0NzUsImV4cCI6MTU2NTc3MjI3NSwiaXNzIjoiMTBrLXN0ZXBzLWFwaSIsInN1YiI6ImZvbyJ9.J_tn2BjMNYE6eFSHwSJ9e8DoCEUr_xMSlYAyBSy1-E_pouvDq4lp8QjG51cJoa5Gbrt1bgtDHinJsLncG1RIsGr_cz1rQw8_GlI_-GdhqFBw8dVjlsgykSf5tfaiiRwORmz7VH_AAk-935aVlxMg4mxkbOvN4YDxRLhLb4Y78TA47F__ivNsM4gLD8CHzOUmTEta_pjpZGzsErmYvzDOV6F7rOZcRhZThJxLvR3zskrtx83iaNHTwph53bkHNOQzC66wxNMar_T4HMRWzqnrr-sFIcOwLFsWJKowc1rQuadjv-ew541YQLaVmkEcai6leZLwCfCTcsxMX9rt0AmOFg'
+HTTP/1.1 403 Forbidden  #1
+content-length: 0</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgV2UgZ2V0IGRlbmllZCB0aGUgYWNjZXNzIHRvIGEgcmVzb3VyY2Ugb2YgdXNlciBhYmMgc2luY2Ugd2UgcGFzcyBhICh2YWxpZCkgdG9rZW4gZm9yIHVzZXIgZm9vLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="58" id="58" data-hash="e9192aa8ba5d7050e4720a93abce96d8"> 
+   <h3 class="calibre29" id="heading_id_8"><a class="pcalibre pcalibre1" id="what-is-in-a-jwt-token" shape="rect"></a>8.2.2 &nbsp;What is in a JWT token?</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="59" id="59" data-hash="415e67a4e6a76a9555060f691df3749e"> 
+   <p>So far so good, but what is in the token string?</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="60" id="60" data-hash="7e64dcfb635c2a61993bdad0b96a8c09"> 
+   <p>If you look closely you will see that a JWT token string is a big line with 3 parts separated by a dot. The 3 parts are of the form header.payload.signature where:</p> 
+  </div> 
+  <ul class="itemizedlist"> 
+   <li class="listitem readable-text scrambled" refid="61" id="61" data-hash="03d88c6f8c19100886eeb01b752ab915"> <code class="code">header</code> ja c ISQG detmcnou wpjr bkr rodu lv ktoen psn kgr gstiunare miaorhtlg genbi gagk, zyn<br> </li> 
+   <li class="listitem readable-text scrambled" refid="62" id="62" data-hash="5cbfaa6008b0c246f17cc8b5344f9e75"> <code class="code">payload</code> cj c ISUO tnudoecm wrdj <em class="calibre9">laimsc</em>, chhwi txc ISUD eernsit wheer emxz txc gztr kl gro pniscteiicfoa, zny xmvz snz kh tlvx-ltxm,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="63" id="63" data-hash="69aea8a714b7ff4162cbdc245232e53f"> <code class="code">signature</code> jz bor gniusetar lx kdr aerehd nsb lyapado rwuj hreite z hsedra rteecs xt s vitapre vpx, ededipgnn vn zwry ritaglohm qpv hsoec.<br> </li> 
+  </ul> 
+  <div class="readable-text scrambled" refid="64" id="64" data-hash="178fb97c392f7931e8f50a3b3596e6f4"> 
+   <p>The header and payload are encoded with the Base64 algorithm. If you decode the JWT token obtained in listing 8.5, then the header contains:</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="65" id="65" data-hash="3378e15ea9beb38cf7edd93fcf2ba475"> 
+   <div class="code-area-container"> 
+    <pre class="code-area">{
+  "typ": "JWT",
+  "alg": "RS256"
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="66" id="66" data-hash="83b993ffffd43b8a239d42435b3c07e0"> 
+   <p>while the payload contains:</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="67" id="67" data-hash="abf895a36aff1c1419804b4cb6eb1db8"> 
+   <div class="code-area-container"> 
+    <pre class="code-area">{
+  "deviceId": "a1b2",
+  "iat": 1565167475,
+  "exp": 1565772275,
+  "iss": "10k-steps-api",
+  "sub": "foo"
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="68" id="68" data-hash="cca22a87addeb16e29d8b167e2c9d435"> 
+   <p>where deviceId is user foo device identifier, sub is the subject (user foo), iat is the date when the token was issued, exp is the token expiration date, and iss is the token issuer (our service).</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="69" id="69" data-hash="47c702b4b91b9b7332955ced3e6534b3"> 
+   <p>The signature allows to check that the content of both the header and payload have been signed by the issuer and have not been modified, as long as you know the public key. This makes JWT tokens a great option for authorization and access control in APIs, as a token with all needed claims is self-contained and does not involve making checks for each request against an identity management service like a LDAP / OAuth server.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="70" id="70" data-hash="e6e87188f360016e7a9639bbcecf14f0"> 
+   <p>It is important to understand that anyone with a JWT token can decode its content since Base64 is not an encryption algorithm, so you must never put sensible data like passwords in tokens, even if they are transmitted over secure channels like HTTPS. It is also important to set token expiration dates, so that a compromised token cannot be used indefinitely. There are various strategies for dealing with JWT token expiration, like maintaining a list of compromised tokens in the backend, and combining short expiration deadlines with frequent validity extension requests from clients where the issuer re-sends the token, but with an extended exp claim.</p> 
+  </div> 
+  <div class="readable-text" refid="71" id="71" data-hash="a0f374e2a9f3269c7bfe5d678be42858"> 
+   <h3 class="calibre29" id="heading_id_9"><a class="pcalibre pcalibre1" id="handling-jwt-tokens-with-vert-x" shape="rect"></a>8.2.3 &nbsp;Handling JWT tokens with Vert.x</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="72" id="72" data-hash="e027a3c858884a7005b4af1668f7b168"> 
+   <p>The first thing that we need is a pair of public and private RSA keys, so we can sign JWT tokens. You can generate these using the shell script in listing 8.8.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="73" id="73" data-hash="f2de0de21f1e7d191343e5e1e13dacd7"> 
+   <h5>Listing&nbsp;8.8.&nbsp;Generating RSA 2048 public and private keys</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">#!/bin/bash
+openssl genrsa -out private.pem 2048
+openssl pkcs8 -topk8 -inform PEM -in private.pem -out private_key.pem -nocrypt
+openssl rsa -in private.pem -outform PEM -pubout -out public_key.pem</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="74" id="74" data-hash="39f9deeb8a12f5b88ec35570a11347f5"> 
+   <p>The .pem files have their key content between '-----' lines, and we need to get rid of these lines to use the keys. Listing 8.9 offers a helper class to read the files and strip these lines.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="75" id="75" data-hash="a1ce96a1745029974a9c22521b263199"> 
+   <h5>Listing&nbsp;8.9.&nbsp;Helper to read RSA keys</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">class CryptoHelper {
+
+  static String publicKey() throws IOException {
+    return read("public_key.pem");
+  }
+
+  static String privateKey() throws IOException {
+    return read("private_key.pem");
+  }
+
+  private static String read(String file) throws IOException {
+    Path path = Paths.get("public-api", file);
+    if (!path.toFile().exists()) {  #1
+      path = Paths.get("..","public-api", file);
+    }
+    return Files
+      .readAllLines(path, StandardCharsets.UTF_8)
+      .stream()
+      .filter(line -&gt; !line.startsWith("-----"))  #2
+      .reduce(String::concat) #3
+      .orElse("OUPS");
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhpcyBhbGxvd3MgcnVubmluZyB0aGUgc2VydmljZSBmcm9tIGVpdGhlciB0aGUgc2VydmljZSBmb2xkZXIgb3IgdGhlIGFwcGxpY2F0aW9uIHByb2plY3Qgcm9vdC4KIzIgUmVtb3ZlcyBkZWxpbWl0ZXIgbGluZXMuCiMzIENvbmNhdGVuYXRlcyB0aGUgcmVtYWluaW5nIGxpbmVzLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="76" id="76" data-hash="5b37480949df08ff934b04cccb5efc0c"> 
+   <p>Note that the code in CryptoHelper uses blocking APIs. Since this code is run once at initialization and PEM files are small, we can afford a possible yet negligible blocking of the event-loop.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="77" id="77" data-hash="9c64ccbe739e25e33a00d8ae916efbc2"> 
+   <p>We can then create a Vert.x JWT handler as in listing 8.10.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="78" id="78" data-hash="068349e916fcd1ae777dd8c71b91a5e1"> 
+   <h5>Listing&nbsp;8.10.&nbsp;Creating a JWT handler</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">String publicKey = CryptoHelper.publicKey();
+String privateKey = CryptoHelper.privateKey();
+
+jwtAuth = JWTAuth.create(vertx, new JWTAuthOptions()  #1
+  .addPubSecKey(new PubSecKeyOptions()
+    .setAlgorithm("RS256")
+    .setPublicKey(publicKey)
+    .setSecretKey(privateKey)));
+
+JWTAuthHandler jwtHandler = JWTAuthHandler.create(jwtAuth); #2</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgand0QXV0aCBpcyBhIHByaXZhdGUgZmllbGQgb2YgdHlwZSBKV1RBdXRoLgojMiBWZXJ0Lnggcm91dGVyIGhhbmRsZXIgZm9yIEpXVCBhdXRoZW50aWNhdGlvbi4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="79" id="79" data-hash="d03511a06654d481dd0c68338bf9cb88"> 
+   <p>The JWT handler can be used for routes that require JWT authentication, as it decodes the Authorization header to extract JWT data. Listing 8.11 recalls a route with the handler in its handlers chain.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="80" id="80" data-hash="311196eb6c77f63de8dca56999031ff8"> 
+   <h5>Listing&nbsp;8.11.&nbsp;JWT handler in a route</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">router.get(prefix + "/:username/:year/:month")
+  .handler(jwtHandler)  #1
+  .handler(this::checkUser)
+  .handler(this::monthlySteps);</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIEpXVCBoYW5kbGVyLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="81" id="81" data-hash="559b5024215dff6117ea31b73df89845"> 
+   <p>The JWT handler supports the common authentication API from the vertx-auth-common module, which offers a unified view across different types of authentication mechanisms like databases, OAuth or Apache .htdigest files. The handler puts authentication data in the routing context.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="82" id="82" data-hash="d2e1f648a7489faa1ad25dae111cf69e"> 
+   <p>Listing 8.12 shows the implementation of method checkUser where we check that the user in the JWT token is the same as the one in the HTTP request path.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="83" id="83" data-hash="fc3bf60babc71cf17488b27d8710d4d7"> 
+   <h5>Listing&nbsp;8.12.&nbsp;Checking that a valid JWT token is present</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void checkUser(RoutingContext ctx) {
+  String subject = ctx.user().principal().getString("sub"); #1
+  if (!ctx.pathParam("username").equals(subject)) { #2
+    sendStatusCode(ctx, 403);
+  } else {
+    ctx.next(); #3
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVXNlciBuYW1lIGZyb20gdGhlIEpXVCB0b2tlbi4KIzIgVXNlciBuYW1lIHNwZWNpZmllZCBpbiB0aGUgSFRUUCByZXF1ZXN0IHBhdGguCiMzIFBhc3MgdG8gdGhlIG5leHQgaGFuZGxlci4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="84" id="84" data-hash="9abb9dbbda732dcdbcc77ffa11872b44"> 
+   <p>This provides a simple separation of concerns as the checkUser handler focuses on access-control, and delegates to the next handler in the chain by calling next if access shall be granted, or ends the request with a 403 status code if the wrong user is trying to access a resource.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="85" id="85" data-hash="ae52fe7f87909de9a937b36276c1d3c9"> 
+   <p>Knowing that access control is correct, the monthlySteps method in listing 8.13 can focus on making the request to the activity service.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="86" id="86" data-hash="c885fe05e1f72d029e743605fe9364d3"> 
+   <h5>Listing&nbsp;8.13.&nbsp;Getting monthly steps data</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void monthlySteps(RoutingContext ctx) {
+  String deviceId = ctx.user().principal().getString("deviceId"); #1
+  String year = ctx.pathParam("year");
+  String month = ctx.pathParam("month");
+  webClient
+    .get(3001, "localhost", "/" + deviceId + "/" + year + "/" + month)
+    .as(BodyCodec.jsonObject())
+    .rxSend()
+    .subscribe(
+      resp -&gt; forwardJsonOrStatusCode(ctx, resp),
+      err -&gt; sendBadGateway(ctx, err));
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRnJvbSB0aGUgSldUIHRva2VuLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="87" id="87" data-hash="a548d0ae036f1789ef1b0b4c6ed742d9"> 
+   <p>The device identifier is extracted from the JWT token data, and passed along to the web client request.</p> 
+  </div> 
+  <div class="readable-text" refid="88" id="88" data-hash="b4d1e0226b524456124bbbccaecb5d2b"> 
+   <h3 class="calibre29" id="heading_id_10"><a class="pcalibre pcalibre1" id="issuing-jwt-tokens-with-vert-x" shape="rect"></a>8.2.4 &nbsp;Issuing JWT tokens with Vert.x</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="89" id="89" data-hash="54feeb589a9de1a9e6929a7c58494129"> 
+   <p>Last but not least, we need to generate JWT tokens. To do that, we need to make 2 requests to the user profile service: first we need to check the credentials, then gather profile data to prepare a token.</p> 
+  </div> 
+  <div class="readable-text" refid="90" id="90" data-hash="fb7d8fe662d3ac0fc2ea0e405bf5365a"> 
+   <p>Listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/token-handler" shape="rect" title="Example 8.14. JWT token creation router handler">8.14</a> shows the handler for the <code class="code">/api/v1/token</code> route.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="91" id="91" data-hash="493d7496de177a938e273e6e693371f9"> 
+   <h5>Listing&nbsp;8.14.&nbsp;JWT token creation router handler</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void token(RoutingContext ctx) {
+  JsonObject payload = ctx.getBodyAsJson(); #1
+  String username = payload.getString("username");
+  webClient
+    .post(3000, "localhost", "/authenticate") #2
+    .expect(ResponsePredicate.SC_SUCCESS)
+    .rxSendJson(payload)
+    .flatMap(resp -&gt; fetchUserDetails(username))  #3
+    .map(resp -&gt; resp.body().getString("deviceId"))
+    .map(deviceId -&gt; makeJwtToken(username, deviceId))  #4
+    .subscribe(
+      token -&gt; sendToken(ctx, token),
+      err -&gt; handleAuthError(ctx, err));
+}
+
+private void sendToken(RoutingContext ctx, String token) {
+  ctx.response().putHeader("Content-Type", "application/jwt").end(token);
+}
+
+private void handleAuthError(RoutingContext ctx, Throwable err) {
+  logger.error("Authentication error", err);
+  ctx.fail(401);
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgV2UgZXh0cmFjdCB0aGUgY3JlZGVudGlhbHMgZnJvbSB0aGUgcmVxdWVzdCB0byAvYXBpL3YxL3Rva2VuLgojMiBXZSBpc3N1ZSBhIGZpcnN0IGF1dGhlbnRpY2F0aW9uIHJlcXVlc3QuCiMzIE9uIHN1Y2Nlc3Mgd2UgbWFrZSBhbm90aGVyIHJlcXVlc3QgdG8gZ2V0IHRoZSBwcm9maWxlIGRhdGEuCiM0IFdlIHByZXBhcmUgdGhlIHRva2VuLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="92" id="92" data-hash="cafe25e0e82cc0267855495b255d7dcc"> 
+   <p>This is a typical RxJava composition of asynchronous operations with flatMap to chain requests. We can also see the declarative API of the Vert.x router where we can specify that we expect the first request to be a success. Listing 8.15 shows the implementation of the fetchUserDetails that gets the user profile data after the authentication request has succeeded.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="93" id="93" data-hash="a530f79521f10418c299abd21d3f496a"> 
+   <h5>Listing&nbsp;8.15.&nbsp;Fetching user details</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private Single&lt;HttpResponse&lt;JsonObject&gt;&gt; fetchUserDetails(String username) {
+  return webClient
+    .get(3000, "localhost", "/" + username)
+    .expect(ResponsePredicate.SC_OK)  <a class="pcalibre pcalibre1" id="CO14-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    .as(BodyCodec.jsonObject())
+    .rxSend();
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgV2UgZXhwZWN0IGEgc3VjY2Vzcy4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="94" id="94" data-hash="dd370140c1ed930b94932039f45d090c"> 
+   <p>Finally, listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/make-jwt-token" shape="rect" title="Example 8.16. Preparing a JWT token">8.16</a> shows how to prepare a JWT token.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="95" id="95" data-hash="5a116563bfeabd465d9d6b57ffcdfaf3"> 
+   <h5>Listing&nbsp;8.16.&nbsp;Preparing a JWT token</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private String makeJwtToken(String username, String deviceId) {
+  JsonObject claims = new JsonObject()  #1
+    .put("deviceId", deviceId);
+  JWTOptions jwtOptions = new JWTOptions()
+    .setAlgorithm("RS256")
+    .setExpiresInMinutes(10_080) // 7 days
+    .setIssuer("10k-steps-api") #2
+    .setSubject(username);
+  return jwtAuth.generateToken(claims, jwtOptions);
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgT3VyIGN1c3RvbSBjbGFpbXMuCiMyIEEgY2xhaW0gdGhhdCBpcyBpbiB0aGUgSldUIHNwZWNpZmljYXRpb24u"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="96" id="96" data-hash="78a292f4def4fb5483653109a37859c4"> 
+   <p>The JWTOptions class offers methods for the common claims from the JWT RFC [JWT] such as the issuer, expiration date and subject. We can see that we did not specify when the token was issued, although there is a method for that in JWTOptions. The jwtAuth object does the right thing here and adds it on our behalf.</p> 
+  </div> 
+  <div class="readable-text" refid="97" id="97" data-hash="c0688a695043b6afa95c1e173eb8210d"> 
+   <h2 class="calibre17" id="heading_id_11"><a class="pcalibre pcalibre1" id="cross-origin-resource-sharing-cors" shape="rect"></a>8.3 &nbsp;Cross-origin resource sharing (CORS)</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="98" id="98" data-hash="54a024e1c50cf4762172c09dbc9de3d3"> 
+   <p>So we have a public API that forwards requests to internal services, and this API uses JWT tokens for authentication and access control. We also demonstrated on the command-line that we can interact with the API. In fact any third-party application can talk to our API over HTTP: a mobile phone application, another service, a desktop application, etc. You could think that web applications can also talk to the API from JavaScript code running in web browsers, but it is (fortunately!) not that simple.</p> 
+  </div> 
+  <div class="readable-text" refid="99" id="99" data-hash="ffcbf47c0de62242c310efd2986e0fcf"> 
+   <h3 class="calibre29" id="heading_id_12"><a class="pcalibre pcalibre1" id="what-is-the-problem" shape="rect"></a>8.3.1 &nbsp;What is the problem?</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="100" id="100" data-hash="0ad45631117ee03e2438a678cb6a70b0"> 
+   <p>Web browsers enforce security policies, among them is the "same-origin policy". Suppose that we load app.js from my.tld:4000/js/app.js, then:</p> 
+  </div> 
+  <ul class="itemizedlist"> 
+   <li class="listitem readable-text scrambled" refid="101" id="101" data-hash="f8f9b1c13bdc58d2a7caa11220d23ff4"> <code class="code">app.js</code> aj aedwllo rk xsmk qrtsseue rk <code class="code"><a class="pcalibre3 pcalibre" href="https://my.tld:4000/api/foo/bar" shape="rect">my.tld:4000/api/foo/bar</a></code>,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="102" id="102" data-hash="6efc7f297f05b9c5182e3397f70cb61c"> <code class="code">app.js</code> jc nkr olldeaw vr omxc sqtrseue vr <code class="code"><a class="pcalibre3 pcalibre" href="https://my.tld:4001/a/b/c" shape="rect">my.tld:4001/a/b/c</a></code> cc z efftndeir vgrt jz rkn oyr kzms gnrioi,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="103" id="103" data-hash="fd7c5ac695fa910fdbec6f991a8e21cd"> <code class="code">app.js</code> zj knr aolewdl rx mosx squtesre kr <code class="code"><a class="pcalibre3 pcalibre" href="https://other.tld/123" shape="rect">other.tld/123</a></code> sc s riteeffnd zeqr jz rxn bro smax ngiiro.<br> </li> 
+  </ul> 
+  <div class="readable-text scrambled" refid="104" id="104" data-hash="069086744d340b25aae59fb341cf4818"> 
+   <p>Cross-origin resource sharing is a mechanism for a service to allow incoming requests from other origins [CORS]. For instance the service exposing other.tld/123 can specify that cross-origin requests are allowed from code served from my.tld:4000, or even from any origin. This allows web browsers to proceed with a cross-origin request when the request origin allows it, else deny it, which is the default behavior.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="105" id="105" data-hash="2fad364d75d72db1a56e52134e8c2142"> 
+   <p>When a cross-origin request is triggered, for instance to load some JSON data, an image or a web font, then a web browser sends a request to the server with the requested resource, and passes a Origin HTTP header. The server then responds with a HTTP header Access-Control-Allow-Origin with the allowed origin, as illustrated in figure 8.4.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="106" id="106" data-hash="a12dc38ecc40466ff4184550f5c9fee0"> 
+   <h5 id="cors-simple">Figure&nbsp;8.4.&nbsp;Example CORS interaction</h5> 
+   <img alt="cors simple" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/cors-simple.png" width="900" loading="lazy" height="375" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="107" id="107" data-hash="d0b2f9802d74322ba7a4414dd9a7a5b0"> 
+   <p>A value "*" means that any origin can access the resource, while a value like my.tld means that only cross-origin requests from my.tld are being allowed. In figure 8.4 the request succeeds with the JSON payload, but if the CORS policy forbids the call then the app.js code gets an error while attempting to do a cross-origin request.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="108" id="108" data-hash="a32d4ca3438ba35e35fed6a10f229b8d"> 
+   <p>Depending on the type of cross-origin HTTP request there are simple and pre-flighted requests that web browsers do. The request in figure 8.4 is a simple one. By contrast a PUT request would need a pre-flighted request as it can potentially have side effects (PUT implies modifying a resource), so a pre-flight OPTIONS HTTP request to the resource is made to check what the CORS policy is, then followed by the actual PUT request when allowed. Pre-flighted requests provide more details such as the allowed HTTP headers and methods, as a server can for example have a CORS policy of forbidding doing DELETE requests or having a ABC header in the HTTP request. I recommend reading [MozillaCORS] as it provides a detailed and approachable explanation on the interactions between browsers and servers with CORS.</p> 
+  </div> 
+  <div class="readable-text" refid="109" id="109" data-hash="31fafd9d3602181c5d7d96041a158667"> 
+   <h3 class="calibre29" id="heading_id_13"><a class="pcalibre pcalibre1" id="supporting-cors-with-vert-x" shape="rect"></a>8.3.2 &nbsp;Supporting CORS with Vert.x</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="110" id="110" data-hash="12cd69e5cd3ac678061daa3954c0bf94"> 
+   <p>Vert.x comes with a ready-to-use CORS handler with the CorsHandler class. Creating a CorsHandler instance requires 3 settings:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="111" id="111" data-hash="108c8f000f825faca9668c8d38c0f794"> yxr wledaol gniori eatnptr, nuz<br> </li> 
+   <li class="listitem readable-text scrambled" refid="112" id="112" data-hash="4d5a40c0e67a3505f104702ac978aa78"> rgv wdealol HYCF hdrasee, zgn<br> </li> 
+   <li class="listitem readable-text scrambled" refid="113" id="113" data-hash="2df8b204d3ceac485fb012038aa3ab4d"> rpo lowlaed HYRF edmhtos.<br> </li> 
+  </ol> 
+  <div class="readable-text scrambled" refid="114" id="114" data-hash="de4f9ab65e31ef5c75d9cbe89e6ebe58"> 
+   <p>Listing 8.17 shows how to install CORS support in a Vert.x router.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="115" id="115" data-hash="18d6893249de2c69fa562fdee22860c2"> 
+   <h5>Listing&nbsp;8.17.&nbsp;Installing CORS support in a router</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">Set&lt;String&gt; allowedHeaders = new HashSet&lt;&gt;(); <a class="pcalibre pcalibre1" id="CO16-1" shape="rect"></a><span class="pcalibre1">#1</span>
+allowedHeaders.add("x-requested-with");
+allowedHeaders.add("Access-Control-Allow-Origin");
+allowedHeaders.add("origin");
+allowedHeaders.add("Content-Type");
+allowedHeaders.add("accept");
+allowedHeaders.add("Authorization");
+
+Set&lt;HttpMethod&gt; allowedMethods = new HashSet&lt;&gt;(); <a class="pcalibre pcalibre1" id="CO16-2" shape="rect"></a><span class="pcalibre1">#2</span>
+allowedMethods.add(HttpMethod.GET);
+allowedMethods.add(HttpMethod.POST);
+allowedMethods.add(HttpMethod.OPTIONS);
+allowedMethods.add(HttpMethod.PUT);
+
+router.route().handler(CorsHandler  <a class="pcalibre pcalibre1" id="CO16-3" shape="rect"></a><span class="pcalibre1">#3</span>
+  .create("*")
+  .allowedHeaders(allowedHeaders)
+  .allowedMethods(allowedMethods));</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIHNldCBvZiBhbGxvd2VkIEhUVFAgaGVhZGVycy4KIzIgVGhlIHNldCBvZiBhbGxvd2VkIEhUVFAgbWV0aG9kcy4KIzMgQSBDT1JTIGhhbmRsZXIgZm9yIGFsbCBvcmlnaW5zLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="116" id="116" data-hash="96117ff74f10308ace98f588d1ff2356"> 
+   <p>The HTTP methods are those supported in our API. You can see that we don’t support DELETE for instance. The CORS handler has been installed for all routes, since they are all part of the API and should be accessible from any kind of application, including web browsers. The allowed headers should match what your API needs, and also what clients may pass like specifying a content type, or headers that could be injected by proxies and for distributed tracing purposes.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="117" id="117" data-hash="7e28af4355ddc8144a4a1b98f0fe810d"> 
+   <p>We can check that CORS is properly supported by doing a HTTP OPTIONS pre-flight request to one of the route supported by the API as in listing 8.18.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="118" id="118" data-hash="1a64aa92b180f92e781725450e10bd94"> 
+   <h5>Listing&nbsp;8.18.&nbsp;Checking CORS support</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ http OPTIONS :4000/api/v1/token Origin:'http://foo.tld'
+HTTP/1.1 405 Method Not Allowed
+access-control-allow-origin: *
+content-length: 0</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="119" id="119" data-hash="039f23cc0a3ed2b6584b07e45bcde1fc"> 
+   <p>By specifying a origin HTTP header, the CORS handler inserts a access-control-allow-origin HTTP header in the response. The HTTP status code is 405 since the OPTION HTTP method is not supported by the specific route, but this is not an issue as web browsers are only interested in the CORS-related headers when they do a pre-flight request.</p> 
+  </div> 
+  <div class="readable-text" refid="120" id="120" data-hash="fee0476113c79b2f07a1b9b601c789ea"> 
+   <h2 class="calibre17" id="heading_id_14"><a class="pcalibre pcalibre1" id="a-modern-web-frontend" shape="rect"></a>8.4 &nbsp;A modern web frontend</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="121" id="121" data-hash="4a29b4575b7b9e136b79cd4150cd7918"> 
+   <p>We have discussed the interesting points in the public API: how to make HTTP requests with the Vert.x web client, how to use JWT tokens, and how to enable CORS support. It is now time to see how we can expose the user web application, and how that application can connect to the public API.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="122" id="122" data-hash="bc513cb0e6a911e476f2bee0022aa87e"> 
+   <p>The application is written with the Vue.js JavaScript framework. Vert.x is used to serve the application compiled assets: HTML, CSS and JavaScript.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="123" id="123" data-hash="ea37006ac0745645dc40c6ecc9d1b82c"> 
+   <p>The corresponding source code is located in the part2-steps-challenge/user-webapp folder of the book source code repository.</p> 
+  </div> 
+  <div class="readable-text" refid="124" id="124" data-hash="80bc011da02c3ec8f6e29fb38b42d577"> 
+   <h3 class="calibre29" id="heading_id_15"><a class="pcalibre pcalibre1" id="vue-js" shape="rect"></a>8.4.1 &nbsp;Vue.js</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="125" id="125" data-hash="00ad840dddb5b6a73f11d2cbcda9dc1d"> 
+   <p>Vue.js is worth a book by itself, and we recommend that you read [VuejsInAction] if you are interested in learning this framework. We give a quick overview here since Vue.js is being used as the JavaScript framework for the 2 web applications developed as part of the larger 10k steps application.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="126" id="126" data-hash="4ae053b99053cdec644613e9909df912"> 
+   <p>Vue.js is a modern JavaScript frontend framework like React or Angular for building modern web applications, including single-page applications. It is reactive as changes in a component model trigger changes in the user interface. Suppose that we display a temperature in a web page, when the corresponding data changes, then the temperature is updated, and Vue.js takes care of (most) of the plumbing for doing that.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="127" id="127" data-hash="8639a91efe47bcabccfef888dd034026"> 
+   <p>Vue.js supports components, where a HTML template, CSS styling and JavaScript code can be grouped together as in listing 8.19.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="128" id="128" data-hash="9b6ba5c433451281f20d7d263f6f7bac"> 
+   <h5>Listing&nbsp;8.19.&nbsp;Canvas of a Vue.js component</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">&lt;template&gt;
+  &lt;div id="app"&gt;
+    {{ hello }}  <a class="pcalibre pcalibre1" id="CO17-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;style scoped&gt;  <a class="pcalibre pcalibre1" id="CO17-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  div {
+    border: solid 1px black;
+  }
+&lt;/style&gt;
+
+&lt;script&gt;
+  export default {
+    data() {
+      return {
+        hello: "Hello, world!"  <a class="pcalibre pcalibre1" id="CO17-3" shape="rect"></a><span class="pcalibre1">#3</span>
+      }
+    }
+  }
+&lt;/script&gt;</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUmVwbGFjZWQgYnkgdGhlIHZhbHVlIG9mIHRoZSBoZWxsbyBwcm9wZXJ0eS4KIzIgQ1NTIHJ1bGVzIGxvY2FsIHRvIHRoZSBjb21wb25lbnQuCiMzIFRoZSBpbml0aWFsIGRlZmluaXRpb24gb2YgdGhlIGhlbGxvIHByb3BlcnR5Lg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="129" id="129" data-hash="0e9adcd7864980da1ecb29ac2bf6d38a"> 
+   <p>A Vue.js project can be created using the Vue.js command-line interface [VueCli]:</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="130" id="130" data-hash="77b3bbeaa7f38a75ecccc7ce7fd805b6"> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ vue create user-webapp</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="131" id="131" data-hash="13c8f718f4c079c1a59bb1af0034b03e"> 
+   <p>The yarn build tool can then be used to install dependencies (yarn install), serve the project for development with automatic live-reload (yarn run serve), and build a production version of the project HTML, CSS and JavaScript assets (yarn run build).</p> 
+  </div> 
+  <div class="readable-text" refid="132" id="132" data-hash="28ebdc540b837b926c2f0ebe789089f1"> 
+   <h3 class="calibre29" id="heading_id_16"><a class="pcalibre pcalibre1" id="vue-js-application-structure-and-build-integration" shape="rect"></a>8.4.2 &nbsp;Vue.js application structure and build integration</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="133" id="133" data-hash="e4c651e5d6b68dbfb3e5a6cd924a710e"> 
+   <p>The user web application is a single-page application with 3 different screens: a login form, a page with user details, and a registration form.</p> 
+  </div> 
+  <div class="readable-text" refid="134" id="134" data-hash="0aee7dedc0fdeba6f6c1303cd64900b1"> 
+   <p>The key Vue.js files are the following:</p> 
+  </div> 
+  <ul class="itemizedlist"> 
+   <li class="listitem readable-text scrambled" refid="135" id="135" data-hash="7b71a3c20265d56aeba682e9775176ab"> <code class="code">src/main.js</code>: ryk etnyr point<br> </li> 
+   <li class="listitem readable-text scrambled" refid="136" id="136" data-hash="8669fe4ab4c3293dc1c9cfc4127c02f2"> <code class="code">src/router.js</code>: rgk Edk.ic uetror drrz atsciedpsh kr xpr notmpnosce vl qor 3 fierndfet nscsree<br> </li> 
+   <li class="listitem readable-text scrambled" refid="137" id="137" data-hash="1e211f570940adc1ed1dc3d84e010ebf"> <code class="code">src/DataStore.js</code>: sn tocjeb rx xpfu rkq itipncalopa sreot nisgu vgr odw rwesrob <em class="calibre9">callo otegsar</em> BVJ, dahres ognam fsf ncesers<br> </li> 
+   <li class="listitem readable-text scrambled" refid="138" id="138" data-hash="de20f64beb23c85b4184e61777670701"> <code class="code">src/App.vue</code>: rxp nzjm nmpnetooc qrrz snmotu odr Zxq.ia etorur<br> </li> 
+   <li class="listitem readable-text scrambled" refid="139" id="139" data-hash="5ff7dac14cb261a226e0c9427287dd92"> <code class="code">src/views</code> sinaoctn rqx 3 ecrnse nncemstoop: <code class="code">Home.vue</code>, <code class="code">Login.vue</code> nzh <code class="code">Register.vue</code>.<br> </li> 
+  </ul> 
+  <div class="readable-text" refid="140" id="140" data-hash="c319405e40e99045d08c989f3f06da88"> 
+   <p>The Vue.js router configuration is given in listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/vue-router" shape="rect" title="Example 8.20. Vue.js router configuration">8.20</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="141" id="141" data-hash="7bfa1f8739b8c27cd18db2f84de8357b"> 
+   <h5>Listing&nbsp;8.20.&nbsp;Vue.js router configuration</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">import Vue from 'vue'
+import Router from 'vue-router'
+import Home from './views/Home.vue'
+import Login from './views/Login.vue'
+import Register from './views/Register.vue'
+
+Vue.use(Router)
+
+export default new Router({
+  routes: [
+    {
+      path: '/',  #1
+      name: 'home', #2
+      component: Home #3
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: Login
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: Register
+    },
+  ]
+})</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQ29tcG9uZW50IHBhdGguCiMyIENvbXBvbmVudCBuYW1lLgojMyBDb21wb25lbnQgcmVmZXJlbmNlLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="142" id="142" data-hash="c2be93cb1618ac651c52fb9831b4a8c9"> 
+   <p>The application code is co-located in the same module as the Vert.x application that serves the user web application, so you will find the usual Java source files under src/main/java and a Gradle build.gradle.kts file. The Vue.js compiled assets (yarn build) must be copied to src/main/resources/webroot/assets for the Vert.x-based service to serve them.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="143" id="143" data-hash="ee0da04ce9c37842d343228f071f427b"> 
+   <p>This makes for 2 build tools in a single project, and fortunately they can co-exist peacefully. In fact, it is very easy to call yarn from Gradle as the com.moowork.node Gradle plugin provides a self-contained Node environment. Listing 8.21 shows the Node-related configuration of the user web application Gradle build file.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="144" id="144" data-hash="674b06bed76373b5472d6773f8ec5d36"> 
+   <h5>Listing&nbsp;8.21.&nbsp;Using the <code class="code1">com.moowork.node</code> Gradle plugin</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">import com.moowork.gradle.node.yarn.YarnTask
+plugins {
+  id("com.moowork.node") version "1.3.1"  <a class="pcalibre pcalibre1" id="CO19-1" shape="rect"></a><span class="pcalibre1">#1</span>
+}
+tasks.register&lt;YarnTask&gt;("buildVueApp") { <a class="pcalibre pcalibre1" id="CO19-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  dependsOn("yarn_install") <a class="pcalibre pcalibre1" id="CO19-3" shape="rect"></a><span class="pcalibre1">#3</span>
+  // (...) <a class="pcalibre pcalibre1" id="CO19-4" shape="rect"></a><span class="pcalibre1">#4</span>
+  args = listOf("build")  <a class="pcalibre pcalibre1" id="CO19-5" shape="rect"></a><span class="pcalibre1">#5</span>
+}
+tasks.register&lt;Copy&gt;("copyVueDist") { <a class="pcalibre pcalibre1" id="CO19-6" shape="rect"></a><span class="pcalibre1">#6</span>
+  dependsOn("buildVueApp")
+  from("$projectDir/dist")
+  into("$projectDir/src/main/resources/webroot/assets")
+}
+val processResources by tasks.named("processResources") { <a class="pcalibre pcalibre1" id="CO19-7" shape="rect"></a><span class="pcalibre1">#7</span>
+  dependsOn("copyVueDist")
+}
+val clean by tasks.named&lt;Delete&gt;("clean") { <a class="pcalibre pcalibre1" id="CO19-8" shape="rect"></a><span class="pcalibre1">#8</span>
+  delete("$projectDir/dist")
+  delete("$projectDir/src/main/resources/webroot/assets")
+}
+// (...)</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVXNlIHRoZSBOb2RlIHBsdWdpbi4KIzIgQ3JlYXRlIGEgdGFzayB0byBjYWxsIHlhcm4uCiMzIEFkZHMgYSBkZXBlbmRlbmN5IG9uIHJ1bm5pbmcgeWFybiBpbnN0YWxsIGZpcnN0LgojNCBHcmFkbGUgY2FjaGluZyBpbnN0cnVjdGlvbnMgdGhhdCB5b3UgY2FuIGZpbmQgaW4gdGhlIGZ1bGwgZmlsZSBzb3VyY2UgY29kZS4KIzUgQ2FsbHMgeWFybiBidWlsZAojNiBUYXNrIHRvIGNvcHkgdGhlIGNvbXBpbGVkIGFzc2V0cy4KIzcgTWFrZSBzdXJlIGJ1aWxkaW5nIHRoZSBwcm9qZWN0IGFsc28gYnVpbGRzIHRoZSBWdWUuanMgYXBwbGljYXRpb24uCiM4IEV4dHJhIGNsZWFuIHRhc2sgdG8gYmUgZG9uZSBmb3IgdGhlIFZ1ZS5qcyBjb21waWxlZCBhc3NldHMu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="145" id="145" data-hash="c648914acfbda33eace68f4fb97978b1"> 
+   <p>The buildVueApp and copyVueDist tasks are inserted as part of the regular project build tasks, so the project builds both the Java Vert.x code and the Vue.js code. We also customize the clean task to remove the generated assets.</p> 
+  </div> 
+  <div class="readable-text" refid="146" id="146" data-hash="b7a5388bfc1d87e79e6b426ce7de3066"> 
+   <h3 class="calibre29" id="heading_id_17"><a class="pcalibre pcalibre1" id="backend-integration-illustrated" shape="rect"></a>8.4.3 &nbsp;Backend integration illustrated</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="147" id="147" data-hash="972dcc78c4e44458b22cde70ea9a09b3"> 
+   <p>Let us look at one of the Vue.js components: the login screen as found in figure 8.5.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="148" id="148" data-hash="df9a8ebae317b940a9914cca2f7aeb73"> 
+   <h5 id="login-screen">Figure&nbsp;8.5.&nbsp;Screenshot of the login screen</h5> 
+   <img alt="user webapp login" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/user-webapp-login.png" width="825" loading="lazy" height="400" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="149" id="149" data-hash="e40858f20d17194543e997742cf6491e"> 
+   <p>The file for this component is src/views/Login.vue. The component shows the login form, and when submitted must call the public API to get a JWT token. On success, it must store the JWT token locally, then switch the view to the home component. On error, it must stay on the login form and display an error message.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="150" id="150" data-hash="0510af741e67affbafba4a25ff03c1d3"> 
+   <p>The HTML template part of the component is given in listing 8.22.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="151" id="151" data-hash="3b07cf548b03fb2a2c0f28caa005d4a2"> 
+   <h5>Listing&nbsp;8.22.&nbsp;Login component HTML template</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">&lt;template&gt;
+  &lt;div&gt;
+    &lt;div class="alert alert-danger" role="alert" v-if="alertMessage.length &gt; 0"&gt;  <a class="pcalibre pcalibre1" id="CO20-1" shape="rect"></a><span class="pcalibre1">#1</span>
+      {{ alertMessage }}  <a class="pcalibre pcalibre1" id="CO20-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    &lt;/div&gt;
+    &lt;form v-on:submit="login"&gt;  <a class="pcalibre pcalibre1" id="CO20-3" shape="rect"></a><span class="pcalibre1">#3</span>
+      &lt;div class="form-group"&gt;
+        &lt;label for="username"&gt;User name&lt;/label&gt;
+        &lt;input type="username" class="form-control" id="username" placeholder="somebody123" v-model="username"&gt; <a class="pcalibre pcalibre1" id="CO20-4" shape="rect"></a><span class="pcalibre1">#4</span>
+      &lt;/div&gt;
+      &lt;div class="form-group"&gt;
+        &lt;label for="password"&gt;Password&lt;/label&gt;
+        &lt;input type="password" class="form-control" id="password" placeholder="abc123" v-model="password"&gt;
+      &lt;/div&gt;
+      &lt;button type="submit" class="btn btn-primary"&gt;Submit&lt;/button&gt;
+    &lt;/form&gt;
+    &lt;div&gt;
+      &lt;p&gt;...or &lt;router-link to="/register"&gt;register&lt;/router-link&gt;&lt;/p&gt; <a class="pcalibre pcalibre1" id="CO20-5" shape="rect"></a><span class="pcalibre1">#5</span>
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/template&gt;</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQ29uZGl0aW9uYWxseSBkaXNwbGF5IHRoZSBkaXYgYmxvY2sgZGVwZW5kaW5nIG9uIHRoZSB2YWx1ZSBvZiB0aGUgYWxlcnRNZXNzYWdlIGNvbXBvbmVudCBkYXRhLgojMiBUZW1wbGF0ZSBzeW50YXggdG8gcmVuZGVyIHRoZSB2YWx1ZSBvZiBhbGVydE1lc3NhZ2UuCiMzIENhbGwgdGhlIGxvZ2luIG1ldGhvZCBvbiBmb3JtIHN1Ym1pdC4KIzQgdi1tb2RlbCBiaW5kcyB0aGUgZmllbGQgdmFsdWUgdG8gdGhlIHVzZXJuYW1lIGNvbXBvbmVudCBkYXRhLgojNSA8cm91dGVyLWxpbms+IGFsbG93cyBsaW5raW5nIHRvIGFub3RoZXIgY29tcG9uZW50Lg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="152" id="152" data-hash="1ecf1e58444f1a4664973284dbca93c4"> 
+   <p>The JavaScript part of the component provides the component data declaration as well as the login method implementation. We use the Axios JavaScript library to make HTTP client calls to the public API. Listing 8.23 provides the component JavaScript code.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="153" id="153" data-hash="15de5aef3a41469d8873788330d863a0"> 
+   <h5>Listing&nbsp;8.23.&nbsp;Login component JavaScript code</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">import DataStore from '../DataStore'
+import axios from 'axios'
+
+export default {
+  data() {  #1
+    return {
+      username: '',
+      password: '',
+      alertMessage: ''
+    }
+  },
+  methods: {  #2
+    login: function () {
+      if (this.username.length === 0 || this.password.length === 0) { #3
+        return
+      }
+      axios
+        .post("http://localhost:4000/api/v1/token", { #4
+          username: this.username,
+          password: this.password
+        })
+        .then(response =&gt; {
+          DataStore.setToken(response.data) #5
+          DataStore.setUsername(this.username)
+          this.$router.push({name: 'home'}) #6
+        })
+        .catch(err =&gt; this.alertMessage = err.message)  #7
+    }
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQ29tcG9uZW50IGRhdGEgZGVjbGFyYXRpb24uCiMyIENvbXBvbmVudCBtZXRob2RzIGRlY2xhcmF0aW9uLgojMyBJZiBlaXRoZXIgb2YgdGhlIGZpZWxkcyBpcyBlbXB0eSwgdGhlcmUgaXMgbm8gcG9pbnQgaW4gdHJ5aW5nIHRvIGF1dGhlbnRpY2F0ZSBhZ2FpbnN0IHRoZSBwdWJsaWMgQVBJLgojNCBJc3N1ZSBhbiBhdXRoZW50aWNhdGlvbiByZXF1ZXN0IHdpdGggdGhlIGNyZWRlbnRpYWxzIGFzIGEgSlNPTiBwYXlsb2FkLgojNSBJbiBjYXNlIG9mIHN1Y2Nlc3MsIHN0b3JlIHRoZSB0b2tlbiBhbmQgdXNlcm5hbWUgZnJvbSB0aGUgcmVzcG9uc2UuCiM2IFRlbGwgdGhlIHJvdXRlciB0byBjaGFuZ2UgY29tcG9uZW50LgojNyBUcmlnZ2VycyB0aGUgZXJyb3IgbWVzc2FnZSB0byBiZSByZWFjdGl2ZWx5IGRpc3BsYXllZCB3aGVuIHRoZSB2YWx1ZSBvZiBhbGVydE1lc3NhZ2UgY2hhbmdlcy4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="154" id="154" data-hash="10decfee036e9400f35667c1cbf822e0"> 
+   <p>The component data properties are updated as the user types text in the username and password fields, and the login method is called on form submit. If the call succeeds, then the application moves to the home component.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="155" id="155" data-hash="47c23c23546958e8cc70c0dc40241516"> 
+   <p>Listing 8.24 is extracted from the code of the Home.vue component, and shows how to use the JWT token to fetch the user total number of steps.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="156" id="156" data-hash="484d086a804f4a6c3330bf1da8d2a82a"> 
+   <h5>Listing&nbsp;8.24.&nbsp;Using the JWT token with Axios</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">axios
+  .get(`http://localhost:4000/api/v1/${DataStore.username()}/total`, {
+    headers: {
+      'Authorization': `Bearer ${DataStore.token()}`  #1
+    }
+  })
+  .then(response =&gt; this.totalSteps = response.data.count) #2
+  .catch(err =&gt; {
+    if (err.response.status === 404) {
+      this.totalSteps = 0
+    } else {
+      this.alertMessage = err.message
+    }
+  })</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUGFzcyB0aGUgdG9rZW4gZnJvbSB0aGUgdmFsdWUgZmV0Y2hlZCBieSB0aGUgbG9naW4gY29tcG9uZW50LgojMiBVcGRhdGUgdGhlIGNvbXBvbmVudCBkYXRhLCB0cmlnZ2VyaW5nIGEgdmlldyByZWZyZXNoLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="157" id="157" data-hash="b143e009f5ce9852e14c84e8595e65d8"> 
+   <p>Let us now see how to serve the web application assets with Vert.x</p> 
+  </div> 
+  <div class="readable-text" refid="158" id="158" data-hash="dc94aacedbd1d870b81bbb84714d83f2"> 
+   <h3 class="calibre29" id="heading_id_18"><a class="pcalibre pcalibre1" id="static-content-serving-with-vert-x" shape="rect"></a>8.4.4 &nbsp;Static content serving with Vert.x</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="159" id="159" data-hash="850018e1d1a3fe5bbccd6f6df99f7153"> 
+   <p>The Vert.x code does not have much to do beyond starting a HTTP server and serving static content. Listing 8.25 gives the content of the rxStart method of the UserWebAppVerticle class.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="160" id="160" data-hash="0d12ecfd12db6220025a4494416b535a"> 
+   <h5>Listing&nbsp;8.25.&nbsp;Serving static content with Vert.x</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">@Override
+public Completable rxStart() {
+  Router router = Router.router(vertx);
+
+  router.get("/").handler(ctx -&gt; ctx.reroute("/index.html"));     #1
+  router.route().handler(StaticHandler.create("webroot/assets")); #2
+
+  return vertx.createHttpServer()
+    .requestHandler(router)
+    .rxListen(HTTP_PORT)
+    .ignoreElement();
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQWxpYXMgLyB0byAvaW5kZXguaHRtbC4KIzIgUmVzb2x2ZSBzdGF0aWMgY29udGVudCBhZ2FpbnN0IHdlYnJvb3QvYXNzZXRzIGluIHRoZSBjbGFzc3BhdGgu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="161" id="161" data-hash="64d30ab38fc0b92f87eba6a5751ce19c"> 
+   <p>The StaticHandler caches files in memory, unless configured otherwise in the call to the create method. Disabling caching is useful while in development mode, because you can modify static assets content and see changes by reloading in a web browser without having to restart the Vert.x server. By default static files are resolved from the webroot folder in the classpath, but you can override it as we did by specifying webroot/assets.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="162" id="162" data-hash="6a30490b02734f1739c6ef23892722e1"> 
+   <p>Now that we discussed how to use the Vert.x web stack it is time to focus on testing the services that compose the reactive application.</p> 
+  </div> 
+  <div class="readable-text" refid="163" id="163" data-hash="ffdfd668ac7141420fa7771bc983019d"> 
+   <h2 class="calibre17" id="heading_id_19"><a class="pcalibre pcalibre1" id="writing-integration-tests" shape="rect"></a>8.5 &nbsp;Writing integration tests</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="164" id="164" data-hash="c776425bc98c5944563b6853099f0492"> 
+   <p>Testing is a very important concern, especially as there are multiple services involved in the making of the 10k steps challenge reactive application. There is no point in testing that the user web application service does deliver static content properly, while it is crucial to have tests covering interactions with the public API service. Let us discuss how to write integration tests for this service.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="165" id="165" data-hash="3f8ccb9b1fdc71bdd4bde737334c1a97"> 
+   <p>The public API source code reveals an IntegrationTest class. It contains several ordered test methods that check the API behavior:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="166" id="166" data-hash="facc2f97bc30ba357831b40543344ef6"> erigsert xzmx eruss,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="167" id="167" data-hash="d0d86abdbc18fe263ffc17d46c5b682f"> rop s IMX netok lxt usco zytx,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="168" id="168" data-hash="15355717c5222f884ff8a24aed740d93"> efthc s zvtg crgc,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="169" id="169" data-hash="53119eaa2c994746ab8751cc2c105c95"> tpr re fhcet ryo xatb zqrs xl aenroth atho,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="170" id="170" data-hash="37475b85d27f4409fae1c62c78c70976"> tapeud z kaht prcs,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="171" id="171" data-hash="ee795538efeb78d8a9a3708144b66046"> hkcce xcem ytvicati tstas xlt c boat,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="172" id="172" data-hash="4eb088932f7ac57d34a1ad7d621bedc2"> urt rx khecc rdo tcatviyi lx erhotna xdzt.<br> </li> 
+  </ol> 
+  <div class="readable-text scrambled" refid="173" id="173" data-hash="aee8f16e47f9d2fbea9d32ff5bc06135"> 
+   <p>Since the public API service depends on the activity and user profile services, we either need to mock them with fake services that we run during the tests execution, or deploy them along with all their dependencies like databases. Either approach is fine, and in the next chapters we will sometimes create a fake service for running our integration tests, and sometimes we will just deploy the real services.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="174" id="174" data-hash="753fb833312990f40f349f9931ff49df"> 
+   <p>In this case we are going to deploy the real services, and we need to make this from JUnit 5 in a self-contained and reproducible manner. We first need to add the project dependencies as in listing 8.26.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="175" id="175" data-hash="ba0d7aa4672c4b20d5d7d66f23a0ab55"> 
+   <h5>Listing&nbsp;8.26.&nbsp;Test dependencies to run the integration tests</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">testImplementation(project(":user-profile-service"))  #1
+testImplementation(project(":activity-service"))
+testImplementation("io.vertx:vertx-pg-client:$vertxVersion")  #2
+testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion") #3
+
+testImplementation("org.junit.jupiter:junit-jupiter-api:$junit5Version")
+testImplementation("io.vertx:vertx-junit5:$vertxVersion")
+testImplementation("io.rest-assured:rest-assured:$restAssuredVersion")  #4
+testImplementation("org.assertj:assertj-core:$assertjVersion")</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRGVwZW5kZW5jeSBvbiBhbm90aGVyIHByb2plY3QgbW9kdWxlLgojMiBUaGlzIGlzIHVzZWQgdG8gaW5zZXJ0IGRhdGEgaW4gUG9zdGdyZVNRTCwgbW9yZSBvbiB0aGF0IGxhdGVyLgojMyBUaGlzIGlzIHRvIHJ1biBEb2NrZXIgY29udGFpbmVycy4KIzQgQSBuaWNlIERTTCBsaWJyYXJ5IGZvciB0ZXN0aW5nIEhUVFAgc2VydmljZXMu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="176" id="176" data-hash="684148fcd267941ad5968dcf02a077f2"> 
+   <p>These dependencies bring us 2 useful tools for writing tests:</p> 
+  </div> 
+  <ul class="itemizedlist"> 
+   <li class="listitem readable-text scrambled" refid="177" id="177" data-hash="4962209f39b299350efab3cb90951b4a"> RrcoBrientnoas jc c ecportj ktl iugnnrn Qekroc crniseaont nj IDnrj ttsse, cv wk ffjw xy fpvs vr vcd ifraertuntcsru eceissvr oofj EsgroteSGZ vt Gzelz, gcn<br> </li> 
+   <li class="listitem readable-text scrambled" refid="178" id="178" data-hash="77da9a5e38bf0b3e78272a029b75849f"> CZSY Ydrsues jz c lyrrbia nuigcsfo nk nsttegi HCRF secvsire, ivngoprid z oevncinent ftlune XZJ lxt icendsbrig eusestrq qsn pnsereso nrisoteass.<br> </li> 
+  </ul> 
+  <div class="readable-text" refid="179" id="179" data-hash="a650a2ba195f491654e9339fdff752bc"> 
+   <p>The preamble of the test class is in listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-8/v-10/integration-test-preamble" shape="rect" title="Example 8.27. Preamble of the integration test class">8.27</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="180" id="180" data-hash="ff364bd965e44c14a26bbc8e870117cc"> 
+   <h5>Listing&nbsp;8.27.&nbsp;Preamble of the integration test class</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">@ExtendWith(VertxExtension.class) #1
+@TestMethodOrder(OrderAnnotation.class) #2
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@DisplayName("Integration tests for the public API")
+@Testcontainers #3
+class IntegrationTest {
+
+  @Container
+  private static final DockerComposeContainer CONTAINERS =
+    new DockerComposeContainer(new File("../docker-compose.yml"));  #4
+
+  // (...)
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVXNlIHRoZSBWZXJ0LnggSlVuaXQgNSBzdXBwb3J0LgojMiBUZXN0IG1ldGhvZHMgbXVzdCBiZSBydW4gaW4gb3JkZXIgdGhhbiByYW5kb21seS4KIzMgVXNlIFRlc3QgQ29udGFpbmVycyBzdXBwb3J0LgojNCBTdGFydCBjb250YWluZXJzIGZyb20gYSBEb2NrZXIgQ29tcG9zZSBmaWxlLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="181" id="181" data-hash="b362ffbac47d6e4d6fbdb14625b2ed24"> 
+   <p>Test Containers gives lots of choices for starting one or many containers. It supports generic Docker images, specialized classes for common infrastructure (e.g., PostgreSQL, Apache Kafka, etc) and Docker Compose. Here we re-use the Docker Compose descriptor for running the whole application (docker-compose.yml), and the containers described in the file are started before the first test is run. The containers are destroyed when all tests have executed. This is very interesting as we get to write integration tests against the real infrastructure services that would be used in production.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="182" id="182" data-hash="c929b5f8548947da5e2fe7eef0f411f0"> 
+   <p>The prepareSpec method is annotated with @BeforeAll, and is used to prepare the tests. It inserts some data in the PosgreSQL database for the activity service and then deploys the user profile and activity verticles. It also prepares a RequestSpecification object from REST Assured, as show in listing 8.28.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="183" id="183" data-hash="06407d24d63f65eb5a7205331f42a4cf"> 
+   <h5>Listing&nbsp;8.28.&nbsp;Preparing a REST Assure request specification</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">requestSpecification = new RequestSpecBuilder()
+  .addFilters(asList(new ResponseLoggingFilter(), new RequestLoggingFilter()))  #1
+  .setBaseUri("http://localhost:4000/")
+  .setBasePath("/api/v1") #2
+  .build();</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQWxsIHJlcXVlc3RzIGFuZCByZXNwb25zZXMgd2lsbCBiZSBsb2dnZWQsIHdoaWNoIGlzIHVzZWZ1bCB0byB0cmFjayBlcnJvcnMuCiMyIFRoaXMgYXZvaWRzIHJlcGVhdGluZyB0aGUgYmFzZSBwYXRoIG9mIGFsbCBVUkwgaW4gcmVxdWVzdHMu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="184" id="184" data-hash="d0d894fd263fb18447686f6de0a96a92"> 
+   <p>This object is shared among all tests methods, as they all have to make requests to the API. We enable logging of all requests and responses for easier debugging, and also set /api/v1 as the base path for all requests.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="185" id="185" data-hash="fa68035923adba7ef1588b5f78c741b5"> 
+   <p>The test class maintains a hash map of users to register and later use in calls, as well as a hash map of JWT tokens, as in listing 8.29.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="186" id="186" data-hash="db82cc38ac568baad39382d87d9b79a4"> 
+   <h5>Listing&nbsp;8.29.&nbsp;Utility hash maps for the integration test</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private final HashMap&lt;String, JsonObject&gt; registrations = new HashMap&lt;String, JsonObject&gt;() { <a class="pcalibre pcalibre1" id="CO27-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  {
+    put("Foo", new JsonObject()
+      .put("username", "Foo")
+      .put("password", "foo-123")
+      .put("email", "foo@email.me")
+      .put("city", "Lyon")
+      .put("deviceId", "a1b2c3")
+      .put("makePublic", true));
+    // (...)
+};
+
+private final HashMap&lt;String, String&gt; tokens = new HashMap&lt;&gt;(); <a class="pcalibre pcalibre1" id="CO27-2" shape="rect"></a><span class="pcalibre1">#2</span></pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVXNlcnMuCiMyIEpXVCB0b2tlbnMsIG9uY2VzIHJldHJpZXZlZC4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="187" id="187" data-hash="ed6d7fd26d24c79595c861d4e85ef802"> 
+   <p>Listing 8.30 is the first test where the users from the registrations hash map are being registered.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="188" id="188" data-hash="605aa38c432788b76009241234b8bcc7"> 
+   <h5>Listing&nbsp;8.30.&nbsp;Test for registering users</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">@Test
+@Order(1)
+@DisplayName("Register some users")
+void registerUsers() {
+  registrations.forEach((key, registration) -&gt; {
+    given(requestSpecification)
+      .contentType(ContentType.JSON)
+      .body(registration.encode())  #1
+      .post("/register")  #2
+      .then()
+      .assertThat()
+      .statusCode(200); #3
+  });
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgV2UgZW5jb2RlIHRoZSBKU09OIGRhdGEgdG8gYSBzdHJpbmcuCiMyIEhUVFAgUE9TVCB0byAvYXBpL3YxL3JlZ2lzdGVyLgojMyBBc3NlcnQgdGhhdCB0aGUgc3RhdHVzIGNvZGUgaXMgYSAyMDAu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="189" id="189" data-hash="83c052bdd433b4b580a67996e8ad1958"> 
+   <p>The REST Assured fluent API allows us to express our request, and then do an assertion on the response. It is possible to extract a response a text or JSON to perform further assertions, as in listing 8.31 which is extracted from the test method that retrieves JWT tokens.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="190" id="190" data-hash="513bd1d56c02cd4c688ba3f8eed37fb5"> 
+   <h5>Listing&nbsp;8.31.&nbsp;Test code for retrieving JWT tokens</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">JsonObject login = new JsonObject()
+  .put("username", key)
+  .put("password", registration.getString("password"));
+
+String token = given(requestSpecification)
+  .contentType(ContentType.JSON)
+  .body(login.encode())
+  .post("/token")
+  .then()
+  .assertThat()
+  .statusCode(200)
+  .contentType("application/jwt")  #1
+  .extract()  #2
+  .asString();
+
+assertThat(token) #3
+  .isNotNull()
+  .isNotBlank();
+
+tokens.put(key, token);</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQXNzZXJ0IHRoYXQgdGhlIGNvbnRlbnQgdHlwZSBoZWFkZXIgaXMgaW4gdGhlIHJlc3BvbnNlIGFuZCBtYXRjaGVzIHRoYXQgb2YgSldUIHRva2Vucy4KIzIgRXh0cmFjdCB0aGUgcmVzcG9uc2UuCiMzIEFzc2VydEogYXNzZXJ0aW9ucyBvbiBhIFN0cmluZy4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="191" id="191" data-hash="c4f79396ea0ba93f1cf96c75ad8c368c"> 
+   <p>The test fetches a token, then assets that the token is neither a null value or an blank string (empty or with spaces). Extracting JSON data is similar, as shown in listing 8.32.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="192" id="192" data-hash="a19c7602f566fa4d09022cfcf80e8dee"> 
+   <h5>Listing&nbsp;8.32.&nbsp;Extracting JSON with REST Assured</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">JsonPath jsonPath = given(requestSpecification)
+  .headers("Authorization", "Bearer " + tokens.get("Foo"))  #1
+  .get("/Foo/total")
+  .then()
+  .assertThat()
+  .statusCode(200)
+  .contentType(ContentType.JSON)
+  .extract()
+  .jsonPath();
+
+assertThat(jsonPath.getInt("count")).isNotNull().isEqualTo(6255); #2</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUGFzcyBhIEpXVCB0b2tlbi4KIzIgV29yayB3aXRoIGEgSlNPTiByZXByZXNlbnRhdGlvbi4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="193" id="193" data-hash="8c125879c6bd984b48e654b3a4b0f7f0"> 
+   <p>The test fetches the total number of steps for user Foo, extracts the JSON reponse, then checks that the steps count (the count key in the JSON response) is equal to 6255.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="194" id="194" data-hash="34c25c385cc6c496b39c10461720752c"> 
+   <p>The integration test can be run with Gradle (./gradlew :public-api:test) or from a development environment, as show in figure 8.6.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="195" id="195" data-hash="0682569b99bb16aeae3e3aa914b12cd8"> 
+   <h5 id="run-tests">Figure&nbsp;8.6.&nbsp;Running the integration tests from IntelliJ IDEA</h5> 
+   <img alt="run tests" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/run-tests.png" width="936" loading="lazy" height="374" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="196" id="196" data-hash="4649439318799e7763b5f19f70a7e234"> 
+   <p>You now have a good understanding of using the Vert.x web stack both for exposing endpoints and consuming other services. The next chapter focuses on the messaging and event streaming stack of Vert.x.</p> 
+  </div> 
+  <div class="readable-text" refid="197" id="197" data-hash="69d8a2bbc410a3c9889efb77396805c6"> 
+   <h2 class="calibre17" id="heading_id_20"><a class="pcalibre pcalibre1" id="summary" shape="rect"></a>8.6 &nbsp;Summary</h2> 
+  </div> 
+  <ul class="itemizedlist"> 
+   <li class="listitem readable-text" refid="198" id="198" data-hash="191eeaafc6c83ca8fd1349195347c427"> The Vert.x web module made it easy to build a edge service with CORS support and HTTP calls to other services.<br> </li> 
+   <li class="listitem readable-text" refid="199" id="199" data-hash="d63c54a9b9daba01e7227ddbf36dd333"> JSON web tokens are useful for authorization and access control in a public API.<br> </li> 
+   <li class="listitem readable-text" refid="200" id="200" data-hash="ccbaea79d62a9898ff106bc7e000a5c3"> Vert.x does not have a preference regarding frontend application frameworks, but it was easy to integrate a Vue.js frontend application.<br> </li> 
+   <li class="listitem readable-text" refid="201" id="201" data-hash="44882c6ca92193e128d3f04446527c6e"> By combining Docker containers managed from TestContainers and the Rest Assured library, we were able to write integration tests for HTTP APIs.<br> </li> 
+  </ul> 
+  <div class="readable-text" refid="202" id="202" data-hash="061cc56814d9ead0e2ceab041f5d303e"> 
+   <h2 class="calibre17" id="heading_id_21"><a class="pcalibre pcalibre1" id="references" shape="rect"></a>8.7 &nbsp;References</h2> 
+  </div> 
+  <div class="bibliodiv"> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e5870" shape="rect"></a> 
+    <div class="readable-text" refid="203" id="203" data-hash="63bddfde485f4b5536938ea5dd61b9fb"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="JWT" shape="rect"></a>[JWT] Internet Engineering Task Force (IETF). May 2015. RFC 7519 - JSON Web Token (JWT). <a class="pcalibre3 pcalibre" href="https://tools.ietf.org/html/rfc7519" shape="rect">tools.ietf.org/html/rfc7519</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e5874" shape="rect"></a> 
+    <div class="readable-text" refid="204" id="204" data-hash="87185e3c16915af4159af94f0d677c5b"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="CORS" shape="rect"></a>[CORS] WhatWG. Fetch (living standard). <a class="pcalibre3 pcalibre" href="https://fetch.spec.whatwg.org/" shape="rect">fetch.spec.whatwg.org/</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e5878" shape="rect"></a> 
+    <div class="readable-text" refid="205" id="205" data-hash="98c2a46c01cde6b7c27668122ed2ca69"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="MozillaCORS" shape="rect"></a>[MozillaCORS] Mozilla Developer Network. Retrieved August 2019. Cross-Origin Resource Sharing. <a class="pcalibre3 pcalibre" href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS" shape="rect">developer.mozilla.org/en-US/docs/Web/HTTP/CORS</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e5882" shape="rect"></a> 
+    <div class="readable-text" refid="206" id="206" data-hash="15ea872b123d0665eaf1a14016d68698"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="VuejsInAction" shape="rect"></a>[VuejsInAction] Erik Hanchett with Benjamin Listwon. Vue.js in Action. 2018. Manning Publications. ISBN 9781617294624.</span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e5885" shape="rect"></a> 
+    <div class="readable-text" refid="207" id="207" data-hash="27c99bc3feeb47bf3f315726e3a250ba"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="VueCli" shape="rect"></a>[VueCli] Vue.js project. Retrieved August 2019. Vue CLI. <a class="pcalibre3 pcalibre" href="https://cli.vuejs.org/" shape="rect">cli.vuejs.org/</a></span></p> 
+    </div> 
+   </div> 
+  </div>
+ </body>
+</html>

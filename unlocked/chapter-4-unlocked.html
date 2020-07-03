@@ -1,0 +1,1348 @@
+<html>
+ <head></head>
+ <body>
+  <div class="readable-text" refid="1" id="1" data-hash="24fc80b128aa7b4150ae1ef8a89b4743"> 
+   <h1 class="chaptertitle" id="heading_id_19">4 <a class="pcalibre pcalibre1" id="asynchronous-data-and-event-streams" shape="rect"></a>Asynchronous data and event streams</h1> 
+  </div> 
+  <div class=" introduction-summary"> 
+   <h3 class="intro-header">This chapter covers:</h3> 
+   <ul> 
+    <li class=" readable-text" refid="2" id="2" data-hash="0e49866a2a94beaf5951969881e48783"> why streams are a useful abstraction on top of eventing,<br> </li> 
+    <li class=" readable-text" refid="3" id="3" data-hash="db51440d99e5b3e8f31316d83b65fba5"> what is back-pressure and why it is fundamental with asynchronous producers and consumers<br> </li> 
+    <li class=" readable-text" refid="4" id="4" data-hash="c412679cc98e7ff9a23e21ec733c3a43"> how to parse protocol data from streams.<br> </li> 
+   </ul> 
+  </div> 
+  <div class="readable-text" refid="5" id="5" data-hash="4c75756c7942703fec2ffd0a9607d024"> 
+   <h2 class="calibre17" id="heading_id_3"><a class="pcalibre pcalibre1" id="unified-stream-model" shape="rect"></a>4.1 &nbsp;Unified stream model</h2> 
+  </div> 
+  <div class="readable-text" refid="6" id="6" data-hash="08e32e4197600f1ef2d8bef1e7f188c2"> 
+   <p>So far we have been processing events using <em class="calibre10">callbacks</em>, and from various sources such as HTTP or TCP servers. Callbacks allow us to reason about events <em class="calibre10">one at a time</em>.</p> 
+  </div> 
+  <div class="readable-text" refid="7" id="7" data-hash="2b5f55a807e3ead85244463a3d775fb8"> 
+   <p>Processing an incoming data buffer from a TCP connection, from a file or from a HTTP request is not very different: you need to declare a callback handler that <em class="calibre10">reacts</em> to each event and allows custom processing.</p> 
+  </div> 
+  <div class="readable-text" refid="8" id="8" data-hash="a664e056ef61270c7be19405b7fc0a45"> 
+   <p>That being said, most events need to be processed as <em class="calibre10">series</em> rather than as <em class="calibre10">isolated</em> events. Processing the body of a HTTP request is a good example, as several buffers of different sizes need to be assembled to reconstitute the full body payload.</p> 
+  </div> 
+  <div class="readable-text" refid="9" id="9" data-hash="dbd959df01e0e5b20bc33f174ecd3ce2"> 
+   <p>Vert.x offers a unified abstraction of <em class="calibre10">streams</em>. A <em class="calibre10">read stream</em> is a source of events that can be read, while a <em class="calibre10">write stream</em> is a destination for events to be sent. As an example, a HTTP request is a read stream, while a HTTP response is a write stream.</p> 
+  </div> 
+  <div class="readable-text" refid="10" id="10" data-hash="458793a132a9b92e13423d0c8406b1ad"> 
+   <p>Streams in Vert.x span a wide range of sources and sinks, including those from table <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-4/v-10/stream-types" shape="rect" title="Table 4.1. Vert.x common read and write streams">4.1</a>.</p> 
+  </div> 
+  <div class=" browsable-container" refid="11" id="11" data-hash="e97da382ad92da200c9ac81c66e819be"> 
+   <h5>Table&nbsp;4.1.&nbsp;Vert.x common read and write streams</h5> 
+   <table border="1" class="contenttable" summary="Vert.x common read and write streams" width="100%"> 
+    <colgroup class="calibre28" span="1"> 
+     <col class="col_" span="1" width="33.3333%"> 
+     <col class="col_" span="1" width="33.3333%"> 
+     <col class="col_" span="1" width="33.3334%"> 
+    </colgroup> 
+    <tbody> 
+     <tr class="calibre20"> 
+      <td class="contenttable1" colspan="1" rowspan="1">Stream resource</td> 
+      <td class="contenttable1" colspan="1" rowspan="1">Read support</td> 
+      <td class="contenttable1" colspan="1" rowspan="1">Write support</td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>TCP sockets</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Yes</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>yes</p> </td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>UDP datagrams</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Yes</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Yes</p> </td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>HTTP requests and responses</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Yes</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Yes</p> </td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>WebSockets</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Yes</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Yes</p> </td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Files</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Yes</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Yes</p> </td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>SQL results</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Yes</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>No</p> </td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Kafka events</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Yes</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Yes</p> </td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Periodic timers</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Yes</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>No</p> </td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>(â¦)</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>(â¦)</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>(â¦)</p> </td> 
+     </tr> 
+    </tbody> 
+   </table> 
+  </div> 
+  <div class="readable-text scrambled" refid="12" id="12" data-hash="21d2208996c70ef5cf9cdf613eaf81fc"> 
+   <p>Read and write stream are defined through the ReadStream and WriteStream interfaces of the io.vertx.core.streams package. You will mostly deal with APIs that implement these 2 interfaces rather than implement them yourself, although you may have to do so if you want to connect to some third-party asynchronous events API.</p> 
+  </div> 
+  <div class="readable-text" refid="13" id="13" data-hash="9105c6692d5763b4548001669218fab2"> 
+   <p>These interfaces can be seen each as having 2 parts:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="14" id="14" data-hash="71dbbdeb919312046c92bb643501faca"> satsieeln shetomd tvl igaerdn te nirgitw srys, nsy<br> </li> 
+   <li class="listitem readable-text scrambled" refid="15" id="15" data-hash="2f34146ae484fa053072a451481a3d05"> <em class="calibre9">ysso-rspreesu</em> aeatnmegmn shmteod surr kw wjff veorc nj rqx ornv nsietco.<br> </li> 
+  </ol> 
+  <div class=" browsable-container" refid="16" id="16" data-hash="49d61aa7d19b0e32c884f7434897e0e5"> 
+   <h5>Table&nbsp;4.2.&nbsp;ReadStream essential methods.</h5> 
+   <table border="1" class="contenttable" summary="ReadStream essential methods." width="100%"> 
+    <colgroup class="calibre28" span="1"> 
+     <col class="col_" span="1" width="33%"> 
+     <col class="col_" span="1" width="67%"> 
+    </colgroup> 
+    <tbody> 
+     <tr class="calibre20"> 
+      <td class="contenttable1" colspan="1" rowspan="1">Method</td> 
+      <td class="contenttable1" colspan="1" rowspan="1">Description</td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p><code class="code2">handler(Handler&lt;T&gt;)</code></p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Handle a new read value of type <code class="code2">T</code> (e.g., <code class="code2">Buffer</code>, <code class="code2">byte[]</code>, <code class="code2">JsonObject</code>, etc).</p> </td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p><code class="code2">exceptionHandler(Handler&lt;Throwable&gt;)</code></p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Handle a read exception.</p> </td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p><code class="code2">endhandler(Handler&lt;Void&gt;)</code></p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Called when the stream has ended, either because all data has been read, or because an exception was raised.</p> </td> 
+     </tr> 
+    </tbody> 
+   </table> 
+  </div> 
+  <div class="readable-text scrambled" refid="17" id="17" data-hash="a540f943b04a6fafbae31dfa8497e76d"> 
+   <p>Table 4.2 gives the essential methods of read streams. They define callbacks for being notified of 3 types of events: some data is read, an exception arises, and the stream has ended.</p> 
+  </div> 
+  <div class=" browsable-container" refid="18" id="18" data-hash="2a2bf7708ee91af6b9eb9b5e21a86183"> 
+   <h5>Table&nbsp;4.3.&nbsp;WriteStream essential methods.</h5> 
+   <table border="1" class="contenttable" summary="WriteStream essential methods." width="100%"> 
+    <colgroup class="calibre28" span="1"> 
+     <col class="col_" span="1" width="33%"> 
+     <col class="col_" span="1" width="67%"> 
+    </colgroup> 
+    <tbody> 
+     <tr class="calibre20"> 
+      <td class="contenttable1" colspan="1" rowspan="1">Method</td> 
+      <td class="contenttable1" colspan="1" rowspan="1">Description</td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p><code class="code2">write(T)</code></p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Write some data of type <code class="code2">T</code> (e.g., <code class="code2">Buffer</code>, <code class="code2">byte[]</code>, <code class="code2">JsonObject</code>, etc).</p> </td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p><code class="code2">exceptionHandler(Handler&lt;Throwable&gt;)</code></p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Handle a write exception.</p> </td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p><code class="code2">end()</code></p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Ends the stream.</p> </td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p><code class="code2">end(T)</code></p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Write some data of type <code class="code2">T</code> then end the stream.</p> </td> 
+     </tr> 
+    </tbody> 
+   </table> 
+  </div> 
+  <div class="readable-text scrambled" refid="19" id="19" data-hash="89e6357872fdf2e4a01d78c8fd555664"> 
+   <p>Similarly, the essential methods of write streams outlined in table 4.3 allow to write data, end a stream, and be notified when an exception arises.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="20" id="20" data-hash="38dae3e1a7d93d10c0804855968febcf"> 
+   <p>We had already manipulated streams in the previous chapters without knowing it, for example with TCP and HTTP servers.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="21" id="21" data-hash="ef82afa4692be67eb5ccff4c94face3a"> 
+   <p>The java.io APIs form a classic stream I/O abstraction for reading and writing data from various sources in Java, albeit using blocking APIs. It is interesting to compare the JDK streams against the Vert.x non-blocking stream APIs.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="22" id="22" data-hash="4b88330f02a8030853cf23ad04accc9f"> 
+   <p>Suppose that we want to read the content of a file, and output its content to the standard console output.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="23" id="23" data-hash="27f026e3b8b176a9f137cc8c1f8164fd"> 
+   <h5>Listing&nbsp;4.1.&nbsp;Reading a file using JDK I/O APIs</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">public static void main(String[] args) {
+  File file = new File("build.gradle");
+  byte[] buffer = new byte[1024];
+  try (FileInputStream in = new FileInputStream(file)) { #1
+    int count = in.read(buffer);
+    while (count != -1) {
+      System.out.println(new String(buffer, 0, count));
+      count = in.read(buffer);
+    }
+  } catch (IOException e) {
+    e.printStackTrace();
+  } finally {
+    System.out.println("\n--- DONE");  #2
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVXNpbmcgdHJ5LXdpdGgtcmVzb3VyY2VzIHdlIGVuc3VyZSB0aGF0IHJlYWRlci5jbG9zZSgpIGlzIGFsd2F5cyBnb2luZyB0byBiZSBjYWxsZWQsIG5vIG1hdHRlciBpZiB0aGUgZXhlY3V0aW9uIGNvbXBsZXRlcyBub3JtYWxseSBvciBleGNlcHRpb25hbGx5LgojMiBXZSBpbnNlcnQgMiBsaW5lcyB0byB0aGUgY29uc29sZSBvbmNlIHJlYWRpbmcgaGFzIGZpbmlzaGVkLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="24" id="24" data-hash="0023e46606728a34b62258a0a96a757a"> 
+   <p>Listing 4.1 shows a classical example of using JDK I/O streams to read a file then output its content to the console while taking care of possible errors. We read data to a buffer, then immediately write the buffer content to the standard console before recycling the buffer for the next read.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="25" id="25" data-hash="b72cd7b62922d928596b2782b0a86292"> 
+   <h5>Listing&nbsp;4.2.&nbsp;Reading a file using Vert.x streams</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">public static void main(String[] args) {
+  Vertx vertx = Vertx.vertx();
+  OpenOptions opts = new OpenOptions().setRead(true);   #1
+  vertx.fileSystem().open("build.gradle", opts, ar -&gt; { #2
+    if (ar.succeeded()) {
+      AsyncFile file = ar.result();                     #3
+      file.handler(System.out::println)                 #4
+        .exceptionHandler(Throwable::printStackTrace)   #5
+        .endHandler(done -&gt; {                           #6
+          System.out.println("\n--- DONE");
+          vertx.close();
+        });
+    } else {
+      ar.cause().printStackTrace();
+    }
+  });
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgT3BlbmluZyBhIGZpbGUgd2l0aCBWZXJ0LnggcmVxdWlyZXMgb3B0aW9ucywgc3VjaCBhcyB3aGV0aGVyIHRoZSBmaWxlIGlzIGluIHJlYWQsIHdyaXRlLCBhcHBlbmQgbW9kZSBhbmQgbW9yZS4KIzIgT3BlbmluZyBhIGZpbGUgaXMgYW4gYXN5bmNocm9ub3VzIG9wZXJhdGlvbi4KIzMgQXN5bmNGaWxlIGlzIHRoZSBpbnRlcmZhY2UgZm9yIFZlcnQueCBhc3luY2hyb25vdXMgZmlsZXMuCiM0IFRoZSBjYWxsYmFjayBmb3IgbmV3IEJ1ZmZlciBkYXRhLgojNSBUaGUgY2FsbGJhY2sgd2hlbiBhbiBleGNlcHRpb24gYXJpc2VzLgojNiBUaGUgY2FsbGJhY2sgd2hlbiBzdHJlYW0gZW5kcy4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="26" id="26" data-hash="843d1e1ab6184d37d3c87876c28bba29"> 
+   <p>Listing 4.2 shows the implementation of the very same code as in listing 4.1, but using the Vert.x asynchronous file APIs. The approach is declarative here, as we define handlers for the different types of events when reading the stream. We are being pushed data while in listing 4.1 we are pulling data from the stream.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="27" id="27" data-hash="78895e673e05b07da190be53591f12c5"> 
+   <p>It may seem like a cosmetic difference at first sight that in one example data is being pulled, while in the other data is being pushed. The difference is major, and certainly one that needs to be understood for mastering asynchronous streams, be it with Vert.x or with other solutions.</p> 
+  </div> 
+  <div class="readable-text" refid="28" id="28" data-hash="b2a0ee8bce82c9b41cad4a277871083c"> 
+   <p>This brings us to investigating the notion of <em class="calibre10">back-pressure</em>.</p> 
+  </div> 
+  <div class="readable-text" refid="29" id="29" data-hash="17fd6ef443fc68153e3f5b1007e9bf48"> 
+   <h2 class="calibre17" id="heading_id_4"><a class="pcalibre pcalibre1" id="what-is-back-pressure" shape="rect"></a>4.2 &nbsp;What is back-pressure?</h2> 
+  </div> 
+  <div class="callout-container"> 
+   <div class="itemizedlist1"> 
+    <div class="readable-text" refid="30" id="30" data-hash="2c12ece7ea937d96b0279e34406dc1ba"> 
+     <p>Back-pressure definition</p> 
+    </div> 
+   </div> 
+   <div class="readable-text scrambled" refid="31" id="31" data-hash="f9b3e6b83932ae5e66edca0b437c021e"> 
+    <p>Back-pressure is a mechanism for a consumer of events to signal an events producer that it is emitting events at a faster rate than the consumer can handle them.</p> 
+   </div> 
+   <div class="readable-text scrambled" refid="32" id="32" data-hash="f51ab6aedde67f91c3af62f40ae9a8a1"> 
+    <p>In reactive systems back-pressure is useful to pause or slow-down a producer so that consumers avoids accumulating unprocessed events in unbounded memory buffers, possibly exhausting resources.</p> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="33" id="33" data-hash="de633261df4f57f8a363cb773c32f9da"> 
+   <p>To understand back-pressure and why it matters with asynchronous streams, let us take the example of a HTTP server used for downloading Linux distribution images, and consider the implementation without any back-pressure management strategy in place.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="34" id="34" data-hash="af45679bbbafec641c73e6f1c6558133"> 
+   <p>Linux distribution images are often distributed as .iso files and can easily weigh several gigabytes. The implementation of such a server would consists in:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="35" id="35" data-hash="50a0a54dd4901301c88530cf5b662707"> npoegni z HYXZ svrere,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="36" id="36" data-hash="0fb58702c0d765373c47fcdc42bb9fb7"> klt dkza iocingmn HBAL rsteuqe, lnhj rux opgsineorrndc jvfl,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="37" id="37" data-hash="cf2022a56f84d2832ebabb6ea429b0fe"> ltk asku fubfre bztx lvmt obr fjkl, tiewr jr er yvr HCRV rssnopee heuu.<br> </li> 
+  </ol> 
+  <div class="browsable-container figure-container" refid="38" id="38" data-hash="e68ce1c67e2ae6e4fb1c9529397c4189"> 
+   <h5 id="read-then-write">Figure&nbsp;4.1.&nbsp;Reading then writing data between streams without any back-pressure signaling</h5> 
+   <img alt="streams read then write" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/streams-read-then-write.png" width="1273" loading="lazy" height="486" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="39" id="39" data-hash="023a9457b188b1ba750c5d93c821fe31"> 
+   <p>Figure 4.1 provides an illustration of how this would work with Vert.x, although this directly generalizes to any non-blocking I/O API. Data buffers are read from the file stream, then passed to a handler. The handler is not likely to do anything else but directly writing each buffer back to the HTTP response stream. Each buffer is eventually written to the underlying TCP buffer, either directly or as smaller chunks. Since the TCP buffer may be full (either because of the network or because the client is busy) it is necessary to maintain a buffer of pending buffers to be written (the write queue in figure 4.1). Remember: a write operation is non-blocking, so buffering is needed.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="40" id="40" data-hash="af25e6f7ddfbd6cf1740fba29e8a2ae0"> 
+   <p>This sounds like a very simple processing pipeline, so… what could possibly go wrong?</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="41" id="41" data-hash="228fb4037d79dd63b66ed87ae65ef43f"> 
+   <p>Reading from a filesystem is generally fast and low-latency, and given several read requests an operating system is likely to cache some pages into RAM memory. By contrast writing to the network is much slower, and bandwidth depends on the weakest network link. Delays also occur.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="42" id="42" data-hash="1e5c6455dbd853afa4a9db11bb13e4ce"> 
+   <p>As reads here are much faster than writes, a write buffer as in figure 4.1 may quickly grow very large. Suppose that we have several thousand concurrent connections to download ISO images, then we may have lots of buffers accumulated in write buffer queues. We may actually have several gigabytes worth of ISO images in a JVM process memory, waiting to be written over the network!</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="43" id="43" data-hash="f28dc249aa3b60ffa5f0c9fd90e372e3"> 
+   <p>The more buffers there are in write queues, the more the process consumes memory. The risk here is clearly that of exhaustion, either because the process eats all available physical memory, or because it runs in a memory-capped environment such as a container.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="44" id="44" data-hash="68a3da81e1586f5b99f0906250611937"> 
+   <p>Because of how asynchronous and non-blocking I/Os work, the read and the write streams operate at different paces, requiring buffering, and thus exposing the risk of consuming too much memory and even crashing.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="45" id="45" data-hash="c9611e2d8ede4adf51e449043ed7be39"> 
+   <p>As you can guess one solution lies in back-pressure signaling, so that the read stream adapts to the throughput of the write stream. Back to the previous example when the HTTP response write queue grows too big, then it should be able to notify the file read stream that it goes too fast. In practice pausing the source stream is a good way to manage back-pressure, as it gives a chance to write the items in the write buffer while not accumulating new ones.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="46" id="46" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+     <h5>Tip</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="47" id="47" data-hash="2dec96d3a52e4ac65265b6e0a844bc07"> 
+     <p>Blocking I/O APIs have an implicit form of back-pressure by blocking execution threads until I/O operations complete. Write operations block when buffers are full, which prevents blocked threads from pulling more data until write operations have completed.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class=" browsable-container" refid="48" id="48" data-hash="0d0d2f1259ace1a9d9deed05cd8040a2"> 
+   <h5>Table&nbsp;4.4.&nbsp;ReadStream back-pressure management methods.</h5> 
+   <table border="1" class="contenttable" summary="ReadStream back-pressure management methods." width="100%"> 
+    <colgroup class="calibre28" span="1"> 
+     <col class="col_" span="1" width="33%"> 
+     <col class="col_" span="1" width="67%"> 
+    </colgroup> 
+    <tbody> 
+     <tr class="calibre20"> 
+      <td class="contenttable1" colspan="1" rowspan="1">Method</td> 
+      <td class="contenttable1" colspan="1" rowspan="1">Description</td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p><code class="code2">pause()</code></p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Puts the stream in pause, preventing further data to be sent to the handler.</p> </td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p><code class="code2">resume()</code></p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Starts reading data again and sending it to the handler.</p> </td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p><code class="code2">fetch(long)</code></p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Demand a number <code class="code2">n</code> of elements to be read (at most). The stream must have been paused before calling <code class="code2">fetch(n)</code>.</p> </td> 
+     </tr> 
+    </tbody> 
+   </table> 
+  </div> 
+  <div class="readable-text scrambled" refid="49" id="49" data-hash="2ab58f40e6d8df3110174897753a8915"> 
+   <p>Table 3.4 gives the back-pressure management methods of ReadStream. By default a read stream reads data as fast as it can, unless it is being paused. A processor can pause then resume a read stream to control the data flow.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="50" id="50" data-hash="c90a162c47f1e0193cc0026da7fc80d2"> 
+   <p>When a read stream has been paused, it is possible to ask a certain numbers of elements to be fetched, which is a form of asynchronous pulling. This means that a processor can ask elements using fetch, at its own pace. We will see concrete examples of that in the last section of this chapter.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="51" id="51" data-hash="a38baa9376b4c5a01425018811f61f2a"> 
+   <p>In any case, calling resume() causes the stream to start pushing data as fast as it can again.</p> 
+  </div> 
+  <div class=" browsable-container" refid="52" id="52" data-hash="360f2f76f0e1af989ceee459dfe3c47e"> 
+   <h5>Table&nbsp;4.5.&nbsp;WriteStream back-pressure management methods.</h5> 
+   <table border="1" class="contenttable" summary="WriteStream back-pressure management methods." width="100%"> 
+    <colgroup class="calibre28" span="1"> 
+     <col class="col_" span="1" width="33%"> 
+     <col class="col_" span="1" width="67%"> 
+    </colgroup> 
+    <tbody> 
+     <tr class="calibre20"> 
+      <td class="contenttable1" colspan="1" rowspan="1">Method</td> 
+      <td class="contenttable1" colspan="1" rowspan="1">Description</td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p><code class="code2">setWriteQueueMaxSize(int)</code></p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Defines what the maximum write buffer queue size should be like before being considered as <em class="calibre9">full</em>. This is a size in terms of queued Vert.x buffers to be written, not a size in terms of actual bytes as the queued buffers may be of different sizes.</p> </td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p><code class="code2">boolean writeQueueFull()</code></p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Indicates when the write buffer queue size is <em class="calibre9">full</em>.</p> </td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p><code class="code2">drainHandler(Handler&lt;Void&gt;)</code></p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Defines a callback when the write buffer queue has been <em class="calibre9">drained</em>, typically when it is back to half of its maximum size.</p> </td> 
+     </tr> 
+    </tbody> 
+   </table> 
+  </div> 
+  <div class="readable-text scrambled" refid="53" id="53" data-hash="10426b0ba8c02bcdc4b89537e659849e"> 
+   <p>Table 4.5 shows the corresponding back-pressure management methods for WriteStream. The write buffer queue has a maximum size after which it is considered to be full. Write queues have default sizes that you will rarely want to tweak, but you can do so if you want to. Note that writes can still be made and data will just accumulate in the queue. A writer is supposed to check when the queue is full, but there is no enforcement on writes.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="54" id="54" data-hash="f62d2f0daf757d1ac37094c84c411771"> 
+   <p>When the writer knows that the write queue is full, it can be notified through a drain handler when data can be written again. In general this happens when half the write queue has been drained.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="55" id="55" data-hash="a38e2495533892d15a2b98fc390d7360"> 
+   <p>Now that we have seen what back-pressure operations are provided in both ReadStream and WriteStream, here is the recipe for controlling the flow back to our example of providing ISO images via HTTP:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="56" id="56" data-hash="02a88647669830ec9cf6ec31b230ce4c"> lkt kdca otzh ffberu, itrew rj rv oru HBCE psnreose emrast, nvqr<br> </li> 
+   <li class="listitem readable-text scrambled" refid="57" id="57" data-hash="858da7527c1736674fc468a21c416eac"> cekhc jl kdr twier berffu uqeeu ja plff, rpnv<br> </li> 
+   <li class="listitem readable-text scrambled" refid="58" id="58" data-hash="cc28ea281610c38f4a7b4a0cbee49b4f"> 
+    <div class="readable-text" refid="59" id="59" data-hash="789b24336e97c10b864d6a8a9bb52e74"> 
+     <p>lj jr ja fylf:</p> 
+    </div> 
+    <div class="itemizedlist1"> 
+     <ol class="orderedlist2"> 
+      <li class="listitem"> euasp vry fjlx kztb tsrame, pnc<br> </li> 
+      <li class="listitem"> nlltisa c dainr dlnehra curr usrsmee rkq klfj qcvt mstear wgxn rj jc eibgn dcelal.<br> </li> 
+     </ol> 
+    </div> </li> 
+  </ol> 
+  <div class="readable-text scrambled" refid="60" id="60" data-hash="92eaf8c10192a9661ee0c03636b38f9b"> 
+   <p>Note that this back-pressure management strategy is not always what you need. Indeed:</p> 
+  </div> 
+  <ul class="itemizedlist"> 
+   <li class="listitem readable-text scrambled" refid="61" id="61" data-hash="d01120f101252168885d80caa1100420"> ehtre ctx esacs hreew grdnopip urzc wehil z wreit ueqeu ja fhlf zj locunfatylni etrrcco snp knkv serldabei,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="62" id="62" data-hash="e1737bb28b46517cb0637ad52c47413d"> sesmtieom kbr creuos lv envste kaoh nrx portsup guapisn kjvf c Pktr.k <code class="code">ReadStream</code> yvak, zun dkp bonv rv ieedcd tnwbeee pgriopnd crgz xt eufbirfgn nvxk lj rj pmc csaeu oyermm ehosuianxt.<br> </li> 
+  </ul> 
+  <div class="readable-text scrambled" refid="63" id="63" data-hash="ec194de9510ff9043e9822bb0e16bd8c"> 
+   <p>The strategy to adopt for dealing with back-pressure depends on the functional requirements of the code you are writing. In general you will prefer flow control like Vert.x streams offer, but when you can’t, you need to adopt another strategy.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="64" id="64" data-hash="97307ec6bb60cd5aed901babf831da07"> 
+   <p>Let us now assemble all that we’ve seen into an application.</p> 
+  </div> 
+  <div class="readable-text" refid="65" id="65" data-hash="a8fc05d3fa29303dc5a617b04bab3886"> 
+   <h2 class="calibre17" id="heading_id_5"><a class="pcalibre pcalibre1" id="making-a-music-streaming-jukebox" shape="rect"></a>4.3 &nbsp;Making a music streaming jukebox</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="66" id="66" data-hash="84f2255ef573cf5e85bc9eba627476db"> 
+   <p>We are going to illustrate Vert.x streams and back-pressure management through the example of a music streaming jukebox (see figure 4.2).</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="67" id="67" data-hash="32297c61e0a697453dddaa0bb0e2f546"> 
+   <h5 id="jukebox">Figure&nbsp;4.2.&nbsp;Jukebox application overview</h5> 
+   <img alt="streams jukebox" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/streams-jukebox.png" width="1059" loading="lazy" height="682" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="68" id="68" data-hash="f3215e3b138a72bf36d258815ee3d26d"> 
+   <p>The idea is that the jukebox has a few MP3 files stored locally, and clients can connect over HTTP to listen to the stream. Individual files may also be downloaded over HTTP. In turn, controlling when to play, pause, and schedule a song to be played happens over a simple, text-based TCP protocol. All connected players shall be listening to the same audio at the same time, modulo minor delays due to the buffering put in place in the players.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="69" id="69" data-hash="aca59e5c208a6800de8ff829b453c263"> 
+   <p>This example allows us to see how to deal with custom flow pacing, different back-pressure management strategies, and also how to parse streams.</p> 
+  </div> 
+  <div class="readable-text" refid="70" id="70" data-hash="07b0f7caad4e7e2b1ff2874d994bd92a"> 
+   <h3 class="calibre29" id="heading_id_6"><a class="pcalibre pcalibre1" id="features-and-usage" shape="rect"></a>4.3.1 &nbsp;Features and usage</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="71" id="71" data-hash="9a6c1222d28cbb1d020306ee2340686a"> 
+   <p>The application that we are going to build can be run from the examples using a Gradle task, as shown in the console output of listing 4.3.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="72" id="72" data-hash="f35a087d0dc71beb3a7204d91c1c49e4"> 
+     <h5>Note</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="73" id="73" data-hash="e0db6b2933e71fd7b3a5057333c7f01b"> 
+     <p>You will need to copy some of your MP3 files to a folder named tracks/ if you want the jukebox to have music to play.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="74" id="74" data-hash="fe78b585f2d0a5f1ab47cdb2f66fc055"> 
+   <h5>Listing&nbsp;4.3.&nbsp;Running the jukebox application</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ ./gradlew run -PmainClass=chapter4.jukebox.Main #1
+
+&gt; Task :run
+[vert.x-eventloop-thread-0] chapter4.jukebox.Jukebox - Start  #2
+[vert.x-eventloop-thread-1] chapter4.jukebox.NetControl - Start</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIG1haW4gY2xhc3MgaXMgY2hhcHRlcjQuanVrZWJveC5KdWtlYm94LgojMiBXZSBhcmUgZGVwbG95aW5nIDIgdmVydGljbGVzLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="75" id="75" data-hash="537cab9333fade3b1962864a2b1abad4"> 
+   <p>There are 2 verticles being deployed:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="76" id="76" data-hash="73001ea4816591b4929c5baeeec6bba0"> <code class="code">Jukebox</code> ripsoevd rvp jmcn umsic msgitnear lgoci gcn HCXZ erevrs efrntciea ltv imsuc elrsayp kr oecncnt, ngz<br> </li> 
+   <li class="listitem readable-text scrambled" refid="77" id="77" data-hash="529eec48eaeff395b0bfa80f54b8a91c"> <code class="code">NetControl</code> rpdeisvo c krro-sdeba CBL ocloprot ktl teleomyr itcolnnogrl rvy kejoxub atlppcnoaii.<br> </li> 
+  </ol> 
+  <div class="readable-text scrambled" refid="78" id="78" data-hash="d89554bb5848946548b9a3bc3f40539b"> 
+   <p>To listen to music, one can connect a player such as VLC (see figure 4.3) or even open a web browser directly at localhost:8080/.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="79" id="79" data-hash="33c5907be4ae63e7b0f6ac9bf35dbcab"> 
+   <h5 id="vlc">Figure&nbsp;4.3.&nbsp;VLC connected to the jukebox</h5> 
+   <img alt="streams vlc" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/streams-vlc.png" width="984" loading="lazy" height="602" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="80" id="80" data-hash="fbdb88e39ddcea3b0e174f94364981c1"> 
+   <p>On the other hand, the player can be controlled using plain text commands using a tool like netcat with commands to list all files, schedule a track to be played and pause / restart the stream. Listing 4.4 shows an interactive session using netcat.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="81" id="81" data-hash="b00ba4f6f652e04efb8aa34c5606ec8a"> 
+   <h5>Listing&nbsp;4.4.&nbsp;Controlling the jukebox with <code class="code1">netcat</code></h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ netcat localhost 3000   #1
+/list   #2
+Daniela-La-Luz-Did-you-Ever-(Original-Mix).mp3
+The-Revenge-Let-Love-Take-The-Blame-(Original-Mix).mp3
+intro.mp3
+SQL-Surrender-(Original-Mix).mp3
+/schedule SQL-Surrender-(Original-Mix).mp3  #3
+/pause  #4
+/play   #5
+/schedule Daniela-La-Luz-Did-you-Ever-(Original-Mix).mp3  #6
+^C  #7</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIGNvbnRyb2wgVENQIHNlcnZlciBsaXN0ZW5zIG9uIHBvcnQgMzAwMC4KIzIgVGhpcyBjb21tYW5kIGxpc3RzIGFsbCBmaWxlcy4KIzMgU2NoZWR1bGluZyBhZGRzIHRoZSBmaWxlIHRvIGEgcGxheWxpc3QuCiM0IFRoaXMgcGF1c2VzIHRoZSBzdHJlYW0gZm9yIGFsbCBjb25uZWN0ZWQgcGxheWVycy4KIzUgVGhpcyByZXN1bWVzIHRoZSBzdHJlYW0uCiM2IFdlIHNjaGVkdWxlIGFub3RoZXIgdHJhY2sgd2hlbiB0aGUgZmlyc3QgaGFzIGZpbmlzaGVkLgojNyBXZSBjYW4gZXhpdCB0aGUgbmV0Y2F0IHNlc3Npb24gd2l0aCBDdHJsK0Mgd2l0aCBubyBoYXJtLg=="></div> 
+   </div> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="82" id="82" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+     <h5>Tip</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="83" id="83" data-hash="3fd0296d01f42de532ca38da3543dce5"> 
+     <p>netcat may be available as nc on your Unix environment. I am not aware of a friendly and equivalent tool for Windows outside of a WSL environment.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="84" id="84" data-hash="b1d8e2fcaf289bba717f98ef99c12ad2"> 
+   <p>Finally, we want to be able to download any MP3 for which we know the file name over HTTP, as in:</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="85" id="85" data-hash="0d863b4119782cc92b29ec588bff276a"> 
+   <div class="code-area-container"> 
+    <pre class="code-area">curl -o out.mp3 http://localhost:8080/download/intro.mp3</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="86" id="86" data-hash="2bf96aa8d326e3c39a3a7707c5bb2c12"> 
+   <p>Let us now dissect the various parts of the implementation.</p> 
+  </div> 
+  <div class="readable-text" refid="87" id="87" data-hash="111ce04471fb27b7bcef276339f41baa"> 
+   <h3 class="calibre29" id="heading_id_7"><a class="pcalibre pcalibre1" id="http-processing-the-big-picture" shape="rect"></a>4.3.2 &nbsp;HTTP processing: the big picture</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="88" id="88" data-hash="328d7a0d8b118fe76dd1174e693bafe9"> 
+   <p>Since there will be many code snippets referring to the HTTP server processing, it is good to look at figure 4.4 to understand how the next pieces of code will fit together.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="89" id="89" data-hash="e7e780f91fd7be0d7f6f4507ad2e0cdd"> 
+   <h5 id="http-bigpicture">Figure&nbsp;4.4.&nbsp;Big picture of the HTTP server processing</h5> 
+   <img alt="streams httpbigpicture" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/streams-httpbigpicture.png" width="1237" loading="lazy" height="899" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="90" id="90" data-hash="2c10baa709074ceb4c0f6851c9132088"> 
+   <p>There are 2 types of incoming HTTP requests: either a client wants to directly download a file by name, or it want to join the audio stream. The processing strategies are then very different.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="91" id="91" data-hash="34dc67b5c65f7ae53a588285e92621d5"> 
+   <p>In the case of downloading a file, the goal is to perform a direct copy between the file read stream and the HTTP response write stream. This will be done with back-pressure management for avoiding excessive buffering.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="92" id="92" data-hash="b8075108fae27be0b9243c6a3a1e1172"> 
+   <p>Streaming is a bit more involving, as we need to keep track of all streamers HTTP response write streams. Then, a timer periodically reads data from the current MP3 file, and then the data is duplicated and written for each streamer.</p> 
+  </div> 
+  <div class="readable-text" refid="93" id="93" data-hash="0b4c73dcf7e008b525946d4a159255ae"> 
+   <p>Let us now see how these parts are implemented.</p> 
+  </div> 
+  <div class="readable-text" refid="94" id="94" data-hash="d16e23298bb6fd17721fcb787ca9297f"> 
+   <h3 class="calibre29" id="heading_id_8"><a class="pcalibre pcalibre1" id="jukebox-verticle-basics" shape="rect"></a>4.3.3 &nbsp;Jukebox verticle basics</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="95" id="95" data-hash="1388817733a04a41d42fdd6f476b4987"> 
+   <p>Listing 4.5 shows that the state of the Jukebox verticle class is defined by a play status, and a playlist.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="96" id="96" data-hash="d2d91b0420f6eb9d921b60b01c4c2856"> 
+   <h5>Listing&nbsp;4.5.&nbsp;State of the jukebox class</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private enum State {PLAYING, PAUSED}
+
+private State currentMode = State.PAUSED;
+
+private final Queue&lt;String&gt; playlist = new ArrayDeque&lt;&gt;();</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="97" id="97" data-hash="328c382ddb352347eba5ba167f048998"> 
+   <p>An enumerated type State defines 2 states, while a Queue holds all scheduled tracks to be played next. Again, the Vert.x threading model ensures single-threaded access so there is no need for concurrent collections and critical sections.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="98" id="98" data-hash="90ea80fbda8efaa4f50346e374c9230a"> 
+   <p>The start method of the Jukebox verticle (listing 4.6) needs to configure a few event-bus handlers that correspond to the command / actions that can be used from the TCP text protocol. Another verticle NetControl that we will dissect later deals with the inners of the TCP server, and sends messages to the event bus.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="99" id="99" data-hash="6cf30afe47dad1812c8b0b17fa69d92e"> 
+   <h5>Listing&nbsp;4.6.&nbsp;Setting up the event bus handlers</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">@Override
+public void start() {
+  EventBus eventBus = vertx.eventBus();
+  eventBus.consumer("jukebox.list", this::list);
+  eventBus.consumer("jukebox.schedule", this::schedule);
+  eventBus.consumer("jukebox.play", this::play);
+  eventBus.consumer("jukebox.pause", this::pause);
+
+  // (...more later!)
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="100" id="100" data-hash="e25614a604f93444d71354fa15e7ea33"> 
+   <p>Note that by abstracting the commands part over the event-bus, we could easily plug new ways to command the jukebox, from mobile applications, web applications and more.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="101" id="101" data-hash="8bb932f094013125a1b8575296bf354e"> 
+   <p>Listing 4.7 provides the play / pause and schedule handlers. These methods directly manipulate the play and playlist state.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="102" id="102" data-hash="cf6fe38327f691cede34c085dc169055"> 
+   <h5>Listing&nbsp;4.7.&nbsp;Play / pause and schedule operations</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void play(Message&lt;?&gt; request) {
+  currentMode = State.PLAYING;
+}
+
+private void pause(Message&lt;?&gt; request) {
+  currentMode = State.PAUSED;
+}
+
+private void schedule(Message&lt;JsonObject&gt; request) {
+  String file = request.body().getString("file");
+  if (playlist.isEmpty() &amp;&amp; currentMode == State.PAUSED) {  <a class="pcalibre pcalibre1" id="CO5-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    currentMode = State.PLAYING;
+  }
+  playlist.offer(file);
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhpcyBhbGxvd3MgYXV0b21hdGljYWxseSByZXN1bWluZyBwbGF5aW5nIHdoZW4gbm8gdHJhY2sgd2FzIHBsYXlpbmcgYW5kIHdlIHNjaGVkdWxlIGEgbmV3IG9uZS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="103" id="103" data-hash="0d99bfbb714683760ba1f8943e5fdbe0"> 
+   <p>Listing available files is a bit more involving as listing 4.8 shows.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="104" id="104" data-hash="e706a7badfe5860c7c390674318c1d63"> 
+   <h5>Listing&nbsp;4.8.&nbsp;Listing all available files</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void list(Message&lt;?&gt; request) {
+  vertx.fileSystem().readDir("tracks", ".*mp3$", ar -&gt; {  <a class="pcalibre pcalibre1" id="CO6-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    if (ar.succeeded()) {
+      List&lt;String&gt; files = ar.result()
+        .stream()
+        .map(File::new)
+        .map(File::getName)
+        .collect(Collectors.toList());
+      JsonObject json = new JsonObject().put("files", new JsonArray(files));
+      request.reply(json);  <a class="pcalibre pcalibre1" id="CO6-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    } else {
+      logger.error("readDir failed", ar.cause());
+      request.fail(500, ar.cause().getMessage()); <a class="pcalibre pcalibre1" id="CO6-3" shape="rect"></a><span class="pcalibre1">#3</span>
+    }
+  });
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgV2UgYXN5bmNocm9ub3VzbHkgZ2V0IGFsbCBmaWxlcyBlbmRpbmcgd2l0aCAubXAzIGluIHRoZSB0cmFja3MvIGZvbGRlci4KIzIgV2UgYnVpbGQgYSBKU09OIHJlc3BvbnNlLgojMyBUaGlzIGlzIGFuIGV4YW1wbGUgb2YgZmFpbGluZyBhIHJlcXVlc3QgLyByZXBseSBjb21tdW5pY2F0aW9uIG92ZXIgdGhlIGV2ZW50LWJ1cyB3aXRoIGFuIGVycm9yLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="105" id="105" data-hash="73f97fdccaeebf80b7a73d2c0cf835fe"> 
+   <h3 class="calibre29" id="heading_id_9"><a class="pcalibre pcalibre1" id="incoming-http-connections" shape="rect"></a>4.3.4 &nbsp;Incoming HTTP connections</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="106" id="106" data-hash="8143fbe2db58ff6a1fb3b20690d9a6f6"> 
+   <p>There are 2 types of incoming HTTP clients: either they want the audio stream or they want to download a file.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="107" id="107" data-hash="45e746f2c07884f91ae568eff741e9f0"> 
+   <p>Starting the HTTP server is done in the start method of the verticle (see listing 4.9).</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="108" id="108" data-hash="8a94503d552853152d3eaf67b89716e7"> 
+   <h5>Listing&nbsp;4.9.&nbsp;Setting up the HTTP server</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">@Override
+public void start() {
+  EventBus eventBus = vertx.eventBus();
+  eventBus.consumer("jukebox.list", this::list);
+  eventBus.consumer("jukebox.schedule", this::schedule);
+  eventBus.consumer("jukebox.play", this::play);
+  eventBus.consumer("jukebox.pause", this::pause);
+
+  vertx.createHttpServer()
+    .requestHandler(this::httpHandler)
+    .listen(8080);
+
+   // (...more later!) #1
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgV2Ugd2lsbCBleHBhbmQgdGhpcyBsYXRlciB3aXRoIE1QMyBzdHJlYW1pbmcu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="109" id="109" data-hash="3818e2a43006b4552f4b785449ea2308"> 
+   <p>The request handler used by the Vert.x HTTP server is given in listing 4.10, and forwards to utility methods openAudioStream and download to proceeed.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="110" id="110" data-hash="a72c48b5b2ac82c72fbd0a888dee3c34"> 
+   <h5>Listing&nbsp;4.10.&nbsp;HTTP request handler and dispatcher</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void httpHandler(HttpServerRequest request) {
+  if ("/".equals(request.path())) {
+    openAudioStream(request);
+    return;
+  }
+  if (request.path().startsWith("/download/")) {
+    String sanitizedPath = request.path().substring(10).replaceAll("/", "");  #1
+    download(sanitizedPath, request);
+    return;
+  }
+  request.response().setStatusCode(404).end();  #2
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhpcyBzdHJpbmcgc3Vic3RpdHV0aW9uIHByZXZlbnRzIGZyb20gbWFsaWNpb3VzIGF0dGVtcHRzIHRvIHJlYWQgZmlsZXMgZnJvbSBvdGhlciBkaXJlY3RvcmllcyAodGhpbmsgb2Ygc29tZW9uZSB3aWxsaW5nIHRvIHJlYWQgL2V0Yy9wYXNzd2QpLgojMiBXaGVuIG5vdGhpbmcgbWF0Y2hlcyB3ZSBnaXZlIGEgNDA0IChub3QgZm91bmQpLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="111" id="111" data-hash="9ffdc2e63f21219fb4ab553f62fed464"> 
+   <p>The implementation of method openAudioStream is given in listing 4.11. It prepares the stream to be in chunking mode, sets the proper content-type, and sets the response object aside for later.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="112" id="112" data-hash="1cd15e9f43bb954b52d89fd046ef96dd"> 
+   <h5>Listing&nbsp;4.11.&nbsp;Dealing with new stream players</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private final Set&lt;HttpServerResponse&gt; streamers = new HashSet&lt;&gt;();  <a class="pcalibre pcalibre1" id="CO9-1" shape="rect"></a><span class="pcalibre1">#1</span>
+
+private void openAudioStream(HttpServerRequest request) {
+  HttpServerResponse response = request.response()
+    .putHeader("Content-Type", "audio/mpeg")
+    .setChunked(true);  <a class="pcalibre pcalibre1" id="CO9-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  streamers.add(response);
+  response.endHandler(v -&gt; {
+    streamers.remove(response); <a class="pcalibre pcalibre1" id="CO9-3" shape="rect"></a><span class="pcalibre1">#3</span>
+    logger.info("A streamer left");
+  });
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgV2UgdHJhY2sgYWxsIGN1cnJlbnQgc3RyZWFtZXJzIGluIGEgc2V0IG9mIEhUVFAgcmVzcG9uc2VzLgojMiBJdCBpcyBhIHN0cmVhbSwgc28gbGVuZ3RoIGlzIHVua25vd24uCiMzIFdoZW4gYSBzdHJlYW0gZXhpdHMsIGl0IGlzIG5vIGxvbmdlciB0cmFja2VkLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="113" id="113" data-hash="37508916897961e35542bae290bf6102"> 
+   <h3 class="calibre29" id="heading_id_10"><a class="pcalibre pcalibre1" id="downloading-as-efficiently-as-possible" shape="rect"></a>4.3.5 &nbsp;Downloading as efficiently as possible</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="114" id="114" data-hash="3c9389e1f9ed90a7efc7143d967b9b0b"> 
+   <p>Downloading a file is a perfect example of back-pressure management to coordinate a source stream (the file) and a sink stream (the HTTP response).</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="115" id="115" data-hash="6d4accc2b0dc7f7c1c2725e7931f348e"> 
+   <p>Listing 4.12 gives how we look for the file, and when it exists, we forward the final download duty to the downloadFile method.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="116" id="116" data-hash="c6ba02ce9735e2c5af1483c5b8946cb4"> 
+   <h5>Listing&nbsp;4.12.&nbsp;Download method</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void download(String path, HttpServerRequest request) {
+  String file = "tracks/" + path;
+  if (!vertx.fileSystem().existsBlocking(file)) { #1
+    request.response().setStatusCode(404).end();
+    return;
+  }
+  OpenOptions opts = new OpenOptions().setRead(true);
+  vertx.fileSystem().open(file, opts, ar -&gt; {
+    if (ar.succeeded()) {
+      downloadFile(ar.result(), request);
+    } else {
+      logger.error("Read failed", ar.cause());
+      request.response().setStatusCode(500).end();
+    }
+  });
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVW5sZXNzIHlvdSBhcmUgb24gYSBuZXR3b3JrZWQgZmlsZSBzeXN0ZW0sIHRoZSBwb3NzaWJsZSBibG9ja2luZyB0aW1lIGlzIG1hcmdpbmFsIHNvIHdlIGF2b2lkIGEgbmVzdGVkIGNhbGxiYWNrIGxldmVsLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="117" id="117" data-hash="1f44796b5dc984d5f11a9ba3fda3957a"> 
+   <p>The implementation of method <code class="code">downloadFile</code> is given in listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-4/v-10/downloadFile" shape="rect" title="Example 4.13. Downloading a file">4.13</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="118" id="118" data-hash="0933798bfc478d1c4e739e9172c62aa4"> 
+   <h5>Listing&nbsp;4.13.&nbsp;Downloading a file</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void downloadFile(AsyncFile file, HttpServerRequest request) {
+  HttpServerResponse response = request.response();
+  response.setStatusCode(200)
+    .putHeader("Content-Type", "audio/mpeg")
+    .setChunked(true);
+
+  file.handler(buffer -&gt; {
+    response.write(buffer);
+    if (response.writeQueueFull()) {  #1
+      file.pause(); #2
+      response.drainHandler(v -&gt; file.resume());  #3
+    }
+  });
+
+  file.endHandler(v -&gt; response.end());
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgV3JpdGluZywgdG9vIGZhc3QhCiMyIEJhY2stcHJlc3N1cmUgYXBwbGljYXRpb24sIGJ5IHBhdXNpbmcgdGhlIHJlYWQgc3RyZWFtLgojMyBSZXN1bWluZyB3aGVuIGRyYWluZWQu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="119" id="119" data-hash="e718924e35b03839dcb73d02fd6a897b"> 
+   <p>Back-pressure is being taken care of while copying data between the 2 streams. In fact, this is so common to do when the strategy is to pause the source and not lose any data that the same code can be rewritten as in listing 4.14.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="120" id="120" data-hash="a40bdef41b67e5866618f386bf64b383"> 
+   <h5>Listing&nbsp;4.14.&nbsp;Pipe helper</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">HttpServerResponse response = request.response();
+response.setStatusCode(200)
+  .putHeader("Content-Type", "audio/mpeg")
+  .setChunked(true);
+
+file.pipeTo(response); #1</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUGlwZXMgZGF0YSBmcm9tIGZpbGUgdG8gcmVzcG9uc2Uu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="121" id="121" data-hash="57c87124eb24d5e67db48af37d3e92b2"> 
+   <p>A pipe deals with back-pressure for copying between a pausable ReadStream and a WriteStream. It also manages the end of the source stream and errors on both streams. The code of listing 4.14 does exactly what is in listing 4.13, but without the boilerplate. There are other variants of pipeTo to specify custom handlers.</p> 
+  </div> 
+  <div class="readable-text" refid="122" id="122" data-hash="bf1f85024f4706dc518d2997ca15ad38"> 
+   <h3 class="calibre29" id="heading_id_11"><a class="pcalibre pcalibre1" id="reading-mp3-files-but-not-too-fast" shape="rect"></a>4.3.6 &nbsp;Reading MP3 files, but not too fast</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="123" id="123" data-hash="b46d9a3d5ccc9a59c2b30578b92ed6ff"> 
+   <p>MP3 files have a header containing meta-data such as the artist name, genre, bit rate, etc. Then several frames containing compressed audio data follow, which decoders can then turn into pulse-code modulation data that can eventually be turned into sound.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="124" id="124" data-hash="9a9deac358b254f57580524705217dbb"> 
+   <p>MP3 decoders are very resilient to errors, so if they start decoding right in the middle of a file they will still manage to figure out what is the bit rate, and they will align with the next frame to start decoding audio. You can even concatenate multiple MP3 files and send them to a player, audio will be decoded as long as all files are using the same bit rate and stereo mode.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="125" id="125" data-hash="7e038e4d3b082f984a09c1bd5bd6772e"> 
+   <p>This is interesting for us in designing a music streaming jukebox: given our files have been encoded the same way, we can simply push each file of a playlist one after the other and decoders will handle the audio just fine.</p> 
+  </div> 
+  <div class="readable-text" refid="126" id="126" data-hash="c62e6bee6e2d4fb82deebb33a0a0de68"> 
+   <h4 class="calibre30" id="heading_id_12"><a class="pcalibre pcalibre1" id="why-back-pressure-alone-is-not-enough" shape="rect"></a>Why back-pressure alone is not enough</h4> 
+  </div> 
+  <div class="readable-text scrambled" refid="127" id="127" data-hash="f32a7fca4799c173601b31018e00f583"> 
+   <p>Now feeding MP3 data to many connected players is not as simple as it seems. The main issue is that of ensuring that all current and future players are listening the same music at roughly the same time. All players have different local buffering strategies to ensure smooth playback even when the network suffers delays, but if the server simply pushes files as fast as it can then for sure not all clients will be synchronized. Worse: when a new player connects it may receive nothing to play at all while the current players have several minutes of music to play in their buffers. Hence to provide a sensible playback experience, we need to control the pace at which files are being read, and for that we are going to use a timer.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="128" id="128" data-hash="f6b1d21dc18da71fe4d6f00c356b22a2"> 
+   <p>This is illustrated in figure 4.5 where we show what happens without and with rate control on the streams.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="129" id="129" data-hash="aa6accc78b832f61640896e44031d545"> 
+   <h5 id="stream-buffers">Figure&nbsp;4.5.&nbsp;Streaming without and with rate control</h5> 
+   <img alt="streams stream buffers" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/streams-stream-buffers.png" width="1124" loading="lazy" height="848" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="130" id="130" data-hash="7680e8ab8d5940f33114b85c1a4048ca"> 
+   <p>In both cases, suppose that Player A joined the stream at the beginning, while Player B joined, say, 10 seconds later. Without read rate control we find ourselves back to a similar case as that of downloading a MP3 file. We may of course have back-pressure in place to ensure efficient resource usage while copying MP3 data chunks to the connected clients, yet the streaming experience will be very bad.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="131" id="131" data-hash="a98f75e12f43b756992fd68d3b875b60"> 
+   <p>Since we are basically streaming data as fast as we can, Player A finds its internal buffers filled with pretty much all the current file data. While it may be playing at position 0 minute 15 seconds, it has already received data up above the 3 minutes mark. In turn when Player B joins it starts receiving MP3 data chunks much farther from the file, hence it starts playing at position 3 minutes and 30 seconds. If we extend our reasoning to multiple files, then a new player can join and receive no data at all, while the previously connected players may have multiple songs to play in their internal buffers.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="132" id="132" data-hash="9b706c268ea1d09db20892d96986604d"> 
+   <p>By contrast if we control the read rate of the MP3 file and hence the rate at which MP3 chunks are being copied and written to the connected players, then we ensure that they are all more-or-less at the same position. Rate control here is all about ensuring that all players receive data fast enough so that they can play without interruption, yet they do not buffer too much data.</p> 
+  </div> 
+  <div class="readable-text" refid="133" id="133" data-hash="5cbb0dcbf4812a187a2bdacb7eb54cb1"> 
+   <h4 class="calibre30" id="heading_id_13"><a class="pcalibre pcalibre1" id="rate-limited-streaming-implementation" shape="rect"></a>Rate-limited streaming implementation</h4> 
+  </div> 
+  <div class="readable-text scrambled" refid="134" id="134" data-hash="bcf65c2ab4ea483cb4cd59406af3051d"> 
+   <p>Let us now first look at the complete Jukebox verticle start method in listing 4.15, as it shows that much needed timer.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="135" id="135" data-hash="8b832a24432ce422b81ce68c3b428a69"> 
+   <h5>Listing&nbsp;4.15.&nbsp;Jukebox verticle class start method</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">@Override
+public void start() {
+  EventBus eventBus = vertx.eventBus();
+  eventBus.consumer("jukebox.list", this::list);
+  eventBus.consumer("jukebox.schedule", this::schedule);
+  eventBus.consumer("jukebox.play", this::play);
+  eventBus.consumer("jukebox.pause", this::pause);
+
+  vertx.createHttpServer()
+    .requestHandler(this::httpHandler)
+    .listen(8080);
+
+  vertx.setPeriodic(100, this::streamAudioChunk); #1
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgc3RyZWFtQXVkaW9DaHVuayBwZXJpb2RpY2FsbHkgcHVzaGVzIG5ldyBNUDMgZGF0YSAoMTAwbXMgaXMgcHVyZWx5IGVtcGlyaWNhbCwgZmVlbC1mcmVlIHRvIGFkanVzdCku"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="136" id="136" data-hash="6cfa221eec239d04668c580319651dd0"> 
+   <p>Beyond connecting the event-bus handlers and starting a HTTP server, the start method also defines a timer so that data is being streamed every 100 milliseconds. We can now look at the implementation of the streamAudioChunk method, given in listing 4.16.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="137" id="137" data-hash="933c87421b37a84dc80576bf5340bb58"> 
+   <h5>Listing&nbsp;4.16.&nbsp;Streaming file chunks</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private AsyncFile currentFile;
+private long positionInFile;
+
+private void streamAudioChunk(long id) {
+  if (currentMode == State.PAUSED) {
+    return;
+  }
+  if (currentFile == null &amp;&amp; playlist.isEmpty()) {
+    currentMode = State.PAUSED;
+    return;
+  }
+  if (currentFile == null) {
+    openNextFile();
+  }
+  currentFile.read(Buffer.buffer(4096), 0, positionInFile, 4096, ar -&gt; {  #1
+    if (ar.succeeded()) {
+      processReadBuffer(ar.result()); #2
+    } else {
+      logger.error("Read failed", ar.cause());
+      closeCurrentFile();
+    }
+  });
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQnVmZmVycyBjYW5ub3QgYmUgcmV1c2VkIGFjcm9zcyBJL08gb3BlcmF0aW9ucyBzbyB3ZSBuZWVkIGEgbmV3IG9uZS4KIzIgVGhpcyBpcyB3aGVyZSBkYXRhIGlzIGJlaW5nIGNvcGllZCB0byBhbGwgcGxheWVycy4="></div> 
+   </div> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="138" id="138" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+     <h5>Tip</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="139" id="139" data-hash="65cdcf59c8dc6adc97c908a0019e770d"> 
+     <p>Why do we read data every 100 milliseconds? And why read buffers of 4096 bytes?</p> 
+    </div> 
+    <div class="readable-text scrambled" refid="140" id="140" data-hash="d1811ff3ef9f7308c0327ac38175cad4"> 
+     <p>These values have been empirically found to work great for 320 kbps constant bit rate MP3 files on my laptop. They ensured no drops in tests while preventing players to buffer too much data, and thus ending several seconds apart in the audio stream.</p> 
+    </div> 
+    <div class="readable-text scrambled" refid="141" id="141" data-hash="c35243525d47b77fd754ec4a6b8472c3"> 
+     <p>Feel-free to tinker with these values as you run the samples.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="142" id="142" data-hash="a007cd9aeb662a5ac971ccceb9396fe1"> 
+   <p>The code of streamAudioChunk reads blocks of at most 4096 bytes. Since the method is always going to be called 10 times per second, it also needs to check if anything is being played at all. Method processReadBuffer streams data, as given in listing 4.17.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="143" id="143" data-hash="550ffdc5f645f81da1a885cf97096773"> 
+   <h5>Listing&nbsp;4.17.&nbsp;Streaming data chunks to players</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void processReadBuffer(Buffer buffer) {
+  positionInFile += buffer.length();
+  if (buffer.length() == 0) { #1
+    closeCurrentFile();
+    return;
+  }
+  for (HttpServerResponse streamer : streamers) {
+    if (!streamer.writeQueueFull()) { #2
+      streamer.write(buffer.copy());  #3
+    }
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhpcyBoYXBwZW5zIHdoZW4gdGhlIGVuZCBvZiB0aGUgZmlsZSBoYXMgYmVlbiByZWFjaGVkLgojMiBCYWNrLXByZXNzdXJlIGFnYWluLgojMyBSZW1lbWJlciwgYnVmZmVycyBjYW5ub3QgYmUgcmV1c2VkLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="144" id="144" data-hash="a3deedbcc9475ab4791dfda70fc9252f"> 
+   <p>For every HTTP response stream to a player, the method copies the read data. Note that we have another case of back-pressure management here: when the write queue of a client is full, then we simply discard data. On the player end this will result in a audio drops, but since the queue is full on the server it means that the player is going to have delays or drops anyway. Discarding data is fine as MP3 decoders know how to recover, and it ensures that playback will remain closely on time with the other players.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="145" id="145" data-hash="bf26d85e1aec3d63e66619eaa6943458"> 
+     <h5>Warning</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="146" id="146" data-hash="c0e3b2f122073b18a6aaf8c4a5955788"> 
+     <p>Vert.x buffers cannot be reused once they have been written, as they are placed in a write queue. Re-using buffers will always result in bugs, so don’t look for un-necessary optimizations here.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="147" id="147" data-hash="1a6a6f4fd22855337c6c39edc85ccee9"> 
+   <p>Finally, the helper methods in listing 4.18 allow opening and closing files.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="148" id="148" data-hash="3bd9832f7ed0fa9c28bf5f6d2b5b0bba"> 
+   <h5>Listing&nbsp;4.18.&nbsp;Opening and closing files</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void openNextFile() {
+  OpenOptions opts = new OpenOptions().setRead(true);
+  currentFile = vertx.fileSystem()
+    .openBlocking("tracks/" + playlist.poll(), opts); #1
+  positionInFile = 0;
+}
+
+private void closeCurrentFile() {
+  positionInFile = 0;
+  currentFile.close();
+  currentFile = null;
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQWdhaW4sIHdlIHVzZSB0aGUgYmxvY2tpbmcgdmFyaWFudCwgYnV0IGl0IHdpbGwgcmFyZWx5IGJlIGFuIGlzc3VlIGZvciBvcGVuaW5nIGEgZmlsZS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="149" id="149" data-hash="7c306f020b445e2fd419e4c6486f99c1"> 
+   <h2 class="calibre17" id="heading_id_14"><a class="pcalibre pcalibre1" id="parsing-simple-streams" shape="rect"></a>4.4 &nbsp;Parsing simple streams</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="150" id="150" data-hash="9395533b0ed00393e6471a4cf3c5b012"> 
+   <p>So far our dissection of the jukebox example focused on the Jukebox verticle to download and stream MP3 data.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="151" id="151" data-hash="9fd52a7e8b18c69f9129f20e4a59aa5f"> 
+   <p>Now is the time to dissect the NetControl verticle that exposes a TCP server on port 3000 for receiving text commands to control what the jukebox plays. Extracting data from asynchronous data streams is a common requirement, and as we will show Vert.x provides effective tools to do that.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="152" id="152" data-hash="68f6bb632adfd01e6a5f3ea6c0de760f"> 
+   <p>The commands in our text protocol are of the following form:</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="153" id="153" data-hash="61938412ef947022c09b5e3c5c0e98dc"> 
+   <div class="code-area-container"> 
+    <pre class="code-area">/action [argument]</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="154" id="154" data-hash="5f712c7922265e3175679b2b4158d419"> 
+   <p>With the actions being:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="155" id="155" data-hash="a85410ac99735b9bdfa97c0642ead7d6"> <code class="code">/list</code>: jrcf gkr isfel bleaaliva etl plkyacab,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="156" id="156" data-hash="771862e2e9ee9aa7482e4cce76cae33e"> <code class="code">/play</code>: enresu gkr trsmae yslap,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="157" id="157" data-hash="97d40d71dbf5133886411e5ef05684f5"> <code class="code">/pause</code>: supae xrg measrt,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="158" id="158" data-hash="ef9e490ea00728b3132c2ecea8c680df"> <code class="code">/schedule file</code>: ndpaep <code class="code">file</code> rs our xyn vl vur ilylaspt.<br> </li> 
+  </ol> 
+  <div class="readable-text scrambled" refid="159" id="159" data-hash="b8b9abd1d0b5027573256e1f8e1a578b"> 
+   <p>Each text line can have exactly 1 command, hence the protocol is said to be newline-separated.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="160" id="160" data-hash="8c096163963f505ea16fe4b469f55770"> 
+   <p>We need a parser for this, as buffers arrive in chunks that rarely correspond to 1 line each. For example a first read buffer could have:</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="161" id="161" data-hash="da7aec3136c7bb08a5c9c3c00924cc3f"> 
+   <div class="code-area-container"> 
+    <pre class="code-area">ettes.mp3
+/play
+/pa</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="162" id="162" data-hash="e1b26d6a5c2f4cddad9901b710f7456f"> 
+   <p>and the next one:</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="163" id="163" data-hash="09640553d6464a250dc0a7ee963f20cd"> 
+   <div class="code-area-container"> 
+    <pre class="code-area">use
+/schedule right-here-righ</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="164" id="164" data-hash="4b5349976ad407a3bac177461e4781cf"> 
+   <p>followed by:</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="165" id="165" data-hash="11967b6f86cb00fc917060c7b1736595"> 
+   <div class="code-area-container"> 
+    <pre class="code-area">t-now.mp3</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="166" id="166" data-hash="da009a46b4dcf5a4e097ecb7a84161cd"> 
+   <p>What we actually want is reasoning about lines, hence the solution is to concatenate buffers as they arrive, and look for new lines in them to split buffers. Instead of manually assembling intermediary buffers, Vert.x offers a handy parsing helper with the RecordParser class. The parser ingests buffers and emits new buffers with parsed data, either by looking for delimiters, or by working with chunks of fixed size.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="167" id="167" data-hash="0f0f73e3f18245d2a94e5d8b12eb3489"> 
+   <p>In our case we just need to look for newline delimiters in the stream. Listing 4.19 shows how to use RecordParser in the NetControl verticle.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="168" id="168" data-hash="1d504d870703c7321e89e70792da378f"> 
+   <h5>Listing&nbsp;4.19.&nbsp;A record parser based on newlines over a TCP server stream</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">@Override
+public void start() {
+  vertx.createNetServer()
+    .connectHandler(this::handleClient)
+    .listen(3000);
+}
+
+private void handleClient(NetSocket socket) {
+  RecordParser.newDelimited("\n", socket)   #1
+    .handler(buffer -&gt; handleBuffer(socket, buffer))  #2
+    .endHandler(v -&gt; logger.info("Connection ended"));
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUGFyc2UgYnkgbG9va2luZyBmb3IgbmV3IGxpbmVzLgojMiBOb3cgYnVmZmVycyBhcmUgbGluZXMu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="169" id="169" data-hash="2e9424db7e2c23fa707503b136216c7d"> 
+   <p>The parser is both a read and a write stream as it works as an adapter between 2 streams. It ingests intermediate buffers coming from the TCP socket, and emits parsed data as new buffers. This is fairly transparent and simplifies the rest of the verticle implementation.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="170" id="170" data-hash="d00e1aad987420a648efc7b8905f154d"> 
+   <p>In listing 4.20 each buffer is known to be a line, so we can go directly to processing commands.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="171" id="171" data-hash="f3450f38712d486f00110a4372bbb84b"> 
+   <h5>Listing&nbsp;4.20.&nbsp;Handling parsed buffers</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void handleBuffer(NetSocket socket, Buffer buffer) {
+  String command = buffer.toString(); #1
+  switch (command) {
+    case "/list":
+      listCommand(socket);
+      break;
+    case "/play":
+      vertx.eventBus().send("jukebox.play", "");
+      break;
+    case "/pause":
+      vertx.eventBus().send("jukebox.pause", "");
+      break;
+    default:
+      if (command.startsWith("/schedule ")) {
+        schedule(command);
+      } else {
+        socket.write("Unknown command\n");
+      }
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQnVmZmVyIHRvIHN0cmluZyBkZWNvZGluZyB3aXRoIHRoZSBkZWZhdWx0IGNoYXJzZXQu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="172" id="172" data-hash="813b71e0dc647b499c9a09526a3b2561"> 
+   <p>The simple commands are in the case clauses, and the other commands in separate methods given in listing 4.21.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="173" id="173" data-hash="6a9e2d215f2235dc9c7fa7e9c11a95a9"> 
+   <h5>Listing&nbsp;4.21.&nbsp;Other commands</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void schedule(String command) {
+  String track = command.substring(10); #1
+  JsonObject json = new JsonObject().put("file", track);
+  vertx.eventBus().send("jukebox.schedule", json);
+}
+
+private void listCommand(NetSocket socket) {
+  vertx.eventBus().request("jukebox.list", "", reply -&gt; {
+    if (reply.succeeded()) {
+      JsonObject data = (JsonObject) reply.result().body();
+      data.getJsonArray("files")
+        .stream().forEach(name -&gt; socket.write(name + "\n")); #2
+    } else {
+      logger.error("/list error", reply.cause());
+    }
+  });
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIGZpcnN0IDEwIGNoYXJhY3RlcnMgYXJlIGZvciAvc2NoZWR1bGUgYW5kIGEgc3BhY2UuCiMyIFdlIHNpbXBseSB3cml0ZSBlYWNoIGZpbGUgbmFtZSB0byB0aGUgc3RhbmRhcmQgY29uc29sZSBvdXRwdXQu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="174" id="174" data-hash="d3e6dd7c4d2106d5b5b1b7cce952f159"> 
+   <h2 class="calibre17" id="heading_id_15"><a class="pcalibre pcalibre1" id="parsing-complex-streams" shape="rect"></a>4.5 &nbsp;Parsing complex streams</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="175" id="175" data-hash="66000604eefd5103d815b55476091d15"> 
+   <p>Streams can be more complex that just lines of text, and RecordParser can also greatly simplify our work.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="176" id="176" data-hash="bc90e6f9c7a4f45bf3f707f4308650fc"> 
+   <p>Let us take the example of a key / value database storage, where each key and value is a string. In such a database we could have entries such as 1 → {foo} and 2 → {bar, baz} with 1 and 2 being keys.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="177" id="177" data-hash="ee4522b5585b5828f7ab57b535a13bfa"> 
+   <p>There are countless ways to define a serialization scheme for this type of data structure, so imagine that we must use the stream format of table 5.6.</p> 
+  </div> 
+  <div class=" browsable-container" refid="178" id="178" data-hash="60d2ee9086428590e30581f5cacab2a6"> 
+   <h5>Table&nbsp;4.6.&nbsp;Database stream format</h5> 
+   <table border="1" class="contenttable" summary="Database stream format" width="100%"> 
+    <colgroup class="calibre28" span="1"> 
+     <col class="col_" span="1" width="33%"> 
+     <col class="col_" span="1" width="67%"> 
+    </colgroup> 
+    <tbody> 
+     <tr class="calibre20"> 
+      <td class="contenttable1" colspan="1" rowspan="1">Data</td> 
+      <td class="contenttable1" colspan="1" rowspan="1">Description</td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Magic header</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>A sequence of bytes <code class="code2">1</code>, <code class="code2">2</code>, <code class="code2">3</code> and <code class="code2">4</code> to identify the file type.</p> </td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Version</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>An integer with the database stream format version.</p> </td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Name</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Name of the database as a string ending with a newline character.</p> </td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Key length</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Integer with the number of characters for the next key.</p> </td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Key name</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>A sequence of characters for the key name.</p> </td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Value length</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Integer with the number of characters for the next value.</p> </td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Value</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>A sequence of characters for the value.</p> </td> 
+     </tr> 
+     <tr class="calibre20"> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>(â¦)</p> </td> 
+      <td class="contenttable2" colspan="1" rowspan="1"> <p>Remaining <code class="code2">{key, value}</code> sequences.</p> </td> 
+     </tr> 
+    </tbody> 
+   </table> 
+  </div> 
+  <div class="readable-text scrambled" refid="179" id="179" data-hash="8907ea99f119f39775a55e7a0e12219e"> 
+   <p>The format mixes binary and text records as the stream starts with a magic number, a version number, a name and then a sequence of key and value entries. While the format in itself is questionable on some points, it is a good example to illustrate more complex parsing.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="180" id="180" data-hash="b6704feaeda78c4cc148de513006fe25"> 
+   <p>First of all, let us have a program that writes a database to a file with 2 key / value entries. Listing 4.22 shows how to use the Vert.x filesystem APIs to open a file, append data to a buffer, then write it.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="181" id="181" data-hash="bdc91cddf7a64ed27faf55ab54810198"> 
+   <h5>Listing&nbsp;4.22.&nbsp;Writing a sample database to a file.</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">AsyncFile file = vertx.fileSystem().openBlocking("sample.db",
+  new OpenOptions().setWrite(true).setCreate(true));
+Buffer buffer = Buffer.buffer();
+
+buffer.appendBytes(new byte[] { 1, 2, 3, 4}); #1
+buffer.appendInt(2);  #2
+buffer.appendString("Sample database\n"); #3
+
+String key = "abc"; #4
+String value = "123456-abcdef";
+buffer
+  .appendInt(key.length())
+  .appendString(key)
+  .appendInt(value.length())
+  .appendString(value);
+
+key = "foo@bar";  #5
+value = "Foo Bar Baz";
+buffer
+  .appendInt(key.length())
+  .appendString(key)
+  .appendInt(value.length())
+  .appendString(value);
+
+file.write(buffer).close();</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgTWFnaWMgbnVtYmVyLgojMiBWZXJzaW9uLgojMyBEYXRhYmFzZSBuYW1lLgojNCBGaXJzdCBlbnRyeS4KIzUgU2Vjb25kIGVudHJ5Lg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="182" id="182" data-hash="1644e6da3e32265dc88f68fe04c0eb55"> 
+   <p>Note that in this example as we had little data we used a single buffer that we prepared wholly before writing it to the file, but we could equally use a buffer for the header, and new buffers for each key / value entry.</p> 
+  </div> 
+  <div class="readable-text" refid="183" id="183" data-hash="1c7e9621aab59f8819281792ab11a130"> 
+   <p>Writing is easy, but how about reading back?</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="184" id="184" data-hash="0df40c35a8529659e7a60755d78a44ce"> 
+   <p>The interesting property of RecordParser is that its parsing mode can be switched on-the-fly. We can start parsing buffers of fixed size 5, then switch to parsing based on tab characters, then chunks of 12 bytes, etc.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="185" id="185" data-hash="9da33e7c513a29cd34821065b56dd24b"> 
+   <p>The parsing logic is easier expressed by splitting into methods where each method corresponds to a parsing state. There is a method for parsing the database name, a method for parsing a value entry, etc.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="186" id="186" data-hash="4e2edcaac65f1dea52030f4ccf738201"> 
+   <p>Listing 4.23 opens the file that we previously wrote, and puts the RecordParser object into fixed mode as we are looking for a sequence of 4 bytes that represent the magic header. The handler that we install is called when a magic number is read.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="187" id="187" data-hash="6b9e08b8e6ae2f19ce4ace6731001ad9"> 
+   <h5>Listing&nbsp;4.23.&nbsp;Reading a database stream, step 1</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">AsyncFile file = vertx.fileSystem().openBlocking("sample.db",
+  new OpenOptions().setRead(true));
+
+RecordParser parser = RecordParser.newFixed(4, file); #1
+parser.handler(header -&gt; readMagicNumber(header, parser));</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgV2UgZmlyc3Qgd2FudCB0byByZWFkIHRoZSBtYWdpYyBudW1iZXIu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="188" id="188" data-hash="1f05ff0813e139ded92db73cc3e0da59"> 
+   <p>Listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-4/v-10/read-db-2" shape="rect" title="Example 4.24. Reading a database stream, step 2">4.24</a> provides the implementation of further methods.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="189" id="189" data-hash="357f6fe45a598ff90fc943f2341f5d60"> 
+   <h5>Listing&nbsp;4.24.&nbsp;Reading a database stream, step 2</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private static void readMagicNumber(Buffer header, RecordParser parser) {
+  logger.info("Magic number: {}:{}:{}:{}", header.getByte(0), header.getByte(1), header.getByte(2), header.getByte(3));
+  parser.handler(version -&gt; readVersion(version, parser));
+}
+
+private static void readVersion(Buffer header, RecordParser parser) {
+  logger.info("Version: {}", header.getInt(0));
+  parser.delimitedMode("\n");   #1
+  parser.handler(name -&gt; readName(name, parser));
+}
+
+private static void readName(Buffer name, RecordParser parser) {
+  logger.info("Name: {}", name.toString());
+  parser.fixedSizeMode(4);
+  parser.handler(keyLength -&gt; readKey(keyLength, parser));
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIHBhcnNlciBtb2RlIGNhbiBiZSBzd2l0Y2hlZCBvbi10aGUtZmx5Lg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="190" id="190" data-hash="65d495a44b28e3ccb2e7f93d99c3a3be"> 
+   <p>The readMagicNumber method extracts the 4 bytes of the magic number from a buffer. We know that the buffer is exactly of 4 bytes since the parser was in fixed sized mode.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="191" id="191" data-hash="a5f7f4cc394bd948e52ef2d3d2676187"> 
+   <p>Now since the next entry is the database version and it is an integer, we don’t have to change the parser mode since an integer is 4 bytes. Once the version has been read, the readVersion method switches to delimited mode to extract the database name.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="192" id="192" data-hash="da3209b2d38a5ae95685326a9ae7b84c"> 
+   <p>We then enter looking for a key length, so we need a fixed sized mode in readName.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="193" id="193" data-hash="432a1b4fb11e242caf7b1e9fc6b65896"> 
+   <p>Listing 4.25 follows by reading the key name, the value length, the proper value, and then finishEntry sets back the parser looking for an integer and delegating to readKey.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="194" id="194" data-hash="057eb5777cd1666d2e7cf8f93dca05db"> 
+   <h5>Listing&nbsp;4.25.&nbsp;Reading a database stream, step 3</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private static void readKey(Buffer keyLength, RecordParser parser) {
+  parser.fixedSizeMode(keyLength.getInt(0));
+  parser.handler(key -&gt; readValue(key.toString(), parser));
+}
+
+private static void readValue(String key, RecordParser parser) {
+  parser.fixedSizeMode(4);
+  parser.handler(valueLength -&gt; finishEntry(key, valueLength, parser));
+}
+
+private static void finishEntry(String key, Buffer valueLength, RecordParser parser) {
+  parser.fixedSizeMode(valueLength.getInt(0));
+  parser.handler(value -&gt; {
+    logger.info("Key: {} / Value: {}", key, value);
+    parser.fixedSizeMode(4);
+    parser.handler(keyLength -&gt; readKey(keyLength, parser));
+  });
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="195" id="195" data-hash="84bf61efa785addd6f701deee31bba20"> 
+   <p>Listing 4.26 shows a sample output when reading the database file with the parsing methods of listings 4.23, 4.24 and 4.25.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="196" id="196" data-hash="82f8c3bcef5bf85db7468c3ed07bba2d"> 
+   <h5>Listing&nbsp;4.26.&nbsp;Logs of reading the database stream</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">DatabaseReader - Magic number: 1:2:3:4
+DatabaseReader - Version: 2
+DatabaseReader - Name: Sample database
+DatabaseReader - Key: abc / Value: 123456-abcdef
+DatabaseReader - Key: foo@bar / Value: Foo Bar Baz</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="197" id="197" data-hash="f1dd8e9da35b24fec11e1233f794249c"> 
+   <p>These on-the-fly parser mode and handler changes form a very simple yet effective way to parse complex streams.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="198" id="198" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+     <h5>Tip</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="199" id="199" data-hash="4baf83ec570d3afae7806f1b0a53cab8"> 
+     <p>You may wonder how the parsing mode can be changed on-the-fly while some further data is already available to the parser from the read stream.</p> 
+    </div> 
+    <div class="readable-text scrambled" refid="200" id="200" data-hash="ab65daa64e6efa05b8e40a44ac3d8e58"> 
+     <p>Remember that we are on an event-loop, so parser handlers are processing parser records one at a time. When we switch from, say, a delimiter mode to a fixed size mode, then the next record is emitted by processing the remaining stream data based on a number of bytes rather than looking for some string. The same reasoning applies when switching from a fixed sized mode to a delimiter mode.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="201" id="201" data-hash="45a1d61d7ccd3b4ce3ee058fc9ed44b4"> 
+   <h2 class="calibre17" id="heading_id_16"><a class="pcalibre pcalibre1" id="a-quick-note-on-the-stream-fetch-mode" shape="rect"></a>4.6 &nbsp;A quick note on the stream fetch mode</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="202" id="202" data-hash="c83db3d4262f9819d834cb16a5402b07"> 
+   <p>Before we wrap up this chapter, let us go back to a detail of the ReadStream interface that we deliberately left aside.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="203" id="203" data-hash="550803aee2236ed8feadf053a44f92a1"> 
+   <p>Introduced in Vert.x 3.6, the fetch mode that we mentioned earlier in this chapter allows a stream consumer to request an amount of data items, rather than the stream pushing data items to the consumer. This works by pausing the stream, then asking varying number of items to be fetched later on as data is needed.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="204" id="204" data-hash="123940b12b60400c54991a60f946e62f"> 
+   <p>We could rewrite the jukebox file streaming code with the fetch mode, but we would still need a timer to dictate the pace. In this case manually reading a buffer of 4096 bytes or requesting 4096 to be fetched is not much different.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="205" id="205" data-hash="dad46d46ec7d45b4bdfffc6148dc62cd"> 
+   <p>Instead, let us go back to the database reading example. The read stream was pushing events in listings 4.23, 4.24 and 4.25.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="206" id="206" data-hash="8a382c3e4365066da635586366a3882f"> 
+   <p>Switching to fetch mode and pulling data does not require many changes. Listing 4.27 shows the stream initialization code.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="207" id="207" data-hash="999015423bb52da3a081c7cf4c18938a"> 
+   <h5>Listing&nbsp;4.27.&nbsp;Putting a read stream in fetch mode</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">RecordParser parser = RecordParser.newFixed(4, file);
+parser.pause(); #1
+parser.fetch(1);  #2
+parser.handler(header -&gt; readMagicNumber(header, parser));</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIHN0cmVhbSB3b27igJl0IHB1c2ggZXZlbnRzLgojMiBXZSBhc2sgZm9yIDEgZWxlbWVudCAoaGVyZSwgYSBidWZmZXIpLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="208" id="208" data-hash="f4503b661ec41d624bee2c5298ae704c"> 
+   <p>Remember that the RecordParser decorates the file stream. It is paused, then the fetch method asks for 1 element. Since the parser emits buffers of parsed data, asking 1 element in this example means asking for a buffer of 4 bytes (the magic number).</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="209" id="209" data-hash="2024ca3066e5c70f4e503060fa019f6d"> 
+   <p>Eventually, the parser handler will be called to process the requested buffer, and nothing else will happen until another call to the fetch method.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="210" id="210" data-hash="f36e7ad5b2d4962cad1817d2c3cc45d4"> 
+   <p>Listing 4.28 shows 2 of the parsing handler methods and their adaptation to the fetch mode.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="211" id="211" data-hash="2fec8a69f41c36e1c896e207f1ce6123"> 
+   <h5>Listing&nbsp;4.28.&nbsp;Fetching stream data as needed</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private static void readMagicNumber(Buffer header, RecordParser parser) {
+  logger.info("Magic number: {}:{}:{}:{}", header.getByte(0), header.getByte(1), header.getByte(2), header.getByte(3));
+  parser.handler(version -&gt; readVersion(version, parser));
+  parser.fetch(1);  #1
+}
+// (...)
+
+private static void finishEntry(String key, Buffer valueLength, RecordParser parser) {
+  parser.fixedSizeMode(valueLength.getInt(0));
+  parser.handler(value -&gt; {
+    logger.info("Key: {} / Value: {}", key, value);
+    parser.fixedSizeMode(4);
+    parser.handler(keyLength -&gt; readKey(keyLength, parser));
+    parser.fetch(1);
+  });
+  parser.fetch(1);
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgSGVyZSAxIGl0ZW0gaXMgYSBwYXJzZXIgcmVjb3JkLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="212" id="212" data-hash="55b1f6cc7d9a7affbb9aefce793875ac"> 
+   <p>The only difference is again that we need to request elements by calling fetch.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="213" id="213" data-hash="c57441f67da68a093e61d8c1e6d8c514"> 
+   <p>You will not likely need to play with fetch mode while writing Vert.x applications, but if you ever need to manually control a read stream, then it is a useful tool to have.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="214" id="214" data-hash="803de1dcc10f554e013aea4979fa1b5b"> 
+   <p>The next chapter focuses on other models than callbacks for asynchronous programming with Vert.x.</p> 
+  </div> 
+  <div class="readable-text" refid="215" id="215" data-hash="e591de6fa305e6d2651dcb119324d9e9"> 
+   <h2 class="calibre17" id="heading_id_17"><a class="pcalibre pcalibre1" id="summary" shape="rect"></a>4.7 &nbsp;Summary</h2> 
+  </div> 
+  <ul class="itemizedlist"> 
+   <li class="listitem readable-text" refid="216" id="216" data-hash="f4e9f940e7092e0214f2e1d1cd5f9c7d"> Vert.x streams model asynchronous event and data flows, and they can be used in both <em class="calibre9">push</em> and <em class="calibre9">pull / fetch</em> modes.<br> </li> 
+   <li class="listitem readable-text" refid="217" id="217" data-hash="d31966b58ede242cf6e771b377bd9442"> Back-pressure management is essential to ensure the coordinated exchange of events between asynchronous systems, and we illustrated this through MP3 audio streaming across multiple devices and direct downloads.<br> </li> 
+   <li class="listitem readable-text" refid="218" id="218" data-hash="298eff28955142d03eb4218e533447b1"> Streams can be parsed for simple and complex data, illustrated here by a networked control interface for the audio streaming service.<br> </li> 
+  </ul>
+ </body>
+</html>

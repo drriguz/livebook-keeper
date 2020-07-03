@@ -1,0 +1,814 @@
+<html>
+ <head></head>
+ <body>
+  <div class="readable-text" refid="1" id="1" data-hash="36e11064c6d296870de8111c63e7a810"> 
+   <h1 class="chaptertitle" id="heading_id_18">11 <a class="pcalibre pcalibre1" id="end-to-end-real-time-reactive-event-processing" shape="rect"></a>End-to-end real-time reactive event processing</h1> 
+  </div> 
+  <div class=" introduction-summary"> 
+   <h3 class="intro-header">This chapter covers:</h3> 
+   <ul> 
+    <li class=" readable-text" refid="2" id="2" data-hash="aa26799fea4d1eb1be99c09bf55bab93"> Combining RxJava operators and Vert.x clients to support advanced processing<br> </li> 
+    <li class=" readable-text" refid="3" id="3" data-hash="4d5eadfa6368ebbb09cdac12a68597cb"> Using RxJava operators to perform <em class="calibre9">content enrichment</em> (see <a class="pcalibre para2" href="/book/vertx-in-action/chapter-11/v-10/EIP" shape="rect">[EIP]</a>) and aggregate data processing on top of event streams<br> </li> 
+    <li class=" readable-text" refid="4" id="4" data-hash="e2de584e4b4a447c9466f557e14c35a7"> Extending the Vert.x event bus to web applications to unify the backend and frontend communication models<br> </li> 
+    <li class=" readable-text" refid="5" id="5" data-hash="09591d473833318da1056000a5b46e97"> Managing state in a stream processing setting<br> </li> 
+   </ul> 
+  </div> 
+  <div class="readable-text" refid="6" id="6" data-hash="f5cb91ded0fafff82596e993dfe6d81a"> 
+   <p>In this chapter we explore advanced reactive stream processing, where application state is subject to live change based on events. By performing transformations and aggregations on events, we will see how to compute live statistics on what is happening in the larger 10k steps application. We will also see how event streams can impact real-time web applications by unifying Java and JavaScript code under the Vert.x event bus umbrella.</p> 
+  </div> 
+  <div class="readable-text" refid="7" id="7" data-hash="5fed2ad2365ed78f67ff159713100227"> 
+   <p>This chapter starts with advanced stream processing with RxJava operators and Vert.x clients. We then discuss the topic of real-time web applications connected over the event-bus, before finishing with techniques to properly deal with state (and especially the <em class="calibre10">initial</em> state) in a context of continuous events.</p> 
+  </div> 
+  <div class="readable-text" refid="8" id="8" data-hash="b76d785be04b68b8c970486abf170ba4"> 
+   <h2 class="calibre17" id="heading_id_3"><a class="pcalibre pcalibre1" id="advanced-stream-data-processing-with-kafka-and-rxjava" shape="rect"></a>11.1 &nbsp;Advanced stream data processing with Kafka and RxJava</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="9" id="9" data-hash="1b4d3e34dbd4aab4c543f6a06dd29df0"> 
+   <p>In previous chapters we have used RxJava operators to process events of all kinds: HTTP requests, AMQP messages and Kakfa records. RxJava is a versatile library for reactive programming, and it is especially well-suited for processing event streams with the Flowable type for back-pressured streams. Kafka provides a solid middleware for event streaming, while Vert.x provides a rich ecosystem of reactive clients to connect to other services, databases or messaging systems.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="10" id="10" data-hash="9a9cb35ed0c29ba9a0081bcbc605d255"> 
+   <p>The event stats service is an event-driven reactive service that consumes Kafka records and produces some statistics as other Kafka records. We are going to see how we can use RxJava operators to efficiently address 3 common operations on event streams:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="11" id="11" data-hash="1a6a07cdd9c18a1e8c6a3d20a94998b6"> irihngecn yrzz, ngz<br> </li> 
+   <li class="listitem readable-text scrambled" refid="12" id="12" data-hash="ddd2d4b7e4c5609dd722796f24e4cd22"> aiggggeantr rhzz xxte rxmj dwsowni, ycn<br> </li> 
+   <li class="listitem readable-text scrambled" refid="13" id="13" data-hash="e95986dac457874c5a32eec5dbc4a32b"> ragggeagitn ysrc gu uiggonrp slenmete nsugi s oxp tv c ncotinuf.<br> </li> 
+  </ol> 
+  <div class="readable-text" refid="14" id="14" data-hash="1eba4511aaf58cac3cf0d2dad4a3cd9c"> 
+   <h3 class="calibre29" id="heading_id_4"><a class="pcalibre pcalibre1" id="enriching-daily-device-updates-to-generate-user-updates" shape="rect"></a>11.1.1 &nbsp;Enriching daily device updates to generate user updates</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="15" id="15" data-hash="81023a12fc53b319fcb581e8ae0dd62b"> 
+   <p>The daily.step.updates Kafka topic is populated with records sent from the activity service. The records contain 3 entries: the device identifier, a timestamp when the record was produced, and a number of steps.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="16" id="16" data-hash="e01c85b6241f9fe66be122de55022c72"> 
+   <p>Whenever a device update is processed by the activity service, it stores the update to a PostgreSQL database, then produces a Kafka record with the number of steps on the current day for the corresponding device. For instance when device abc receives an update of say, 300 steps recorded at 11:25, then it sends a Kafka record to daily.step.updates with the number of steps for the day corresponding to device abc.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="17" id="17" data-hash="7438aec791dea901097b7877fa5f34d8"> 
+   <p>The event stats service consumes these events to enrich them with user data, so other services can be updated in real-time about the number of steps recorded on the current day for any user. To do that we take the records from the daily.step.updates Kafka topic, and add the data from the user API: user name, email, city, and whether data shall be public. The enriched data is then sent as records to the event-stats.user-activity.updates topic.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="18" id="18" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+     <h5>Tip</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="19" id="19" data-hash="cfd8d56c1233edff52abe0f4df8f8329"> 
+     <p>This is an implementation technique for the content enricher messaging pattern in the seminal Enterprise Integration Patterns book [EIP].</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="20" id="20" data-hash="a2db97b416440a2d76b6ac2a0e609a66"> 
+   <p>The steps to enrich data are the following, as shown in figure 11.1.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="21" id="21" data-hash="7e357d8552562b771e5bf70b036f95e2"> 
+   <h5 id="enrichment">Figure&nbsp;11.1.&nbsp;Enriching device updates with user data</h5> 
+   <img alt="enrichment" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/enrichment.png" width="902" loading="lazy" height="425" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text" refid="22" id="22" data-hash="290145dac5050f76d16536bba8af8458"> 
+   <p>For each incoming Kafka record:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="23" id="23" data-hash="d257b2ff41da3ecd101a0475e25acdd9"> zomx c qeruste xr orq atob irefopl YVJ rx wenv euw rod eeivdc logsnbe rx, knpr<br> </li> 
+   <li class="listitem readable-text scrambled" refid="24" id="24" data-hash="8b71f3d775cfbd75d13ba4531bc020b3"> vkmc ornehat eetruqs xr rbo ktad ofleipr REJ xr pro ffc rszp ltmx kqr zhkt, snu germe jr wdrj krq icminong rdreoc zhsr, qvrn<br> </li> 
+   <li class="listitem readable-text scrambled" refid="25" id="25" data-hash="a7d045f5761fe1a3464ab707db833240"> ewrti xrg crienedh coerdr xr vyr <code class="code">event-stats.user-activity.updates</code> Gzxlz ctipo zng ticmom jr.<br> </li> 
+  </ol> 
+  <div class="readable-text" refid="26" id="26" data-hash="9a48092d2a932559739b04af50472da8"> 
+   <p>Listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/enrich-data-pipeline" shape="rect" title="Example 11.1. RxJava pipeline for generating user updates">11.1</a> shows the corresponding RxJava pipeline.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="27" id="27" data-hash="b1ededfd30f0507b388a069d7d532d18"> 
+   <h5>Listing&nbsp;11.1.&nbsp;RxJava pipeline for generating user updates</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">KafkaConsumer.&lt;String, JsonObject&gt;create(vertx, KafkaConfig.consumer("event-stats-user-activity-updates"))
+  .subscribe("daily.step.updates")      <a class="pcalibre pcalibre1" id="CO1-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  .toFlowable()
+  .flatMapSingle(this::addDeviceOwner)  <a class="pcalibre pcalibre1" id="CO1-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  .flatMapSingle(this::addOwnerData)    <a class="pcalibre pcalibre1" id="CO1-3" shape="rect"></a><span class="pcalibre1">#3</span>
+  .flatMapCompletable(this::publishUserActivityUpdate)  <a class="pcalibre pcalibre1" id="CO1-4" shape="rect"></a><span class="pcalibre1">#4</span>
+  .doOnError(err -&gt; logger.error("Woops", err))
+  .retryWhen(this::retryLater)
+  .subscribe();</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgU3Vic2NyaWJlIHRvIHRoZSBzb3VyY2UgS2Fma2EgdG9waWMuCiMyIEdldCB3aG8gb3ducyB0aGUgZGV2aWNlIGZyb20gdGhlIHJlY29yZC4KIzMgRmV0Y2ggdGhlIHVzZXIgZGF0YSBhbmQgbWVyZ2UgaXQgd2l0aCB0aGUgcmVjb3JkLgojNCBDb21taXQgdG8gdGhlIHRhcmdldCBLYWZrYSB0b3BpYy4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="28" id="28" data-hash="0c422bbcce0abd165ce3e259ba112e45"> 
+   <p>The RxJava pipeline composes asynchronous operations with flatMapSingle and flatMapCompletable. This is because doing a HTTP request is a (single) result, while committing a Kafka record is an operation with not return value (hence completable). We also see the common error handling logic from earlier chapters with a delayed re-subscription. Listing 11.2 shows the implementation of method addDeviceOwner.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="29" id="29" data-hash="0cb38055d34a2eaae6ecab003a6568fc"> 
+   <h5>Listing&nbsp;11.2.&nbsp;Adding a device owner</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private Single&lt;JsonObject&gt; addDeviceOwner(KafkaConsumerRecord&lt;String, JsonObject&gt; record) {
+  JsonObject data = record.value(); <a class="pcalibre pcalibre1" id="CO2-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  return webClient
+    .get(3000, "localhost", "/owns/" + data.getString("deviceId"))  <a class="pcalibre pcalibre1" id="CO2-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    .as(BodyCodec.jsonObject())
+    .rxSend()
+    .map(HttpResponse::body)        <a class="pcalibre pcalibre1" id="CO2-3" shape="rect"></a><span class="pcalibre1">#3</span>
+    .map(data::mergeIn);            <a class="pcalibre pcalibre1" id="CO2-4" shape="rect"></a><span class="pcalibre1">#4</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhpcyBpcyB0aGUgaW5jb21pbmcgS2Fma2EgcmVjb3JkLgojMiBNYWtlIGEgSFRUUCByZXF1ZXN0IHRvIHRoZSB1c2VyIHByb2ZpbGUgQVBJLgojMyBFeHRyYWN0IHRoZSBIVFRQIHJlc3BvbnNlIGJvZHkgKGEgSnNvbk9iamVjdCkuCiM0IFJldHVybiB0aGUgSlNPTiBkYXRhIG1lcmdlLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="30" id="30" data-hash="23758e6dadff8500409679d39f8e78e7"> 
+   <p>This method makes a HTTP request whose result is a JSON object, and returns the merge of the source Kafka record JSON data with the request result data. Once this is done we know who the device of the record belongs to, so we can chain with another request to get the user data from the user profile API, as in listing 11.3.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="31" id="31" data-hash="4bf027a4284d66671c9f958648f864c3"> 
+   <h5>Listing&nbsp;11.3.&nbsp;Adding owner data</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private Single&lt;JsonObject&gt; addOwnerData(JsonObject data) {
+  String username = data.getString("username"); <a class="pcalibre pcalibre1" id="CO3-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  return webClient
+    .get(3000, "localhost", "/" + username)     <a class="pcalibre pcalibre1" id="CO3-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    .as(BodyCodec.jsonObject())
+    .rxSend()
+    .map(HttpResponse::body)
+    .map(data::mergeIn);                        <a class="pcalibre pcalibre1" id="CO3-3" shape="rect"></a><span class="pcalibre1">#3</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhpcyBpcyB0aGUgZGF0YSByZXR1cm5lZCBieSBhZGREZXZpY2VPd25lci4KIzIgTWFrZSB0aGUgSFRUUCByZXF1ZXN0LgojMyBNZXJnZSB0aGUgZGF0YS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="32" id="32" data-hash="3d8c3a2724b3c742023e3524b76ac496"> 
+   <p>This method follows the same pattern as addDeviceOwner, as it takes the result from the previous operation as a parameter, makes a HTTP request to the user profile API, then returns merged data. The last operation is that of method publishActivityUpdate, given in listing 11.4.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="33" id="33" data-hash="c1500b1de905a6f7899c66bbf94cf2d1"> 
+   <h5>Listing&nbsp;11.4.&nbsp;Publishing a user activity update Kafka record</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private CompletableSource publishUserActivityUpdate(JsonObject data) {
+  return producer.rxWrite(  #1
+    KafkaProducerRecord.create("event-stats.user-activity.updates", data.getString("username"), data));
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgV3JpdGUgdGhlIEthZmthIHJlY29yZC4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="34" id="34" data-hash="988ab4eab9a88845b533f64414464086"> 
+   <p>The implementation is writing the Kafka record to the target event-stats.user-activity.updates topic.</p> 
+  </div> 
+  <div class="readable-text" refid="35" id="35" data-hash="bdffdb5ee9143ab4d2367a937419c35b"> 
+   <h3 class="calibre29" id="heading_id_5"><a class="pcalibre pcalibre1" id="computing-the-device-update-ingestion-throughput-using-time-window-aggregates" shape="rect"></a>11.1.2 &nbsp;Computing the device update ingestion throughput using time window aggregates</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="36" id="36" data-hash="2c0ae6c3875ba782893d7cf1d05452f9"> 
+   <p>The ingestion service receives the incoming device updates from HTTP and AMQP, then publishes them to the incoming.steps Kafka topic. The ingestion throughput is typical of a dashboard metric, where the value is frequently updated with the number of device updates ingested per second. This is a good indicator of the stress level on the larger application as every update triggers further events being processed by other micro-services.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="37" id="37" data-hash="4d0afafbe7f3b14815161e6f4f5adca1"> 
+   <p>To do so we need to listen for records on the incoming.steps topic, then aggregate records over a fixed time window, and count how many records have been received. This is illustrated in figure 11.2.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="38" id="38" data-hash="5235c90bd5af852fb5b73e93889d0d7a"> 
+   <h5 id="throughput">Figure&nbsp;11.2.&nbsp;Throughput computation from ingestion records</h5> 
+   <img alt="throughput" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/throughput.png" width="846" loading="lazy" height="425" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="39" id="39" data-hash="6f4ce44dd6cbb7788da05099f78686a6"> 
+   <p>Listing 11.5 shows the RxJava pipeline for computing the throughput and publishing the results to the event-stats.throughput Kafka topic.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="40" id="40" data-hash="fa309f4e74a4046563f05a9a50ed021b"> 
+   <h5>Listing&nbsp;11.5.&nbsp;RxJava pipeline for computing ingestion throughput</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">KafkaConsumer.&lt;String, JsonObject&gt;create(vertx, KafkaConfig.consumer("event-stats-throughput"))
+  .subscribe("incoming.steps")                              <a class="pcalibre pcalibre1" id="CO5-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  .toFlowable()
+  .buffer(5, TimeUnit.SECONDS, RxHelper.scheduler(vertx))   <a class="pcalibre pcalibre1" id="CO5-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  .flatMapCompletable(this::publishThroughput)              <a class="pcalibre pcalibre1" id="CO5-3" shape="rect"></a><span class="pcalibre1">#3</span>
+  .doOnError(err -&gt; logger.error("Woops", err))
+  .retryWhen(this::retryLater)
+  .subscribe();</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgU3Vic2NyaWJlIHRvIHRoZSBzb3VyY2UgS2Fma2EgdG9waWMuCiMyIEJ1ZmZlciByZWNvcmRzIGluIHdpbmRvd3Mgb2YgNSBzZWNvbmRzLgojMyBDb21wdXRlIGFuZCBwdWJsaXNoIGEgdGhyb3VnaHB1dC4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="41" id="41" data-hash="267ebbc12c889ff076b12ffc57258ad1"> 
+   <p>The buffer operator is one of the several aggregation operators that you can use in RxJava. It aggregates events for a time period, then passes the result as a List. You can see that we pass a Vert.x scheduler from the RxHelper class: this because buffer delays event processing and by default will call the next operators on a RxJava-specific thread. The Vert.x scheduler ensures that operators are instead called from the original Vert.x context so as to preserve the Vert.x threading model.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="42" id="42" data-hash="1afcb914c2fab57a7a9dbd3bb649cf15"> 
+   <p>Once buffer has aggregated all Kafka records over the last 5 seconds, method publishThroughput computes and publishes the throughput as given in listing 11.6.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="43" id="43" data-hash="ad1fde96db9068c7bf5140ca841b46c3"> 
+   <h5>Listing&nbsp;11.6.&nbsp;Publish the ingestion throughput</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private CompletableSource publishThroughput(List&lt;KafkaConsumerRecord&lt;String, JsonObject&gt;&gt; records) {
+  KafkaProducerRecord&lt;String, JsonObject&gt; record = KafkaProducerRecord.create("event-stats.throughput",
+    new JsonObject()                                            <a class="pcalibre pcalibre1" id="CO6-1" shape="rect"></a><span class="pcalibre1">#1</span>
+      .put("seconds", 5)
+      .put("count", records.size())
+      .put("throughput", (((double) records.size()) / 5.0d)));  <a class="pcalibre pcalibre1" id="CO6-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  return producer.rxWrite(record);                              <a class="pcalibre pcalibre1" id="CO6-3" shape="rect"></a><span class="pcalibre1">#3</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUGF5bG9hZCBhcyBhIEpTT04gb2JqZWN0LgojMiBDb21wdXRlIHRoZSB0aHJvdWdocHV0LgojMyBXcml0ZSB0aGUgS2Fma2EgcmVjb3JkLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="44" id="44" data-hash="910ccfa0d228298a001412789d87413e"> 
+   <p>Given the records list we can easily compute a throughput and publish a new record. We take care to indicate the number of records and time window size in seconds, so that event consumers have all information and not just the raw result.</p> 
+  </div> 
+  <div class="readable-text" refid="45" id="45" data-hash="b388cd127b1b0ab9a5b9b12477a3bd28"> 
+   <h3 class="calibre29" id="heading_id_6"><a class="pcalibre pcalibre1" id="computing-per-city-trends-using-aggregation-discriminants-and-time-windows" shape="rect"></a>11.1.3 &nbsp;Computing per-city trends using aggregation discriminants and time windows</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="46" id="46" data-hash="0f643b31ee13bdb693c738f013b6b1ba"> 
+   <p>Let us now see another form of data aggregation based on RxJava operators by computing per-city trends. More specifically we are interested in computing periodically how many steps have been recorded in each city on the current day. To do that we can re-use the events published to the event-stats.user-activity.updates Kafka topic by the very same event stats service, since they contain how many steps a user has recorded today along with other data, including the city.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="47" id="47" data-hash="854de7e11da70715556f393c362947ea"> 
+   <h5 id="city-trends">Figure&nbsp;11.3.&nbsp;Computing per-city trends from user activity records</h5> 
+   <img alt="city trends" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/city-trends.png" width="1015" loading="lazy" height="667" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="48" id="48" data-hash="63ec4deb8a164323efba4346ff120a9c"> 
+   <p>We could reuse the buffer operator as in listing 11.5, and then iterate over the list of records. For each record we would update a hash table entry where the key would be the the city, and the value would be the number of steps. We would then publish an update for each city based on the values in the hash table.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="49" id="49" data-hash="803dab8ed215ea0d8bb7077a98d59c5b"> 
+   <p>We can however write a more idiomatic RxJava processing pipeline thanks to the groupBy operator, as shown in listing 11.7.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="50" id="50" data-hash="c236fb252c67dbcf2759e1d154e409f9"> 
+   <h5>Listing&nbsp;11.7.&nbsp;RxJava pipeline to compute per-city trends</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">KafkaConsumer.&lt;String, JsonObject&gt;create(vertx, KafkaConfig.consumer("event-stats-city-trends"))
+  .subscribe("event-stats.user-activity.updates")
+  .toFlowable()
+  .groupBy(this::city)                                                              <a class="pcalibre pcalibre1" id="CO7-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  .flatMap(group -&gt; group.buffer(5, TimeUnit.SECONDS, RxHelper.scheduler(vertx)))   <a class="pcalibre pcalibre1" id="CO7-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  .flatMapCompletable(this::publishCityTrendUpdate)                                 <a class="pcalibre pcalibre1" id="CO7-3" shape="rect"></a><span class="pcalibre1">#3</span>
+  .doOnError(err -&gt; logger.error("Woops", err))
+  .retryWhen(this::retryLater)
+  .subscribe();</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgR3JvdXAgYnkgY2l0eS4KIzIgQnVmZmVyIGJ5IHdpbmRvd3Mgb2YgNSBzZWNvbmRzLgojMyBQdWJsaXNoIGEgS2Fma2EgcmVjb3JkLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="51" id="51" data-hash="e6710e0126391bf7ff06aa8a763e0495"> 
+   <p>As events enter the pipeline, the groupBy operator dispatches them to groups based on the city values found in records (the discriminant). You can think of groupBy as the equivalent of GROUP BY in a SQL statement. The filtering function city is given in listing 11.8 and extracts the city value from the Kafka record.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="52" id="52" data-hash="0449978e76ca8bafa1c32ce09aa1cdcb"> 
+   <h5>Listing&nbsp;11.8.&nbsp;Filter based on the city value</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private String city(KafkaConsumerRecord&lt;String, JsonObject&gt; record) {
+  return record.value().getString("city");
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="53" id="53" data-hash="add1e732da79ba4a6eb766a22c41966f"> 
+   <p>The groupBy operator returns here a Flowable of GroupedFlowable of Kafka records. Each GroupedFlowable is a flowable that is dedicated to the grouped records of a city, as dispatched by groupBy using the city function. For each group the flatMap operator is then used to group event in time windows of 5 seconds, meaning that per-city steps are updated every 5 seconds. Finally the publishCityTrendUpdate method prepares a new record with updated stats for each city, as given in listing 11.9.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="54" id="54" data-hash="267b4ae1d8ebe7acbb186baec868e1b6"> 
+   <h5>Listing&nbsp;11.9.&nbsp;Publishing per-city stats</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private CompletableSource publishCityTrendUpdate(List&lt;KafkaConsumerRecord&lt;String, JsonObject&gt;&gt; records) {
+  if (records.size() &gt; 0) {                                 <a class="pcalibre pcalibre1" id="CO8-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    String city = city(records.get(0));                     <a class="pcalibre pcalibre1" id="CO8-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    Long stepsCount = records.stream()
+      .map(record -&gt; record.value().getLong("stepsCount"))  <a class="pcalibre pcalibre1" id="CO8-3" shape="rect"></a><span class="pcalibre1">#3</span>
+      .reduce(0L, Long::sum);                               <a class="pcalibre pcalibre1" id="CO8-4" shape="rect"></a><span class="pcalibre1">#4</span>
+    KafkaProducerRecord&lt;String, JsonObject&gt; record = KafkaProducerRecord.create("event-stats.city-trend.updates", city, new JsonObject()
+      .put("timestamp", LocalDateTime.now().toString())
+      .put("seconds", 5)
+      .put("city", city)
+      .put("stepsCount", stepsCount)
+      .put("updates", records.size()));
+    return producer.rxWrite(record);                        <a class="pcalibre pcalibre1" id="CO8-5" shape="rect"></a><span class="pcalibre1">#5</span>
+  } else {
+    return Completable.complete();                          <a class="pcalibre pcalibre1" id="CO8-6" shape="rect"></a><span class="pcalibre1">#6</span>
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQ2hlY2sgaWYgcmVjb3JkcyBoYXZlIGJlZW4gcmVjZWl2ZWQgaW4gdGhlIHRpbWUgd2luZG93LgojMiBBbGwgcmVjb3JkcyBoYXZlIHRoZSBzYW1lIGNpdHksIHNvIHRoZSBmaXJzdCBvbmUgZ2l2ZXMgaXQgdG8gdXMuCiMzIEV4dHJhY3Qgc3RlcCBjb3VudHMuCiM0IENvbXB1dGUgdGhlIHN1bS4KIzUgV3JpdGUgdGhlIEthZmthIHJlY29yZC4KIzYgSWYgdGhlcmUgd2FzIG5vIHJlY29yZCBqdXN0IHJlcG9ydCBhIGNvbXBsZXRlZCBvcGVyYXRpb24u"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="55" id="55" data-hash="33adae634914e2d7bb272bdd04afde4a"> 
+   <p>The publishCityTrendUpdate method receives a list of Kafka records for a given city and from a time window. We first have to check if there is any record, otherwise there is nothing to do. With records we can use Java streams to compute the sum with a reduce operator, then prepare a Kafka record with several entries: a timestamp, the time window duration in seconds, the city, how many steps have been recorded, and how many updates were observed during the time window. Once this is done we write the record to the event-stats.city-trend.updates Kafka topic.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="56" id="56" data-hash="64c5e0afe2d87572df6836af1100c510"> 
+   <p>Now that we’ve studied how to perform advanced event streaming processing with RxJava and Vert.x, let’s see how to propagate events to reactive web applications.</p> 
+  </div> 
+  <div class="readable-text" refid="57" id="57" data-hash="b9a756296845483780b4539741b01182"> 
+   <h2 class="calibre17" id="heading_id_7"><a class="pcalibre pcalibre1" id="real-time-reactive-web-applications" shape="rect"></a>11.2 &nbsp;Real-time reactive web applications</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="58" id="58" data-hash="e8cf6044d3d96d5ffbb15d1d22b7889a"> 
+   <p>As specified in chapter 7, the dashboard web application consumes events from the stats service and displays:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="59" id="59" data-hash="9688c328cb49ba1afdf02da74bc5aa96"> itioegnns thhrutgupo, nhc<br> </li> 
+   <li class="listitem readable-text scrambled" refid="60" id="60" data-hash="610efb3696e2f391e551b201e7772a5c"> gasriknn le plicbu rsues, nsb<br> </li> 
+   <li class="listitem readable-text scrambled" refid="61" id="61" data-hash="2377fb047b797363cf486f9d7896a772"> xtb-apjr strned.<br> </li> 
+  </ol> 
+  <div class="readable-text scrambled" refid="62" id="62" data-hash="cd889fd216f5c54b0f1d970720868bc9"> 
+   <p>This application is updated live as soon as new data is received, which makes for a nice case of end-to-end integration between backend services and web browsers. The application is a micro-service as illustrated in figure 11.4.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="63" id="63" data-hash="4921d73f36e6ea8af0d8d9a37ec965fa"> 
+   <h5 id="reactive-webapp">Figure&nbsp;11.4.&nbsp;Reactive web application overview</h5> 
+   <img alt="reactive webapp" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/reactive-webapp.png" width="1027" loading="lazy" height="369" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text" refid="64" id="64" data-hash="3d08290786b7a93e220865f99dc940b2"> 
+   <p>The dashboard service is made of 2 parts:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="65" id="65" data-hash="cbcb72af45e06624b958379a1125aa9f"> s Lbk.ai ilnipcpaota, nys<br> </li> 
+   <li class="listitem readable-text scrambled" refid="66" id="66" data-hash="74977d881411c8b8c795a334d3fd9cb8"> 
+    <div class="readable-text" refid="67" id="67" data-hash="61ebea03a4949198774819534c4f0c44"> 
+     <p>s Ptrk.k rcsieve yrrz:</p> 
+    </div> 
+    <div class="itemizedlist1"> 
+     <ol class="orderedlist2"> 
+      <li class="listitem"> severs ryo Lgk.ic eesurcosr, nsu<br> </li> 
+      <li class="listitem"> octcsnne kr Uzsvl cqn rdswraof uasedtp er xrb Ptxr.v etnve yyc, nbz<br> </li> 
+      <li class="listitem"> z edrgib ntebeew rgo edcnceont dwx rbsweors hcn rkp Prkt.e veent-cyp.<br> </li> 
+     </ol> 
+    </div> </li> 
+  </ol> 
+  <div class="readable-text" refid="68" id="68" data-hash="11634b465211d0b0a08637a10ab3ab31"> 
+   <p>Letâs start with the Kafka to event bus forwarding.</p> 
+  </div> 
+  <div class="readable-text" refid="69" id="69" data-hash="371fceb2f85b1a5b6d07bcb59c703bcb"> 
+   <h3 class="calibre29" id="heading_id_8"><a class="pcalibre pcalibre1" id="forwarding-kafka-records-to-the-vert-x-event-bus" shape="rect"></a>11.2.1 &nbsp;Forwarding Kafka records to the Vert.x event-bus</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="70" id="70" data-hash="6c8ead401ba0314b9ea5170fba1699c5"> 
+   <p>Both throughput and city trend updates are directly forwarded to the Vue.js application code. These are the records received on the event-stats.throughput and event-stats.city-trend.updates Kafka topics.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="71" id="71" data-hash="2583a25ae5d4a58788957d9a53bd2598"> 
+   <p>In DashboardWebAppVerticle we put in place the RxJava pipelines of listing 11.10.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="72" id="72" data-hash="0f0b90cfafb578259ea3fafb401fad52"> 
+   <h5>Listing&nbsp;11.10.&nbsp;RxJava pipelines to forward throughput and city trend updates</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">KafkaConsumer.&lt;String, JsonObject&gt;create(vertx, KafkaConfig.consumerConfig("dashboard-webapp-throughput"))
+  .subscribe("event-stats.throughput")  <a class="pcalibre pcalibre1" id="CO9-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  .toFlowable()
+  .subscribe(record -&gt; forwardKafkaRecord(record, "client.updates.throughput"));    <a class="pcalibre pcalibre1" id="CO9-2" shape="rect"></a><span class="pcalibre1">#2</span>
+
+KafkaConsumer.&lt;String, JsonObject&gt;create(vertx, KafkaConfig.consumerConfig("dashboard-webapp-city-trend"))
+  .subscribe("event-stats.city-trend.updates")
+  .toFlowable()
+  .subscribe(record -&gt; forwardKafkaRecord(record, "client.updates.city-trend"));</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgU3Vic2NyaWJlIHRvIHRoZSBLYWZrYSB0b3BpYy4KIzIgRm9yd2FyZCB0byB0aGUgZXZlbnQgYnVzLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="73" id="73" data-hash="452c9d337e1317dcf76eaffdebd28ce3"> 
+   <p>These 2 RxJava pipelines have no complicated logic, as they forward to the client.updates.throughput and client.updates.city-trend event bus destination. Listing 11.11 shows the implementation of method forwardKafkaRecord.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="74" id="74" data-hash="f4255a35640cd892b0f037c20840c57c"> 
+   <h5>Listing&nbsp;11.11.&nbsp;Forwarding a Kafka record to the event bus</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void forwardKafkaRecord(KafkaConsumerRecord&lt;String, JsonObject&gt; record, String destination) {
+  vertx.eventBus().publish(destination, record.value());    <a class="pcalibre pcalibre1" id="CO10-1" shape="rect"></a><span class="pcalibre1">#1</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUHVibGlzaCB0byB0aGUgZXZlbnQgYnVzLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="75" id="75" data-hash="e8fa7cb9d0b9d0eb2114dadf8f901ede"> 
+   <p>Since the Kafka record values are of type JsonObject, there is no data conversion to perform to publish them to the Vert.x event-bus.</p> 
+  </div> 
+  <div class="readable-text" refid="76" id="76" data-hash="70366f7fcf9204d5fa6bd8e095416e2b"> 
+   <h3 class="calibre29" id="heading_id_9"><a class="pcalibre pcalibre1" id="bridging-the-event-bus-and-web-applications" shape="rect"></a>11.2.2 &nbsp;Bridging the event-bus and web applications</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="77" id="77" data-hash="5df438106f9d7ea0387b91dbe3bb4839"> 
+   <p>The dashboard web application starts a HTTP server, as shown in the excerpt of listing 11.12.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="78" id="78" data-hash="b38841034eef966eea982aae256b8e69"> 
+   <h5>Listing&nbsp;11.12.&nbsp;Dashboard service HTTP server</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">Router router = Router.router(vertx);                           #1
+// (...) RxJava pipelines to forward Kafka records
+
+router.get("/").handler(ctx -&gt; ctx.reroute("/index.html"));     #2
+router.route().handler(StaticHandler.create("webroot/assets")); #3
+// (...) Event bus bridge setup
+
+return vertx.createHttpServer()                                 #4
+  .requestHandler(router)
+  .rxListen(HTTP_PORT)
+  .ignoreElement();</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQSBWZXJ0Lnggd2ViIHJvdXRlciB0byBkaXNwYXRjaCBIVFRQIHJlcXVlc3RzLgojMiBSZWRpcmVjdCB0cmFmZmljIG9uIC8gdG8gL2luZGV4Lmh0bWwuCiMzIFNlcnZlIHN0YXRpYyBmaWxlcyBmcm9tIHRoZSB3ZWJyb290L2Fzc2V0cyByZXNvdXJjZSBmb2xkZXIuCiM0IFN0YXJ0IHRoZSBIVFRQIHNlcnZlci4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="79" id="79" data-hash="18e93caa7f9ee87f96c4ff284261fba1"> 
+   <p>Listing 11.12 shows a HTTP server for serving static files. This is only an excerpt: we now need to see how the Vert.x event bus can be connected to web applications.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="80" id="80" data-hash="6fcb209938f4b5245f3171a3ea49ce97"> 
+   <p>Vert.x offers an event bus integration using the SockJS library [SockJS]. SockJS is an emulation library for the WebSocket protocol [WebSocket], which allows browsers and servers to communicate in both directions on top of a persistent connection. The Vert.x core APIs offer support for WebSockets, but SockJS is interesting because not every browser in the market properly supports WebSockets, and some HTTP proxies / load balancers may reject WebSocket connections. SockJS uses WebSockets whenever it can, and fallbacks to other mechanisms such as long polling over HTTP, AJAX, JSONP or iframe.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="81" id="81" data-hash="d39a85e6c28457bb56bc7628d75d47e0"> 
+   <p>The Vert.x web module offers a handler for SockJS connections that bridge the event bus, so the same programming model can be used from the server side (in Vert.x) and the client side (in JavaScript). Listing 11.13 shows how to configure it.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="82" id="82" data-hash="76dcd28a6749995b8811669d85251aa2"> 
+   <h5>Listing&nbsp;11.13.&nbsp;Configuring the SockJS event bus bridge</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">SockJSHandler sockJSHandler = SockJSHandler.create(vertx);                              #1
+SockJSBridgeOptions bridgeOptions = new SockJSBridgeOptions()
+  .addInboundPermitted(new PermittedOptions().setAddressRegex("client.updates.*"))      #2
+  .addOutboundPermitted(new PermittedOptions().setAddressRegex("client.updates.*"));    #3
+sockJSHandler.bridge(bridgeOptions);                                                    #4
+router.route("/eventbus/*").handler(sockJSHandler);                                     #5</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgU29ja0pTIGhhbmRsZXIuCiMyIEFjY2VwdCBpbmJvdW5kIGV2ZW50IGJ1cyBtZXNzYWdlcyBmcm9tIGRlc3RpbmF0aW9ucyB0aGF0IHN0YXJ0IHdpdGggY2xpZW50LnVwZGF0ZXMuCiMzIEFjY2VwdCBvdXRib3VuZCBldmVudCBidXMgbWVzc2FnZXMgdG8gZGVzdGluYXRpb25zIHRoYXQgc3RhcnQgd2l0aCBjbGllbnQudXBkYXRlcy4KIzQgSW5zdGFsbCB0aGUgYnJpZGdlLgojNSBTb2NrSlMgY2xpZW50cyBlbmRwb2ludC4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="83" id="83" data-hash="820bda50d07acc4cda7871d02721bd64"> 
+   <p>The bridge relies on a handler for SockJS client connections, with a set of permissions to allow only certain event bus destinations to be bridged. It is indeed important to limit the events that flow between the connected web applications and backend, both for security and performance reasons. In our case we decided that only the destinations starting with client.updates will be available.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="84" id="84" data-hash="eff5ed74362874eb08f5f42350ae6867"> 
+   <p>On the web application side, the Vert.x project offers the vertx3-eventbus-client library which can be downloaded manually or using a tool like npm (the Node package manager). By using it we can connect to the event-bus, as outlined in listing 11.14.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="85" id="85" data-hash="02dc5748e47c8ea3b1d5d0b6763ecda4"> 
+   <h5>Listing&nbsp;11.14.&nbsp;Using the JavaScript SockJS event bus client</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">import EventBus from 'vertx3-eventbus-client'           #1
+
+const eventBus = new EventBus("/eventbus")              #2
+eventBus.enableReconnect(true)                          #3
+
+eventBus.onopen = () =&gt; {                               #4
+  eventBus.registerHandler("a.b.c", (err, message) =&gt; { #5
+    console.log(`Received: ${message.body}`)
+  })
+
+  eventBus.publish("d.e.f", {                           #6
+    book: "Vert.x in Action",
+    comment: "A great book!"
+  })
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgSW1wb3J0IHRoZSBKYXZhU2NyaXB0IG1vZHVsZS4KIzIgQ29ubmVjdCB0byB0aGUgZXZlbnQgYnVzIGVuZHBvaW50LgojMyBBdXRvbWF0aWNhbGx5IHJlY29ubmVjdCB3aGVuIHRoZSBjb25uZWN0aW9uIGlzIGxvc3QuCiM0IENhbGxlZCB3aGVuIHRoZSBjb25uZWN0aW9uIHRvIHRoZSBldmVudCBidXMgaGFzIGJlZW4gZXN0YWJsaXNoZWQuCiM1IFJlZ2lzdGVyIGFuIGV2ZW50IGJ1cyBkZXN0aW5hdGlvbiBoYW5kbGVyLgojNiBQdWJsaXNoIGEgbWVzc2FnZSB0byB0aGUgZXZlbnQgYnVzLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="86" id="86" data-hash="b0102ff35ac8463f2ee8c8e508fa0785"> 
+   <p>The full code of the usage of the Vert.x event bus in a Vue.js component is in the part2-steps-challenge/dashboard-webapp/src/App.vue file of the source code repository. As we can see we have the same programming model in the JavaScript code: we can register event bus handlers and publish messages, just like we would to in Vert.x code.</p> 
+  </div> 
+  <div class="readable-text" refid="87" id="87" data-hash="1d631fb8d31daad470660fd73ae21aec"> 
+   <h3 class="calibre29" id="heading_id_10"><a class="pcalibre pcalibre1" id="from-kafka-to-live-web-application-updates" shape="rect"></a>11.2.3 &nbsp;From Kafka to live web application updates</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="88" id="88" data-hash="02204c9e0953e085595059f1ba6a8bf5"> 
+   <p>The dashboard uses Vue.js, just like the public web application service that we saw earlier. The whole application essentially fits in the App.vue component which can be found in the project source code. The component data model is made of 3 entries, as found in listing 11.15.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="89" id="89" data-hash="b2154f2d1cb0287848888fc9c4b7377b"> 
+   <h5>Listing&nbsp;11.15.&nbsp;Data model of the Vue.js component</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">data() {
+  return {
+    throughput: 0,      #1
+    cityTrendData: {},  #2
+    publicRanking: []   #3
+  }
+},</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQ3VycmVudCB0aHJvdWdocHV0LgojMiBDaXR5IHRyZW5kIGRhdGEuCiMzIFB1YmxpYyByYW5raW5ncy4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="90" id="90" data-hash="2f6b5a3954320e88150ee53c5bd0c1be"> 
+   <p>These entries are being updated when events are received from the Vert.x event bus. To do that we use the Vue.js mounted life-cycle callback to connect to the event bus, then register handlers as in listing 11.16.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="91" id="91" data-hash="59cc115a564f8186d2fc3431c90f963d"> 
+   <h5>Listing&nbsp;11.16.&nbsp;Event bus handlers in the Vue.js component</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">mounted() {
+  eventBus.onopen = () =&gt; {
+    eventBus.registerHandler("client.updates.throughput", (err, message) =&gt; {   #1
+      this.throughput = message.body.throughput                                 #2
+    })
+    eventBus.registerHandler("client.updates.city-trend", (err, message) =&gt; {
+      const data = message.body
+      data.moment = moment(data.timestamp)
+      this.$set(this.cityTrendData, message.body.city, data)
+    })
+    eventBus.registerHandler("client.updates.publicRanking", (err, message) =&gt; {
+      this.publicRanking = message.body
+    })
+  }
+},</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgU3Vic2NyaWJlIHRvIHRocm91Z2hwdXQgdXBkYXRlcy4KIzIgVXBkYXRlIHRoZSBtb2RlbC4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="92" id="92" data-hash="97e1f24664b562ef5704c85acd30313b"> 
+   <p>The handlers update the model based on what is received from the event-bus. Since Vue.js is a reactive web application framework, the interface is updated when the data model changes. For instance when the value of throughput changes, then so does the value displayed by the HTML template of listing 11.17.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="93" id="93" data-hash="4956dfbfbeee0b2f622696786e687ec1"> 
+   <h5>Listing&nbsp;11.17.&nbsp;Throughput Vue.js HTML template</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">(...)
+&lt;h4&gt;
+  &lt;span class="badge badge-pill badge-dark"&gt;{{ throughput }}&lt;/span&gt; <a class="pcalibre pcalibre1" id="CO16-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  device updates per second
+&lt;/h4&gt;
+(...)</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQmluZHMgdG8gdGhlIHRocm91Z2hwdXQgZGF0YSB2YWx1ZS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="94" id="94" data-hash="fbc6d52d62df8f1f7585f5f04f2d6688"> 
+   <p>The city trends view rendering is a more elaborated template found in listing 11.18.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="95" id="95" data-hash="de45ef211a750e0c06744325d1450a4d"> 
+   <h5>Listing&nbsp;11.18.&nbsp;City trends vue.js HTML template</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">&lt;h4&gt;Trends&lt;/h4&gt;
+&lt;table class="table table-sm table-hover"&gt;
+  &lt;thead&gt;
+  &lt;tr&gt;
+    &lt;th scope="col"&gt;City&lt;/th&gt;
+    &lt;th scope="col"&gt;Steps&lt;/th&gt;
+  &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;transition-group name="city-trends" tag="tbody"&gt;
+    &lt;tr v-for="item in cityTrendRanking" v-bind:key="item.city"&gt;    <a class="pcalibre pcalibre1" id="CO17-1" shape="rect"></a><span class="pcalibre1">#1</span>
+      &lt;td scope="row"&gt;{{ item.city }}&lt;/td&gt;                          <a class="pcalibre pcalibre1" id="CO17-2" shape="rect"></a><span class="pcalibre1">#2</span>
+      &lt;td&gt;
+        +{{ item.stepsCount }}                                      <a class="pcalibre pcalibre1" id="CO17-3" shape="rect"></a><span class="pcalibre1">#3</span>
+        &lt;span class="text-secondary font-weight-lighter"&gt;
+        ({{ item.moment.format("ddd     hh:mm:ss") }})                  <a class="pcalibre pcalibre1" id="CO17-4" shape="rect"></a><span class="pcalibre1">#4</span>
+        &lt;/span&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/transition-group&gt;
+&lt;/table&gt;</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgSXRlcmF0ZSBvdmVyIGFsbCBjaXR5IGVudHJpZXMuCiMyIENpdHkgbmFtZS4KIzMgU3RlcHMgY291bnQuCiM0IEZvcm1hdCB0aGUgdGltZXN0YW1wIHdpdGggdGhlIE1vbWVudC5qcyBsaWJyYXJ5Lg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="96" id="96" data-hash="e2ff08363167423c9284b1f0d418931f"> 
+   <p>The template iterates over all city data, and renders a table row for each. When a city has an update then the city row is updated thanks to the item.city binding which ensures uniqueness in the rows generated by the v-for loop. The transition-group tag is specific to Vue.js and is used for animation purposes: when the data order changes then row order changes with an animation. The loop iterates over cityTrendRanking, which is a computed property given in listing 11.19.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="97" id="97" data-hash="b9f658e7af0e6b93cae2843be3a01076"> 
+   <h5>Listing&nbsp;11.19.&nbsp;Computed ranking property</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">computed: {
+  cityTrendRanking: function () {
+    const values = Object.values(this.cityTrendData).slice(0)
+    values.sort((a, b) =&gt; b.stepsCount - a.stepsCount)  #1
+    return values
+  }
+},</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgT3JkZXIgYnkgc3RlcHMgY291bnQu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="98" id="98" data-hash="9e09f7391685d14c6ef096022e98e675"> 
+   <p>The cityTrendRanking computed property ranks entries by number of steps, so the dashboard shows cities with the most steps on top.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="99" id="99" data-hash="61ff25443d301e7ad6d4183817450618"> 
+   <p>The throughput and city trends are updated every 5 seconds with updates coming from Kafka records, and whose JSON payloads are forwarded to the dashboard web application. This works well because updates are frequent and cover aggregated data, but as we are going to see now, things are more complicated for the users ranking.</p> 
+  </div> 
+  <div class="readable-text" refid="100" id="100" data-hash="e4f7caa9476847c8297fa9bbf0cd673d"> 
+   <h2 class="calibre17" id="heading_id_11"><a class="pcalibre pcalibre1" id="streams-and-state" shape="rect"></a>11.3 &nbsp;Streams and state</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="101" id="101" data-hash="59f5fd797ea08995e7a06fe928b364f4"> 
+   <p>The dashboard web applications shows a live ranking of users based on the number of steps they have made over the last 24 hours. Users can be ranked based on the updates produced by the event stats service, and sent to the event-stats.user-activity.updates Kafka topic.</p> 
+  </div> 
+  <div class="readable-text" refid="102" id="102" data-hash="ecaa93ca58bf09f58649366ee77c10e0"> 
+   <h3 class="calibre29" id="heading_id_12"><a class="pcalibre pcalibre1" id="a-stream-of-updates" shape="rect"></a>11.3.1 &nbsp;A stream of updates</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="103" id="103" data-hash="3597abf22c7a1cd529136b3dd0222c0e"> 
+   <p>Each record sent to event-stats.user-activity.updates contains the latest number of steps for a given user. The dashboard service can observe these events, update its state to keep track of how many steps a given user has done, and update the global ranking accordingly. The problem here is that we need some state to start with, because when it starts (or re-starts!) the dashboard service doesn’t know about the earlier updates.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="104" id="104" data-hash="e26d7bb06882cee7ed4073e55aaa4106"> 
+   <p>We could configure the Kafka subscriber to restart from the beginning of the stream, but it could potentially span over several days or even weeks worth of data. So replaying all records when the dashboard service starts should in theory allow us to compute an accurate ranking, but this is a costly operation. Also we need to wait until all records have been processed before sending updates to the connected web applications, because this would induce a big traffic on the event-bus.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="105" id="105" data-hash="2ea8147c9fd6e13d43f6895f64ca2edf"> 
+   <p>Another solution is to start by asking the activity service what the current day rankings are, which is a straightforward SQL query which is built-in the service. We call this the hydration phase. We can then update the ranking as we receive updates from the event-stats.user-activity.updates Kafka topic.</p> 
+  </div> 
+  <div class="readable-text" refid="106" id="106" data-hash="def09b2f2f914198660bd6f13b603e7a"> 
+   <h3 class="calibre29" id="heading_id_13"><a class="pcalibre pcalibre1" id="hydrating-the-ranking-state" shape="rect"></a>11.3.2 &nbsp;Hydrating the ranking state</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="107" id="107" data-hash="47e617c35674da0bf92f7df56e913555"> 
+   <p>The dashboard service maintains a publicRanking field which is a map where keys are user names, and values are the latest user update entries as JSON data. When the service starts this collection is empty, so the first step is to fill it with data.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="108" id="108" data-hash="aff5679d31b809d94abbbf753cc9ca2d"> 
+   <p>To do that the hydrate method is being called from the DashboardWebAppVerticle initialization method (rxStart), right after the Kafka consumers have been set as in listing 11.10. This method assembles ranking data by calling the the activity and user profile services, as given in listing 11.20.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="109" id="109" data-hash="2b2d5fc5ec06a80352c62d34661494c2"> 
+   <h5>Listing&nbsp;11.20.&nbsp;Implementation of the hydration method</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">WebClient webClient = WebClient.create(vertx);
+webClient
+  .get(3001, "localhost", "/ranking-last-24-hours")             #1
+  .as(BodyCodec.jsonArray())
+  .rxSend()
+  .delay(5, TimeUnit.SECONDS, RxHelper.scheduler(vertx))        #2
+  .retry(5)                                                     #3
+  .map(HttpResponse::body)
+  .flattenAsFlowable(Functions.identity())
+  .cast(JsonObject.class)
+  .flatMapSingle(json -&gt; whoOwnsDevice(webClient, json))        #4
+  .flatMapSingle(json -&gt; fillWithUserProfile(webClient, json))  #5
+  .subscribe(
+    this::hydrateEntryIfPublic,                                 #6
+    err -&gt; logger.error("Hydratation error", err),
+    () -&gt; logger.info("Hydratation completed"));</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQWN0aXZpdHkgc2VydmljZSByYW5raW5nIGVuZHBvaW50LgojMiBBbGxvdyBhIGRlbGF5IHdoZW4gdGhlIHNlcnZpY2Ugc3RhcnRzLgojMyBBbGxvdyA1IHJldHJpZXMgaWYgdGhlIGFjdGl2aXR5IHNlcnZpY2UgaXMgbm90IGF2YWlsYWJsZS4KIzQgRm9yIGVhY2ggZGV2aWNlIHJhbmtpbmcgZW50cnksIGZpbmQgdGhlIG93bmVyLgojNSBGaWxsIHdpdGggdGhlIHVzZXIgZGV0YWlscy4KIzYgVHJhY2sgb25seSB0aGUgdXNlcnMgd2hvIG9wdGVkIHRvIGJlIHB1YmxpYy4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="110" id="110" data-hash="76d884f7f65a9b354ed5436afaf7750f"> 
+   <p>The implementation of method hydrate relies on getting a ranking of the devices over the last 24 hours. The service returns a JSON array ordered in the number of steps. We allow an arbitrary 5 seconds delay before doing the request, and allow 5 retries in case the activity service is not available. Once we have ranking data, then method whoOwnsDevice (listing 11.21) and fillWithUserProfile (listing 11.22) correlate a pedometer-centric data with a user. Finally method hydrateEntryIfPublic of listing 11.23 fills the publicRanking collection with data from users who opted to be in public rankings.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="111" id="111" data-hash="2cfa66a8607c51d126db85043bad6e1f"> 
+   <h5>Listing&nbsp;11.21.&nbsp;Finding who owns a device</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private Single&lt;JsonObject&gt; whoOwnsDevice(WebClient webClient, JsonObject json) {
+  return webClient
+    .get(3000, "localhost", "/owns/" + json.getString("deviceId"))  <a class="pcalibre pcalibre1" id="CO20-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    .as(BodyCodec.jsonObject())
+    .rxSend()
+    .retry(5)
+    .map(HttpResponse::body)
+    .map(resp -&gt; resp.mergeIn(json));                               <a class="pcalibre pcalibre1" id="CO20-2" shape="rect"></a><span class="pcalibre1">#2</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUmVxdWVzdCB0byBmaW5kIGEgZGV2aWNlIG93bmVyLgojMiBNZXJnZSBKU09OIGRhdGEu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="112" id="112" data-hash="42502fdf22f5a126df7b6acb24c1a97b"> 
+   <p>The whoOwnsDevice method performs a HTTP request to know who owns a device, then merges the resulting JSON data. At this point we need to fill the remaining user data, which is done via method fillWithUserProfile of listing 11.22.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="113" id="113" data-hash="95f7d7ad0a4183d47f699c0b343780da"> 
+   <h5>Listing&nbsp;11.22.&nbsp;Adding user data to a ranking data</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private Single&lt;JsonObject&gt; fillWithUserProfile(WebClient webClient, JsonObject json) {
+  return webClient
+    .get(3000, "localhost", "/" + json.getString("username")) <a class="pcalibre pcalibre1" id="CO21-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    .as(BodyCodec.jsonObject())
+    .rxSend()
+    .retry(5)
+    .map(HttpResponse::body)
+    .map(resp -&gt; resp.mergeIn(json));                         <a class="pcalibre pcalibre1" id="CO21-2" shape="rect"></a><span class="pcalibre1">#2</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgR2V0IHVzZXIgZGF0YS4KIzIgTWVyZ2UgSlNPTiBkYXRhLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="114" id="114" data-hash="672d77cf6f1874626f92aac0ec535b2f"> 
+   <p>The code is very similar to that of method whoOwnsDevice. Last but not least, method hydrateEntryIfPublic of listing 11.23 adds data to the publicRanking collection.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="115" id="115" data-hash="15d15612bfd12aa2aba7040eaf22c6f3"> 
+   <h5>Listing&nbsp;11.23.&nbsp;Hydration of public user data</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void hydrateEntryIfPublic(JsonObject data) {
+  if (data.getBoolean("makePublic")) {                        #1
+    data.put("timestamp", Instant.now().toString());          #2
+    publicRanking.put(data.getString("username"), data);      #3
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgT25seSBzdG9yZSBwdWJsaWMgdXNlcnMuCiMyIEluc2VydCBhIGxvY2FsIHRpbWVzdGFtcCBmb3IgdGhlIHVwZGF0ZS4KIzMgU3RvcmUgdGhlIHVzZXIgZGF0YS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="116" id="116" data-hash="d4dba04d1b49ac57779cd73b2192399d"> 
+   <p>Hydration is a process started asynchronously when the verticle starts and eventually the publicRanking collection holds accurate data. Note that at this stage we have not pushed any ranking data to the dashboard web application clients. Let us now see what happens next.</p> 
+  </div> 
+  <div class="readable-text" refid="117" id="117" data-hash="d15b0cc2048f4050ad01b1983e1adf3b"> 
+   <h3 class="calibre29" id="heading_id_14"><a class="pcalibre pcalibre1" id="periodically-updating-rankings-from-the-updates-stream" shape="rect"></a>11.3.3 &nbsp;Periodically updating rankings from the updates stream</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="118" id="118" data-hash="a0c240d7d77df32deaa60083cd178b72"> 
+   <p>The user ranking is updated every 5 seconds: to do so we collect updates from users for 5 seconds, then update the public ranking data and push the result to the dashboard web application. We batch data over spans of 5 seconds to pace the dashboard refresh, but you can lower the time window or even get rid of it if you want a more lively dashboard. Listing 11.24 shows the RxJava pipeline to manage this process.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="119" id="119" data-hash="5630c09d80cfb0a37c094e90467d64af"> 
+   <h5>Listing&nbsp;11.24.&nbsp;RxJava pipeline to update user rankings</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">KafkaConsumer.&lt;String, JsonObject&gt;create(vertx, KafkaConfig.consumerConfig("dashboard-webapp-ranking"))
+  .subscribe("event-stats.user-activity.updates")             <a class="pcalibre pcalibre1" id="CO23-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  .toFlowable()
+  .filter(record -&gt; record.value().getBoolean("makePublic"))  <a class="pcalibre pcalibre1" id="CO23-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  .buffer(5, TimeUnit.SECONDS, RxHelper.scheduler(vertx))     <a class="pcalibre pcalibre1" id="CO23-3" shape="rect"></a><span class="pcalibre1">#3</span>
+  .subscribe(this::updatePublicRanking);                      <a class="pcalibre pcalibre1" id="CO23-4" shape="rect"></a><span class="pcalibre1">#4</span></pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgU3Vic2NyaWJlIHRvIHRoZSB1cGRhdGVzLgojMiBLZWVwIG9ubHkgdGhlIHB1YmxpYyB1c2Vycy4KIzMgR3JvdXAgZXZlbnRzIG92ZXIgNSBzZWNvbmRzLgojNCBVcGRhdGUgcmFua2luZ3MgYW5kIHB1c2ggZGF0YS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="120" id="120" data-hash="c8ecfc0c6b2d7e5e8bcad7bdfb766e60"> 
+   <p>The filter operator is used to keep only Kafka records where the user data is public, and the buffer operator makes 5 seconds windows of events. Listing 11.25 gives the implementation of method updatePublicRanking that processes these event batches.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="121" id="121" data-hash="3d41e65e133ea62cd71420aa009cb289"> 
+   <h5>Listing&nbsp;11.25.&nbsp;Public ranking maintenance process</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void updatePublicRanking(List&lt;KafkaConsumerRecord&lt;String, JsonObject&gt;&gt; records) {
+  copyBetterScores(records);  <a class="pcalibre pcalibre1" id="CO24-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  pruneOldEntries();          <a class="pcalibre pcalibre1" id="CO24-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  vertx.eventBus().publish("client.updates.publicRanking", computeRanking()); <a class="pcalibre pcalibre1" id="CO24-3" shape="rect"></a><span class="pcalibre1">#3</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgTWVyZ2UgZGF0YS4KIzIgRGlzY2FyZCBvbGRlciBkYXRhLgojMyBDb21wdXRlIHJhbmtpbmcgYW5kIHNlbmQgdG8gdGhlIGV2ZW50IGJ1cy4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="122" id="122" data-hash="2e7463e862340b1014929d226465bc0d"> 
+   <p>The method describes the process in 3 steps:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="123" id="123" data-hash="64024bbe2be32e5201740d53d60f10fc"> axp rod clolecdte zprc rv aedutp rnakign uzcr,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="124" id="124" data-hash="35895379dc25cac0c579fb3acbf69850"> drdacis rodle eisenrt,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="125" id="125" data-hash="588c1f9dc7f627402fd2310daa7d025c"> mcptoeu s wkn ngakrin zqn ncvu rj re kdr enntcdoce wxu isalpiopcant eetv kgr vtene agq.<br> </li> 
+  </ol> 
+  <div class="readable-text" refid="126" id="126" data-hash="0e338b65c263298170f850b1e49cf01d"> 
+   <p>Listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-11/v-10/copyBetterScores" shape="rect" title="Example 11.26. Updating ranking data">11.26</a> provides the implementation of method <code class="code">copyBetterScores</code>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="127" id="127" data-hash="38b0c3a3f889e9203f4bcc0ff3f9e75e"> 
+   <h5>Listing&nbsp;11.26.&nbsp;Updating ranking data</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void copyBetterScores(List&lt;KafkaConsumerRecord&lt;String, JsonObject&gt;&gt; records) {
+  for (KafkaConsumerRecord&lt;String, JsonObject&gt; record : records) {
+    JsonObject json = record.value();
+    long stepsCount = json.getLong("stepsCount");                                   <a class="pcalibre pcalibre1" id="CO25-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    JsonObject previousData = publicRanking.get(json.getString("username"));
+    if (previousData == null || previousData.getLong("stepsCount") &lt; stepsCount) {  <a class="pcalibre pcalibre1" id="CO25-2" shape="rect"></a><span class="pcalibre1">#2</span>
+      publicRanking.put(json.getString("username"), json);
+    }
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgR2V0IHRoZSBwcm9wb3NlZCB1cGRhdGUgbnVtYmVyIG9mIHN0ZXBzLgojMiBVcGRhdGUgb25seSB3aGVuIHRoZXJlIGFyZSBtb3JlIHN0ZXBzLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="128" id="128" data-hash="e9d5ba63f61e03b82c33c828acf76b31"> 
+   <p>The method updates the publicRanking collection when a collected entry has more steps count that the previous one, because there can potentially be a conflict between an undergoing hydration process and a user update. Listing 11.27 gives the pruneOldEntries method.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="129" id="129" data-hash="16ad31b023989e178e9f97ec3981593f"> 
+   <h5>Listing&nbsp;11.27.&nbsp;Pruning older data</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void pruneOldEntries() {
+  Instant now = Instant.now();                          <a class="pcalibre pcalibre1" id="CO26-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  Iterator&lt;Map.Entry&lt;String, JsonObject&gt;&gt; iterator = publicRanking.entrySet().iterator();
+  while (iterator.hasNext()) {                          <a class="pcalibre pcalibre1" id="CO26-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    Map.Entry&lt;String, JsonObject&gt; entry = iterator.next();
+    Instant timestamp = Instant.parse(entry.getValue().getString("timestamp"));
+    if (timestamp.until(now, ChronoUnit.DAYS) &gt;= 1L) {  <a class="pcalibre pcalibre1" id="CO26-3" shape="rect"></a><span class="pcalibre1">#3</span>
+      iterator.remove();
+    }
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgR2V0IHRoZSBjdXJyZW50IHRpbWUuCiMyIEl0ZXJhdGUgb3ZlciBhbGwgcmFua2luZyBkYXRhLgojMyBSZW1vdmUgZW50cmllcyBhZnRlciBhIGRheS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="130" id="130" data-hash="68e4631a41bce8d9ee31b78e0e182fb3"> 
+   <p>The method simply iterates over all ranking data entries in the publicRanking collection, and remove entries older than one day. The ranking is produced by the method computeRanking of listing 11.28.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="131" id="131" data-hash="c51b40d65f60551a75bce5ed8c7d66df"> 
+   <h5>Listing&nbsp;11.28.&nbsp;Computing the ranking</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private JsonArray computeRanking() {
+  List&lt;JsonObject&gt; ranking = publicRanking.entrySet()
+    .stream()
+    .map(Map.Entry::getValue)                       <a class="pcalibre pcalibre1" id="CO27-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    .sorted(this::compareStepsCountInReverseOrder)  <a class="pcalibre pcalibre1" id="CO27-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    .map(json -&gt; new JsonObject()                   <a class="pcalibre pcalibre1" id="CO27-3" shape="rect"></a><span class="pcalibre1">#3</span>
+      .put("username", json.getString("username"))
+      .put("stepsCount", json.getLong("stepsCount"))
+      .put("city", json.getString("city")))
+    .collect(Collectors.toList());
+  return new JsonArray(ranking);                    <a class="pcalibre pcalibre1" id="CO27-4" shape="rect"></a><span class="pcalibre1">#4</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRXh0cmFjdCB2YWx1ZXMgaW4gcHVibGljUmFua2luZy4KIzIgU29ydCBieSBkZWNyZWFzaW5nIHN0ZXBzIGNvdW50LgojMyBDb3B5IHZhbHVlcy4KIzQgV3JhcCBhcyBhIEpTT04gYXJyYXku"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="132" id="132" data-hash="9e4a1ca05847e361b18cfab38085dc3a"> 
+   <p>The method sorts public ranking data and produces a JSON array, where entries are ranked in reverse order (the first value is the user with most steps over the last 24 hours, etc). The compareStepsCountInReverseOrder method used to compare and sort entries is given in listing 11.29.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="133" id="133" data-hash="e99646d3cee5155b9595e3d1a7523087"> 
+   <h5>Listing&nbsp;11.29.&nbsp;Comparing user data against their steps count</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private int compareStepsCountInReverseOrder(JsonObject a, JsonObject b) {
+  Long first = a.getLong("stepsCount");
+  Long second = b.getLong("stepsCount");
+  return second.compareTo(first); #1
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRGVsZWdhdGVzIHRvIGNvbXBhcmVUbyBpbiBjbGFzcyBqYXZhLmxhbmcuTG9uZy4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="134" id="134" data-hash="605a4babbcc6c306e7de504366ca372e"> 
+   <p>The comparison returns -1 when b has less steps than a, 0 when they are equal, and 1 when b has more steps than a.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="135" id="135" data-hash="55a8fa5e70f120c022edfdbfe31d93a3"> 
+   <p>The Vue.js template for rendering the user ranking table is given in listing 11.30.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="136" id="136" data-hash="8eeda91190d82cf185907d6353809cf8"> 
+   <h5>Listing&nbsp;11.30.&nbsp;User ranking template in Vue.js</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">&lt;h4&gt;Public ranking (last 24 hours)&lt;/h4&gt;
+&lt;table class="table table-sm table-hover"&gt;
+  &lt;thead&gt;
+  &lt;tr&gt;
+    &lt;th scope="col"&gt;Name&lt;/th&gt;
+    &lt;th scope="col"&gt;From&lt;/th&gt;
+    &lt;th scope="col"&gt;Steps&lt;/th&gt;
+  &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;transition-group name="public-ranking" tag="tbody"&gt;
+  &lt;tr v-for="item in publicRanking" v-bind:key="item.username"&gt; <a class="pcalibre pcalibre1" id="CO29-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    &lt;td scope="row"&gt;{{ item.username }}&lt;/td&gt;
+    &lt;td&gt;{{ item.city }}&lt;/td&gt;
+    &lt;td&gt;{{ item.stepsCount }}&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;/transition-group&gt;
+&lt;/table&gt;</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgSXRlcmF0ZSBvdmVyIHRoZSBkYXRhLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="137" id="137" data-hash="d44aa026f57568e521034ef24bd812b8"> 
+   <p>The Vue.js code for the web application receives the ranking array over the event bus, and updates the publicRanking data entry. Whenever this happens then the display is updated to reflect the changes. Just like the city trends table, entries move using an animation as their order changes.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="138" id="138" data-hash="dc7b549cdae843f10ddfcaedfe6084a4"> 
+   <p>This concludes end-to-end stream processing, from Kafka records to reactive web applications. The next chapter focuses on resilience and fault-tolerance in reactive systems.</p> 
+  </div> 
+  <div class="readable-text" refid="139" id="139" data-hash="60abbece348baff423c46957b17add51"> 
+   <h2 class="calibre17" id="heading_id_15"><a class="pcalibre pcalibre1" id="summary" shape="rect"></a>11.4 &nbsp;Summary</h2> 
+  </div> 
+  <ul class="itemizedlist"> 
+   <li class="listitem readable-text" refid="140" id="140" data-hash="4ff1aa4540e3b8a926111a015abd4965"> RxJava offers advanced operators like <code class="code">buffer</code> and <code class="code">groupBy</code> that can be composed to perform aggregate data processing.<br> </li> 
+   <li class="listitem readable-text" refid="141" id="141" data-hash="593cd874c33316464bbdbf719a1e1b54"> A micro-service does not have to expose a HTTP API: the event stats service only consumes and produces Kafka records.<br> </li> 
+   <li class="listitem readable-text" refid="142" id="142" data-hash="9bb7dbe5144e94a45cd67ab8b6d69a00"> There are stream processing works that can start at any point of a stream like computing a throughput, while other works require some initial state like maintaining a live ranking of users over the last 24 hours.<br> </li> 
+   <li class="listitem readable-text" refid="143" id="143" data-hash="41e2ab5d6317ab0657ee06e8a0bdac46"> The Vert.x event bus can be extended to web applications using the SockJS protocol, offering the same communication model across service and web code bases.<br> </li> 
+   <li class="listitem readable-text" refid="144" id="144" data-hash="0db64b340bac3a3f717ffa7737b2f546"> Vert.x allows building end-to-end reactive systems, where events trigger computations in services and impact user-facing web applications.<br> </li> 
+  </ul> 
+  <div class="readable-text" refid="145" id="145" data-hash="dd541ce959012de8f7a058f8c5b70820"> 
+   <h2 class="calibre17" id="heading_id_16"><a class="pcalibre pcalibre1" id="references" shape="rect"></a>11.5 &nbsp;References</h2> 
+  </div> 
+  <div class="bibliodiv"> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e733" shape="rect"></a> 
+    <div class="readable-text" refid="146" id="146" data-hash="ec5a1fcd4cd4346ef258943967a73dd0"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="SockJS" shape="rect"></a>[SockJS] SockJS Project. SockJS. Retrieved February 2020. <a class="pcalibre3 pcalibre" href="https://github.com/sockjs" shape="rect">github.com/sockjs</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e737" shape="rect"></a> 
+    <div class="readable-text" refid="147" id="147" data-hash="2f26f2ee9abc178239b05f31da218407"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="WebSocket" shape="rect"></a>[WebSocket] Internet Engineering Task Force (IETF). The WebSocket Protocol (RFC 6455). December 2011. <a class="pcalibre3 pcalibre" href="https://tools.ietf.org/html/rfc6455" shape="rect">tools.ietf.org/html/rfc6455</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e741" shape="rect"></a> 
+    <div class="readable-text" refid="148" id="148" data-hash="acb02a4d00424fe9299bd2ece294156a"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="EIP" shape="rect"></a>[EIP] Gregor Hohpe and Bobby Woolf. 2003. Enterprise Integration Patterns: Designing, Building, and Deploying Messaging Solutions. Addison-Wesley Longman Publishing Co., Inc., USA.</span></p> 
+    </div> 
+   </div> 
+  </div>
+ </body>
+</html>

@@ -1,0 +1,858 @@
+<html>
+ <head></head>
+ <body>
+  <div class="readable-text" refid="1" id="1" data-hash="820cdc1e1a894c15a5b0ef02a1104edf"> 
+   <h1 class="chaptertitle" id="heading_id_24">9 <a class="pcalibre pcalibre1" id="messaging-and-event-streaming-with-vert-x" shape="rect"></a>Messaging and event streaming with Vert.x</h1> 
+  </div> 
+  <div class=" introduction-summary"> 
+   <h3 class="intro-header">This chapter covers:</h3> 
+   <ul> 
+    <li class=" readable-text" refid="2" id="2" data-hash="befb3d671ac3786407f399fd5bc3158b"> messaging with AMQP,<br> </li> 
+    <li class=" readable-text" refid="3" id="3" data-hash="47d0fb279998fe1f357d3b68acdc689c"> event streaming with Apache Kafka,<br> </li> 
+    <li class=" readable-text" refid="4" id="4" data-hash="63e004c6822b62e84c06ec4f5d705000"> sending emails,<br> </li> 
+    <li class=" readable-text" refid="5" id="5" data-hash="ef1f7afaf467be957415a865b4e20bac"> integration testing with messaging and event streaming middleware.<br> </li> 
+   </ul> 
+  </div> 
+  <div class="readable-text" refid="6" id="6" data-hash="4acfa4d7ed345c5f3c633b2b6a19bed4"> 
+   <p>So far we have mostly shown services that exposed HTTP APIs. While HTTP is a versatile and effective protocol for interacting with a service, it should not be the single choice. There are several options for integrating Vert.x-based services using messaging and event streaming. This chapter introduces AMQP message brokers and Apache Kafka. We will also cover sending emails using a SMTP server.</p> 
+  </div> 
+  <div class="readable-text" refid="7" id="7" data-hash="78fbf9abd76846da57434f1405bbb082"> 
+   <p>In this chapter we dive into the implementation of the ingester and congratulation services. The ingester is receiving step updates from devices over HTTP and AMQP, and forwards them into the system as Kafka events. The congratulation services listens for certain Kafka events to spot when a user has just reached 10000 steps on a day, and sends her / him a congratulation email.</p> 
+  </div> 
+  <div class="readable-text" refid="8" id="8" data-hash="009cc5a0ba91238c6a6928cd05ecf95b"> 
+   <h2 class="calibre17" id="heading_id_3"><a class="pcalibre pcalibre1" id="event-driven-services-beyond-http-with-vert-x" shape="rect"></a>9.1 &nbsp;Event-driven services beyond HTTP with Vert.x</h2> 
+  </div> 
+  <div class="readable-text" refid="9" id="9" data-hash="6a33fc73cdd8d2d74de0a0edb4ec3273"> 
+   <p>HTTP is a sensible choice as a networked interface for an event-driven service, especially when a service shall offer an API. Messaging and event streaming middleware offer useful tools for decoupling and integrating services. They are also typically better suited than HTTP for exchanging lots of events between services.</p> 
+  </div> 
+  <div class="readable-text" refid="10" id="10" data-hash="7094d62226756d4ca94cc7373a00ed64"> 
+   <h3 class="calibre29" id="heading_id_4"><a class="pcalibre pcalibre1" id="what-vert-x-provides" shape="rect"></a>9.1.1 &nbsp;What Vert.x provides</h3> 
+  </div> 
+  <div class="readable-text" refid="11" id="11" data-hash="4740d370f40cc91e5daa7b537d03eeef"> 
+   <p>Vert.x provides clients for message brokers, event streaming with Apache Kafka, and a general-purpose TCP protocol for the event-bus.</p> 
+  </div> 
+  <div class="readable-text" refid="12" id="12" data-hash="57f40c8ffb223820673ad7ade6a03ce0"> 
+   <h4 class="calibre30" id="heading_id_5"><a class="pcalibre pcalibre1" id="message-brokers" shape="rect"></a>Message brokers</h4> 
+  </div> 
+  <div class="readable-text scrambled" refid="13" id="13" data-hash="44dcac2d42f37559b96624a3e5a827a6"> 
+   <p>Messaging middleware can be more effective for service-to-service communications with better throughput, and they can also provide durability guarantees while a consumer or producer service is temporarily unavailable. Vert.x provides several modules for doing integration work with messaging middleware:</p> 
+  </div> 
+  <ul class="itemizedlist"> 
+   <li class="listitem readable-text scrambled" refid="14" id="14" data-hash="0ffd23219b1adcb7befda921d9eb61b0"> cn TWUE (<em class="calibre9">Rnadvced Waesgse Gieuung Flortooc</em>) cientl,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="15" id="15" data-hash="ad0152de56b24d1e3bfac58edfb6573e"> c SCKWE (<em class="calibre9">Spleim Avvr Uiterend Wigssgnae Zooocrtl</em>) cienlt,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="16" id="16" data-hash="61d39a40230115cbb292e340034e05e9"> c AbiabtWN tinelc,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="17" id="17" data-hash="8025c977d56162cea8d4fe346232fe60"> c WNAA (<em class="calibre9">Wsgeesa Keguuni Cyeretlme Yroasrtpn</em>) letnci.<br> </li> 
+  </ul> 
+  <div class="readable-text scrambled" refid="18" id="18" data-hash="99b0b25f1b833a8683aee32ff58ed924"> 
+   <p>AMQP is a standard protocol for messaging middleware and is implemented by a large number of brokers such as Apache ActiveMQ, JBoss A-MQ, Windows Azure Service Bus, RabbitMQ and more. Vert.x provides a dedicated client for RabbitMQ and its extensions. Note that it is also possible to use the Vert.x AMQP client with RabbitMQ since it exposes an AMQP server alongside the RabbitMQ-specific server.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="19" id="19" data-hash="5258295c8ce933c3a26c3d6df799bffe"> 
+   <p>STOMP is a text-based protocol for messaging middleware with less features than AMQP, but which may be enough for simple messaging, and is supported by popular message brokers.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="20" id="20" data-hash="e48540abb5add4971881437d125fa42a"> 
+   <p>MQTT is a protocol designed for machine-to-machine publish / subscribe interactions which is quite popular for embedded / Internet of Things devices as it uses low bandwidth.</p> 
+  </div> 
+  <div class="readable-text" refid="21" id="21" data-hash="a1024d915e022d2ac160f0596a72b9d4"> 
+   <h4 class="calibre30" id="heading_id_6"><a class="pcalibre pcalibre1" id="kafka-event-streaming" shape="rect"></a>Kafka event streaming</h4> 
+  </div> 
+  <div class="readable-text scrambled" refid="22" id="22" data-hash="8bf7fba6ba75f12685053d5b72890638"> 
+   <p>Vert.x provides support for Apache Kafka, a popular event-streaming middleware. At first, event-streaming middlewares share some resemblance with messaging systems, but they allow for interesting architectural patterns as different services can consume the same set of events at their own pace. Of course message brokers support publish / subscribe mechanisms for multiple services to consume the same events, but event-streaming middlewares also have the ability to replay events at will. Rewinding event streams is a distinctive feature. It also allows new services to be plugged in the processing pipeline without impacting other services. You can use event-streaming middleware like a messaging middleware, but there is really more to it than just passing events between services.</p> 
+  </div> 
+  <div class="readable-text" refid="23" id="23" data-hash="af7ae08ee0c4044e1c8aa95d77c5aae6"> 
+   <h4 class="calibre30" id="heading_id_7"><a class="pcalibre pcalibre1" id="event-bus-tcp-bridge" shape="rect"></a>Event-bus TCP bridge</h4> 
+  </div> 
+  <div class="readable-text scrambled" refid="24" id="24" data-hash="b362508c14df2ae0b2e343978325291e"> 
+   <p>Last but not least, Vert.x provides an event-bus bridge over a simple TCP protocol, with binding in JavaScript, Go, C#, C and Python. This allows to use the event-bus to connect with non-Java applications. We do not cover this piece in the book, but you can easily find out how to use it from the official Vert.x documentation. From the Vert.x side this is really just the event-bus, except that some of the events can be produced and consumed outside of the JVM.</p> 
+  </div> 
+  <div class="readable-text" refid="25" id="25" data-hash="7d101333e6b2a31ccd7790691b81e0a0"> 
+   <h3 class="calibre29" id="heading_id_8"><a class="pcalibre pcalibre1" id="the-middleware-and-services-that-well-use" shape="rect"></a>9.1.2 &nbsp;The middleware and services that weâll use</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="26" id="26" data-hash="e794a4b470ea6d147bf57140f4cb5c12"> 
+   <p>The 10k steps challenge application allows us to explore AMQP for messaging, Kafka for event streaming, and sending email with a SMTP server.</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="27" id="27" data-hash="46384a1b17b433b209db9a4871a1fe8d"> XWGE jc xzbg bh qro iesnngtoi ereisvc cc jr eevcsrei dretpeemo vdeeic dseautp vkto rieeht HCRL tv TWDE.<br> </li> 
+   <li class="listitem readable-text scrambled" refid="28" id="28" data-hash="d968bc39fc14f92d325ca7cacf9b4ecd"> Ozlvz zj gapk re oneycv tvenes ebenewt nmsp ceverssi el brx itipplacnoa.<br> </li> 
+   <li class="listitem readable-text scrambled" refid="29" id="29" data-hash="e8cc76736da957adafd49e1d39ba8a5e"> SWCF jz aqhx re nbva annatgliuorcto alseim kr ryo sersu.<br> </li> 
+  </ol> 
+  <div class="readable-text scrambled" refid="30" id="30" data-hash="c63dd6bea73696667a66f5c804511b54"> 
+   <p>As in the previous chapter, Docker Compose can be used to start the required middleware services for local development purposes: Apache Kafka (also requires Apache Zookeeper), Apache ActiveMQ Artemis, and MailHog (a test-friendly SMTP server). You can of course install and run each service by yourself if you want to, but starting disposable containers with Docker offers a simplified development experience.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="31" id="31" data-hash="0635e084a732cad5a0f8aa0c56a40431"> 
+   <p>On the Vert.x side we use the following modules to build our services:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="32" id="32" data-hash="2792a35b08f53c1e3f6af38c91ebe23b"> <code class="code">vertx-amqp-client</code>: vrq CWUZ tlcien, gnz<br> </li> 
+   <li class="listitem readable-text scrambled" refid="33" id="33" data-hash="d061a59c0d49e7c120bdee017bff9977"> <code class="code">vertx-kafka-client</code>: rpv Yecpha Qclzv cntlei, nqc<br> </li> 
+   <li class="listitem readable-text scrambled" refid="34" id="34" data-hash="569f4925e333adc88c93bc4fe7c9e65d"> <code class="code">vertx-mail-client</code>: rbv SWXZ itencl rk znxq elimsa.<br> </li> 
+  </ol> 
+  <div class="readable-text" refid="35" id="35" data-hash="915c35dbc916c900017db71dcc1af258"> 
+   <h3 class="calibre29" id="heading_id_9"><a class="pcalibre pcalibre1" id="what-is-amqp-and-a-message-broker" shape="rect"></a>9.1.3 &nbsp;What is AMQP? (and a message broker)</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="36" id="36" data-hash="9b6e777fd03c862a70f76d6025c0bcf9"> 
+   <p>The Advanced Message Queuing Protocol (AMQP) is a widely used network protocol for messaging middleware backed by an open specification. The protocol itself is binary, based on TCP, and supports authentication and encryption. We use Apache ActiveMQ in the project, and it supports AMQP.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="37" id="37" data-hash="17b61fb9a209c3d4944b6c67b39401b6"> 
+   <p>Message brokers are a classic form of service integration, as they typically support message queues and publish / subscribe communications. They allow services to communicate through message passing, and the broker ensures message durability.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="38" id="38" data-hash="6d3310614de4e3b474b3e08a1451253c"> 
+   <p>Figure 9.1 shows the interactions between a device, an AMQP queue to collect step events, and the ingestion service.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="39" id="39" data-hash="e2d24d5eb5e2aad41f6cf9404eed5dcc"> 
+   <h5 id="amqp">Figure 9.1. Overview of an AMQP queue</h5> 
+   <img alt="amqp" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/amqp.png" width="1218" loading="lazy" height="322" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="40" id="40" data-hash="e8c69e65a896e1b551f6ac2801825d02"> 
+   <p>Messages can be made durable, so they are not lost in case the broker crashes. Producers and consumers can use acknowledgements to ensure that a message has been properly sent or retrieved then processed. Brokers also offer various quality-of-service features such as expiration date and advanced routing. Depending on the broker, messages can be transformed from one representation to the other such as converting from a binary format to JSON. Some brokers also support aggregating multiple messages into one, or conversely splitting one message to produce many.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="41" id="41" data-hash="f35a087d0dc71beb3a7204d91c1c49e4"> 
+     <h5>Note</h5> 
+    </div> 
+    <div class="readable-text" refid="42" id="42" data-hash="2b046845675168568a17a36d2289b081"> 
+     <p>We suggest reading <a class="pcalibre para2" href="/book/vertx-in-action/chapter-9/v-10/AMQ" shape="rect">[AMQ]</a> if you are new to ActiveMQ.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="43" id="43" data-hash="e82f9686e7378da8a0b3600032f9ad06"> 
+   <h3 class="calibre29" id="heading_id_10"><a class="pcalibre pcalibre1" id="what-is-kafka" shape="rect"></a>9.1.4 &nbsp;What is Kafka?</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="44" id="44" data-hash="324c46b65a50af0166842c0905b14357"> 
+   <p>Apache Kafka is an event streaming middleware based on distributed logs. While that may sound complicated at first sight, all you really need to understand is that Kafka offers streams of event records, where producers can append new records, and consumers can walk back and forth along streams. For instance incoming pedometer step updates form a stream where each event is an update sent by a device, and the ingestion service produces these events. On the other hand various consumers can look at the events on that stream, be it to populate databases, compute statistics, etc. Events remain in a stream for some amount of time, or until the stream is too big and has to discard its oldest records.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="45" id="45" data-hash="c6e89e6b062be6ecb97106b3dd88b56a"> 
+   <p>Kafka supports publish / subscribe interactions between distributed services, as illustrated in figure 9.2.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="46" id="46" data-hash="be5a686feefa75dfee9077a416fc59a5"> 
+   <h5 id="kafka">Figure 9.2. Overview of a Kafka topic</h5> 
+   <img alt="kafka" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/kafka.png" width="1054" loading="lazy" height="494" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="47" id="47" data-hash="8172d16c1460df945b633c90d9d1207f"> 
+   <p>In a Kafka cluster, events are published and consumed from topics that group related events. Topics are split into replicated partitions which are ordered sequences of events. Each event is identified by its offset position in the event log that materializes its partition.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="48" id="48" data-hash="1c98a2483dede9404a88337cf8cf17e9"> 
+   <p>Consumers pull events from partitions. They can keep track of the last offset that they have consumed, but it is also possible to arbitrarily seek to any random position in a partition, or even replay all events since the beginning. Also, consumer groups can divide work by reading from different partitions and parallelize event processing.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="49" id="49" data-hash="9102fe435698047c7e302ef8ecfaba23"> 
+   <p>It is easy to think that Kafka is a messaging system like ActiveMQ, and in some cases Kafka is a very fine messaging middleware, but it should really still be considered as a streaming middleware.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="50" id="50" data-hash="a4b6e36f801dbb8f461ca47ecd2cb3bb"> 
+   <p>In a message broker, messages disappear when they have been consumed from a queue, or when they expire. Kafka partitions eventually evict records, either using a partition size limit (e.g., 2 gigabytes), or using some eviction delay (e.g., 2 weeks). Kafka records should be considered as "semi-durable" as they will eventually disappear. It is possible to configure the partitions in a topic to keep events forever, but this is quite rare as events are expected to produce durable effects when consumed. For instance the ingestion service produces incoming step updates records, and the activity service turns these records into long-term facts in a database. Another interesting feature of Kakfa is that topics can be replayed at will, so new services can join and consume a stream at their own pace.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="51" id="51" data-hash="f35a087d0dc71beb3a7204d91c1c49e4"> 
+     <h5>Note</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="52" id="52" data-hash="f47f4caaaccd05e8d93036dc05293a14"> 
+     <p>We suggest reading [Kafka] if you are new to Apache Kafka.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="53" id="53" data-hash="eb3b7046b63ef7ccb6fb1635eede7799"> 
+   <p>Let us now dive into the ingestion service.</p> 
+  </div> 
+  <div class="readable-text" refid="54" id="54" data-hash="26374e83f3ff85ee93bf65fbaed4ef8c"> 
+   <h2 class="calibre17" id="heading_id_11"><a class="pcalibre pcalibre1" id="reliably-ingesting-messages-over-http-and-amqp" shape="rect"></a>9.2 &nbsp;Reliably ingesting messages over HTTP and AMQP</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="55" id="55" data-hash="6f7566e499fdfabf9252c2e34b024ab9"> 
+   <p>Everything begins with the ingestion service, as it receives steps count updates from the pedometers. In our (fictitious!) application, we can expect that several types of pedometers will be available, and that they have different communication capabilities. For example some devices may directly talk to the ingestion service over the Internet, while others may need to reach a gateway that forwards updates to the ingestion service.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="56" id="56" data-hash="e935224651d3d5a38df10fa2e0a3e4c8"> 
+   <p>This is why we offer 2 interfaces for ingesting device updates:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="57" id="57" data-hash="0cc4bb5c5935f2113e786a3a2473a56e"> s cdveei cns eonctcn er rpv HCYF CEJ pdderovi dp bor niotsigen vrcisee, kt<br> </li> 
+   <li class="listitem readable-text scrambled" refid="58" id="58" data-hash="dda29906961ae749f0d782bb02b2c3f9"> c eedvic zsn dofrwar sn tpuead vr s essgame oekrbr, ncy rvb ontgsniie ierevcs rcvsieee xrd sdpuaet tmlv rgk rrebok.<br> </li> 
+  </ol> 
+  <div class="readable-text scrambled" refid="59" id="59" data-hash="c8bb92ff53e8e6d3525deade66c85897"> 
+   <p>Once an update has been received, it must be validated then sent to a Kafka topic. It is interesting to explore both the AMQP and HTTP interfaces, as we can draw similarities in their implementation but also differences in acknowledging device updates.</p> 
+  </div> 
+  <div class="readable-text" refid="60" id="60" data-hash="2f7d2c527ca63b1ca1efd8d2995067a6"> 
+   <h3 class="calibre29" id="heading_id_12"><a class="pcalibre pcalibre1" id="ingesting-from-amqp" shape="rect"></a>9.2.1 &nbsp;Ingesting from AMQP</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="61" id="61" data-hash="2ef4d563830a58e5dc741263f0b4a69b"> 
+   <p>Let us start with the AMQP ingestion. We first need to create an AMQP client that connects to the broker. Listing 9.1 shows the client configuration code.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="62" id="62" data-hash="55d00bc06ac6422c9d2cf0e3ccd497ae"> 
+   <h5>Listing 9.1. AMQP client configuration</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private AmqpClientOptions amqpConfig() {
+  return new AmqpClientOptions()
+    .setHost("localhost")
+    .setPort(5672)
+    .setUsername("artemis") #1
+    .setPassword("simetraehcapa");
+}
+// (...)
+
+AmqpClientOptions amqpOptions = amqpConfig();
+AmqpReceiverOptions receiverOptions = new AmqpReceiverOptions()
+  .setAutoAcknowledgement(false)    #2
+  .setDurable(true);    #3</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIGNyZWRlbnRpYWxzIGFyZSB0aGUgZGVmYXVsdCBvbmVzIGZyb20gdGhlIERvY2tlciBpbWFnZSB0aGF0IHdlIHVzZS4KIzIgV2Ugd2lsbCBtYW51YWxseSBhY2tub3dsZWRnZSBpbmNvbWluZyBtZXNzYWdlcy4KIzMgV2Ugd2FudCBkdXJhYmxlIG1lc3NhZ2luZy4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="63" id="63" data-hash="2329d4f1f943fb97e447b1930e1ed577"> 
+   <p>The amqpConfig method that we use here provides a configuration with hard-coded values. This is great for testing purposes as we do in this book, but for production settings you would, of course, resolve credentials, hostnames and port numbers from some external source. These could be environment variables or a registry service such as Apache ZooKeeper or Consul. We also set up the connection for durable messaging and declare manual acknowledgment, as we want to retry message processing if ever writing to a Kafka topic fails.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="64" id="64" data-hash="39289244bb47deea2ace492f16c855f0"> 
+   <p>The next step is to set-up the event processing pipeline for incoming AMQP messages. We do it using RxJava to dispatch messages to a processing function, log errors, and recover from errors as shown in listing 9.2.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="65" id="65" data-hash="4b18bdb31f279c6eea93bdffc3f54705"> 
+   <h5>Listing 9.2. AMQP event processing pipeline</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">AmqpClient.create(vertx, amqpOptions)   #1
+  .rxConnect()
+  .flatMap(conn -&gt; conn.rxCreateReceiver("step-events", receiverOptions))   #2
+  .flatMapPublisher(AmqpReceiver::toFlowable)                               #3
+  .doOnError(this::logAmqpError)        #4
+  .retryWhen(this::retryLater)          #5
+  .subscribe(this::handleAmqpMessage);  #6</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQ3JlYXRlIGFuIEFNUVAgY2xpZW50LgojMiBDcmVhdGUgYSBtZXNzYWdlIHJlY2VpdmVyIGZyb20gZGVzdGluYXRpb24gc3RlcC1ldmVudHMuCiMzIENyZWF0ZSBhIEZsb3dhYmxlIG9mIEFNUVAgbWVzc2FnZXMuCiM0IEVycm9yIGxvZ2dpbmcuCiM1IFJldHJ5IGxvZ2ljLgojNiBTdWJzY3JpcHRpb24gdGhhdCBkaXNwYXRjaGVzIGluY29taW5nIG1lc3NhZ2VzLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="66" id="66" data-hash="50950beeae4fa97cfbfe557543cb04cb"> 
+   <p>This pipeline is interesting as it is purely declarative. It starts with the creation of a client, then obtains a receiver for the step-events durable queue, then a flow of messages. From there we declare what to do upon receiving a message or an error. We also keep the code short and clean by using Java method references rather than lambdas. But what do these logAmqpError, retryLater and handleAmqpMessage methods do?</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="67" id="67" data-hash="7fd91ef70a798863f9aa8e4f1e1604c9"> 
+   <p>Logging messages is not very complicated, as shows in listing 9.3.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="68" id="68" data-hash="1e6597ce9bd7d72a0e80289523bbba4f"> 
+   <h5>Listing 9.3. Logging AMQP errors</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void logAmqpError(Throwable err) {
+  logger.error("Woops AMQP", err);  #1
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgTG9nIHRoZSBlcnJvciBhbmQgc3RhY2sgdHJhY2Uu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="69" id="69" data-hash="9132e12c4fd6ebe6e7b35163fcfc7a59"> 
+   <p>Errors happen: for instance we can loose the connection to the AMQP broker. In this case an error passes along the pipeline, and logAmqpError logs it, but doOnError lets the error propagate to subscribers. We then need to retry connecting to the AMQP broker and resume receiving events, which translates to re-subscribing to the source in RxJava. We can do that we the retryWhen operator as it allows us to define our own policy. If you just want to retry a number of times, or even always, then retry is simpler. Listing 9.4 shows how we introduce a 10 seconds delay before re-subscribing.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="70" id="70" data-hash="02f7b75a0ac11335b48245387aa4e267"> 
+   <h5>Listing 9.4. Recovering from errors with a delayed re-subscription</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private Flowable&lt;Throwable&gt; retryLater(Flowable&lt;Throwable&gt; errs) {
+  return errs.delay(10, TimeUnit.SECONDS, RxHelper.scheduler(vertx));   <a class="pcalibre pcalibre1" id="CO4-1" shape="rect"></a><span class="pcalibre1">#1</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgSXQgaXMgaW1wb3J0YW50IHRvIHVzZSB0aGUgc2NoZWR1bGVyIHBhcmFtZXRlciB0byBwcm9jZXNzIGV2ZW50cyBvbiBhIFZlcnQueCBldmVudC1sb29wLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="71" id="71" data-hash="f5eb6416e2cea679cfbef46960d02f9f"> 
+   <p>The way <code class="code">retryLater</code> works is as follows:</p> 
+  </div> 
+  <ul class="itemizedlist"> 
+   <li class="listitem readable-text scrambled" refid="72" id="72" data-hash="b457a1d990533e93bd801f4aaf959d4b"> rj estka z <code class="code">Flowable</code> el rreors cc crj iputn, ncsie wv tzx jn s <code class="code">Flowable</code> lx CWUE eessamgs,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="73" id="73" data-hash="900c2ea70ced0a7d795ddb615afdae8c"> 
+    <div class="readable-text" refid="74" id="74" data-hash="28fa131f77ac74d5769bc17ccff009d6"> 
+     <p>rj snrteru c <code class="code">Flowable</code> lx <em class="calibre9">innyghat</em> ewreh:</p> 
+    </div> 
+    <div class="itemizedlist1"> 
+     <ul class="itemizedlist2"> 
+      <li class="listitem"> ttgmiine <code class="code">onComplete</code> te <code class="code">onError</code> cgoe nrk tigegrr s tx-uiirsnpcosbt,<br> </li> 
+      <li class="listitem"> ntiteigm <code class="code">onNext</code> (nk tteamr rwzu qor velau zj) esirtrgg c kt-irostspubcni.<br> </li> 
+     </ul> 
+    </div> </li> 
+  </ul> 
+  <div class="readable-text scrambled" refid="75" id="75" data-hash="92f18bdc063303a5e4805a776951f2ce"> 
+   <p>To delay the re-subscription by 10 seconds, we use the delay operator. It will eventually emit a value hence onNext will be called and a re-subscription happens. You can of course think of more elaborated handlers, like limiting the number of retries and/or using an exponential back-off strategy. We will use this pattern a lot, as it greatly simplifies the error recovery logic.</p> 
+  </div> 
+  <div class="readable-text" refid="76" id="76" data-hash="cf7ea96ed6cc227b57cbb7d301b623f5"> 
+   <h3 class="calibre29" id="heading_id_13"><a class="pcalibre pcalibre1" id="translating-amqp-messages-to-kafka-records" shape="rect"></a>9.2.2 &nbsp;Translating AMQP messages to Kafka records</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="77" id="77" data-hash="e80dcff4098e29e01520fdf000b10a74"> 
+   <p>Listing 9.5 contains the method to handle incoming AMQP messages, validate them, then push them as Kafka records.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="78" id="78" data-hash="55ccea06e83e3157d2361861974a5e68"> 
+   <h5>Listing 9.5. Handling AMQP messages</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void handleAmqpMessage(AmqpMessage message) {
+  if (!"application/json".equals(message.contentType()) || invalidIngestedJson(message.bodyAsJsonObject())) {   <a class="pcalibre pcalibre1" id="CO5-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    logger.error("Invalid AMQP message (discarded): {}", message.bodyAsBinary());
+    message.accepted();
+    return;
+  }
+  JsonObject payload = message.bodyAsJsonObject();
+  KafkaProducerRecord&lt;String, JsonObject&gt; record = makeKafkaRecord(payload);    <a class="pcalibre pcalibre1" id="CO5-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  updateProducer.rxSend(record).subscribe(
+    ok -&gt; message.accepted(),   <a class="pcalibre pcalibre1" id="CO5-3" shape="rect"></a><span class="pcalibre1">#3</span>
+    err -&gt; {
+      logger.error("AMQP ingestion failed", err);
+      message.rejected();   <a class="pcalibre pcalibre1" id="CO5-4" shape="rect"></a><span class="pcalibre1">#4</span>
+    });
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQ2hlY2sgZm9yIGEgdmFsaWQgSlNPTiBtZXNzYWdlLgojMiBQcmVwYXJlIGEgS2Fma2EgcmVjb3JkLgojMyBBY2tub3dsZWRnZSB0aGUgQU1RUCBtZXNzYWdlLgojNCBSZWplY3QgdGhlIEFNUVAgbWVzc2FnZS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="79" id="79" data-hash="bb3cfc49643ca9fbd99f37661ea6b5d1"> 
+   <p>The handleAmqpMessage method first performs some validation on the incoming AMQP message, then prepares a Kafka record. The AMQP message is acknowledged when the Kafka record is written, and rejected if the record could not be written.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="80" id="80" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+     <h5>Tip</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="81" id="81" data-hash="917e9c1278aac367e822a1298da25456"> 
+     <p>In listing 9.5 and all subsequent services we will directly work with JsonObject data representation. There is little point in converting the JSON representation to Java domain classes (e.g., a IngestionData class) given that we mostly copy and transform data. You can of course perform such mapping if you have to do some more complex business logic and the cost of abstraction is justified.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="82" id="82" data-hash="b30f6c2614305d346311b94e17afc3c8"> 
+   <p>The invalidIngestedJson method checks that the JSON data contains all required entries, as given in listing 9.6.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="83" id="83" data-hash="eb6775467780a48841f08fc18bcb8ffa"> 
+   <h5>Listing 9.6. Checking for valid JSON data</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private boolean invalidIngestedJson(JsonObject payload) {
+  return !payload.containsKey("deviceId") || #1
+    !payload.containsKey("deviceSync") ||
+    !payload.containsKey("stepsCount");
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQ2hlY2tpbmcgZm9yIEpTT04gZW50cmllcy4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="84" id="84" data-hash="cf65c140b70e6a03e4c06eb923530e40"> 
+   <p>The makeKafkaRecord method of listing 9.7 converts the AMQP message JSON to a Kafka record aimed at the incoming-steps topic.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="85" id="85" data-hash="4e37a296907377f5272bb2a55e75b1b7"> 
+   <h5>Listing 9.7. Preparing a Kafka record</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private KafkaProducerRecord&lt;String, JsonObject&gt; makeKafkaRecord(JsonObject payload) {
+  String deviceId = payload.getString("deviceId");
+  JsonObject recordData = new JsonObject()  <a class="pcalibre pcalibre1" id="CO7-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    .put("deviceId", payload.getString("deviceId"))
+    .put("deviceSync", payload.getLong("deviceSync"))
+    .put("stepsCount", payload.getInteger("stepsCount"));
+  return KafkaProducerRecord.create("incoming.steps", deviceId, recordData);    <a class="pcalibre pcalibre1" id="CO7-2" shape="rect"></a><span class="pcalibre1">#2</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgV2UgY29weSBKU09OIGRhdGEuCiMyIFJlY29yZCB3aXRoIGtleSBkZXZpY2VJZCBhbmQgSlNPTiBkYXRhLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="86" id="86" data-hash="bf13c73122b1b5acb1a8124b379c79d2"> 
+   <p>We could avoid copying all JSON entries manually and just pass the JSON from the AMQP message to the Kafka record. This however helps ensuring no extra data ends up in the Kafka record.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="87" id="87" data-hash="cb69241f49e51d853945a0481b4fe52f"> 
+   <p>The updateProducer field is of type KafkaProducer&lt;String, JsonObject&gt; because it produces messages with string keys, and JSON payloads. Instances of KafkaProducer are created by passing configuration from a Map as in listing 9.8.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="88" id="88" data-hash="127cd878d5a253823952e0df7abe7064"> 
+   <h5>Listing 9.8. Configuring a Kafka producer</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">Map&lt;String, String&gt; kafkaConfig() {
+  Map&lt;String, String&gt; config = new HashMap&lt;&gt;();
+  config.put("bootstrap.servers", "localhost:9092");
+  config.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");   <a class="pcalibre pcalibre1" id="CO8-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  config.put("value.serializer", "io.vertx.kafka.client.serialization.JsonObjectSerializer");   <a class="pcalibre pcalibre1" id="CO8-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  config.put("acks", "1");
+  return config;
+}
+// (...)
+
+// in rxStart()
+updateProducer = KafkaProducer.create(vertx, kafkaConfig());    <a class="pcalibre pcalibre1" id="CO8-3" shape="rect"></a><span class="pcalibre1">#3</span></pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQ2xhc3MgdG8gc2VyaWFsaXplIHZhbHVlcyBmcm9tIHN0cmluZ3MuCiMyIENsYXNzIHRvIHNlcmlhbGl6ZSB2YWx1ZXMgZnJvbSBWZXJ0LnggSnNvbk9iamVjdC4KIzMgQ3JlYXRlIGEgVmVydC54IEthZmthIHByb2R1Y2VyLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="89" id="89" data-hash="259e568d78f641301d17f67ffec6a242"> 
+   <p>The configuration especially specifies the serializer (or deserializer) classes, as Kafka records need to be mapped to Java types. StringSerializer comes from the Kafka client library, and serializes Java strings to Kafka data, while JsonObjectSerializer comes from Vert.x and serializes JsonObject data. You need to specify correct serializer classes for both your keys and values. Similarly you will need to configure deserializers when reading from Kafka topics.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="90" id="90" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+     <h5>Tip</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="91" id="91" data-hash="1457c38933f99ca7b7feb336a1b7706e"> 
+     <p>The Vert.x Kafka module wraps the Java client from the Apache Kafka project, and all configuration key / values match those from the Kafka Java client documentation.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="92" id="92" data-hash="ac8f068f5fe660ac1e90c8f261da65a6"> 
+   <h3 class="calibre29" id="heading_id_14"><a class="pcalibre pcalibre1" id="ingesting-from-http" shape="rect"></a>9.2.3 &nbsp;Ingesting from HTTP</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="93" id="93" data-hash="f44b840eec84cb9a2f3185c7a5649886"> 
+   <p>The code to ingest from HTTP is very similar to that of ingesting with AMQP. The most notable difference is that a HTTP status code needs to be set, so that the device that sent an update knows that ingestion has failed and must be retried later. We first need a HTTP server and router as in listing 9.9.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="94" id="94" data-hash="9033364dd0dc539102feacae8c82fc28"> 
+   <h5>Listing 9.9. HTTP server for ingestion</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">Router router = Router.router(vertx);
+router.post().handler(BodyHandler.create());    #1
+router.post("/ingest").handler(this::httpIngest);
+
+return vertx.createHttpServer()
+  .requestHandler(router)
+  .rxListen(HTTP_PORT)
+  .ignoreElement();</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQm9keUhhbmRsZXIgZGVjb2RlcyBIVFRQIHJlcXVlc3QgYm9kaWVzLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="95" id="95" data-hash="dc62f7c68305461fda8609620cd7fc93"> 
+   <p>The httpIngest method is given in listing 9.10 and is quite similar to handleAmqpMessage.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="96" id="96" data-hash="680040e72fe08883b01cc53a66d9d76d"> 
+   <h5>Listing 9.10. Ingesting updates from HTTP</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void httpIngest(RoutingContext ctx) {
+  JsonObject payload = ctx.getBodyAsJson();
+  if (invalidIngestedJson(payload)) {   <a class="pcalibre pcalibre1" id="CO10-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    logger.error("Invalid HTTP JSON (discarded): {}", payload.encode());
+    ctx.fail(400);  <a class="pcalibre pcalibre1" id="CO10-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    return;
+  }
+  KafkaProducerRecord&lt;String, JsonObject&gt; record = makeKafkaRecord(payload);
+  updateProducer.rxSend(record).subscribe(
+    ok -&gt; ctx.response().end(), <a class="pcalibre pcalibre1" id="CO10-3" shape="rect"></a><span class="pcalibre1">#3</span>
+    err -&gt; {
+      logger.error("HTTP ingestion failed", err);
+      ctx.fail(500);    <a class="pcalibre pcalibre1" id="CO10-4" shape="rect"></a><span class="pcalibre1">#4</span>
+    });
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQ2hlY2sgdGhlIEpTT04gZW50cmllcy4KIzIgQmFkIEpTT04sIGxldCB0aGUgcmVxdWVzdGVyIGtub3cgdGhhdC4KIzMgU3VjY2Vzc2Z1bCBpbmdlc3Rpb24uCiM0IFRoZSBpbmdlc3Rpb24gZmFpbGVkLCBsZXQgdGhlIHJlcXVlc3RlciBrbm93IHRoYXQu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="97" id="97" data-hash="bf405e34b3245f27f1a5e77de739701e"> 
+   <p>HTTP status codes are important to let the client know if the payload is incorrect (400), if the ingestion failed due to some (temporary) error (500), or when the ingestion succeeded (200).</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="98" id="98" data-hash="26758cabf33f1708c81fda0b9b697f96"> 
+   <p>The ingestion service is a good example of integration using different input protocols. Let us now explore more of Apache Kafka with Vert.x through the congratulation service.</p> 
+  </div> 
+  <div class="readable-text" refid="99" id="99" data-hash="42331fb98a0b0be783288dfe4c252891"> 
+   <h2 class="calibre17" id="heading_id_15"><a class="pcalibre pcalibre1" id="sending-congratulation-emails" shape="rect"></a>9.3 &nbsp;Sending congratulation emails</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="100" id="100" data-hash="d26890e902e5a8e40fedc29555988ee0"> 
+   <p>While the ingestion service produces Kafka events, the congratulation service consumes Kafka events. The activity service generate daily step events whenever a device update has been received. Each event contains the number of steps recorded for the originating device on the current day. The congratulation service can observe these events as they are sent to the daily.step.updates Kafka topic, and target the events where the number of steps is above 10000.</p> 
+  </div> 
+  <div class="readable-text" refid="101" id="101" data-hash="df08d380bb43fcabe266bdd5c33e6428"> 
+   <h3 class="calibre29" id="heading_id_16"><a class="pcalibre pcalibre1" id="listening-for-daily-step-update-events" shape="rect"></a>9.3.1 &nbsp;Listening for daily step update events</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="102" id="102" data-hash="92ff4964e71d3d3b5b1f05349342d3f9"> 
+   <p>The events sent to the daily.step.updates Kafka topic are JSON data with the following content:</p> 
+  </div> 
+  <ul class="itemizedlist"> 
+   <li class="listitem readable-text scrambled" refid="103" id="103" data-hash="4e049ed5628ccd27445d6e1850838692"> <code class="code">deviceId</code> zj rkp vediec tfeienidri, qsn<br> </li> 
+   <li class="listitem readable-text scrambled" refid="104" id="104" data-hash="93a962efea7c70e76ad245c4b49ddb2c"> <code class="code">timestamp</code> aj ykr atmtspemi wngv yro tenve csw edprcudo nj rbx vatyciti erisvce, zgn<br> </li> 
+   <li class="listitem readable-text scrambled" refid="105" id="105" data-hash="8276f8148758613e08b12ffea1c9fee3"> <code class="code">stepsCount</code> aj xrp brumne lv estps tkl yro nrerctu yqz.<br> </li> 
+  </ul> 
+  <div class="readable-text scrambled" refid="106" id="106" data-hash="9771745671860c8579f89c15c193e62d"> 
+   <p>The Kafka records also have a key which is the concatenation of several parameters: deviceId:year-month-day. In this scheme all records of device 1a2b produced on October 6th 2019 have the key 1a2b:2019-10-06. As we will shortly see, the key will be useful not just to ensure that events for a given device are consumed in order, but also to ensure that we don’t send more than 1 congratulation email per day.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="107" id="107" data-hash="7aeb772239583a04aa1b758be74f852f"> 
+   <p>The pipeline for processing daily steps event is given in figure 9.3.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="108" id="108" data-hash="618bb0c9daef3730c23d286031dbef17"> 
+   <h5 id="sendmail-pipeline">Figure 9.3. Pipeline from daily step counts to congratulation emails</h5> 
+   <img alt="sendmail pipeline" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/sendmail-pipeline.png" width="975" loading="lazy" height="273" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text" refid="109" id="109" data-hash="448c315075b8288f4283f2b26fb2baa1"> 
+   <p>Daily step updates flow from the <code class="code">daily.step.updates</code> Kafka topic, then:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="110" id="110" data-hash="c03771dbfcc5d8009c43d22fcc1f7d48"> vw addsric setvne hwere xdr emrbnu el tseps jc afzx zrdn 10000, rqon<br> </li> 
+   <li class="listitem readable-text scrambled" refid="111" id="111" data-hash="9b519badd418fa14794ffe90c6b86a48"> kw daircsd teensv lkt hwich cn envte wpjr rbv mozz xed zcq eyralad vkng ceseprods, vnur<br> </li> 
+   <li class="listitem readable-text scrambled" refid="112" id="112" data-hash="48d3eb80e4acb8f53ef5ecf76f6a6656"> wx hona sn aeilm.<br> </li> 
+  </ol> 
+  <div class="readable-text" refid="113" id="113" data-hash="951e91e6a8e025cfacb7c0b5927fc523"> 
+   <p>Listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/congrats-main-pipeline" shape="rect" title="Example 9.11. Kafka RxJava pipeline for receiving and processing daily step updates">9.11</a> contains the the corresponding RxJava pipeline.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="114" id="114" data-hash="95c316a969931d02d7a8a852c4bb80c9"> 
+   <h5>Listing 9.11. Kafka RxJava pipeline for receiving and processing daily step updates</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">KafkaConsumer.&lt;String, JsonObject&gt;create(vertx, KafkaConfig.consumerConfig("congrats-service"))
+  .subscribe("daily.step.updates")  <a class="pcalibre pcalibre1" id="CO11-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  .toFlowable()
+  .filter(this::above10k) <a class="pcalibre pcalibre1" id="CO11-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  .distinct(KafkaConsumerRecord::key) <a class="pcalibre pcalibre1" id="CO11-3" shape="rect"></a><span class="pcalibre1">#3</span>
+  .flatMapSingle(this::sendmail)  <a class="pcalibre pcalibre1" id="CO11-4" shape="rect"></a><span class="pcalibre1">#4</span>
+  .doOnError(err -&gt; logger.error("Woops", err))
+  .retryWhen(this::retryLater)  <a class="pcalibre pcalibre1" id="CO11-5" shape="rect"></a><span class="pcalibre1">#5</span>
+  .subscribe(mailResult -&gt; logger.info("Congratulated {}", mailResult.getRecipients()));  <a class="pcalibre pcalibre1" id="CO11-6" shape="rect"></a><span class="pcalibre1">#6</span></pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgU3Vic2NyaWJlIHRvIHRoZSBLYWZrYSB0b3BpYy4KIzIgRmlsdGVyIG91dCBldmVudHMgd2l0aCBsZXNzIHRoYW4gMTAwMDAgc3RlcHMuCiMzIERpc2NhcmQgZXZlbnRzIGZvciB3aGljaCBhIHByZXZpb3VzIGV2ZW50IHdpdGggdGhlIHNhbWUga2V5IGhhcyBiZWVuIHByb2Nlc3NlZC4KIzQgQXN5bmNocm9ub3VzIG9wZXJhdGlvbiB0byBzZW5kIGFuIGVtYWlsLgojNSBSZXRyeSBvbiBlcnJvci4KIzYgTG9nIGVhY2ggc3VjY2Vzc2Z1bCBjb25ncmF0dWxhdGlvbi4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="115" id="115" data-hash="9c0cfc67b3905ade81972cf768f114f9"> 
+   <p>The sample uses the RxJava binding to subscribe to a Kafka topic as a Flowable for Kafka records. We then use the filter combinator to filter out records with less than 10000 steps, and use the predicate method from listing 9.12.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="116" id="116" data-hash="f2feffa183486e52b3287ed24a9d976a"> 
+   <h5>Listing 9.12. Predicate for events with at least 10000 steps</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private boolean above10k(KafkaConsumerRecord&lt;String, JsonObject&gt; record) {
+  return record.value().getInteger("stepsCount") &gt;= 10_000; <a class="pcalibre pcalibre1" id="CO12-1" shape="rect"></a><span class="pcalibre1">#1</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUHJlZGljYXRlIG9uIEpTT04gZGF0YS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="117" id="117" data-hash="96d28bc5d6a979a9fa829027e7e64f96"> 
+   <p>The distinct combinator ensures a single event by Kafka record key right after filter. This is to avoid sending more than one congratulation email to a user on a given day, as we could easily have a first event with, say, 10100 steps, followed later by another event with 10600 steps and so on. Note that this design is not 100% bullet-proof, as it requires storing already processed key values in memory, and upon a service restart we could accidentally send a second email. This is a reasonable trade-off with our example compared to using a persistent data store just to keep track of when an email was last sent to a user.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="118" id="118" data-hash="73ade7e01f7bff696b4c527599035965"> 
+   <p>The rest of the pipeline uses a similar event processing and retryWhen logic to re-subscribe on errors. The sendmail method is an asynchronous operation to send an email, let us now see how it works.</p> 
+  </div> 
+  <div class="readable-text" refid="119" id="119" data-hash="9f49ad486e8c1ba7481639d15adbb1e6"> 
+   <h3 class="calibre29" id="heading_id_17"><a class="pcalibre pcalibre1" id="sending-emails" shape="rect"></a>9.3.2 &nbsp;Sending emails</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="120" id="120" data-hash="daefef3807394209f07b219fbc105688"> 
+   <p>The vertx-mail-client module offers a SMTP client. Listing 9.13 shows how to create such a client.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="121" id="121" data-hash="433108fbcebc5524e0cbc2fd16032fee"> 
+   <h5>Listing 9.13. Creating a SMTP client</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">MailClient mailClient = MailClient.createShared(vertx, MailerConfig.config()); #1</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQ3JlYXRlIGEgc2hhcmVkIGluc3RhbmNlLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="122" id="122" data-hash="06071d5d03e6375a2d526adc2fb63558"> 
+   <p>As with many other Vert.x clients, we obtain an instance through a factory method, pass a Vertx context as well as some parameters. The MailerConfig class provides a method to retrieve configuration data as in listing 9.14.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="123" id="123" data-hash="7231dddf15ebedb5133cd70d99afbe05"> 
+   <h5>Listing 9.14. Mail client configuration</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">class MailerConfig {
+  static MailConfig config() {
+    return new MailConfig()
+      .setHostname("localhost") #1
+      .setPort(1025); #2
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgU2VydmVyIGhvc3QuCiMyIFNlcnZlciBwb3J0Lg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="124" id="124" data-hash="dd85c7cdba8cd05a5a395e9a9e2540b6"> 
+   <p>Again, these hard-coded values are fine for testing purposes and keeping our code simple. The values are for connecting to mailhog, the testing SMTP server that we use from a Docker container. The MailConfig class supports more configuration options like SSL, authentication method, credentials, etc.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="125" id="125" data-hash="330ee51fd03067978d673abdbea7d23a"> 
+   <p>A matching daily steps update Kafka event applies to a device: it does not contain the name of the owner neither the email address. Before we can send an email, we must first fetch the missing information (name and email) from the user profile service. We thus need 2 requests to that service:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="126" id="126" data-hash="1a83767d087aca29b478623821d30b6d"> s rteques xl roq mltx <code class="code">/owns/deviceId</code> rx krd rkg cytk cmnk, nkqr<br> </li> 
+   <li class="listitem readable-text scrambled" refid="127" id="127" data-hash="0347cbf5a606c32210218b298157487a"> c ueqters vl rgk lmkt <code class="code">/username</code> rk vpr rod tocg iferpol cnp teeevrir rvy eamli ddrases.<br> </li> 
+  </ol> 
+  <div class="readable-text" refid="128" id="128" data-hash="ca57fa371929646e4bf73d696c14172f"> 
+   <p>The <code class="code">sendmail</code> method is given in listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-9/v-10/sendmail" shape="rect" title="Example 9.15. Implementation of the sendmail method">9.15</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="129" id="129" data-hash="0852baabdf30f480f9beca554227bfbe"> 
+   <h5>Listing 9.15. Implementation of the <code class="code1">sendmail</code> method</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private Single&lt;MailResult&gt; sendmail(KafkaConsumerRecord&lt;String, JsonObject&gt; record) {
+  String deviceId = record.value().getString("deviceId"); <a class="pcalibre pcalibre1" id="CO15-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  Integer stepsCount = record.value().getInteger("stepsCount");
+  return webClient
+    .get(3000, "localhost", "/owns/" + deviceId)  <a class="pcalibre pcalibre1" id="CO15-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    .as(BodyCodec.jsonObject())
+    .rxSend()
+    .map(HttpResponse::body)  <a class="pcalibre pcalibre1" id="CO15-3" shape="rect"></a><span class="pcalibre1">#3</span>
+    .map(json -&gt; json.getString("username")) <a class="pcalibre pcalibre1" id="CO15-4" shape="rect"></a><span class="pcalibre1">#4</span>
+    .flatMap(this::getEmail)  <a class="pcalibre pcalibre1" id="CO15-5" shape="rect"></a><span class="pcalibre1">#5</span>
+    .map(email -&gt; makeEmail(stepsCount, email)) <a class="pcalibre pcalibre1" id="CO15-6" shape="rect"></a><span class="pcalibre1">#6</span>
+    .flatMap(mailClient::rxSendMail); <a class="pcalibre pcalibre1" id="CO15-7" shape="rect"></a><span class="pcalibre1">#7</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRXh0cmFjdCB0aGUgZGV2aWNlIGlkZW50aWZpZXIuCiMyIFByZXBhcmUgYSByZXF1ZXN0IHRvIGZpbmQgd2hvIG93bnMgdGhlIGRldmljZS4KIzMgRXh0cmFjdCB0aGUgYm9keSwgd2hpY2ggaXMgYSBKc29uT2JqZWN0LgojNCBFeHRyYWN0IHRoZSB1c2VybmFtZSB2YWx1ZS4KIzUgQXN5bmNocm9ub3VzIG9wZXJhdGlvbiB0byBmZXRjaCB0aGUgZW1haWwgZm9yIHRoZSB1c2VyLgojNiBQcmVwYXJlIGFuIGVtYWlsIG1lc3NhZ2UuCiM3IEFzeW5jaHJvbm91c2x5IHNlbmQgdGhlIGVtYWlsLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="130" id="130" data-hash="f8a86a2f0c7d111f9cb6b92d62a4cfee"> 
+   <p>The sendmail method is another RxJava pipeline that composes asynchronous operations and data processing, illustrated in figure 9.4.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="131" id="131" data-hash="234a0bdbfdfa9333056f9c960e9b8d6e"> 
+   <h5 id="sendmail-get-info">Figure 9.4. Asynchronous operations to prepare then send a congratulation email.</h5> 
+   <img alt="sendmail get info" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/sendmail-get-info.png" width="648" loading="lazy" height="398" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="132" id="132" data-hash="d6ec5579e9e1ee9335d991d2096925af"> 
+   <p>It starts by issuing a HTTP request to the user profile service and find the user name of the device owner, and prepares another request to fetch the user profile data to get the email address. Listing 9.16 provides the implementation of method getEmail.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="133" id="133" data-hash="9667a7fd76d2992408bc288cabc51fed"> 
+   <h5>Listing 9.16. Request to retrieve the email address</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private Single&lt;String&gt; getEmail(String username) {
+  return webClient
+    .get(3000, "localhost", "/" + username)
+    .as(BodyCodec.jsonObject())
+    .rxSend() <a class="pcalibre pcalibre1" id="CO16-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    .map(HttpResponse::body)
+    .map(json -&gt; json.getString("email"));  <a class="pcalibre pcalibre1" id="CO16-2" shape="rect"></a><span class="pcalibre1">#2</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgU2VuZCB0aGUgcmVxdWVzdC4KIzIgS2VlcCBvbmx5IHRoZSBlbWFpbCBhZGRyZXNzLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="134" id="134" data-hash="8374deb93af2000deb6a43ab647b3512"> 
+   <p>The next step is to prepare an email, enclosed in a MailMessage instance as given by the implementation of method makeEmail in listing 9.17.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="135" id="135" data-hash="85f8dab66cec450ef028ddd0065b01b4"> 
+   <h5>Listing 9.17. Preparing an email message</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private MailMessage makeEmail(Integer stepsCount, String email) {
+  return new MailMessage()
+    .setFrom("noreply@tenksteps.tld") #1
+    .setTo(email) #2
+    .setSubject("You made it!") #3
+    .setText("Congratulations on reaching " + stepsCount + " steps today!\n\n- The 10k Steps Team\n");  #4
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQWRkcmVzcyBvZiB0aGUgc2VuZGVyLgojMiBSZWNpcGllbnQgYWRkcmVzcy4KIzMgU3ViamVjdC4KIzQgQm9keS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="136" id="136" data-hash="311b0f2fd2930e13b24bbc808f613b7c"> 
+   <p>Note that for more advanced email formatting you could use a template engine rather than text.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="137" id="137" data-hash="cb93a00afaeb3f223b28a88059b8ed0e"> 
+   <p>Now that you know how to do messaging and event streaming with Vert.x, let’s not forget integration testing to ensure that both the ingestion and congratulation services work correctly.</p> 
+  </div> 
+  <div class="readable-text" refid="138" id="138" data-hash="c51c131d68b64b88a563ee4fb27e8133"> 
+   <h2 class="calibre17" id="heading_id_18"><a class="pcalibre pcalibre1" id="integration-tests" shape="rect"></a>9.4 &nbsp;Integration tests</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="139" id="139" data-hash="6ddda67fc06134a1d5e61534622fcd5d"> 
+   <p>Testing the ingestion service is all about sending "device updates" over AMQP and HTTP, and observe Kafka topics. Conversely testing the congratulations service is about sending events to Kafka topics, and observing emails.</p> 
+  </div> 
+  <div class="readable-text" refid="140" id="140" data-hash="cd071883756fa3c525113abd2a7dcabc"> 
+   <h3 class="calibre29" id="heading_id_19"><a class="pcalibre pcalibre1" id="ingestion-testing" shape="rect"></a>9.4.1 &nbsp;Ingestion testing</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="141" id="141" data-hash="fd781f58d84cb95ebf1b04eb95d674c8"> 
+   <p>Testing the ingestion service requires sending a message over AMQP or HTTP, and then checking that a Kafka record has been emitted, as given in figure 9.5.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="142" id="142" data-hash="86a59d9d281200329cabb4f63bea6399"> 
+   <h5 id="ingester-test">Figure 9.5. Ingestion integration test overview</h5> 
+   <img alt="ingester test" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/ingester-test.png" width="839" loading="lazy" height="393" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="143" id="143" data-hash="cf756c80448a2ef2e65ae4e2d2c77cd0"> 
+   <p>The IntegrationTest class in the ingestion service source code is using JUnit 5 and Docker containers to start an AMQP broker, Apache Kafka and Apache ZooKeeper. Listing 9.18 shows the test preparation.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="144" id="144" data-hash="5d29da469e8bd06bc887cbcfc584091f"> 
+   <h5>Listing 9.18. Ingestion test preparation</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">@BeforeEach
+void setup(Vertx vertx, VertxTestContext testContext) {
+  kafkaConsumer = KafkaConsumer.create(vertx, kafkaConfig()); #1
+  amqpClient = AmqpClient.create(vertx, amqClientOptions());  #2
+  KafkaAdminClient adminClient = KafkaAdminClient.create(vertx, kafkaConfig()); #3
+  vertx
+    .rxDeployVerticle(new IngesterVerticle()) #4
+    .delay(500, TimeUnit.MILLISECONDS, RxHelper.scheduler(vertx))
+    .flatMapCompletable(id -&gt; adminClient.rxDeleteTopics(singletonList("incoming.steps"))) #5
+    .onErrorComplete()
+    .subscribe(testContext::completeNow, testContext::failNow);
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgS2Fma2EgY29uc3VtZXIuCiMyIEFNUVAgY2xpZW50LgojMyBDbGllbnQgdG8gYWRtaW5pc3RlciBLYWZrYS4KIzQgRGVwbG95IHRoZSBpbmdlc3Rpb24gdmVydGljbGUuCiM1IERlbGV0ZSBhbGwgaW5jb21pbmcuc3RlcHMgdG9waWNzIGlmIHRoZXkgZXhpc3Qu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="145" id="145" data-hash="cf22b4075c94386db6909f05a461798f"> 
+   <p>The preparation consists in deploying the IngesterVerticle verticle, and then deleting any existing incoming.steps topic. This is useful to ensure that tests do not pollute each other with remaining Kafka events. Note the onErrorComplete combinator: it ensures progress because deleting topics raises an error when they don’t exist. We want to run the tests when incoming.steps does not exist, which is typically the case of the first test being run. Of course onErrorComplete can mask a deployment failure of IngesterVerticle, but we will find out in test executions anyway.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="146" id="146" data-hash="7d0c31c5fb4767ecf06bb2d7a1f7721e"> 
+   <p>Listing 9.19 gives the preamble of the test case where a well-formed AMQP message is being ingested.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="147" id="147" data-hash="e609d1d09898bf3f0f9dda2a73ba5045"> 
+   <h5>Listing 9.19. AMQP ingestion test preamble</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">@Test
+@DisplayName("Ingest a well-formed AMQP message")
+void amqIngest(VertxTestContext testContext) {
+  JsonObject body = new JsonObject().put("deviceId", "123")
+    .put("deviceSync", 1L).put("stepsCount", 500);
+  amqpClient.rxConnect()  #1
+    .flatMap(connection -&gt; connection.rxCreateSender("step-events"))  #2
+    .subscribe(sender -&gt; {
+        AmqpMessage msg = AmqpMessage.create()  #3
+          .durable(true)
+          .ttl(5000)
+          .withJsonObjectAsBody(body).build();
+        sender.send(msg); #4
+      },
+      testContext::failNow);
+  // (...)
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgT3BlbiBhbiBBTVFQIGNsaWVudCBjb25uZWN0aW9uLgojMiBDcmVhdGUgYSBzZW5kZXIgdG8gdGhlIHN0ZXAtZXZlbnRzIGRlc3RpbmF0aW9uLgojMyBDcmVhdGUgYW4gQU1RUCBtZXNzYWdlLgojNCBTZW5kIHRoZSBtZXNzYWdlLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="148" id="148" data-hash="1b24dfd829be823da33aee51d81ecb80"> 
+   <p>The AMQP client sends a message which we know is well-formed, as its body contains all required JSON entries. Once this is done, we need to check that a Kafka record has been sent, as in listing 9.20.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="149" id="149" data-hash="0ef522e31cd23eac8544b60d5eab9221"> 
+   <h5>Listing 9.20. AMQP ingestion test: checking for a Kafka record</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">kafkaConsumer.subscribe("incoming.steps") #1
+  .toFlowable()
+  .subscribe(
+    record -&gt; testContext.verify(() -&gt; {  #2
+      assertThat(record.key()).isEqualTo("123");
+      JsonObject json = record.value();
+      assertThat(json.getString("deviceId")).isEqualTo("123");
+      assertThat(json.getLong("deviceSync")).isEqualTo(1L);
+      assertThat(json.getInteger("stepsCount")).isEqualTo(500);
+      testContext.completeNow();  #3
+    }),
+    testContext::failNow);  #4</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgU3Vic2NyaWJlIHRvIHRoZSBLYWZrYSB0b3BpYy4KIzIgUGVyZm9ybSBhc3NlcnRpb25zIG9uIHRoZSBLYWZrYSByZWNvcmQuCiMzIFRoZSB0ZXN0IHBhc3Nlcy4KIzQgRmFpbCB0aGUgdGVzdCBvbiBhbnkgZXJyb3Iu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="150" id="150" data-hash="e2208aacad6ba3dddf06a3ec9caf2ec9"> 
+   <p>Of course we also need to test what happens when an incorrect message is sent, like an empty JSON document. We must check that no Kafka record is being emitted as in listing 9.21.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="151" id="151" data-hash="c43f2f54ba143c1b45c292008645d005"> 
+   <h5>Listing 9.21. Ingesting a bad JSON document</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">@Test
+@DisplayName("Ingest a badly-formed AMQP message and observe no Kafka record")
+void amqIngestWrong(Vertx vertx, VertxTestContext testContext) {
+  JsonObject body = new JsonObject(); #1
+  // (...)  #2
+
+  kafkaConsumer.subscribe("incoming.steps")
+    .toFlowable()
+    .timeout(3, TimeUnit.SECONDS, RxHelper.scheduler(vertx))  #3
+    .subscribe(
+      record -&gt; testContext.failNow(new IllegalStateException("We must not get a record")),
+      err -&gt; {
+        if (err instanceof TimeoutException) {  #4
+          testContext.completeNow();
+        } else {
+          testContext.failNow(err);
+        }
+      });
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRW1wdHkgSlNPTi4KIzIgU2VuZCBpdCwgc2FtZSBjb2RlIGFzIGluIGxpc3RpbmcgOS4yMC4KIzMgV2FpdCBmb3IgMyBzZWNvbmRzLgojNCBDaGVjayB0aGF0IHRoaXMgaXMgdGhlIGVycm9yIHdlIGV4cGVjdGVkIQ=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="152" id="152" data-hash="abca8343acfaa30466fc2ff71c3b3b4c"> 
+   <p>The timeout in the RxJava pipeline is important as we need to let some time lapse to be sure that no Kafka record has been sent. The remainder of the IntegrationTest class is quite similar with 2 test cases for the HTTP ingestion: one that checks what happens when a correct payload is sent, and one where the payload is an empty JSON document.</p> 
+  </div> 
+  <div class="readable-text" refid="153" id="153" data-hash="884efb3e8a67cdd8c6d00cda1a75d383"> 
+   <h3 class="calibre29" id="heading_id_20"><a class="pcalibre pcalibre1" id="congratulation-email-testing" shape="rect"></a>9.4.2 &nbsp;Congratulation email testing</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="154" id="154" data-hash="baa00e5144af32d3b1e2df6ca5be137f"> 
+   <p>Testing the behavior of the congratulations service is more involving than the ingestion, as there are more moving parts in the test environment as illustrated in figure 9.6.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="155" id="155" data-hash="8abb7638f6ebdb983bcec702c3c4c5cf"> 
+   <h5 id="congrats-test">Figure 9.6. Congratulation service integration test overview</h5> 
+   <img alt="congrats test" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/congrats-test.png" width="952" loading="lazy" height="604" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="156" id="156" data-hash="6355aa733ab01179e36c7f2246e05313"> 
+   <p>The goal is to send Kafka records, and then observe the emails that have been sent (or not!). Interestingly mailhog is not just a SMTP server: it also provides a web interface and a HTTP API to simulate an email inbox. This allows us to perform tests by sending Kafka records, and then check what emails have been received in the inbox.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="157" id="157" data-hash="80c2e5eb59ff3d0653c0d8378dd6b545"> 
+   <p>The CongratsTest class features an initialization method prepare that creates a Kafka producer (to send Kafka events) and a Vert.x web client (to query the inbox). The steps to prepare the environment in method prepare are given in listing 9.22.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="158" id="158" data-hash="19065ff0829fba690c4c31f4ab37a94c"> 
+   <h5>Listing 9.22. Preparing the congratulation service integration test</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">KafkaAdminClient adminClient = KafkaAdminClient.create(vertx, conf);
+adminClient
+  .rxDeleteTopics(Arrays.asList("incoming.steps", "daily.step.updates"))  #1
+  .onErrorComplete()
+  .andThen(vertx.rxDeployVerticle(new CongratsVerticle()))  #2
+  .ignoreElement()
+  .andThen(vertx.rxDeployVerticle(new FakeUserService())) #3
+  .ignoreElement()
+  .andThen(webClient.delete(8025, "localhost", "/api/v1/messages").rxSend())  #4
+  .ignoreElement()
+  .subscribe(testContext::completeNow, testContext::failNow);</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRGVsZXRlIEthZmthIHRvcGljcy4KIzIgRGVwbG95IHRoZSB2ZXJ0aWNsZS4KIzMgRGVwbG95IGEgbW9jayB1c2VyIGFjY291bnQgc2VydmljZS4KIzQgRGVsZXRlIGFsbCBtZXNzYWdlcyBmcm9tIHRoZSBpbmJveC4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="159" id="159" data-hash="a3c6e52289d4126c3f0b599f64c54ff8"> 
+   <p>We first delete existing Kafka topics, then deploy the verticle under test. We also deploy a verticle to mock the user profile service, and delete all messages from the inbox by making a HTTP DELETE query to the mailhog instance.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="160" id="160" data-hash="ca13b4d59a31af64e0b449eed149e555"> 
+   <p>The FakeUserService verticle found in the test sources exposes a HTTP service with the just the minimal level of functionality to replace the real user profile service in our tests. All requests to find who owns a device point to user Foo, and retrieving the details of user Foo give just the username and email. Listing 9.23 shows an excerpt with the code for answering a user details request with those of user Foo and just the JSON entries needed for CongratsVerticle to operate.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="161" id="161" data-hash="3c7495cf8a3dba2fd3c670b8ab0c9bc2"> 
+   <h5>Listing 9.23. Excerpt of the <code class="code1">FakeUserService</code> class</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">router.get("/:username").handler(this::username); #1
+//(...)
+
+private void username(RoutingContext ctx) {
+  logger.info("User data request {}", ctx.request().path());
+  JsonObject notAllData = new JsonObject()  #2
+    .put("username", "Foo")
+    .put("email", "foo@mail.tld");
+  ctx.response()
+    .putHeader("Content-Type", "application/json")
+    .end(notAllData.encode());
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUm91dGUgZm9yIGEgdXNlciBwcm9maWxlIGluZm8uCiMyIEpTT04gd2l0aCBqdXN0IHRoZSByZXF1aXJlZCBkYXRhIGZvciB0aGUgc2VydmljZSBhbmQgdGVzdC4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="162" id="162" data-hash="b463f0209784fa70c12ddc66cc0c05a8"> 
+   <p>This way we have a good isolation of the congratulation service for testing. We could also have deployed the real user profile service, but that would have involved preparing a database with some data. It is always better to replace dependant services with mock ones when we can.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="163" id="163" data-hash="d208101a206abb64cb31773e04c0d4ed"> 
+   <p>Listing 9.24 is the full test case for checking that no email is sent on a Kafka record with less than 10000 steps.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="164" id="164" data-hash="ff50874724b46d16396b7fe28d235b3d"> 
+   <h5>Listing 9.24. Checking that no mail has been sent for less than 10000 steps</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">@Test
+@DisplayName("No email must be sent below 10k steps")
+void checkNothingBelow10k(Vertx vertx, VertxTestContext testContext) {
+  producer
+    .rxSend(record("123", 5000))  #1
+    .ignoreElement()
+    .delay(3, TimeUnit.SECONDS, RxHelper.scheduler(vertx))  #2
+    .andThen(webClient
+      .get(8025, "localhost", "/api/v2/search?kind=to&amp;query=foo@mail.tld")  #3
+      .as(BodyCodec.jsonObject()).rxSend())
+    .map(HttpResponse::body)
+    .subscribe(
+      json -&gt; {
+        testContext.verify(() -&gt; assertThat(json.getInteger("total")).isEqualTo(0));  #4
+        testContext.completeNow();
+      },
+      testContext::failNow);
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgS2Fma2EgcmVjb3JkIGZvciBkZXZpY2UgMTIzIGFuZCA1MDAwIHN0ZXBzLgojMiBXYWl0IGZvciAzIHNlY29uZHMgYWZ0ZXIgdGhlIG1lc3NhZ2UgaGFzIGJlZW4gc2VudC4KIzMgUXVlcnkgYWxsIG1lc3NhZ2VzIGZvciBlbWFpbCBmb29AbWFpbC50bGQuCiM0IENoZWNrIHRoYXQgdGhlcmUgaXMgbm8gbWVzc2FnZS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="165" id="165" data-hash="47c2a16abea9c5bf6454b0641da94ff1"> 
+   <p>The mailhog API allows to check what messages have been sent. Listing 9.25 checks that an email is sent for more than 10000 steps.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="166" id="166" data-hash="d22fe51adf019ce55199f0eadfc8c4fb"> 
+   <h5>Listing 9.25. Checking that an email is sent for more than 10000 steps</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">producer
+  .rxSend(record("123", 11_000))  #1
+  .ignoreElement()
+  .delay(3, TimeUnit.SECONDS, RxHelper.scheduler(vertx))
+  .andThen(webClient
+    .get(8025, "localhost", "/api/v2/search?kind=to&amp;query=foo@mail.tld")
+    .as(BodyCodec.jsonObject()).rxSend())
+  .map(HttpResponse::body)
+  .subscribe(
+    json -&gt; {
+      testContext.verify(() -&gt; assertThat(json.getInteger("total")).isEqualTo(1));  #2
+      testContext.completeNow();
+    },
+    testContext::failNow);</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQSByZWNvcmQgd2l0aCAxMTAwMCBzdGVwcy4KIzIgV2UgbXVzdCBoYXZlIDEgbWVzc2FnZS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="167" id="167" data-hash="ae309d9a75601128a6dd290a9ca6c7de"> 
+   <p>The last test case in method checkNotTwiceToday checks that only 1 email is sent for 2 successive records with more than 10000 steps. We do not reproduce the code here due to the verbosity but you can get it from the example source code repository.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="168" id="168" data-hash="35f00e44d6c479cea031bb839a247db5"> 
+   <p>This concludes the design, implementation and testing of 2 services that used messaging and event streaming. The next chapter focuses on Vert.x and data sources.</p> 
+  </div> 
+  <div class="readable-text" refid="169" id="169" data-hash="06ee2de057593ad2253f8bd1c6f983fe"> 
+   <h2 class="calibre17" id="heading_id_21"><a class="pcalibre pcalibre1" id="summary" shape="rect"></a>9.5 &nbsp;Summary</h2> 
+  </div> 
+  <ul class="itemizedlist"> 
+   <li class="listitem readable-text" refid="170" id="170" data-hash="80e310fc6bf7f0f32e92c80e9b811935"> AMQP is a standard protocol for message brokers, and we saw how to consume and produce AQMP messages with Vert.x and Apache ActiveMQ.<br> </li> 
+   <li class="listitem readable-text" refid="171" id="171" data-hash="cb2e6441b6d32365797e51220d96db94"> Apache Kafka is an event-streaming middleware that allow services to replay events at will. Vert.x provides an efficient integration with Kafka.<br> </li> 
+   <li class="listitem readable-text" refid="172" id="172" data-hash="f77b2d48eb2793e3f4265291590e30cf"> RxJava allows us to write event processing pipelines in a declarative fashion, and with built-in error recovery.<br> </li> 
+   <li class="listitem readable-text" refid="173" id="173" data-hash="c1a60db16c6719971ddaec0a52818adf"> We explored strategies for writing integration tests with AMQP, Kafka and test containers by sending messages from tests to replace external components.<br> </li> 
+   <li class="listitem readable-text" refid="174" id="174" data-hash="086b7e33004ca2363288f426b029586b"> <em class="calibre9">mailhog</em> is a test-friendly SMTP server that exposes a convenient API to inspect what emails have been sent.<br> </li> 
+  </ul> 
+  <div class="readable-text" refid="175" id="175" data-hash="a87360f22f907ccc8096f98dbfc1ac55"> 
+   <h2 class="calibre17" id="heading_id_22"><a class="pcalibre pcalibre1" id="references" shape="rect"></a>9.6 &nbsp;References</h2> 
+  </div> 
+  <div class="bibliodiv"> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e6630" shape="rect"></a> 
+    <div class="readable-text" refid="176" id="176" data-hash="6bdb1573e9dfbbeabf98165da113d19b"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="Kafka" shape="rect"></a>[Kafka] Dylan Scott. Kafka in Action. 2017. Manning Publications. ISBN 9781617295232.</span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e6633" shape="rect"></a> 
+    <div class="readable-text" refid="177" id="177" data-hash="cae439c114056feebcc622fa255c4617"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="AMQ" shape="rect"></a>[AMQ] Bruce Snyder, Dejan Bosanac, and Rob Davies. 2011. Manning Publications. ISBN 9781933988948.</span></p> 
+    </div> 
+   </div> 
+  </div>
+ </body>
+</html>

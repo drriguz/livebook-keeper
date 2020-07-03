@@ -1,0 +1,588 @@
+<html>
+ <head></head>
+ <body>
+  <div class="readable-text" refid="1" id="1" data-hash="5657a0eeb6f281dcc62ef07cbf26963a"> 
+   <h1 class="chaptertitle" id="heading_id_17">6 <a class="pcalibre pcalibre1" id="beyond-the-event-bus" shape="rect"></a>Beyond the event-bus</h1> 
+  </div> 
+  <div class=" introduction-summary"> 
+   <h3 class="intro-header">This chapter covers:</h3> 
+   <ul> 
+    <li class=" readable-text" refid="2" id="2" data-hash="7cab196b0f009f7edfffd5a624cdb851"> exposing services on top of the event-bus,<br> </li> 
+    <li class=" readable-text" refid="3" id="3" data-hash="afc67569410d03a307a0a5faca8682c2"> asynchronous testing of verticles and event-bus services.<br> </li> 
+   </ul> 
+  </div> 
+  <div class="readable-text" refid="4" id="4" data-hash="12bc51666efa2aff748fa66b69d894e8"> 
+   <p>The event-bus is a fundamental tool for articulating event processing in Vert.x, but there is more to it! Event-bus services are useful to expose typed interfaces rather than plain messaging, especially when multiple message types are expected at an event-bus destination. Testing is also an important concept, and we cover here what is different in testing asynchronous Vert.x code compared to traditional testing.</p> 
+  </div> 
+  <div class="readable-text" refid="5" id="5" data-hash="8309a217fed1814fad0ec960eb25781b"> 
+   <p>In this chapter we are going to revisit an earlier example, refactor it to an event-bus service, and show how to test it.</p> 
+  </div> 
+  <div class="readable-text" refid="6" id="6" data-hash="1204979dff69effd982b0c578453eb1e"> 
+   <h2 class="calibre17" id="heading_id_3"><a class="pcalibre pcalibre1" id="revisiting-heat-sensors-with-a-service-api" shape="rect"></a>6.1 &nbsp;Revisiting heat sensors with a service API</h2> 
+  </div> 
+  <div class="readable-text" refid="7" id="7" data-hash="f0a8729e93abaa31713aaf371b478ccb"> 
+   <p>In chapter 3 we had used heat sensors as an example. We had a <code class="code">SensorData</code> verticle that kept the last observed values for each sensor, and that could compute their average using a request / reply communication on the event-bus. To recall the example, listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/flashback" shape="rect" title="Example 6.1. Event-bus based average computation API">6.1</a> has the code for computing the temperatures average.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="8" id="8" data-hash="eb0b6eced357456b593cd9329455db61"> 
+   <h5>Listing&nbsp;6.1.&nbsp;Event-bus based average computation API</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void average(Message&lt;JsonObject&gt; message) {   <a class="pcalibre pcalibre1" id="CO1-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  double avg = lastValues.values().stream()
+    .collect(Collectors.averagingDouble(Double::doubleValue));
+  JsonObject json = new JsonObject().put("average", avg);
+  message.reply(json);                                <a class="pcalibre pcalibre1" id="CO1-2" shape="rect"></a><span class="pcalibre1">#2</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgV2UgcmVjZWl2ZSBhbiBldmVudCBmcm9tIHRoZSBldmVudC1idXMuCiMyIFdlIHJlcGx5IHRvIHRoZSBldmVudC4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="9" id="9" data-hash="256054c671e32567119ab0c4341d6a27"> 
+   <p>This code is tightly coupled with the Vert.x event-bus APIs, as it needs to receive a message and reply to it. Any software component willing to call <code class="code">average</code> has to send a message over the event-bus and expect a response.</p> 
+  </div> 
+  <div class="readable-text" refid="10" id="10" data-hash="e76c14d23060e02f9d16ebcf9c805970"> 
+   <p>Now what if we could <em class="calibre10">just</em> have a regular Java interface with methods to call rather than have to send and receive messages over the event-bus? The interface proposed in listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/hope" shape="rect" title="Example 6.2. Heat sensor API as a Java interface">6.2</a> would be completely agnostic of the event-bus.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="11" id="11" data-hash="c36e949eb7a151eb72cf263cbf30235e"> 
+   <h5>Listing&nbsp;6.2.&nbsp;Heat sensor API as a Java interface</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">public interface SensorDataService {
+  void valueFor(String sensorId, Handler&lt;AsyncResult&lt;JsonObject&gt;&gt; handler); <a class="pcalibre pcalibre1" id="CO2-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  void average(Handler&lt;AsyncResult&lt;JsonObject&gt;&gt; handler);                   <a class="pcalibre pcalibre1" id="CO2-2" shape="rect"></a><span class="pcalibre1">#2</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQXN5bmNocm9ub3VzbHkgYXNrIGZvciBhIHNlbnNvciB2YWx1ZS4KIzIgQXN5bmNocm9ub3VzbHkgYXNrIGZvciB0aGUgYXZlcmFnZS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="12" id="12" data-hash="df6c66a38f70d39b7d3e5cb91fd5359e"> 
+   <p>The proposed interface has methods with trailing callback parameters to get notified asynchronously of responses and errors. The Handler&lt;AsyncResult&lt;T&gt;&gt; type is commonly used for callbacks in Vert.x APIs where T can be anything, but is typically a JSON type.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="13" id="13" data-hash="6620753bb0ea87026fdcdd1b1f3b3824"> 
+   <p>The interface of listing 6.2 is actually what we are aiming for with event-bus services. Let us now revisit the heat sensors example by replacing event-bus interactions with a SensorDataService typed Java interface.</p> 
+  </div> 
+  <div class="readable-text" refid="14" id="14" data-hash="f3f9ababfe083b6cddc205ff13393865"> 
+   <h2 class="calibre17" id="heading_id_4"><a class="pcalibre pcalibre1" id="return-of-the-rpcs" shape="rect"></a>6.2 &nbsp;Return of the RPCs</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="15" id="15" data-hash="4160b615561e4951c41fcabcde75c0fc"> 
+   <p>You may already be familiar with remote procedure calls, a popular abstraction in distributed computing [RPC]. RPCs where introduced to hide network communications when calling functions running on another machine (the server). The idea is that a local function acts as a proxy, sends a message with the call arguments over the network to the server, and the server then calls the real function. The response is then sent back to the proxy, and the client has the illusion of having called a regular, local function.</p> 
+  </div> 
+  <div class="readable-text" refid="16" id="16" data-hash="aab9c60b8f94c395f6b47fe7fe4a8538"> 
+   <p>Vert.x event-bus services are a form of <em class="calibre10">asynchronous RPC</em>:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="17" id="17" data-hash="3ee41222d312c9526f7ba2c6cf4b90ec"> c ecresiv aetnseucalsp c xzr xl repasioton, jkfv <code class="code">SensorDataService</code> tmxl gsitnil <a class="pcalibre para2" href="/book/vertx-in-action/chapter-6/v-10/hope" shape="rect" title="Example 6.2. Heat sensor API as a Java interface">6.2</a>, nyz<br> </li> 
+   <li class="listitem readable-text scrambled" refid="18" id="18" data-hash="f2ad235cb0ef1dff30c82cc6404080a1"> c csreive zj bddsecire hp c lurearg Icso RLJ wdrj hsmoedt klt edxsepo rsnaotepoi, cnu<br> </li> 
+   <li class="listitem readable-text scrambled" refid="19" id="19" data-hash="e1d86d71896cce7f4ad4e0d911a555c0"> rdkb ory etrqeseru nzp tammielenntoip kq vrn honk rv ictdylre ckhf yjwr envte-hzg sasemges.<br> </li> 
+  </ol> 
+  <div class="readable-text scrambled" refid="20" id="20" data-hash="8831dfb0d9d9c77f5aeb79c7c1b85a3c"> 
+   <p>Figure 6.1 illustrates the various components at stake when invoking the average method of the SensorDataService interface.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="21" id="21" data-hash="9371ba0b4e47b311dbac2967cf715986"> 
+   <h5 id="service-proxies">Figure&nbsp;6.1.&nbsp;How service proxies work</h5> 
+   <img alt="beb service proxy" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/beb-service-proxy.png" width="775" loading="lazy" height="600" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="22" id="22" data-hash="3a11d6dff0b9930c536b4fc0b26bca9c"> 
+   <p>The client code invokes method average on a service proxy. This is an object that implements the SensorDataService interface, and then sends a message on the event-bus to destination sensor.data-service (this can be configured). The message body contains the method call parameter values, so since average only takes a callback, the body is empty. The message also has a action header that indicates which method is being called.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="23" id="23" data-hash="c09d86281ad7323a5bdc73fd3cee8c00"> 
+   <p>A proxy handler listens to the sensor.data-service destination and dispatches method calls based on the message action header and body. The actual SensorDataService implementation is being used here, and the average method is being called. The proxy handler then replies to the event-bus message with a value passed through the average method callback. In turn the client receives the reply through the service proxy, which in turn passes the reply to the callback from the call on the client side.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="24" id="24" data-hash="bbbc7cbf6836acc9fd83fd185c588a09"> 
+   <p>This model can simplify dealing with the event-bus, especially when many operations need to be exposed. It then makes sense to define a Java interface as an API rather than manually dealing with messages.</p> 
+  </div> 
+  <div class="readable-text" refid="25" id="25" data-hash="5336055dc68f4e45150d84425b7d25a4"> 
+   <h2 class="calibre17" id="heading_id_5"><a class="pcalibre pcalibre1" id="defining-a-service-interface" shape="rect"></a>6.3 &nbsp;Defining a service interface</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="26" id="26" data-hash="800a5a389fb2fea22fc77f4a54bf90d4"> 
+   <p>Listing 6.2 has the interface that we want to have for SensorDataService, but there is a little more code to add. To develop an event-bus service, you need to:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="27" id="27" data-hash="7024164b0c6f598649a8adb02e3e1fd4"> trewi z Iscx ercefinta zrry essertpc s vwl nonnvcitoes,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="28" id="28" data-hash="332cad3653134973f44aa7177735fb99"> rwtie sn enptitnimalemo.<br> </li> 
+  </ol> 
+  <div class="readable-text scrambled" refid="29" id="29" data-hash="933a05dcf74e621239d03b281588dabd"> 
+   <p>Vert.x does not rely on magic through bytecode engineering or reflection at runtime, so service proxies and handlers need to be written and compiled. Fortunately Vert.x comes with code generators, so you will generate both the service proxies and handlers at compilation time rather than write them yourself.</p> 
+  </div> 
+  <div class="readable-text" refid="30" id="30" data-hash="37ecd2ed558b9ad64ee613ea584672c8"> 
+   <p>The complete <code class="code">SensorDataService</code> interface is detailed in listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/sensordataservice" shape="rect" title="Example 6.3. Sensor data service">6.3</a>.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="31" id="31" data-hash="45fab5332c46ceab2ba2a7227f6f4f7f"> 
+   <h5>Listing&nbsp;6.3.&nbsp;Sensor data service</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">@ProxyGen <a class="pcalibre pcalibre1" id="CO3-1" shape="rect"></a><span class="pcalibre1">#1</span>
+public interface SensorDataService {
+
+  static SensorDataService create(Vertx vertx) {  <a class="pcalibre pcalibre1" id="CO3-2" shape="rect"></a><span class="pcalibre1">#2</span>
+    return new SensorDataServiceImpl(vertx);
+  }
+
+  static SensorDataService createProxy(Vertx vertx, String address) { <a class="pcalibre pcalibre1" id="CO3-3" shape="rect"></a><span class="pcalibre1">#3</span>
+    return new SensorDataServiceVertxEBProxy(vertx, address);
+  }
+
+  void valueFor(String sensorId, Handler&lt;AsyncResult&lt;JsonObject&gt;&gt; handler); <a class="pcalibre pcalibre1" id="CO3-4" shape="rect"></a><span class="pcalibre1">#4</span>
+
+  void average(Handler&lt;AsyncResult&lt;JsonObject&gt;&gt; handler); <a class="pcalibre pcalibre1" id="CO3-5" shape="rect"></a><span class="pcalibre1">#5</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhpcyBhbm5vdGF0aW9uIGlzIHVzZWQgdG8gZ2VuZXJhdGUgYW4gZXZlbnQtYnVzIHByb3h5LgojMiBGYWN0b3J5IG1ldGhvZCBmb3IgY3JlYXRpbmcgYSBzZXJ2aWNlIGluc3RhbmNlLgojMyBGYWN0b3J5IG1ldGhvZCBmb3IgY3JlYXRpbmcgYSBwcm94eS4KIzQgT3BlcmF0aW9uIHRoYXQgdGFrZXMgYSBwYXJhbWV0ZXIgYW5kIGEgY2FsbGJhY2suCiM1IE9wZXJhdGlvbiB0aGF0IHRha2VzIG5vIHBhcmFtZXRlciBhbmQgYSBjYWxsYmFjay4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="32" id="32" data-hash="cd52de33934b9cbc77533b93dabc6341"> 
+   <p>The @ProxyGen annotation is used to mark an event-bus service interface so as to generate the proxy code. The methods in a service interface need to adhere to a few conventions, notably that of having a callback as the last parameter. You will be tempted to use return values rather than callbacks, but remember that we are dealing with asynchronous operations, so we need callbacks!</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="33" id="33" data-hash="963102e646809569d28e6740f4c75b58"> 
+   <p>It is idiomatic for service interfaces to have factory methods for both the service implementations (create) and proxies (createProxy). These methods greatly simplify the code to either get a proxy or publish a service.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="34" id="34" data-hash="708e168fb6f3d0c1cff0e36f6aa6d6a7"> 
+   <p>The SensorDataServiceVertxEBProxy class is being generated by the Vert.x code generator, and if you peek into it, you will see event-bus operations. There is also a SensorDataServiceVertxProxyHandler class being generated, but only Vert.x will use it, not your code.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="35" id="35" data-hash="f8673afe9aa9f75257bb87703eac1f6b"> 
+   <p>Let us now see the actual service implementation in class SensorDataServiceImpl.</p> 
+  </div> 
+  <div class="readable-text" refid="36" id="36" data-hash="255b7aed61c7284e65387602c06113f2"> 
+   <h2 class="calibre17" id="heading_id_6"><a class="pcalibre pcalibre1" id="service-implementation" shape="rect"></a>6.4 &nbsp;Service implementation</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="37" id="37" data-hash="522771f2fe200902dc5cafb61d12ee6c"> 
+   <p>The service implementation is a direct adaptation of the code from chapter 3, and is given in listing 6.4.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="38" id="38" data-hash="39198741669834e17ac67e3400dfdac9"> 
+   <h5>Listing&nbsp;6.4.&nbsp;Implementation of SensorDataService</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">class SensorDataServiceImpl implements SensorDataService {
+
+  private final HashMap&lt;String, Double&gt; lastValues = new HashMap&lt;&gt;();
+
+  SensorDataServiceImpl(Vertx vertx) {  <a class="pcalibre pcalibre1" id="CO4-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    vertx.eventBus().&lt;JsonObject&gt;consumer("sensor.updates", message -&gt; {  <a class="pcalibre pcalibre1" id="CO4-2" shape="rect"></a><span class="pcalibre1">#2</span>
+      JsonObject json = message.body();
+      lastValues.put(json.getString("id"), json.getDouble("temp"));
+    });
+  }
+
+  @Override
+  public void valueFor(String sensorId, Handler&lt;AsyncResult&lt;JsonObject&gt;&gt; handler) {
+    if (lastValues.containsKey(sensorId)) {
+      JsonObject data = new JsonObject()
+        .put("sensorId", sensorId)
+        .put("value", lastValues.get(sensorId));
+      handler.handle(Future.succeededFuture(data)); <a class="pcalibre pcalibre1" id="CO4-3" shape="rect"></a><span class="pcalibre1">#3</span>
+    } else {
+      handler.handle(Future.failedFuture("No value has been observed for " + sensorId));
+    }
+  }
+
+  @Override
+  public void average(Handler&lt;AsyncResult&lt;JsonObject&gt;&gt; handler) {
+    double avg = lastValues.values().stream()
+      .collect(Collectors.averagingDouble(Double::doubleValue));
+    JsonObject data = new JsonObject().put("average", avg);
+    handler.handle(Future.succeededFuture(data));
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgV2UgcGFzcyB0aGUgVmVydC54IGNvbnRleHQuCiMyIFRvIGdldCBub3RpZmllZCBvZiBzZW5zb3IgdXBkYXRlcywgd2Ugc3RpbGwgbmVlZCB0byBzdWJzY3JpYmUgdG8gdGhlIGV2ZW50LWJ1cy4KIzMgSW5zdGVhZCBvZiBwYXNzaW5nIG1lc3NhZ2VzIGZvciByZXBsaWVzLCB3ZSB1c2UgYXN5bmNocm9ub3VzIHJlc3VsdHMu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="39" id="39" data-hash="c3cdff8d6c6f82cad9f722a9ce4778c1"> 
+   <p>Compared to the code of chapter 3, we have mostly replaced event-bus code with passing asynchronous results via completed future objects. This code is also free from references to the service proxy handler code, which is being generated.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="40" id="40" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+     <h5>Tip</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="41" id="41" data-hash="deb4a13d0f9d4813179c05762024e5cb"> 
+     <p>The code in listing 6.4 is free of asynchronous operations. In more elaborated services you will quickly stumble upon cases where you issue asynchronous calls to some other component like a database, a HTTP service, a message broker or even another service over the event-bus. Once you have a response ready, you will pass the result or an error to the method callback just like we did in SensorDataServiceImpl.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="42" id="42" data-hash="ed48dab7bff73955d073b0d710c43e25"> 
+   <h2 class="calibre17" id="heading_id_7"><a class="pcalibre pcalibre1" id="enabling-proxy-code-generation" shape="rect"></a>6.5 &nbsp;Enabling proxy code generation</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="43" id="43" data-hash="b1c6ba0eae9abeeb10718d6da8d52905"> 
+   <p>Service proxy generation is done using javac and apt annotation processing at compilation time. The following Vert.x modules are required: vertx-service-proxy and vertx-codegen.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="44" id="44" data-hash="8713474ca1eba79f240603e2711124cb"> 
+   <p>To make the Vert.x code generation work with annotation processing in Gradle, you will need a configuration similar to that of listing 6.5.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="45" id="45" data-hash="d5c93d7ca9319014d944ee45d489fa20"> 
+   <h5>Listing&nbsp;6.5.&nbsp;Gradle configuration for code generation</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">dependencies {
+  implementation("io.vertx:vertx-core:$version")
+  implementation("io.vertx:vertx-codegen:$version")
+  implementation("io.vertx:vertx-service-proxy:$version")
+
+  annotationProcessor("io.vertx:vertx-service-proxy:$version")  <a class="pcalibre pcalibre1" id="CO5-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  annotationProcessor("io.vertx:vertx-codegen:$version:processor")
+  // (...)
+}
+
+tasks.getByName&lt;JavaCompile&gt;("compileJava") {
+  options.annotationProcessorGeneratedSourcesDirectory = File("$projectDir/src/main/generated") <a class="pcalibre pcalibre1" id="CO5-2" shape="rect"></a><span class="pcalibre1">#2</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhpcyBpcyB0aGUgc2NvcGUgZm9yIGFubm90YXRpb24gcHJvY2Vzc2luZy4KIzIgVGhpcyBhbGxvd3MgY3VzdG9taXppbmcgd2hlcmUgdGhlIGZpbGVzIGFyZSBiZWluZyBnZW5lcmF0ZWQu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="46" id="46" data-hash="11a855517940c2258a479257c16c1b0a"> 
+   <p>Now whenever the Java classes are being compiled, the proxy classes are generated. You can see the files in the src/main/generated folder of your project.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="47" id="47" data-hash="10e513d0f8828f0b14111a31b076a530"> 
+   <p>If you look into the code of SensorDataServiceVertxProxyHandler, you see a switch block in the handle method, where the action header is being used to dispatch to the service implementation methods. Similarly you will see in the average method of SensorDataServiceVertxEBProxy the code that sends a message over the event-bus to invoke that method. The code of both SensorDataServiceVertxProxyHandler and SensorDataServiceVertxEBProxy is really what you would write if you had to implement your own event-bus service system.</p> 
+  </div> 
+  <div class="readable-text" refid="48" id="48" data-hash="e638e16ce6e849794018912866f8daa7"> 
+   <h2 class="calibre17" id="heading_id_8"><a class="pcalibre pcalibre1" id="deploying-event-bus-services" shape="rect"></a>6.6 &nbsp; Deploying event-bus services</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="49" id="49" data-hash="cfef9756269b38104f9d177097f98273"> 
+   <p>Event-bus services need to be deployed to verticles, and event-bus addresses need to be defined. Listing 6.6 shows how to deploy a service.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="50" id="50" data-hash="676a003eaa0e73521b99e1d2396eace5"> 
+   <h5>Listing&nbsp;6.6.&nbsp;Deploying a service</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">public class DataVerticle extends AbstractVerticle {
+
+  @Override
+  public void start() {
+    new ServiceBinder(vertx)  #1
+      .setAddress("sensor.data-service")  #2
+      .register(SensorDataService.class, SensorDataService.create(vertx));  #3
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQmluZHMgYSBzZXJ2aWNlIHRvIGFuIGFkZHJlc3MuCiMyIFRoZSBldmVudC1idXMgYWRkcmVzcyBmb3IgdGhlIHNlcnZpY2UuCiMzIFdlIGV4cG9zZSBhIHNlcnZpY2UgaW1wbGVtZW50YXRpb24u"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="51" id="51" data-hash="f254e386196f42fd9e33e4131a67cb43"> 
+   <p>Deploying is as simple binding to an address, and passing a service implementation. We can use the factory create methods from the SensorDataService interface.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="52" id="52" data-hash="45032319a0f20ca78013b9d679bab119"> 
+   <p>You can deploy multiple services on a verticle. It makes sense to deploy event-bus services that are functionally related together, so a verticle remains a coherent event processing unit.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="53" id="53" data-hash="3b1805716de1a68e1c4dcb1452e9a828"> 
+   <p>Obtaining a service proxy to issue method calls is made by calling the corresponding factory method, and passing the correct event-bus destination, as in listing 6.7.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="54" id="54" data-hash="e8f8b3d3c1e572744d4701c670b614ac"> 
+   <h5>Listing&nbsp;6.7.&nbsp;Obtaining a service proxy</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">SensorDataService service = SensorDataService
+  .createProxy(vertx, "sensor.data-service");
+
+service.average(ar -&gt; {
+  if (ar.succeeded()) {
+    System.out.println("Average = " + ar.result());
+  } else {
+    ar.cause().printStackTrace();
+  }
+});</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="55" id="55" data-hash="329789f58d0ca30c7a8fc147186f8b28"> 
+   <p>The service interface follows the callbacks model, as this is the canonical definition for (asynchronous) service interfaces.</p> 
+  </div> 
+  <div class="readable-text" refid="56" id="56" data-hash="f021a5c15b45e3fd134036c027ed68ff"> 
+   <h2 class="calibre17" id="heading_id_9"><a class="pcalibre pcalibre1" id="service-proxies-beyond-callbacks" shape="rect"></a>6.7 &nbsp;Service proxies beyond callbacks</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="57" id="57" data-hash="67c7cfedcd48f2c79f7cf5024771ac61"> 
+   <p>We explored asynchronous programming models other than callbacks in the previous chapter, but designed event-bus services with callbacks. The good news is that you can leverage code generation to get say, RxJava or Kotlin coroutine variants for your service proxies. Even better: you do not need much extra work!</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="58" id="58" data-hash="90dfe8773e7d6697b4e61f44c1e7ccc1"> 
+   <p>To make this work, you need to add the @VertxGen annotation to your service interface, as in listing 6.8.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="59" id="59" data-hash="c8c3b5a1df0920171da2786762505acc"> 
+   <h5>Listing&nbsp;6.8.&nbsp;Adding <code class="code1">@VertxGen</code> to a service interface</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">@ProxyGen #1
+@VertxGen #2
+public interface SensorDataService {
+  // (...)
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVG8gZ2VuZXJhdGUgc2VydmljZSBwcm94aWVzLgojMiBUbyBhbGxvdyBjb2RlIGdlbmVyYXRpb24u"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="60" id="60" data-hash="823079da0183c2824069a28bde75e58a"> 
+   <p>When this annotation is present, code generation is made with all suitable code generators available at build time. To generate RxJava bindings, we need to add the dependencies of listing 6.9.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="61" id="61" data-hash="ea244b0bdf4987e499543b6788f88297"> 
+   <h5>Listing&nbsp;6.9.&nbsp;Dependencies for RxJava code generation</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">dependencies {
+  // (...)
+  implementation("io.vertx:vertx-rx-java2:$version")  #1
+  annotationProcessor("io.vertx:vertx-rx-java2-gen:$version") #2
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVmVydC54IFJ4SmF2YSAyIG1vZHVsZS4KIzIgUnhKYXZhIDIgVmVydC54IGNvZGUgZ2VuZXJhdG9yLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="62" id="62" data-hash="b4997f6aa6a9e9bbaec8973d9cff0768"> 
+   <p>When compiling the project, we now get a chapter6.reactivex.SensorDataService class generated. This is a small shim that bridges the original callbacks API to RxJava. The class has all methods from the original SensorDataService API (including create factory methods), plus rx-prefixed methods.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="63" id="63" data-hash="81ba7c704917227f989252b295ee17f3"> 
+   <p>Given the average method that takes a callback, the RxJava code generator creates a rxAverage method with no parameter and that returns a Single object. Similarly, valueFor gets translated to rxValueFor, a method that takes a String argument (the sensor identifier) and returns a Single object.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="64" id="64" data-hash="1128866636290312efdccfbd18e48826"> 
+   <p>Listing 6.10 shows a sample usage of the generated RxJava API.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="65" id="65" data-hash="dcf180ade8dc89907c89d5fa7c3b61c5"> 
+   <h5>Listing&nbsp;6.10.&nbsp;Using the RxJava variant of SensorDataService</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">SensorDataService service = SensorDataService
+  .createProxy(vertx, "sensor.data-service");  #1
+
+service.rxAverage() #2
+  .delaySubscription(3, TimeUnit.SECONDS, RxHelper.scheduler(vertx))
+  .repeat()
+  .map(data -&gt; "avg = " + data.getDouble("average"))
+  .subscribe(System.out::println);</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQW4gaW5zdGFuY2Ugb2YgY2hhcHRlcjYucmVhY3RpdmV4LlNlbnNvckRhdGFTZXJ2aWNlLgojMiByeEF2ZXJhZ2UoKSBnaXZlcyBhIFNpbmdsZTxKc29uT2JqZWN0Pi4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="66" id="66" data-hash="f25ebe9b9d5b54a33496277a36b419e3"> 
+   <p>The RxJava pipeline created here makes a new subscription every 3 seconds, extracts the average into a string that is then displayed on the standard output.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="67" id="67" data-hash="ce7d3fa2d1c31421f7068edc2beb0e4e"> 
+     <h5>Important</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="68" id="68" data-hash="61efbdfd96fb0a5ef4a905c298acdc93"> 
+     <p>You must always develop your event-bus services with the callbacks API for the interface and implementation. Code generators then turn it into other models.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="69" id="69" data-hash="6c03fc2286f182c8edb8d4ba2ab2d299"> 
+   <p>Now that you know how to develop event-bus service, let us switch to the topic of testing verticles and services.</p> 
+  </div> 
+  <div class="readable-text" refid="70" id="70" data-hash="7aa8ea3dc2bf8c8e13740a97ef14b26b"> 
+   <h2 class="calibre17" id="heading_id_10"><a class="pcalibre pcalibre1" id="testing-and-vert-x" shape="rect"></a>6.8 &nbsp;Testing and Vert.x</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="71" id="71" data-hash="6b92eaf927d2fd94955fa4d503fa798f"> 
+   <p>Automated testing is critical in designing software, and Vert.x applications also need to be tested. The main difficulty when testing Vert.x code is the asynchronous nature of operations. Other than that tests are classical: they have a setup phase, a test execution and verification phase, followed by a tear-down phase.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="72" id="72" data-hash="d695c2e5a535bd860a0b7c2cfbc8e929"> 
+   <p>A verticle is relatively well isolated from the rest of the system thanks to the event-bus. This is very useful in a test environment.</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="73" id="73" data-hash="e061ac7af913ea6446f15cac1fbd5a00"> Xux tvnee-gdz wlsaol edgnisn eenvst er c lvitecer rk yrh jr jn s eidsder eatts, shn rgvenbosi brzw teevsn rj dpcsuore.<br> </li> 
+   <li class="listitem readable-text scrambled" refid="74" id="74" data-hash="2589cd7ae35890691817d19db11dd066"> Ryk cnraugooinfit sdsaep re z virectel kwnb rj aj oddpeeyl lowlsa nntgiu mkka tmaererspa vtl s rzor-crctien rneviteonnm (x.p., gusni nc nj-yremmo ateabads).<br> </li> 
+   <li class="listitem readable-text scrambled" refid="75" id="75" data-hash="dfd4158d136d929570a9fa145df0bc3c"> Jr ja sebpoisl vr dplyeo <em class="calibre9">ksem</em> setrvliec bjrw erdnclolot aihvsebor vr tssiutbute tkl escitvrle pwjr frka kl scndpeeedine (k.h., taaasbdse, cointcnneg rx rheto cvletrsie, rak).<br> </li> 
+  </ol> 
+  <div class="readable-text scrambled" refid="76" id="76" data-hash="37c1af2427e9f76f98219fe599376bba"> 
+   <p>As such, testing verticles is more integration testing than unit testing, independently of whether verticles under test are being deployed within the same JVM or in cluster mode. We need to see verticles as black boxes we communicate with via the event-bus, and possibly via connecting to network protocols that verticles expose. For instance when a verticle exposes a HTTP service, we are likely going to issue HTTP requests in tests to check its behavior.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="77" id="77" data-hash="a40d070ef0d01f900d94e5c6f59e80ab"> 
+   <p>In this book, we will only focus on the Vert.x-specific aspects of testing. If you lack experience with the broader topic of testing then we recommend reading a book like [EffectiveUnitTesting].</p> 
+  </div> 
+  <div class="readable-text" refid="78" id="78" data-hash="9fdc1506d5e181d86af708985b4db0c5"> 
+   <h3 class="calibre29" id="heading_id_11"><a class="pcalibre pcalibre1" id="using-junit-5-with-vert-x" shape="rect"></a>6.8.1 &nbsp;Using JUnit 5 with Vert.x</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="79" id="79" data-hash="efa94e25502c6e4a68659b7c85c11f42"> 
+   <p>Vert.x supports both the classic JUnit 4 test framework, as well as the more recent JUnit 5. Vert.x provides a module called vertx-junit5 with support for version 5 of the JUnit framework.[3] To use it in a Vert.x project, you need to add the io.vertx:vertx-junit5 dependency, and possibly some JUnit 5 libraries.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="80" id="80" data-hash="48fd10878a8fd6c169f7e66b61b5369d"> 
+   <p>In a Gradle project, the dependencies section needs to be updated like in listing 6.11.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="81" id="81" data-hash="4045136cf7fb10ef1390b7cfc8997180"> 
+   <h5>Listing&nbsp;6.11.&nbsp;Using JUnit 5 with Vert.x for a Gradle build</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">dependencies {
+  // (...)
+  testCompile("org.junit.jupiter:junit-jupiter-api:5.4.0") <a class="pcalibre pcalibre1" id="CO10-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  testCompile("io.vertx:vertx-junit5:$version") <a class="pcalibre pcalibre1" id="CO10-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  testCompile("org.assertj:assertj-core:3.11.1")
+  testRuntime("org.junit.jupiter:junit-jupiter-engine:5.4.0") <a class="pcalibre pcalibre1" id="CO10-3" shape="rect"></a><span class="pcalibre1">#3</span>
+}
+
+tasks.named&lt;Test&gt;("test") {
+  useJUnitPlatform()  <a class="pcalibre pcalibre1" id="CO10-4" shape="rect"></a><span class="pcalibre1">#4</span>
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIEpVbml0IDUgQVBJcy4KIzIgVGhlIFZlcnQueCBKVW5pdCA1IHN1cHBvcnQgbGlicmFyeS4KIzMgVGhpcyBpcyB1c2VkIGJ5IEdyYWRsZSBmb3IgcnVubmluZyB0ZXN0cy4KIzQgVGhpcyBlbmFibGVzIEpVbml0IDUgc3VwcG9ydCBpbiBHcmFkbGUu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="82" id="82" data-hash="01b92a0dd8645bf8f116c0caa04f3fec"> 
+   <p>The vertx-junit5 library already has a dependency on junit-jupiter-api, but it is a good practice to fix the version in the build. The junit-jupiter-engine module needs to be present in the testRuntime scope for Gradle. Finally JUnit 5 can be used with any assertion API, including its built-in one, and AssertJ is a popular one.</p> 
+  </div> 
+  <div class="readable-text" refid="83" id="83" data-hash="cc028f8c91011e3cd80a9c7d22e62690"> 
+   <h3 class="calibre29" id="heading_id_12"><a class="pcalibre pcalibre1" id="testing-dataverticle" shape="rect"></a>6.8.2 &nbsp;Testing DataVerticle</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="84" id="84" data-hash="3ed2e385668c4e7b811c7433b2621350"> 
+   <p>We need 2 test cases to check the behavior of DataVerticle, and by extension that of SensorDataService:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="85" id="85" data-hash="da39bbd41e479c4756933c23e6dd66ca"> ounw nx snsreo jc tserpne, kry revagea hsolud ho 0, qnc rqgtusneei c uvale lvt qnc renoss tdernifiie hamr eisra zn orrre, qsn<br> </li> 
+   <li class="listitem readable-text scrambled" refid="86" id="86" data-hash="dae2c4bdfdd6d0136e6af755e2af482c"> qnvw terhe stx oernsss, ow knyx vr ckehc dor reeavga ueval ncu dulaiindvi onessr luaevs.<br> </li> 
+  </ol> 
+  <div class="readable-text" refid="87" id="87" data-hash="be2e718de85229c42bfe5022c3fe2f73"> 
+   <p>Figure <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/test-isolation" shape="rect" title="Figure 6.2. Isolating SensorDataService">6.2</a> shows the interactions for the test environment.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="88" id="88" data-hash="b7dbb31efb7cff0108274edd3267ef5f"> 
+   <h5 id="test-isolation">Figure&nbsp;6.2.&nbsp;Isolating SensorDataService</h5> 
+   <img alt="beb test isolation" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/beb-test-isolation.png" width="856" loading="lazy" height="433" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="89" id="89" data-hash="f7f3aacd1d46e0f89c138f64552c927e"> 
+   <p>The test case has a proxy reference to make calls to SensorDataService. The actual DataVerticle verticle is being deployed at destination sensor.data-service. It can issue valueFor and average method calls from tests. Since DataVerticle receives messages from sensors on the event-bus, we can send arbitrary messages rather than deploying actual HeatSensor verticles over which we have no control. Mocking a verticle is often as simple as sending the type of messages it would send.</p> 
+  </div> 
+  <div class="readable-text" refid="90" id="90" data-hash="696dcbe4470d310cddd20023c4e1b8fa"> 
+   <p>Listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-6/v-10/test-preamble" shape="rect" title="Example 6.12. Preamble of SensorDataServiceTest">6.12</a> has the test class preamble.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="91" id="91" data-hash="3fdd66e503d7c7a9332bba7ece13fecd"> 
+   <h5>Listing&nbsp;6.12.&nbsp;Preamble of <code class="code1">SensorDataServiceTest</code></h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">@ExtendWith(VertxExtension.class) #1
+class SensorDataServiceTest {
+
+  private SensorDataService dataService;  #2
+
+  @BeforeEach #3
+  void prepare(Vertx vertx, VertxTestContext ctx) {
+    vertx.deployVerticle(new DataVerticle(), ctx.succeeding(id -&gt; { #4
+      dataService = SensorDataService.createProxy(vertx,
+        "sensor.data-service");  #5
+      ctx.completeNow();  #6
+    }));
+  }
+// (,,,)</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgSlVuaXQgNSBleHRlbnNpb24gZm9yIFZlcnQueC4KIzIgT3VyIHNlcnZpY2UgcHJveHkgcmVmZXJlbmNlLgojMyBTZXR1cCBtZXRob2QsIGV4ZWN1dGVkIGJlZm9yZSBlYWNoIHRlc3QuCiM0IFdlIGRlcGxveSB0aGUgdmVydGljbGUsIHRoYXQgaW50ZXJuYWxseSBleHBvc2VzIGEgc2VydmljZSwgYW5kIGV4cGVjdCBhIHN1Y2Nlc3NmdWwgZGVwbG95bWVudCAoc3VjY2VlZGluZykuCiM1IFdlIGdldCBhIHByb3h5IHJlZmVyZW5jZS4KIzYgV2Ugbm90aWZ5IHRoYXQgdGhlIHNldHVwIGhhcyBjb21wbGV0ZWQu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="92" id="92" data-hash="ff1f8c99e053269e0c7c2c11c797ea5a"> 
+   <p>JUnit 5 supports extensions to give additional functionality. Especially, extensions can inject parameter in test methods, and they can intercept life-cycle event such has before and after a test method is being called. The VertxExtension class simplifies writing test cases by:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="93" id="93" data-hash="827f670a789527d0e58d73686c03f19a"> jgitennci adyre-rk-vcp iatnesscn lv <code class="code">Vertx</code> wjrb atudfle ciaootrnuifgn,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="94" id="94" data-hash="e40503fe4bd5474bf73a43a5d645e678"> inegcntji c <code class="code">VertxTestContext</code> tecjbo xr cfqv pwjr xrd ysnaohsucron atrune lx Lrtx.e akye,<br> </li> 
+   <li class="listitem readable-text scrambled" refid="95" id="95" data-hash="8cfd37cc3d5214ae63b8b6e14fc901e6"> uiregnns tgiaaniw ltx xpr <code class="code">VertxTestContext</code> re terieh scueecd kt lfcj.<br> </li> 
+  </ol> 
+  <div class="readable-text scrambled" refid="96" id="96" data-hash="055d67f8818cb31cc464c2227f195543"> 
+   <p>The prepare method is executed before each test case does to prepare the test environment. We use it here to deploy the DataVerticle verticle, then fetch the service proxy and store it in the dataService field. Since deploying a verticle is an asynchronous operation, the prepare method is being injected a Vertx context and a VertxTestContext object to notify when it has completed.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="97" id="97" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+     <h5>Tip</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="98" id="98" data-hash="8521693fd3f86e2fcb16eeb5263a49d4"> 
+     <p>Users of JUnit before version 5 may be surprised that the class and test methods are package-private: this is idiomatic with JUnit 5.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="99" id="99" data-hash="6fd2bfab7762d79311fcff461a089f04"> 
+   <p>We can then see the first test case in listing 6.13 when there are no sensors being deployed.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="100" id="100" data-hash="2ba225514e2294c7bd18aada5fa7bea9"> 
+   <h5>Listing&nbsp;6.13.&nbsp;Test case without sensors</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">@Test
+void noSensor(VertxTestContext ctx) { #1
+  Checkpoint failsToGet = ctx.checkpoint(); #2
+  Checkpoint zeroAvg = ctx.checkpoint();
+
+  dataService.valueFor("abc", ctx.failing(err -&gt; ctx.verify(() -&gt; { #3
+    assertThat(err.getMessage()).startsWith("No value has been observed");
+    failsToGet.flag();
+  })));
+
+  dataService.average(ctx.succeeding(data -&gt; ctx.verify(() -&gt; {
+    double avg = data.getDouble("average");
+    assertThat(avg).isCloseTo(0.0d, withPercentage(1.0d));
+    zeroAvg.flag();
+  })));
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVmVydHhUZXN0Q29udGV4dCBhbGxvd3MgdG8gZGVhbCB3aXRoIGFzeW5jaHJvbm91cyBvcGVyYXRpb25zIGluIHRlc3RzIHRvIHJlcG9ydCBzdWNjZXNzIGFuZCBmYWlsdXJlcy4KIzIgQSBjaGVja3BvaW50IGlzIG1haW5seSB1c2VkIHRvIGVuc3VyZSB0aGF0IGFuIGFzeW5jaHJvbm91cyBvcGVyYXRpb24gcGFzc2VkIGF0IGEgY2VydGFpbiBsaW5lLgojMyBmYWlsaW5nIGlzIGEgaGVscGVyIGZvciBIYW5kbGVyPEFzeW5jUmVzdWx0PiwgYW5kIHZlcmlmeSB3cmFwcyBhc3NlcnRpb25zLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="101" id="101" data-hash="55567025472cb74b571ae5be4ee06bf3"> 
+   <p>This test case assumes that no sensor has been deployed, so trying to get any sensor value must fail. We check this behavior here by looking for the temperature value of sensor abc, which doesn’t exists. We then check that the average value is zero.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="102" id="102" data-hash="5e9905f7c122c244406d9c2ddcfb7ad7"> 
+   <p>Checkpoints are flagged to mark that the test execution reached certain lines. When all declared checkpoints have been flagged, the test completes successfully. The test fails when an assertion fails, when an unexpected exception is being thrown, or when a (configurable) delay elapses and not all checkpoints have been flagged.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="103" id="103" data-hash="ce7d3fa2d1c31421f7068edc2beb0e4e"> 
+     <h5>Important</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="104" id="104" data-hash="b57da6bf3a76eca1eefc383858a316b7"> 
+     <p>Testing asynchronous operations is slightly different to regular testing you may be familiar with. The default contract in test executions is that a test runner thread calls test methods, and they fail when exceptions are being thrown. Assertion methods throw exceptions to report errors.</p> 
+    </div> 
+    <div class="readable-text scrambled" refid="105" id="105" data-hash="7f919e68fbd8e3904e9044b18d2d523f"> 
+     <p>Since operations like deployVerticle and send are asynchronous, the test runner thread exits the method before they have any chance to complete. The VertxExtension class takes care of that, by waiting for VertxTestContext to report either a success or a failure. To avoid tests to wait forever, there is a timeout (30 seconds by default).</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="106" id="106" data-hash="f8917ba37387c072c05741302bb56bd0"> 
+   <p>Finally, we have a test case when there are sensors in listing 6.14.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="107" id="107" data-hash="1b2af188aaa366aeef2d88796d371cae"> 
+   <h5>Listing&nbsp;6.14.&nbsp;Test case with sensors</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">@Test
+void withSensors(Vertx vertx, VertxTestContext ctx) {
+  Checkpoint getValue = ctx.checkpoint();
+  Checkpoint goodAvg = ctx.checkpoint();
+
+  JsonObject m1 = new JsonObject().put("id", "abc").put("temp", 21.0d); #1
+  JsonObject m2 = new JsonObject().put("id", "def").put("temp", 23.0d);
+
+  vertx.eventBus()  #2
+    .publish("sensor.updates", m1)
+    .publish("sensor.updates", m2);
+
+  dataService.valueFor("abc", ctx.succeeding(data -&gt; ctx.verify(() -&gt; {
+    assertThat(data.getString("sensorId")).isEqualTo("abc");
+    assertThat(data.getDouble("value")).isEqualTo(21.0d);
+    getValue.flag();
+  })));
+
+  dataService.average(ctx.succeeding(data -&gt; ctx.verify(() -&gt; {
+    assertThat(data.getDouble("average")).isCloseTo(22.0, withPercentage(1.0d));  #3
+    goodAvg.flag();
+  })));
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgTWVzc2FnZXMgdG8gbW9jayBzZW5zb3JzLgojMiBXZSBzZW5kIHRoZSBtZXNzYWdlcy4KIzMgQXNzZXJ0SiBoYXMgYXNzZXJ0aW9ucyBmb3IgZmxvYXRpbmcgcG9pbnQgdmFsdWVzIHdpdGggZXJyb3IgbWFyZ2lucy4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="108" id="108" data-hash="4ffa93c27f56a1814d3337a1af04ca61"> 
+   <p>The test simulates two sensors with identifiers abc and def by sending fake sensor data updates over the event-bus, just like a sensor would do. We then have determinism in our assertions, and we can check the behavior for both valueFor and average methods.</p> 
+  </div> 
+  <div class="readable-text" refid="109" id="109" data-hash="3939d81bc76a5dac7dbd2f2d2663e321"> 
+   <h3 class="calibre29" id="heading_id_13"><a class="pcalibre pcalibre1" id="running-the-tests" shape="rect"></a>6.8.3 &nbsp;Running the tests</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="110" id="110" data-hash="1958b8d7db546d140dbe8d688d095c99"> 
+   <p>The tests can be run from your integrated development environment. Of course you can also run them using Gradle: gradlew test.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="111" id="111" data-hash="34c6b612e7ab02b782de284fffb6fb9b"> 
+   <p>Gradle generates a human-readable test report in build/reports/tests/test/index.html. When you open the file in a web browser, you can check that all tests passed as shown in figure 6.3.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="112" id="112" data-hash="a12fcd8416c5b083b908d94686a18148"> 
+   <h5 id="test-report">Figure&nbsp;6.3.&nbsp;Test report</h5> 
+   <img alt="gradle run" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/gradle-run.png" width="692" loading="lazy" height="511" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="113" id="113" data-hash="6c791560c09359a189719f1405e87d27"> 
+   <p>Note that the Gradle test task is a dependency of build, so the tests are always executed when the project is being fully built.</p> 
+  </div> 
+  <div class="footnote2" id="ftn.d5e3964"> 
+   <div class="readable-text" refid="114" id="114" data-hash="f9c0dc906994a5a54eb1491fde82c3cc"> 
+    <p><a class="pcalibre para2" href="/book/vertx-in-action/chapter-6/v-10/d5e3964" shape="rect"><sup class="para3">[3]</sup></a> See <a class="pcalibre3 pcalibre" href="https://junit.org/junit5/" shape="rect">junit.org/junit5/</a>.</p> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="115" id="115" data-hash="1935dd6df3a3c6d4e36a0c935f945c0e"> 
+   <h2 class="calibre17" id="heading_id_14"><a class="pcalibre pcalibre1" id="summary" shape="rect"></a>6.9 &nbsp;Summary</h2> 
+  </div> 
+  <ul class="itemizedlist"> 
+   <li class="listitem readable-text" refid="116" id="116" data-hash="4b197984e3fa959e59dd09299d32f565"> Event-bus services and proxies abstract from event-bus communications by providing an asynchronous service interface.<br> </li> 
+   <li class="listitem readable-text" refid="117" id="117" data-hash="e275f1c4db01ffb0fd3b60cdba0663dd"> It is possible to generate bindings other than callbacks for event-bus services: RxJava, Kotlin coroutines, etc.<br> </li> 
+   <li class="listitem readable-text" refid="118" id="118" data-hash="55a450eb0ae7a32616e5f3a82889fcb7"> Testing asynchronous code and services is more challenging than in the traditional imperative cases, and Vert.x comes with dedicated support for JUnit 5.<br> </li> 
+  </ul> 
+  <div class="readable-text" refid="119" id="119" data-hash="1f60f74f4a2c9f235ad6e4278a387f9e"> 
+   <h2 class="calibre17" id="heading_id_15"><a class="pcalibre pcalibre1" id="references" shape="rect"></a>6.10 &nbsp;References</h2> 
+  </div> 
+  <div class="bibliodiv"> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e4148" shape="rect"></a> 
+    <div class="readable-text" refid="120" id="120" data-hash="f5b8ab1f9f6815083216d4a54a6930de"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="RPC" shape="rect"></a>[RPC] Bruce Jay Nelson. 1981. Remote Procedure Call. Ph.D. Dissertation. Carnegie Mellon Univ., Pittsburgh, PA, USA. AAI8204168.</span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e4151" shape="rect"></a> 
+    <div class="readable-text" refid="121" id="121" data-hash="15c2f5ccce5c4136407ad172c500f954"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="EffectiveUnitTesting" shape="rect"></a>[EffectiveUnitTesting]. Lasse Koskela. Effective Unit Testing. 2013. Manning Publications. ISBN 9781935182573.</span></p> 
+    </div> 
+   </div> 
+  </div>
+ </body>
+</html>

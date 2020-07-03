@@ -1,0 +1,1283 @@
+<html>
+ <head></head>
+ <body>
+  <div class="readable-text" refid="1" id="1" data-hash="9073263320b429645889d989acd8d33d"> 
+   <h1 class="chaptertitle" id="heading_id_19">13 <a class="pcalibre pcalibre1" id="final-notes-container-native-vert-x" shape="rect"></a>Final notes: container-native Vert.x</h1> 
+  </div> 
+  <div class=" introduction-summary"> 
+   <h3 class="intro-header">This chapter covers:</h3> 
+   <ul> 
+    <li class=" readable-text" refid="2" id="2" data-hash="349183cb448a2cd013234b394984707d"> Efficiently building container images with Jib<br> </li> 
+    <li class=" readable-text" refid="3" id="3" data-hash="55b00336792ce42b8785286fe268445a"> Configuring Vert.x clustering to work in a Kubernetes cluster<br> </li> 
+    <li class=" readable-text" refid="4" id="4" data-hash="b45be393a6b03ad4464c9c8fda4f674b"> Deploying Vert.x services to a Kubernetes cluster<br> </li> 
+    <li class=" readable-text" refid="5" id="5" data-hash="1c11010fb54194ae5b2bc9f38e305d8d"> Using Skaffold and Minikube for local development<br> </li> 
+    <li class=" readable-text" refid="6" id="6" data-hash="1ced0be16fd042fe52e2d044d09188d2"> Exposing health checks and metrics<br> </li> 
+   </ul> 
+  </div> 
+  <div class="readable-text" refid="7" id="7" data-hash="3ba9e889ab44a9f495d5a9683449318e"> 
+   <p>By now you should have a solid understanding of what is a reactive application, and how Vert.x can help you building scalable, resource-efficient and resilient services. In this chapter we discuss some of the main concerns for deploying and operating a Vert.x application in a Kubernetes cluster container environment. You will learn how to prepare Vert.x services to work well in Kubernetes, use efficient tools to package container images and run them locally. You will also learn how to expose health checks and metrics to better integrate services in a container environment.</p> 
+  </div> 
+  <div class="readable-text" refid="8" id="8" data-hash="fb0dca506b438f7cf7f99e3ba83833cd"> 
+   <p>This chapter is optional given that the core objectives of the book are about teaching yourself reactive concepts and practice. Still, Kubernetes is a popular deployment target and it is worth explaining how to make Vert.x applications first-class citizen in such environments.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="9" id="9" data-hash="c892c161dad7d1cec68e1d13a747c7a2"> 
+   <p>We assume basic understanding of containers, Docker and Kubernetes, which is covered in depth in other books such as [KubernetesInAction] and [DockerInAction]. You should still be able to understand and run the examples in this chapter, learning some Kubernetes basics along the way, but we will not spend time explaining the core concepts of Kubernetes such as pods and services, or describe the subtleties of the kubectl command-line tool.</p> 
+  </div> 
+  <div class="readable-text" refid="10" id="10" data-hash="0e9f2f962163b77bde137fb09831ce05"> 
+   <h2 class="calibre17" id="heading_id_3"><a class="pcalibre pcalibre1" id="heat-sensors-in-a-cloud" shape="rect"></a>13.1 &nbsp;Heat sensors in a cloud</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="11" id="11" data-hash="a842a387ffcc048e9988d360b2c46fa0"> 
+   <p>In this last chapter we are going back to a use-case based on heat sensors as it will be simpler than the 10k steps challenge application.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="12" id="12" data-hash="2221abdf36ad6470ec82e85771d66e98"> 
+   <p>In this scenario heat sensors regularly publish temperature updates while an API can be used to retrieve the latest temperatures of all sensors, and also to identify the sensors where the temperature is abnormal. The application is based on 3 micro-services that you can find in the source code Git repository, and illustrated in figure 13.1.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="13" id="13" data-hash="fbc737f2bac23e83df24cf181e398c08"> 
+   <h5 id="use-case">Figure&nbsp;13.1.&nbsp;Use case overview</h5> 
+   <img alt="use case" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/use-case.png" width="919" loading="lazy" height="630" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text" refid="14" id="14" data-hash="31c5807c318500365935ff6f67908217"> 
+   <p>Here is what each services does:</p> 
+  </div> 
+  <ul class="itemizedlist"> 
+   <li class="listitem readable-text scrambled" refid="15" id="15" data-hash="75a2cc157a3fc68e518c4885961834a0"> <code class="code">heat-sensor-service</code> rneteprsse s xrgs sroesn rqsr psluhsbei tauemretpre epdtaus xvxt qrx Lrkt.k vtnee-gad, gzn rj seoespx c HCYF REJ kr fcthe yrx urrenct tapurmeeret, ncp<br> </li> 
+   <li class="listitem readable-text scrambled" refid="16" id="16" data-hash="98b1aaeb3a9bc38ed936c8214bcd48cf"> <code class="code">sensor-gateway</code> clteocsl rtuptraemee desatpu vtlm cff yrxc rsneos vseresci etke kru Ftxr.k neetv-dua, bnc sxseope z HBBL BLJ rv ervtriee yor tlsate arertupmeet aveuls, ncq<br> </li> 
+   <li class="listitem readable-text scrambled" refid="17" id="17" data-hash="e714e7b71d33879ce44cb7a9c2d32e63"> <code class="code">heat-api</code> aj s HXCE BVJ rx veeerirt ory atlste arustpetmere lsuvea cpn xr tetecd qvr osrsnse rehwe amersettpure tco nrx hwntii execpted oubnds.<br> </li> 
+  </ul> 
+  <div class="readable-text scrambled" refid="18" id="18" data-hash="ba3b50db601bcd5311929e2e5b0b3519"> 
+   <p>The heat sensor service needs to be scaled to simulate multiple sensors, while the sensor gateway and API services work fine with just 1 instance. That being said they do not share state, so they can also be scaled to multiple instances if the workload requires it.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="19" id="19" data-hash="eed97e2637c16f4462cfa0d6c2f1a17d"> 
+   <p>The heat API is the only service meant to be exposed outside the cluster. The sensor gateway is a cluster-internal service, while the heat sensor services should just be deployed as instances inside the cluster but that do not require a load balancer. The Vert.x cluster manager is using Hazelcast.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="20" id="20" data-hash="b960a94a41b684173c92280422f0e072"> 
+   <p>Let us quickly see the noteworthy code portions in these services implementations.</p> 
+  </div> 
+  <div class="readable-text" refid="21" id="21" data-hash="2ebbb557267f1dc08f702d7352908c10"> 
+   <h3 class="calibre29" id="heading_id_4"><a class="pcalibre pcalibre1" id="heat-sensor-service" shape="rect"></a>13.1.1 &nbsp;Heat sensor service</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="22" id="22" data-hash="cf942ac09ad765077d4a82052d9a5643"> 
+   <p>The service is based on the code found in the early chapters of this book. The update method called from a timer set in method scheduleNextUpdate has been updated as in listing 13.1.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="23" id="23" data-hash="2d776964cc5670df6bc56762bc45057c"> 
+   <h5>Listing&nbsp;13.1.&nbsp;The new update method</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void update(long tid) {
+  temp = temp + (delta() / 10);
+  vertx.eventBus().publish(targetDestination, makeJsonPayload());   #1
+  logger.info("{} new temperature is {}", id, temp);
+  scheduleNextUpdate();
+}
+
+private JsonObject makeJsonPayload() {                              #2
+  return new JsonObject()
+    .put("id", id)
+    .put("timestamp", System.currentTimeMillis())
+    .put("temp", temp);
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUHVibGlzaCB0byB0aGUgZXZlbnQgYnVzLgojMiBQcmVwYXJlIGEgSlNPTiB0ZW1wZXJhdHVyZSB1cGRhdGUgcGF5bG9hZC4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="24" id="24" data-hash="823c4662c2389488778563470c0b5571"> 
+   <p>We still have the same logic and publish a JSON temperature update document to the event-bus. We also introduced method makeJsonPayload as it is also used for the HTTP endpoint of listing 13.2.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="25" id="25" data-hash="10be978101b8ca38d85efd8c95f8a476"> 
+   <h5>Listing&nbsp;13.2.&nbsp;Getting a heat sensor data over HTTP</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void handleRequest(RoutingContext ctx) {
+  ctx.response()
+    .putHeader("Content-Type", "application/json")
+    .end(makeJsonPayload().encode());   #1
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgU2VuZCBKU09OIGRhdGEu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="26" id="26" data-hash="7e6893d050296bbc32816c414f6ec60d"> 
+   <p>Finally we get the service configuration from environment variables in the verticle start method, as given in listing 13.3.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="27" id="27" data-hash="0a147c9955d98aaad46c7583866f0b2b"> 
+   <h5>Listing&nbsp;13.3.&nbsp;Getting the sensor configuration from environment variables</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">Map&lt;String, String&gt; env = System.getenv();                                            <a class="pcalibre pcalibre1" id="CO3-1" shape="rect"></a><span class="pcalibre1">#1</span>
+int httpPort = Integer.parseInt(env.getOrDefault("HTTP_PORT", "8080"));               <a class="pcalibre pcalibre1" id="CO3-2" shape="rect"></a><span class="pcalibre1">#2</span>
+targetDestination = env.getOrDefault("EB_UPDATE_DESTINATION", "heatsensor.updates");  <a class="pcalibre pcalibre1" id="CO3-3" shape="rect"></a><span class="pcalibre1">#3</span></pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQWNjZXNzIHRoZSBlbnZpcm9ubWVudCB2YXJpYWJsZXMuCiMyIEdldCB0aGUgSFRUUCBwb3J0LgojMyBHZXQgdGhlIGV2ZW50IGJ1cyBkZXN0aW5hdGlvbi4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="28" id="28" data-hash="c9be6fc56e98091f5c0bcfebebcfe497"> 
+   <p>Environment variables are great because they are easy to override when running the service. Since they are being exposed as a Java Map, we can take advantage of the getOrDefault method to have default values.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="29" id="29" data-hash="88987d4765b7aa778fafc8a269e9f2ce"> 
+   <p>Vert.x provides the vertx-config module (not covered in this book) if you need more advanced configuration, like combining files, environment variables and distributed registries. You can go to the Vert.x website documentation section to learn more about it.[1] For most cases however parsing a few environment variables straight using the Java System class is much simpler.</p> 
+  </div> 
+  <div class="readable-text" refid="30" id="30" data-hash="4721a7483d166a99dd38489df31b17a9"> 
+   <h3 class="calibre29" id="heading_id_5"><a class="pcalibre pcalibre1" id="sensor-gateway" shape="rect"></a>13.1.2 &nbsp;Sensor gateway</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="31" id="31" data-hash="60adb2ac8543b966c0ae6f323803397f"> 
+   <p>The sensor gateway collects temperature updates from the heat sensor services over Vert.x event-bus communications. First off it fetches configuration from environment variables exactly like in listing 13.3 as it needs a HTTP port number and an event bus destination to listen to. The start methods sets an event bus consumer as in listing 13.4.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="32" id="32" data-hash="ff9b877262c800d378ca874587ebe48e"> 
+   <h5>Listing&nbsp;13.4.&nbsp;Gateway event bus consumer</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">vertx.eventBus().&lt;JsonObject&gt;consumer(targetDestination, message -&gt; {   <a class="pcalibre pcalibre1" id="CO4-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  JsonObject json = message.body();
+  String id = json.getString("id");
+  data.put(id, json);   <a class="pcalibre pcalibre1" id="CO4-2" shape="rect"></a><span class="pcalibre1">#2</span>
+  logger.info("Received an update from sensor {}", id);
+});</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUmVnaXN0ZXIgYSBoYW5kbGVyLgojMiBQdXQgaXQgaW4gYSBtYXAu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="33" id="33" data-hash="37b3580eb3f2bff36292ca47aa14dba2"> 
+   <p>Each incoming JSON update is put in field data, which is a HashMap&lt;String, JsonObject&gt; to store the last update of each sensor.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="34" id="34" data-hash="5faee656c09a6eab18e290f4335accbc"> 
+   <p>The HTTP API exposes the collected sensor data over the /data endpoint which is handled by the code in listing 13.5.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="35" id="35" data-hash="bd9210d3a2cb7b6f165c437131977d75"> 
+   <h5>Listing&nbsp;13.5.&nbsp;Gateway data requests HTTP handler</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void handleRequest(RoutingContext ctx) {
+  JsonArray entries = new JsonArray();
+  for (String key : data.keySet()) {                            #1
+    entries.add(data.get(key));
+  }
+  JsonObject payload = new JsonObject().put("data", entries);   #2
+  ctx.response()
+    .putHeader("Content-Type", "application/json")
+    .end(payload.encode());
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQ29sbGVjdCBlbnRyaWVzIGluIGEgSlNPTiBhcnJheS4KIzIgUHV0IHRoZSBhcnJheSBpbiBhIEpTT04gZG9jdW1lbnQgYW5kIHNlbmQgaXQu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="36" id="36" data-hash="5d9a15665f56b6e62403b2e9055d137a"> 
+   <p>The method prepares a JSON response by assembling all collected data into an array, which is then wrapped in a JSON document.</p> 
+  </div> 
+  <div class="readable-text" refid="37" id="37" data-hash="e65a22e8aafca23cd6370ca1d661b7e7"> 
+   <h3 class="calibre29" id="heading_id_6"><a class="pcalibre pcalibre1" id="heat-api" shape="rect"></a>13.1.3 &nbsp;Heat API</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="38" id="38" data-hash="bbfcc3cd36a6a7b33cb91c6b0ce66639"> 
+   <p>This service gives all sensor data, or just the data for the services where temperatures are outside an expected correct value range. To do so it makes HTTP requests to the sensor gateway.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="39" id="39" data-hash="247efc4f7fdbe2f48715a06bc4a6608f"> 
+   <p>The configuration is again given through environment variables as in listing 13.6.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="40" id="40" data-hash="c28c3e70b1d01b333717d0c6ad73acb2"> 
+   <h5>Listing&nbsp;13.6.&nbsp;Heat API configuration environment variables</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">Map&lt;String, String&gt; env = System.getenv();
+int httpPort = Integer.parseInt(env.getOrDefault("HTTP_PORT", "8080"));
+String gatewayHost = env.getOrDefault("GATEWAY_HOST", "sensor-gateway");        <a class="pcalibre pcalibre1" id="CO6-1" shape="rect"></a><span class="pcalibre1">#1</span>
+int gatewayPort = Integer.parseInt(env.getOrDefault("GATEWAY_PORT", "8080"));   <a class="pcalibre pcalibre1" id="CO6-2" shape="rect"></a><span class="pcalibre1">#2</span>
+lowLimit = Double.parseDouble(env.getOrDefault("LOW_TEMP", "10.0"));            <a class="pcalibre pcalibre1" id="CO6-3" shape="rect"></a><span class="pcalibre1">#3</span>
+highLimit = Double.parseDouble(env.getOrDefault("HIGH_TEMP", "30.0"));          <a class="pcalibre pcalibre1" id="CO6-4" shape="rect"></a><span class="pcalibre1">#4</span></pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIHNlbnNvciBnYXRld2F5IGFkZHJlc3MuCiMyIFRoZSBzZW5zb3IgZ2F0ZXdheSBwb3J0IG51bWJlci4KIzMgVGhlIGNvcnJlY3QgdGVtcGVyYXR1cmUgbG93ZXIgYm91bmQuCiM0IFRoZSBjb3JyZWN0IHRlbXBlcmF0dXJlIGhpZ2hlciBib3VuZC4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="41" id="41" data-hash="828ae93095b4832d9f7fde6e6724b825"> 
+   <p>The service resolves the sensor gateway address as well as the correct temperatures range using environment variables. As we will see later we will be able to override the values when deploying the service to a cluster.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="42" id="42" data-hash="7cc4216d55e7d2f272404acc48db6890"> 
+   <p>The start method configures the web client to make HTTP requests to the sensor gateway, and also uses a Vert.x web router to expose API endpoints.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="43" id="43" data-hash="057764401f5ba74821627a0c3043faab"> 
+   <h5>Listing&nbsp;13.7.&nbsp;Heat API web client and routes</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">webClient = WebClient.create(vertx, new WebClientOptions()
+  .setDefaultHost(gatewayHost)  #1
+  .setDefaultPort(gatewayPort));
+
+Router router = Router.router(vertx);   #2
+router.get("/all").handler(this::fetchAllData);
+router.get("/warnings").handler(this::sensorsOverLimits);</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUHJlLWJpbmQgdGhlIHdlYiBjbGllbnQgaG9zdCBhbmQgcG9ydCBmb3IgcmVxdWVzdHMuCiMyIFRoZSByb3V0ZXIgdG8gZXhwb3NlIHRoZSBBUEkgZW5kcG9pbnRzLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="44" id="44" data-hash="c6c5a909a3d4f98110b06c75d5ff1f07"> 
+   <p>Fetching data from the sensor gateway is made using a HTTP GET requests as given in listing 13.8.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="45" id="45" data-hash="c4674a7d4a8c943106d80152ef8bd893"> 
+   <h5>Listing&nbsp;13.8.&nbsp;Fetching sensor data</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void fetchData(RoutingContext routingContext, Consumer&lt;HttpResponse&lt;JsonObject&gt;&gt; action) {
+  webClient.get("/data")            <a class="pcalibre pcalibre1" id="CO8-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    .as(BodyCodec.jsonObject())
+    .expect(ResponsePredicate.SC_OK)
+    .timeout(5000)
+    .send(ar -&gt; {
+      if (ar.succeeded()) {
+        action.accept(ar.result()); <a class="pcalibre pcalibre1" id="CO8-2" shape="rect"></a><span class="pcalibre1">#2</span>
+      } else {
+        routingContext.fail(500);   <a class="pcalibre pcalibre1" id="CO8-3" shape="rect"></a><span class="pcalibre1">#3</span>
+        logger.error("Could not fetch data", ar.cause());
+      }
+    });
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgTWFrZSBhIHJlcXVlc3QgdG8gL2RhdGEuCiMyIENhbGwgdGhlIGFjdGlvbiBoYW5kbGVyLgojMyBIYW5kbGUgZXJyb3JzLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="46" id="46" data-hash="29d012eaa501ea86e7e0cd86a10d8385"> 
+   <p>The fetchData method is generic with a custom action given as the second parameter, so the 2 HTTP endpoints that we are exposing can reuse the request logic. With this method the implementation of method fetchAllData is in listing 13.9.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="47" id="47" data-hash="fb5e8289b9078ff09c31a6bf1552f902"> 
+   <h5>Listing&nbsp;13.9.&nbsp;Fetching all sensor data</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void fetchAllData(RoutingContext routingContext) {
+  fetchData(routingContext, resp -&gt; {
+    routingContext.response()
+      .putHeader("Content-Type", "application/json")
+      .end(resp.body().encode());
+  });
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="48" id="48" data-hash="356397820322f685db8fb65dd6ce06b7"> 
+   <p>This method doesn’t do anything special besides completing the HTTP request with the JSON data. Method sensorsOverLimits is more interesting as it filters the data as shown in listing 13.10.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="49" id="49" data-hash="e2ad91464388a06e7a970c53e4f12cff"> 
+   <h5>Listing&nbsp;13.10.&nbsp;Filtering out of range sensor data</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void sensorsOverLimits(RoutingContext routingContext) {
+  fetchData(routingContext, resp -&gt; {
+    JsonObject data = resp.body();
+    JsonArray warnings = new JsonArray();                   <a class="pcalibre pcalibre1" id="CO9-1" shape="rect"></a><span class="pcalibre1">#1</span>
+    data.getJsonArray("data").stream()                      <a class="pcalibre pcalibre1" id="CO9-2" shape="rect"></a><span class="pcalibre1">#2</span>
+      .map(JsonObject.class::cast)                          <a class="pcalibre pcalibre1" id="CO9-3" shape="rect"></a><span class="pcalibre1">#3</span>
+      .filter(value -&gt; value.getDouble("temp") &lt;= lowLimit) <a class="pcalibre pcalibre1" id="CO9-4" shape="rect"></a><span class="pcalibre1">#4</span>
+      .filter(value -&gt; value.getDouble("temp") &gt;= highLimit)
+      .forEach(warnings::add);                              <a class="pcalibre pcalibre1" id="CO9-5" shape="rect"></a><span class="pcalibre1">#5</span>
+    data.put("data", warnings);                             <a class="pcalibre pcalibre1" id="CO9-6" shape="rect"></a><span class="pcalibre1">#6</span>
+    routingContext.response()
+      .putHeader("Content-Type", "application/json")
+      .end(data.encode());
+  });
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQW4gYXJyYXkgdG8gY29sbGVjdCBvdmVyIGxpbWl0IGRhdGEuCiMyIFVzZSBhIEphdmEgc3RyZWFtIHRvIGZpbHRlciBlbnRyaWVzLgojMyBDYXN0IGZyb20gT2JqZWN0IHRvIEpzb25PYmplY3QuCiM0IEZpbHRlciBiYXNlZCBvbiB0ZW1wZXJhdHVyZSB2YWx1ZXMuCiM1IEFkZCB0byB0aGUgYXJyYXkuCiM2IEFzc2VtYmxlIHRoZSBmaW5hbCBKU09OIHJlc3BvbnNlLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="50" id="50" data-hash="5456ef5510498beda63445af9de1c7a6"> 
+   <p>Method sensorsOverLimits keeps only the entries where the temperature is not within the expected range. To do so we use a functional processing approach using Java collection streams, then return the response. Note that the data array in the response JSON document may be empty when all sensor values are correct.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="51" id="51" data-hash="aed03a3a759d24023fd5c87989964418"> 
+   <p>Now that we have seen the main interesting points in the 3 services implementation, we can move on to the topic of actually deploying them in a Kubernetes cluster.</p> 
+  </div> 
+  <div class="readable-text" refid="52" id="52" data-hash="057748b3bd56e7c0ad58545d520f409a"> 
+   <h3 class="calibre29" id="heading_id_7"><a class="pcalibre pcalibre1" id="deploying-to-a-local-cluster" shape="rect"></a>13.1.4 &nbsp;Deploying to a local cluster</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="53" id="53" data-hash="92985c906e68ae604d6c6f9b8d53fba9"> 
+   <p>There are many ways to run a local Kubernetes cluster. Docker Desktop embeds Kubernetes, so it may be all you need to run Kubernetes if you have it running on your machine. Among the other options Minikube is a reliable option offered by the Kubernetes project [MK]. It deploys a small virtual machine on Windows, macOS and Linux, which makes it perfect for having disposable clusters for development. If anything goes wrong you can easily destroy a cluster and start anew.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="54" id="54" data-hash="f01d6ea326101babd46611772c3e2b5c"> 
+   <p>Another benefit of Minikube is that it offers environment variables for Docker daemons, so you can have your locally-built container images be available straight inside the cluster. In other Kubernetes configuration you would have to push images to private or public registries, which can slow the development feedback loop especially when pushing a few hundreds of megabytes to public registries over a slow Internet connection. We are assuming that you will use Minikube here, but feel free to use any other option.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="55" id="55" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+     <h5>Tip</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="56" id="56" data-hash="acddbe8d2339bdc9ee0a7d0387c49c6c"> 
+     <p>If you have never used Kubernetes before: welcome! While you will not become a Kubernetes expert by reading this section, running the commands should still give you an intuition of what it is all about. The main concepts behind Kubernetes are quite simple once you go beyond the vast ecosystem and terminology.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="57" id="57" data-hash="e36801a5e6b559dbd589c45eca0c1101"> 
+   <p>Listing 13.11 shows how to create a cluster with 4 CPUs and 8 Gb of memory.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="58" id="58" data-hash="6cfb0bf9962d7187db45a59b2a373745"> 
+   <h5>Listing&nbsp;13.11.&nbsp;Creating a minikube cluster</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ minikube start --cpus=4 --memory=8G --addons ingress  #1
+  minikube v1.9.2 on Darwin 10.15.4
+  MINIKUBE_ACTIVE_DOCKERD=minikube
+  Automatically selected the hyperkit driver. Other choices: docker, virtualbox
+  Starting control plane node m01 in cluster minikube
+  Creating hyperkit VM (CPUs=4, Memory=8192MB, Disk=20000MB) ...
+  Preparing Kubernetes v1.14.0 on Docker 19.03.8 ...
+  Enabling addons: default-storageclass, ingress, storage-provisioner
+  Done! kubectl is now configured to use "minikube"</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRW5hYmxlIHRoZSBpbmdyZXNzIGFkZC1vbi4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="59" id="59" data-hash="0df8e9044922c7e48d8df74a7be02702"> 
+   <p>The flags and the output will differ based on your operating system and software versions. You may need to adjust these by looking at the current Minikube documentation when you will read this chapter. I allocated 4 CPUs and 8 Gb of memory because this is comfortable on my laptop, but you can be fine with 1 CPU and less RAM.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="60" id="60" data-hash="b46a51be2a3f10f2b758987554ab1d57"> 
+   <p>You can access a web dashboard by running the minikube dashboard command. You can have a look at the various Kubernetes resources and even perform some (limited) operations such as scaling a service up and down, or looking into logs.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="61" id="61" data-hash="6f5f81a885f8d22cd9a1ec3623b7b112"> 
+   <p>There is another dashboard that I find particularly efficient and can only recommend that you try: k9s [K9S]. It works as a command-line tool and it is very fast to move between Kubernetes resources, access pod logs, update replica counts, etc.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="62" id="62" data-hash="c38b0bb22c80d271dd8bfd65b155a5ae"> 
+   <p>Kubernetes has a command-line tool called kubectl that you can use to perform anything: deploying services, collecting logs, configure DNS, and more. kubectl is the Swiss-knife of Kubernetes. We could hence use kubectl to apply the Kubernetes resource definitions found in each service k8s/ folder. We will later describe the resources in the k8s/ folders: if you are new to Kubernetes all you need to know right now is that these files tell Kubernetes how to deploy the 3 services of this chapter.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="63" id="63" data-hash="eb1cc11f42642cb9eb5c02f4dbe4e6f7"> 
+   <p>There is a better tool to improve your local Kubernetes development experience called Skaffold [Skaffold]. Instead of using Gradle (or Maven) to build the services, package them then use kubectl to deploy to Kubernetes, Skaffold is able to do it for us, avoiding unnecessary builds using some caching, performing deployments, aggregating all logs, and cleaning everything on exit. Skaffold also works out of the box with Minikube, so no additional configuration is needed. All it needs is a skaffold.yaml resource descriptor as found in listing 13.12 and at the root of the chapter13 folder in the Git repository.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="64" id="64" data-hash="8ade91ca5dc1fe6d908301f36399a54a"> 
+   <h5>Listing&nbsp;13.12.&nbsp;Skaffold configuration</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">apiVersion: skaffold/v1
+kind: Config
+metadata:
+  name: chapter13
+build:
+  artifacts:
+    - image: vertx-in-action/heat-sensor-service  #1
+      jib:
+        type: gradle
+        project: heat-sensor-service              #2
+      context: .
+    - image: vertx-in-action/sensor-gateway
+      jib:
+        type: gradle
+        project: sensor-gateway
+      context: .
+    - image: vertx-in-action/heat-api
+      jib:
+        type: gradle
+        project: heat-api
+      context: .
+deploy:
+  kubectl:
+    manifests:
+      - "**/k8s/*.yaml" #3</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgTmFtZSBvZiBhIGNvbnRhaW5lciBpbWFnZSB0byBwcm9kdWNlLgojMiBQcm9qZWN0IGNvbnRhaW5pbmcgdGhlIHNvdXJjZSBjb2RlLgojMyBBbHNvIGFwcGx5IFlBTUwgZmlsZXMu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="65" id="65" data-hash="b3ae2eb0ef0a8661d2c46dd25a1e804a"> 
+   <p>From the chapter13 folder, you can run skaffold dev and it will build the projects, deploy container images, expose logs and watch for file changes. Figure 13.2 shows a screenshot of Skaffold running.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="66" id="66" data-hash="571c8aaff78484e67653d38e713715c2"> 
+   <h5 id="skaffold-screen">Figure&nbsp;13.2.&nbsp;Screenshot of Skaffold running services</h5> 
+   <img alt="skaffold" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/skaffold.png" width="1100" loading="lazy" height="759" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="67" id="67" data-hash="67788862a0229f0e20948568e3906266"> 
+   <p>Congratulations, you now have the services running in your (local) cluster!</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="68" id="68" data-hash="31c4fffac0ee0ea430cb0900ecfeee91"> 
+   <p>You don’t have to use Skaffold, but for a good local development experience this is a tool you can rely on. It hides some of the complexity of the kubectl command-line interface, and it bridges the gap between project build tools (e.g., Gradle, Maven) and the Kubernetes environment.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="69" id="69" data-hash="9a31945841db55d2d2af19896d5216ca"> 
+   <p>Listing 13.13 shows a few commands to check the services deployed in a cluster.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="70" id="70" data-hash="d536a2576a49b00d9d9e8277bd1a8e5e"> 
+   <h5>Listing&nbsp;13.13.&nbsp;Checking the exposed services</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ minikube tunnel <a class="pcalibre pcalibre1" id="CO12-1" shape="rect"></a><span class="pcalibre1">#1</span>
+$ kubectl get services <a class="pcalibre pcalibre1" id="CO12-2" shape="rect"></a><span class="pcalibre1">#2</span>
+NAME                  TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)             AGE
+heat-api              LoadBalancer   10.103.127.60   10.103.127.60   8080:31673/TCP      102s
+heat-sensor-service   ClusterIP      None            &lt;none&gt;          8080/TCP,5701/TCP   102s
+kubernetes            ClusterIP      10.96.0.1       &lt;none&gt;          443/TCP             42m
+sensor-gateway        ClusterIP      10.108.31.235   &lt;none&gt;          8080/TCP,5701/TCP   102s</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgTmV0d29yayB0dW5uZWwsIHJ1biBpbiBhIHNlcGFyYXRlIHRlcm1pbmFsCiMyIEdldCB0aGUgc2VydmljZXMu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="71" id="71" data-hash="625bfe01f0140da4c6d0f1012f7c44b5"> 
+   <p>The minikube tunnel command is important to access LoadBalancer services, and it should be run in a separate terminal. Note that it will likely require you to enter your password as the command needs to adjust your current network settings. You can alternatively use the following minikube command to obtain a URL to a LoadBalancer service without minikube tunnel:</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="72" id="72" data-hash="1e75e73af7e200d111941d79468c85b1"> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ minikube service heat-api --url
+http://192.168.64.12:31673</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="73" id="73" data-hash="b95c17bf86633487b8c42c130892524d"> 
+   <p>This works because Minikube also exposes LoadBalancer services as NodePort on the Minikube instance IP. Both methods are equivalent when using Minikube, but the one using minikube tunnel is closer to what you would get with a production cluster since the service is accessed via a cluster-external IP address.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="74" id="74" data-hash="f2d8d1359369b3699124f105cdb0b354"> 
+   <p>Since you now have a way to access the heat API service, you can do a few requests as in listing 13.14.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="75" id="75" data-hash="bea91c6a576feddd4aae7d100aefeee1"> 
+   <h5>Listing&nbsp;13.14.&nbsp;Interacting with the heat API service</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ http 10.103.127.60:8080/all <a class="pcalibre pcalibre1" id="CO13-1" shape="rect"></a><span class="pcalibre1">#1</span>
+HTTP/1.1 200 OK
+Content-Type: application/json
+content-length: 402
+
+&lt;JSON DATA&gt;
+
+$ http 10.103.127.60:8080/warnings <a class="pcalibre pcalibre1" id="CO13-2" shape="rect"></a><span class="pcalibre1">#2</span>
+HTTP/1.1 200 OK
+Content-Type: application/json
+content-length: 11
+
+&lt;JSON DATA&gt;</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgR2V0IGFsbCBkYXRhLgojMiBHZXQgb3V0IG9mIHJhbmdlIHNlbnNvciBkYXRhLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="76" id="76" data-hash="42c39283aeb01a112e99a7cb081a993e"> 
+   <p>You can also access the sensor gateway using port forwarding, as shown in listing 13.15.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="77" id="77" data-hash="4fec02a54a1a8754ac8491a026350ae9"> 
+   <h5>Listing&nbsp;13.15.&nbsp;Interacting with the sensor gateway</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ kubectl port-forward services/sensor-gateway 8080 <a class="pcalibre pcalibre1" id="CO14-1" shape="rect"></a><span class="pcalibre1">#1</span>
+$ http :8080/data <a class="pcalibre pcalibre1" id="CO14-2" shape="rect"></a><span class="pcalibre1">#2</span>
+HTTP/1.1 200 OK
+Content-Type: application/json
+content-length: 400
+
+&lt;JSON data&gt;</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUG9ydCBmb3J3YXJkIGZyb20gYSBzZXJ2aWNlIHRvIGEgbG9jYWwgcG9ydCAocnVuIGluIGEgc2VwYXJhdGUgdGVybWluYWwpLgojMiBDYWxsIHRoZSBzZXJ2aWNlLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="78" id="78" data-hash="53c5882d9d4bdb589fa493eb9de2bc16"> 
+   <p>The kubectl port-forward command must be run in another terminal, and as long as it is running then the local port 8080 forwards to the sensor gateway service inside the cluster. This is very convenient to access anything that is running in the cluster without being exposed as a LoadBalancer service.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="79" id="79" data-hash="a103feb81eb3ab51c1df8ea48e25bac2"> 
+   <p>Finally we can make a DNS query to see how the heat sensor headless services are resolved. Listing 13.16 uses a third-party image that contains the dig tool which can be used to make DNS requests.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="80" id="80" data-hash="6c6a7750cdf86aff19101e233c3c10ea"> 
+   <h5>Listing&nbsp;13.16.&nbsp;DNS query to discover the headless heat sensor services</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ kubectl run --image tutum/dnsutils dns -it --rm -- bash            #1
+root@dns:/# dig +short heat-sensor-service.default.svc.cluster.local #2
+172.17.0.8
+172.17.0.12
+172.17.0.11
+172.17.0.9
+root@dns:/#</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEg"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="81" id="81" data-hash="387922d692f1f3eb98cd627c7b1a0f3a"> 
+   <p>Now if we increase the number of replicas as in listing 13.17, we can see that the DNS reflects the change.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="82" id="82" data-hash="6b2aea8613ac3baaa13c5ba0cabf435b"> 
+   <h5>Listing&nbsp;13.17.&nbsp;Increasing the number of heat sensor service replicas</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ kubectl scale deployment/heat-sensor-service --replicas 5 #1
+$ kubectl run --image tutum/dnsutils dns -it --rm -- bash
+root@dns:/# dig +short heat-sensor-service.default.svc.cluster.local
+172.17.0.11
+172.17.0.12
+172.17.0.8
+172.17.0.13
+172.17.0.9
+root@dns:/#</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgU2NhbGUgdG8gNSByZXBsaWNhcy4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="83" id="83" data-hash="64633e4ce4af92b48ba2b72ec72e0abb"> 
+   <p>Also if we make HTTP requests like in listing 13.14, then we can see that we now have data from 5 sensors.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="84" id="84" data-hash="e94121d05465ef69c98948679b234e5a"> 
+   <p>Now that we have deployed the services and interacted with them, let us see how deployment in Kubernetes works for Vert.x services.</p> 
+  </div> 
+  <div class="footnote2" id="ftn.d5e819"> 
+   <div class="readable-text" refid="85" id="85" data-hash="bdb8e890b3976d95b810641fda6fa607"> 
+    <p><a class="pcalibre para2" href="/book/vertx-in-action/chapter-13/v-10/d5e819" shape="rect"><sup class="para3">[1]</sup></a> See <a class="pcalibre3 pcalibre" href="https://vertx.io/docs/" shape="rect">vertx.io/docs/</a></p> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="86" id="86" data-hash="173490a935eeac2b6ac349b904df8369"> 
+   <h2 class="calibre17" id="heading_id_8"><a class="pcalibre pcalibre1" id="making-the-services-work-in-kubernetes" shape="rect"></a>13.2 &nbsp;Making the services work in Kubernetes</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="87" id="87" data-hash="f092a4db4fc2a1ec9b229f62577009b1"> 
+   <p>Making a service work in Kubernetes is fairly transparent for the most part, especially when it has been designed as being agnostic of the target runtime environment. The fact that it runs in a container or not, in a virtual machine or on bare-metal should never be an issue. Still, there are some aspects where adaptation and configuration needs to be made due how Kubernetes work.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="88" id="88" data-hash="89d19650ed0c3b4b83e8d78c02a045a7"> 
+   <p>In our case the only major adaptation that has to be made is configuring the cluster manager so instances can discover themselves, and messages can be sent across the distributed event bus. The rest is just a matter of:</p> 
+  </div> 
+  <ul class="itemizedlist"> 
+   <li class="listitem readable-text scrambled" refid="89" id="89" data-hash="10ffc199f68300a7bc996baff2c5da69"> ingiludb ntcnireao saeigm kl krd vierscse, ncu<br> </li> 
+   <li class="listitem readable-text scrambled" refid="90" id="90" data-hash="b51644f2796b31fe25269d1cc5df76ac"> iriwgtn Nentrbuees scruroee orcedstiprs rk yeodlp kyr sveeiscr.<br> </li> 
+  </ul> 
+  <div class="readable-text" refid="91" id="91" data-hash="c278352490df0839637203eaebb9f155"> 
+   <p>So letâs start by talking about building container images.</p> 
+  </div> 
+  <div class="readable-text" refid="92" id="92" data-hash="27c24f28dd9282457ce7ea97ca948c18"> 
+   <h3 class="calibre29" id="heading_id_9"><a class="pcalibre pcalibre1" id="building-container-images" shape="rect"></a>13.2.1 &nbsp;Building container images</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="93" id="93" data-hash="6cd4a095ef29096bae9315695dc1df1b"> 
+   <p>There are many ways for building a container image, which technically is based on the OCI Image Format [OCIIF]. The most basic way to build such an image is to write a Dockerfile and use the docker build command to build an image. Note that Dockerfile descriptors can be used by other tools so you don’t actually need Docker to build container images.[2]</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="94" id="94" data-hash="b8000b7fb698ef8c38c67b41ac84bb55"> 
+   <p>You could thus choose a base image with Java, then copy a self-contained executable Jar file to be run. While this approach is simple and works just fine, it means that for every change in the source code you need to build a new image layer of the size of the Jar file, which includes all dependencies such as Vert.x, Netty, and more. The compiled classes of a service typically weight a few kilobytes, while a self-contained Jar file weights a few megabytes.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="95" id="95" data-hash="bc29c30ae15b09b342ee3b799e8b4d79"> 
+   <p>You can either craft a Dockerfile with multiple stages and layers, or you can use a tool like Jib to automatically do the equivalent for you [Jib]. As shown in figure 13.3, Jib assembles different layers to make a container image.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="96" id="96" data-hash="2c129a2cbced5ea85364db41e33dd8af"> 
+   <h5 id="jib">Figure&nbsp;13.3.&nbsp;Container image layers with Jib</h5> 
+   <img alt="jib" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/jib.png" width="675" loading="lazy" height="524" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="97" id="97" data-hash="7e3bb8001a757ccefab8404414c8928a"> 
+   <p>Project dependencies are put just above the base image: they are typically bigger than the application code and resources, and they also tend not to change very often except when upgrading versions and adding new dependencies. When a project has snapshot dependencies then they appear as a layer on top of the fixed-version dependencies, because newer snapshots appear frequently. The resources then class files change more often and they are typically light on disk usage, so they end up on top. This clever layering approach does not just save disk space: it also improves build time since layers can often be reused.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="98" id="98" data-hash="cc34c09df8af9d649934b83bd0dcc3cf"> 
+   <p>Jib offers Maven and Gradle plugins, and it builds container images by deriving information from a project. Jib is also great because it is purely written in Java and it does not need Docker to build images, so you can produce container images without any third-party tool. It can also publish container images to registries and Docker daemons, which is useful in development.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="99" id="99" data-hash="b01fef91967d1d20cad893107e6e3da3"> 
+   <p>Once the Jib plugin has been applied, all you need is a few configuration elements as in listing 13.18 for a Gradle build (the Maven version is equivalent albeit done in XML).</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="100" id="100" data-hash="22fd9600f1400e39126bcb0004f3a466"> 
+   <h5>Listing&nbsp;13.18.&nbsp;Configuring the Jib Gradle plugin</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">jib {
+  from {
+    image = "adoptopenjdk/openjdk11:ubi-minimal-jre"                          #1
+  }
+  to {
+    image = "vertx-in-action/heat-sensor"                                     #2
+    tags = setOf("v1", "latest")                                              #3
+  }
+  container {
+    mainClass = "chapter13.sensor.HeatSensor"                                 #4
+    jvmFlags = listOf("-noverify", "-Djava.security.egd=file:/dev/./urandom") #5
+    ports = listOf("8080", "5701")                                            #6
+    user = "nobody:nobody"                                                    #7
+  }
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQmFzZSBpbWFnZS4KIzIgSW1hZ2UgbmFtZS4KIzMgSW1hZ2UgdGFncy4KIzQgTWFpbiBjbGFzcyB0byBydW4uCiM1IEpWTSB0dW5pbmcgZmxhZ3MuCiM2IFBvcnRzIHRvIGJlIGV4cG9zZWQgYnkgdGhlIGNvbnRhaW5lci4KIzcgUnVuIGFzIHRoaXMgdXNlci4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="101" id="101" data-hash="4c1b9031bf5ef75bae130b76ae47fb12"> 
+   <p>The base image comes from the AdoptOpenJDK project that publishes many builds of OpenJDK. Here we are using OpenJDK 11 as a Java Runtime Environment (JRE) rather than a full Java Development Kit (JDK). This saves disk space as we just need a runtime, and a JDK image is bigger than a JRE one. The ubi-minimal part is because we use an AdoptOpenJDK build variant based on the Red Hat Universal Base Image, where the "minimal" variant limits the embedded dependencies to a minimum.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="102" id="102" data-hash="ebbb31dcc785989b56f4b55bbf3fa0ad"> 
+   <p>Jib needs to know the main class to execute as well as the ports to be exposed outside the container. In the case of the heat sensor and sensor gateway services we need to expose port 8080 for the HTTP service, and port 5701 for the Vert.x clustering with Hazelcast. The JVM tuning is limited to disabling the JVM bytecode verifier to boot marginally faster, and also using /dev/urandom for random numbers generation (the default /dev/random pseudo-file may block when a container starts and there isn’t enough entropy). Finally we run as user nobody in group nobody to ensure the process runs as an unprivileged user inside the container.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="103" id="103" data-hash="08012571a3553e1bbe74085f5bac3e78"> 
+   <p>You can build an image and inspect it, as shown in listing 13.19.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="104" id="104" data-hash="422cbbbd30264f658829d17e1a073976"> 
+   <h5>Listing&nbsp;13.19.&nbsp;Building a service container image to a Docker daemon</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ ./gradlew :heat-sensor-service:jibDockerBuild                   #1
+(...)
+
+$ docker image inspect vertx-in-action/heat-sensor-service:latest #2
+(...)</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQnVpbGQgYSBjb250YWluZXIgaW1hZ2UgZm9yIHRoZSBoZWF0IHNlbnNvciBzZXJ2aWNlIGFuZCBwdXNoIGl0IHRvIGEgbG9jYWwgRG9ja2VyIGRhZW1vbi4KIzIgSW5zcGVjdCB0aGUgY29udGFpbmVyIGltYWdlLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="105" id="105" data-hash="54b68cfb698e52753878b1be683a016a"> 
+   <p>All 3 services container images build the same way. The only configuration difference is that the heat API service only exposes port 8080 since it does not need a cluster manager.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="106" id="106" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+     <h5>Tip</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="107" id="107" data-hash="e4d19c17f490da9f230818269659165f"> 
+     <p>You can use a tool like Dive if you are curious about the content of the different layers produced to prepare the container images of the 3 services [Dive].</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="108" id="108" data-hash="258d99c7b6666ca49e6e3fd66ada2620"> 
+   <p>Speaking of clustering, there is configuration work to be done!</p> 
+  </div> 
+  <div class="readable-text" refid="109" id="109" data-hash="65b328498d2fbababa4e373573ccc942"> 
+   <h3 class="calibre29" id="heading_id_10"><a class="pcalibre pcalibre1" id="clustering-and-kubernetes" shape="rect"></a>13.2.2 &nbsp;Clustering and Kubernetes</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="110" id="110" data-hash="4b45c45b3f92c175db0afd16d219a3f5"> 
+   <p>Both Hazelcast and Infinispan that you used in an earlier chapter by default use multicast communications to discover nodes. This is great for local testing and many "bare metal" server deployments, but multicast communications are not possible in a Kubernetes cluster. So if you run the containers as-is on Kubernetes, the heat sensor services and sensor gateway instances will not be able to communicate over the event-bus.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="111" id="111" data-hash="9fad0ab1ca065c2f192822d4576249fd"> 
+   <p>These cluster managers can of course be configured to perform service discovery in Kubernetes. We will briefly cover here the case of Hazelcast, where 2 discovery modes are possible.</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="112" id="112" data-hash="2f3df529e5106813c1c9cab9eafb2c19"> Haazletsc rsza ncecton vr vgr Dsenetrbue BFJ kr ineslt qcn oidecsrv ucky ignctamh z ereqtus, jofx hignav s idredes beall hcn ueval.<br> </li> 
+   <li class="listitem readable-text scrambled" refid="113" id="113" data-hash="2337df1342d3e9b6dfbe5f765eceb26d"> Hcsateazl nss ileayrcdpoil xmvs NDS eqrsuie rk oidsrecv sff gdec elt z ngevi Nteuersebn (deaelhss) ecivsre.<br> </li> 
+  </ol> 
+  <div class="readable-text scrambled" refid="114" id="114" data-hash="0e3a1e9663c596e8ae8b23921fd3977e"> 
+   <p>The DNS approach is more limited than using the Kubernetes API, so let’s configure Hazelcast to use it. By default the Hazelcast Vert.x cluster manager reads configuration from a cluster.xml resource. Listing 13.20 shows the relevant configuration excerpt of the content of file heat-sensor-service/src/main/resource/cluster.xml.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="115" id="115" data-hash="eaef37b7b7f11f780455f6b17523ac72"> 
+   <h5>Listing&nbsp;13.20.&nbsp;Kubernetes configuration for Hazelcast discovery</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">(...)
+&lt;join&gt;
+  &lt;multicast enabled="false"/&gt;                                              <a class="pcalibre pcalibre1" id="CO18-1" shape="rect"></a><span class="pcalibre1">#1</span>
+  &lt;tcp-ip enabled="false" /&gt;
+  &lt;discovery-strategies&gt;
+    &lt;discovery-strategy enabled="true"
+     class="com.hazelcast.kubernetes.HazelcastKubernetesDiscoveryStrategy"&gt; <a class="pcalibre pcalibre1" id="CO18-2" shape="rect"></a><span class="pcalibre1">#2</span>
+      &lt;properties&gt;
+        &lt;property name="service-label-name"&gt;vertx-in-action&lt;/property&gt;      <a class="pcalibre pcalibre1" id="CO18-3" shape="rect"></a><span class="pcalibre1">#3</span>
+        &lt;property name="service-label-value"&gt;chapter13&lt;/property&gt;           <a class="pcalibre pcalibre1" id="CO18-4" shape="rect"></a><span class="pcalibre1">#4</span>
+      &lt;/properties&gt;
+    &lt;/discovery-strategy&gt;
+  &lt;/discovery-strategies&gt;
+&lt;/join&gt;
+(...)</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRGlzYWJsZSBtdWx0aWNhc3QgY29tbXVuaWNhdGlvbnMuCiMyIEVuYWJsZSB0aGUgS3ViZXJuZXRlcyBkaXNjb3Zlcnkgc3RyYXRlZ3kuCiMzIE1hdGNoIHNlcnZpY2VzIHdpdGggbGFiZWwgdmVydHgtaW4tYWN0aW9uLgojNCBNYXRjaCBzZXJ2aWNlcyB3aXRoIHZhbHVlIGNoYXB0ZXIxMyBmb3IgbGFiZWwgdmVydHgtaW4tYWN0aW9uLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="116" id="116" data-hash="25be0987fc2aa5023dd91b70b7814696"> 
+   <p>We disable the default discovery mechanism and enable the Kubernetes ones. Here Hazelcast forms clusters of pods that belong to a service where a label vertx-in-action is defined with value chapter13. Since we opened port 5701 the pods will be able to connect. Note that the configuration is the same for the sensor gateway.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="117" id="117" data-hash="9031ce0619debbcb80e809eeeca3fb46"> 
+   <p>Since Hazelcast needs to read from the Kubernetes API, we need to ensure that we have permissions using the Kubernetes role-based access control (RBAC). To do so we need to apply the ClusterRoleBinding resource of listing 13.21.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="118" id="118" data-hash="25a887daf2b18d936bf6e9d89faf0d75"> 
+   <h5>Listing&nbsp;13.21.&nbsp;RBAC to grant view access to the Kubernetes API</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding              #1
+metadata:
+  name: default-cluster
+roleRef:
+  apiGroup: rbac.authorization.k8s.io #2
+  kind: ClusterRole
+  name: view
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: default</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUmVzb3VyY2UgdHlwZS4KIzIgVmlldyByb2xlIHJlZmVyZW5jZS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="119" id="119" data-hash="4e8922c36c38cbff7a7bf1cfc4f2aaf9"> 
+   <p>The last thing we need to do is ensuring that the heat sensor and gateway services run with clustering enabled. In both cases the code is similar, listing 13.22 shows the main method for the heat sensor service.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="120" id="120" data-hash="c2c5e717d755e6f29d72d46a04df83df"> 
+   <h5>Listing&nbsp;13.22.&nbsp;Enabling clustering for the heat sensor service</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">public static void main(String[] args) throws UnknownHostException {
+  String ipv4 = InetAddress.getLocalHost().getHostAddress();  #1
+  VertxOptions options = new VertxOptions()
+    .setEventBusOptions(new EventBusOptions()                 #2
+      .setHost(ipv4)                                          #3
+      .setClusterPublicHost(ipv4));                           #4
+  Vertx.clusteredVertx(options, ar -&gt; {                       #5
+    if (ar.succeeded()) {
+      ar.result().deployVerticle(new HeatSensor());
+    } else {
+      logger.error("Could not start", ar.cause());
+    }
+  });
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgR2V0IHRoZSBJUHY0IGFkZHJlc3Mgb2YgdGhlIGhvc3QuCiMyIEN1c3RvbWl6ZSB0aGUgZXZlbnQgYnVzIG9wdGlvbnMuCiMzIFNldCB0aGUgaG9zdCBhZGRyZXNzLgojNCBTZXQgdGhlIGhvc3QgdGhhdCBvdGhlciBub2RlcyBuZWVkIHRvIHRhbGsgdG8uCiM1IFN0YXJ0IFZlcnQueCBpbiBjbHVzdGVyIG1vZGUu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="121" id="121" data-hash="f1e44376449d26910b77e780814cb24d"> 
+   <p>We start a clustered Vert.x context and pass options to customize the event-bus configuration. In most cases you don’t need to do any extra tuning here, but in the context of Kubernetes clustering will likely resolve to localhost rather the actual host IPv4 address. This is why we first resolve the IPv4 address, then set the event-bus configuration host to that address, so the other nodes can talk to it.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="122" id="122" data-hash="5c622e940054ac4ab45712e2d7b5d25d"> 
+     <h5>Tip</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="123" id="123" data-hash="680eab7ad25aa53182f346c167a8008c"> 
+     <p>The event-bus network configuration done in listing 13.22 will be done automatically in future Vert.x releases. We keep it here because it can help you troubleshooting distributed event-bus configuration issues in other contexts than Kubernetes.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="124" id="124" data-hash="06360bff9acec8a44d332c0bba962fb6"> 
+   <h3 class="calibre29" id="heading_id_11"><a class="pcalibre pcalibre1" id="kubernetes-deployment-and-service-resources" shape="rect"></a>13.2.3 &nbsp;Kubernetes deployment and service resources</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="125" id="125" data-hash="382917064a303f3705a75629cf57d271"> 
+   <p>Now that we know how to put our services into containers and that we know how to make sure Vert.x clustering works in Kubernetes, we need to discuss resource descriptors. Indeed Kubernetes needs some descriptors to deploy container images to pods, and expose services.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="126" id="126" data-hash="cf404ac7a2f56620e6345c078572b7a8"> 
+   <p>Let’s start with the heat sensor service deployment descriptor of listing 13.23.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="127" id="127" data-hash="dcadac9f6a0fc72d6fe5e1060b2980d5"> 
+   <h5>Listing&nbsp;13.23.&nbsp;Heat sensor service deployment descriptor</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">apiVersion: apps/v1
+kind: Deployment                                           #1
+metadata:
+  labels:
+    app: heat-sensor-service
+  name: heat-sensor-service                                #2
+spec:
+  selector:
+    matchLabels:
+      app: heat-sensor-service
+  replicas: 4                                              #3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:                                         #4
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: heat-sensor-service
+    spec:
+      containers:
+        - image: vertx-in-action/heat-sensor-service:latest #5
+          name: heat-sensor-service</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhpcyBpcyBhIGRlcGxveW1lbnQgcmVzb3VyY2UuCiMyIE5hbWUgb2YgdGhlIGRlcGxveW1lbnQuCiMzIERlcGxveSA0IGluc3RhbmNlcyBieSBkZWZhdWx0LgojNCBSb2xsaW5nIHVwZGF0ZSBjb25maWd1cmF0aW9uIGZvciBIYXplbGNhc3QuCiM1IENvbnRhaW5lciBpbWFnZSB0byBkZXBsb3ku"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="128" id="128" data-hash="182a17d6b73bd3bde3ffa1fa728d5362"> 
+   <p>This deployment descriptor deploys by default 4 pods of the vertx-in-action/heat-sensor-service container image. Deploying pods is a good first step, but we also need a service definition that maps to these pods. This is especially important for Hazelcast: remember that instances discover themselves through Kubernetes services with label vertx-in-action and value chapter13.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="129" id="129" data-hash="042f673e6763f03f4e2156847812b0bd"> 
+   <p>Kubernetes performs rolling updates when a deployment is updated by progressively replacing pods of the older configuration with pods with the newer configuration. It is best to adapt the values of maxSurge and maxUnavailable to 1. By doing so Kubernetes replaces pods one after the other, so the cluster state is smoothly transferred to the new pods. You can avoid this configuration and let Kubernetes be more aggressive when rolling updates, but the cluster state may be inconsistent for some time.</p> 
+  </div> 
+  <div class="readable-text" refid="130" id="130" data-hash="73b9c916c76550393c64bac635274a07"> 
+   <p>Listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-13/v-10/heat-sensor-service-service" shape="rect" title="Example 13.24. Heat sensor service definition">13.24</a> shows the <em class="calibre10">service</em> resource definition.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="131" id="131" data-hash="b8433bc16fc060fafd164b92a3c316f6"> 
+   <h5>Listing&nbsp;13.24.&nbsp;Heat sensor service definition</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: heat-sensor-service
+    vertx-in-action: chapter13  #1
+  name: heat-sensor-service
+spec:
+  clusterIP: None               #2
+  selector:
+    app: heat-sensor-service    #3
+  ports:                        #4
+    - name: http
+      port: 8080
+    - name: hazelcast
+      port: 5701</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgTGFiZWwgdXNlZCBmb3IgSGF6ZWxjYXN0IGRpc2NvdmVyeS4KIzIgV2Ugd2FudCBhICJoZWFkbGVzcyIgc2VydmljZQojMyBNYXRjaGVzIHBvZHMgd2l0aCB0aGlzIGxhYmVsIC8gdmFsdWUgcGFpci4KIzQgVGhlIHBvcnRzIHRvIGV4cG9zZS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="132" id="132" data-hash="945fc3b324b287acebac6a512f0bf8b9"> 
+   <p>The service descriptor exposes a headless service, which is to say that there is no load-balancing among the pods. Since each service is a sensor they cannot be taken one for the other. Headless services can instead be discovered using DNS queries that return the list of all pods. We will check this in the next subsection.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="133" id="133" data-hash="419ce395ea01ce7605a9c50fc7abdf0c"> 
+   <p>The deployment descriptor for the sensor gateway is nearly identical to that of the heat sensor service, as given in listing 13.25.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="134" id="134" data-hash="fdec7cd2140187ff93c2f49a51711ce3"> 
+   <h5>Listing&nbsp;13.25.&nbsp;Sensor gateway deployment descriptor</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: sensor-gateway
+  name: sensor-gateway
+spec:
+  selector:
+    matchLabels:
+      app: sensor-gateway
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: sensor-gateway
+    spec:
+      containers:
+        - image: vertx-in-action/sensor-gateway:latest  #1
+          name: sensor-gateway</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQ29udGFpbmVyIGltYWdlLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="135" id="135" data-hash="155d41dfb1d78e159f38c97db35674a8"> 
+   <p>Aside from names, you can note that we did not specify the replicas count, which by default is 1. The service definition is in listing 13.26.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="136" id="136" data-hash="0c51e25c7b1346eafe3d4f43e5b7d5de"> 
+   <h5>Listing&nbsp;13.26.&nbsp;Sensor gateway service definition</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: sensor-gateway
+    vertx-in-action: chapter13
+  name: sensor-gateway
+spec:
+  type: ClusterIP #1
+  selector:
+    app: sensor-gateway
+  ports:
+    - name: http
+      port: 8080
+    - name: hazelcast
+      port: 5701</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQ2x1c3Rlci1pbnRlcm5hbCBsb2FkIGJhbGFuY2luZy4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="137" id="137" data-hash="5c1ca9e2237a3d515f01a1875b77e37a"> 
+   <p>Now we expose a service that does load-balancing: if we start further pods then the traffic will be load-balanced between them. A ClusterIP service is load-balanced but it is not exposed outside the cluster.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="138" id="138" data-hash="71ec43408d771d7b22c339e433fe61c0"> 
+   <p>The heat API deployment is very similar to the ones we did above, except that there is configuration to pass through environment variables. Listing 13.27 shows the interesting portion of the descriptor in the spec.template.spec.containers section.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="139" id="139" data-hash="fd7e15c5d69d6e3ab4f58cd0cd4aa815"> 
+   <h5>Listing&nbsp;13.27.&nbsp;Heat API deployment excerpt</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">spec:
+  containers:
+    - image: vertx-in-action/heat-api:latest
+      name: heat-api
+      env:                    #1
+        - name: LOW_TEMP      #2
+          value: "12.0"
+        - name: HIGH_TEMP
+          value: "32.0"
+        - name: GATEWAY_HOST
+          valueFrom:
+            configMapKeyRef:  #3
+              name: sensor-gateway-config
+              key: gateway_hostname
+        - name: GATEWAY_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: sensor-gateway-config
+              key: gateway_port</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRGVmaW5lIGVudmlyb25tZW50IHZhcmlhYmxlcy4KIzIgT3ZlcnJpZGUgdGhlIExPV19URU1QIGVudmlyb25tZW50IHZhbHVlLgojMyBHZXQgYSB2YWx1ZSBmcm9tIGEgQ29uZmlnTWFwIHJlc291cmNlLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="140" id="140" data-hash="1a416334a3f8f50af14aabe43be9025f"> 
+   <p>Environment variables can be either passed directly by value as for LOW_TEMP, or passed through the indirection of a ConfigMap resource as the one of listing 13.28.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="141" id="141" data-hash="3597958d5bde662934f9ac8a424a6320"> 
+   <h5>Listing&nbsp;13.28.&nbsp;Configuration map example</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sensor-gateway-config                                 #1
+data:
+  gateway_hostname: sensor-gateway.default.svc.cluster.local  #2
+  gateway_port: "8080"</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgTmFtZSBvZiB0aGUgQ29uZmlnTWFwIHJlc291cmNlLgojMiBWYWx1ZSBmb3Iga2V5IGdhdGV3YXlfaG9zdG5hbWUu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="142" id="142" data-hash="b362c2a71c5e622e675a943888039a77"> 
+   <p>By doing so we can change configuration without having to update the heat API deployment descriptor. Note the value of gateway_hostname: this is the name to resolve the service using DNS inside the Kubernetes cluster. Here default is the Kubernetes namespace, svc designates a service resource, and cluster.local resolves to the cluster.local domain name (remember that we are using a local development cluster).</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="143" id="143" data-hash="d7ae56d4b6a0f8653277ca64da7eb5bc"> 
+   <p>Finally listing 13.29 shows how to expose the heat sensor API as an externally load-balanced service.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="144" id="144" data-hash="b91a75a09099c4487e3610249634d056"> 
+   <h5>Listing&nbsp;13.29.&nbsp;Heat API service definition</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: heat-api
+  name: heat-api
+spec:
+  type: LoadBalancer  #1
+  selector:
+    app: heat-api
+  ports:
+    - name: http
+      port: 8080</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgTG9hZCBiYWxhbmNlIGV4dGVybmFsbHku"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="145" id="145" data-hash="21908a8fe20744727b5f1a3eec331bee"> 
+   <p>A LoadBalancer service is exposed outside the cluster. It can also be mapped to a host name using an Ingress, but this is not something that we will cover.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="146" id="146" data-hash="2027bab21a603e6155bf7e83dc9883a6"> 
+   <p>We have now covered how to deploy the services to Kubernetes, so you may think that we are done. Sure the services work great in Kubernetes as-is, but we can make the integration even better!</p> 
+  </div> 
+  <div class="footnote2" id="ftn.d5e1098"> 
+   <div class="readable-text" refid="147" id="147" data-hash="df12b97afc7c57737e7f576fc32b0667"> 
+    <p><a class="pcalibre para2" href="/book/vertx-in-action/chapter-13/v-10/d5e1098" shape="rect"><sup class="para3">[2]</sup></a> See Podman (<a class="pcalibre3 pcalibre" href="https://podman.io/" shape="rect">podman.io/</a>) and Buildah (<a class="pcalibre3 pcalibre" href="https://github.com/containers/buildah" shape="rect">github.com/containers/buildah</a>).</p> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="148" id="148" data-hash="ee8a3ef7ce2d4f9a812f8125260c2acd"> 
+   <h2 class="calibre17" id="heading_id_12"><a class="pcalibre pcalibre1" id="first-class-kubernetes-citizens" shape="rect"></a>13.3 &nbsp;First-class Kubernetes citizens</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="149" id="149" data-hash="215ebeddf9ac02d9b641130d1927390a"> 
+   <p>As we have just seen, the services that we deployed work fine in Kubernetes. That being said, we can make them first-class Kubernetes citizen by:</p> 
+  </div> 
+  <ol class="orderedlist"> 
+   <li class="listitem readable-text scrambled" refid="150" id="150" data-hash="b41717564c97f8db111f93eeebf4b659"> inxspgeo eatlhh nuz isarsneed kchcse, nuc<br> </li> 
+   <li class="listitem readable-text scrambled" refid="151" id="151" data-hash="cdaf71c9901eb904f66160b100f9d051"> nspgoexi ecitmsr.<br> </li> 
+  </ol> 
+  <div class="readable-text scrambled" refid="152" id="152" data-hash="0ae3d0170a777696fd567eba6ead120e"> 
+   <p>This is important to make sure a cluster knows how services behave, for instance to restart services or scale them up and down.</p> 
+  </div> 
+  <div class="readable-text" refid="153" id="153" data-hash="b19bbe529379a1394279391227a2b858"> 
+   <h3 class="calibre29" id="heading_id_13"><a class="pcalibre pcalibre1" id="health-checks" shape="rect"></a>13.3.1 &nbsp;Health checks</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="154" id="154" data-hash="8de382ab045a63e8981f201c572880af"> 
+   <p>When Kubernetes starts a pod, it assumes that it can serve requests on the exposed ports, and that the application is running fine as long as the process is running. If a process crashes, then Kubernetes will restart its pod. Also if a process consumes too much memory, Kubernetes will kill it and restart its pod.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="155" id="155" data-hash="4e8cd3e22aef90ff39dcbe68f7e387d3"> 
+   <p>We can do better by having a process inform Kubernetes about how it is going. There are 2 important concepts in health checking:</p> 
+  </div> 
+  <ul class="itemizedlist"> 
+   <li class="listitem readable-text scrambled" refid="156" id="156" data-hash="152548efbfcf6d29d5480dbe34b4316e"> svieslen kccseh alowl s vscerie xr erptor jl jr aj inkogwr occtrryel, tv lj rj jc infailg nsq sdnee xr kd drteetars, znu<br> </li> 
+   <li class="listitem readable-text scrambled" refid="157" id="157" data-hash="654a57c344a08fe2005781fcd3201b26"> eainrsdse hescck olwla s vesceri xr preort rj cj aryed kr taccpe rcafitf.<br> </li> 
+  </ul> 
+  <div class="readable-text scrambled" refid="158" id="158" data-hash="4e79a6b66952d7901a14ea304d9d605a"> 
+   <p>Liveness checks are important because a process may be working yet be stuck with a fatal error, or be stuck in say, an infinite loop. Liveness probes can be based on files, TCP ports and HTTP endpoints. When probes fail beyond a threshold then Kubernetes restarts the pod.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="159" id="159" data-hash="ef9b676672f1ba11362403b992674bd9"> 
+   <p>The heat sensor service and sensor gateway can provide a simple health check reporting using HTTP. As long as the HTTP endpoint is responding then it means the service is operating. Listing 13.30 shows how to add health check capability to these services.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="160" id="160" data-hash="3573bda61d1148542e631d0dff087075"> 
+   <h5>Listing&nbsp;13.30.&nbsp;Simple HTTP health check probe</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">// In the verticle start method:
+router.get("/health").handler(this::healthCheck);                         #1
+
+// (...)
+private final JsonObject okStatus = new JsonObject().put("status", "UP"); #2
+
+private void healthCheck(RoutingContext ctx) {                            #3
+  logger.info("Health check");
+  ctx.response()
+    .putHeader("Content-Type", "application/json")
+    .end(okStatus.encode());
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgQWRkIGEgcm91dGUgZm9yIGEgaGVhbHRoIGNoZWNrLgojMiBKU09OIHBheWxvYWQgdG8gc2F5IHRoZSBzZXJ2aWNlIGlzIHVwLgojMyBWZXJ0Lnggd2ViIGhhbmRsZXIgZm9yIGhlYWx0aCBjaGVja3Mu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="161" id="161" data-hash="fe80ebec1ed9ab8306df9c77249c1250"> 
+   <p>With HTTP probes Kubernetes is interested in the HTTP status code of the response: 200 means the check succeeded, and anything else means that there is a problem. It is a loose convention to return a JSON document with a status field and values UP or DOWN. Additional data can be in the document, for example messages from various checks being done. This data is mostly useful when logged for diagnosis purposes.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="162" id="162" data-hash="695f8ee3c4c9344c27d086dd98c3b5dd"> 
+   <p>We then have to let Kubernetes know of the probe as in listing 13.31.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="163" id="163" data-hash="db25a908bd91958277d854075c636dca"> 
+   <h5>Listing&nbsp;13.31.&nbsp;Heat sensor service liveness probe</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area"># (...)
+spec:
+  containers:
+    - image: vertx-in-action/heat-sensor-service:latest
+      name: heat-sensor-service
+      livenessProbe:            #1
+        httpGet:                #2
+          path: /health
+          port: 8080
+        initialDelaySeconds: 15 #3
+        periodSeconds: 15       #4
+        timeoutSeconds: 5       #5</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRGVmaW5lIGEgbGl2ZW5lc3MgcHJvYmUuCiMyIFNwZWNpZnkgdGhlIEhUVFAgZW5kcG9pbnQuCiMzIEluaXRpYWwgZGVsYXkgYmVmb3JlIGRvaW5nIGNoZWNrcy4KIzQgSW50ZXJ2YWwgYmV0d2VlbiBjaGVja3MuCiM1IENoZWNrIHRpbWVvdXQu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="164" id="164" data-hash="b82c298b40c765a926a16bb83d8c6ce9"> 
+   <p>Here the liveness checks start after 15 seconds, happen every 15 seconds, and timeout after 5 seconds. We can check this by looking at the logs of one of the heat sensor service pod, as in listing 13.32.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="165" id="165" data-hash="af6b8312e624bb8ea0fa646b46c25257"> 
+   <h5>Listing&nbsp;13.32.&nbsp;Health checks in logs</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ kubectl logs -f heat-sensor-service-6944f78b84-2tpnx | grep 'Health check' #1
+2020-05-02 17:27:54,218 INFO [vert.x-eventloop-thread-1] chapter13.sensor.HeatSensor - Health check
+2020-05-02 17:28:09,182 INFO [vert.x-eventloop-thread-1] chapter13.sensor.HeatSensor - Health check
+2020-05-02 17:28:24,181 INFO [vert.x-eventloop-thread-1] chapter13.sensor.HeatSensor - Health check
+2020-05-02 17:28:39,182 INFO [vert.x-eventloop-thread-1] chapter13.sensor.HeatSensor - Health check</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVGhlIHBvZCBuYW1lIHdpbGwgYmUgZGlmZmVyZW50IG9uIHlvdXIgbWFjaGluZS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="166" id="166" data-hash="e6d399721dcb5c3e6650d7972b101c66"> 
+   <p>To get a pod name and check the logs, you can look at the output of kubectl get pods. Here we see that the checks indeed happen every 15 seconds.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="167" id="167" data-hash="3bc784039b331d14dde325bf45a43443"> 
+   <p>The case of the heat API is more interesting, as we can define both liveness and readiness checks. Indeed, the API needs the sensor gateway, so its readiness depends on that of the gateway. First, we have to define 2 routes for liveness and readiness checks, as shown in listing 13.33.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="168" id="168" data-hash="94939aa00b83d293e82401b3d3b78bfd"> 
+   <h5>Listing&nbsp;13.33.&nbsp;Health checks routes of the heat API service</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">router.get("/health/ready").handler(this::readinessCheck);  #1
+router.get("/health/live").handler(this::livenessCheck);    #2</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUmVhZGluZXNzIGNoZWNrLgojMiBMaXZlbmVzcyBjaGVjay4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="169" id="169" data-hash="5c00e582f1c38290e30eeebf7339793b"> 
+   <p>The implementation of method livenessCheck is identical to that of listing 13.30: if the service responds then it is alive. There is no condition under which the service would still respond yet be in a state where a restart would be required. The service can however be unable to accept traffic because the sensor gateway is not available, which is reported by the readiness check of listing 13.34.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="170" id="170" data-hash="b0a7e4720b103647f70c1240130851a2"> 
+   <h5>Listing&nbsp;13.34.&nbsp;Readiness checking of the heat API service</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">private void readinessCheck(RoutingContext ctx) {
+  webClient.get("/health")                                      #1
+    .expect(ResponsePredicate.SC_OK)
+    .timeout(5000)
+    .send(ar -&gt; {
+      if (ar.succeeded()) {
+        logger.info("Readiness check complete");
+        ctx.response().setStatusCode(200)                       #2
+          .putHeader("Content-Type", "application/json")
+          .end(okStatus.encode());
+      } else {
+        logger.error("Readiness check failed", ar.cause());
+        ctx.response().setStatusCode(503)                       #3
+          .putHeader("Content-Type", "application/json")
+          .end(new JsonObject()
+            .put("status", "DOWN")
+            .put("reason", ar.cause().getMessage()).encode());  #4
+      }
+    });
+}</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgTWFrZSBhIHJlcXVlc3QgdG8gdGhlIHNlbnNvciBnYXRld2F5LgojMiBTZW5kIGEgMjAwIHN0YXR1cy4KIzMgUmVwb3J0IGEgZmFpbHVyZS4KIzQgR2l2ZSB0aGUgZXJyb3IgbWVzc2FnZSBpbiB0aGUgcmVwb3J0Lg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="171" id="171" data-hash="223349d312fde93abd5d05b4388eda67"> 
+   <p>To do that we make a request to the sensor gateway health check endpoint. We could actually make any other request that allow us to know if the service is available. We then respond to the readiness check with either a HTTP 200 or 503.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="172" id="172" data-hash="090b914aad0147859d7681fab3c659a7"> 
+   <p>The configuration in the deployment resource is given in listing 13.35.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="173" id="173" data-hash="ca2364b44a814afdccca9d75b480ccd0"> 
+   <h5>Listing&nbsp;13.35.&nbsp;Configuring health checks for the heat API service</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area"># (...)
+spec:
+  containers:
+    - image: vertx-in-action/heat-api:latest
+      name: heat-api
+      # (...)
+      livenessProbe:
+        httpGet:
+          path: /health/live
+          port: 8080
+        initialDelaySeconds: 1
+        periodSeconds: 15
+        timeoutSeconds: 5
+      readinessProbe: #1
+        httpGet:
+          path: /health/ready
+          port: 8080
+        initialDelaySeconds: 5
+        periodSeconds: 10
+        timeoutSeconds: 5</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRGVmaW5lIGEgcmVhZGluZXNzIHByb2JlLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="174" id="174" data-hash="ba794e622fd2ef2fdaafe5c951b32684"> 
+   <p>As you can see a readiness probe is configured very much like a liveness probe. We have defined initialDelaySeconds to be of 5 seconds: this is because the initial Hazelcast discovery takes a few seconds, so the sensor gateway hasn’t deployed its verticle before this has been completed.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="175" id="175" data-hash="3682c76f41ba3851d5e9281ad873f518"> 
+   <p>We can check the effect by taking down all instances of the sensor gateway, as show in listing 13.36.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="176" id="176" data-hash="afb51f290a73905973d9d0eda90d6ecc"> 
+   <h5>Listing&nbsp;13.36.&nbsp;Scaling down the sensor gateway to 0 replicas</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ kubectl scale deployment/sensor-gateway --replicas 0 #1
+deployment.extensions/sensor-gateway scaled
+$ kubectl get pods #2
+NAME                                   READY   STATUS    RESTARTS   AGE
+heat-api-5dbcc84795-ccb8d              0/1     Running   0          55m
+heat-sensor-service-6946bc8f6f-2k7lv   1/1     Running   0          55m
+heat-sensor-service-6946bc8f6f-d9hd8   1/1     Running   0          55m
+heat-sensor-service-6946bc8f6f-rhdbg   1/1     Running   0          55m
+heat-sensor-service-6946bc8f6f-xd28p   1/1     Running   0          55m</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgU2NhbGUgdG8gMC4KIzIgTGlzdCBhbGwgcG9kcyBpbiB0aGUgZGVmYXVsdCBuYW1lc3BhY2Uu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="177" id="177" data-hash="1c446afe0c0788a827b2ea5c76749eac"> 
+   <p>You should wait a few seconds before listing the pods, and observe that the heat API pod becomes marked as 0/1 ready. This is because the readiness checks have failed, so the pod will not receive traffic anymore. You can try running the following query and see and immediate error:</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="178" id="178" data-hash="a8cb4be729d47054704ecf84508e3dac"> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ http $(minikube service heat-api --url)/warnings</pre> 
+    <div class="code-annotations-overlay-container" data-annotations=""></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="179" id="179" data-hash="34a29b86b9d62e692b0ea8a839b0e556"> 
+   <p>Now if we scale back to 1 instance, we can get back to a working state, as shown in listing 13.37.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="180" id="180" data-hash="24d6d082e8b2091076ddb78a8b32f0ee"> 
+   <h5>Listing&nbsp;13.37.&nbsp;Scaling up the sensor gateway to 1 replica</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ kubectl scale deployment/sensor-gateway --replicas 1  #1
+deployment.extensions/sensor-gateway scaled
+$ kubectl get pods
+NAME                                   READY   STATUS    RESTARTS   AGE
+heat-api-5dbcc84795-ccb8d              1/1     Running   0          63m
+heat-sensor-service-6946bc8f6f-2k7lv   1/1     Running   0          63m
+heat-sensor-service-6946bc8f6f-d9hd8   1/1     Running   0          63m
+heat-sensor-service-6946bc8f6f-rhdbg   1/1     Running   0          63m
+heat-sensor-service-6946bc8f6f-xd28p   1/1     Running   0          63m
+sensor-gateway-6b7cd8bbcb-btl4k        1/1     Running   0          2m18s</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgU2NhbGUgdXAgdG8gMSBpbnN0YW5jZS4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="181" id="181" data-hash="4087c97bd4da77938bcdf85f5e833b24"> 
+   <p>And you can now make successful HTTP requests again.</p> 
+  </div> 
+  <div class="tip"> 
+   <div class=" callout-container caution-container"> 
+    <div class="readable-text" refid="182" id="182" data-hash="f35a087d0dc71beb3a7204d91c1c49e4"> 
+     <h5>Note</h5> 
+    </div> 
+    <div class="readable-text scrambled" refid="183" id="183" data-hash="4a7c7e1d97ce39b52d08e6f6715777ca"> 
+     <p>The action to perform in a health or readiness check depends on what your service does. As a general rule you should perform an action that has no side effect in the system. For instance if your service needs to report a failed health check when a database connection is down, then a safe action should be to perform a small SQL query. By contrast doing a data insertion SQL query has side effects, and this is probably not how you want to check if the database connection is working.</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="readable-text" refid="184" id="184" data-hash="7f3e856009beda824ca1c0cacce6c9a1"> 
+   <h3 class="calibre29" id="heading_id_14"><a class="pcalibre pcalibre1" id="metrics" shape="rect"></a>13.3.2 &nbsp;Metrics</h3> 
+  </div> 
+  <div class="readable-text scrambled" refid="185" id="185" data-hash="206be37ef9815aa43c75f1c04a325ae8"> 
+   <p>Vert.x can be configured to report metrics on various items like the event bus communications, network communications and more. Monitoring metrics is important because they can be used to check how a service is doing and trigger alerts. For instance you can have an alert that causes Kubernetes to scale up a service when the throughput or latency of a given URL endpoint is above a threshold.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="186" id="186" data-hash="05a41d1ed1328c666f8513c8f79c67c2"> 
+   <p>I will show you how to expose metrics from Vert.x, but the other topics like visualization, alerting and auto-scaling are vastly complex and clearly outside the scope of this book.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="187" id="187" data-hash="52d603d55c3607d85f1936ce712787c7"> 
+   <p>Vert.x exposes metrics over popular technologies such as JMX, Dropwizard, Jolokia and Micrometer. Micrometer is interesting because it is an abstraction over metric reporting backends such as InfluxDB and Prometheus[Micrometer].</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="188" id="188" data-hash="05aacda3a773272e7c5b0abcd5efe87b"> 
+   <p>We will be using Micrometer and Prometheus. Prometheus is a metrics and alerting project which is popular in the Kubernetes ecosystem [Prometheus]. It also works in pull mode: Prometheus is configured to periodically collect metrics from services, so your services are not impacted by Prometheus being unavailable.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="189" id="189" data-hash="d9da8aa0625724d0c83f4b0c04116353"> 
+   <p>We will be adding metrics to the sensor gateway as it receives both event bus and HTTP traffic, and it is the most solicited service of the use-case. To do that, we first have to add 2 dependencies as in listing 13.38.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="190" id="190" data-hash="5bae184b6c613bba65ab135c9133d957"> 
+   <h5>Listing&nbsp;13.38.&nbsp;Adding metrics support</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">implementation("io.vertx:vertx-micrometer-metrics:$vertxVersion") #1
+implementation("io.micrometer:micrometer-registry-prometheus:$mpromVersion") #2</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgVmVydC54IE1pY3JvbWV0ZXIgc3VwcG9ydC4KIzIgTWljcm9tZXRlciBzdXBwb3J0IGZvciBQcm9tZXRoZXVzLg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="191" id="191" data-hash="8042649c9ce3606133eb3dc54d212140"> 
+   <p>The sensor gateway needs clustering and metrics when starting Vert.x from the main method. We need to enable metrics as show in listing 13.39.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="192" id="192" data-hash="c40aa6d6eb46aaef56521a7bd388f6fa"> 
+   <h5>Listing&nbsp;13.39.&nbsp;Enabling Micrometer / Prometheus metrics</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">VertxOptions options = new VertxOptions()
+  .setEventBusOptions(new EventBusOptions() #1
+    .setHost(ipv4)
+    .setClusterPublicHost(ipv4))
+  .setMetricsOptions(new MicrometerMetricsOptions() #2
+    .setPrometheusOptions(new VertxPrometheusOptions()
+      .setPublishQuantiles(true)  #3
+      .setEnabled(true))
+    .setEnabled(true));</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRXZlbnQgYnVzIGNvbmZpZ3VyYXRpb24sIGp1c3QgbGlrZSBiZWZvcmUuCiMyIEVuYWJsZSBNaWNyb21ldGVyIG1ldHJpY3Mgd2l0aCBQcm9tZXRoZXVzLgojMyBBbHNvIHB1Ymxpc2ggbWV0cmljIHF1YW50aWxlcy4="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="193" id="193" data-hash="f32541b231fafdcc10dd347ce01c40a5"> 
+   <p>We now have to define a HTTP endpoint for metrics to be available. The Vert.x Micrometer module offers a Vert.x web handler to make it easy, as seen in listing 13.40.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="194" id="194" data-hash="a8c787d1212e74be57d16d650381bdd3"> 
+   <h5>Listing&nbsp;13.40.&nbsp;Exposing a metrics endpoint over HTTP</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">router.route("/metrics")                        #1
+  .handler(ctx -&gt; {
+    logger.info("Collecting metrics");          #2
+    ctx.next();
+  })
+  .handler(PrometheusScrapingHandler.create()); #3</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgRXhwb3NlIGF0IHRoZSAvbWV0cmljcyBwYXRoLgojMiBMb2cgcmVxdWVzdHMuCiMzIFByZS1tYWRlIGhhbmRsZXIu"></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="195" id="195" data-hash="ee8ef2aec4fd191c63f414bbe5298430"> 
+   <p>It is a good idea to intercept metric requests and log them: this is useful when configuring Prometheus to check if it is collecting any metrics. You can test the output using port forwarding as in listing 13.41.</p> 
+  </div> 
+  <div class=" browsable-container listing-container" refid="196" id="196" data-hash="ad8a0c18369c72f298bea71238395a60"> 
+   <h5>Listing&nbsp;13.41.&nbsp;Testing metric reports</h5> 
+   <div class="code-area-container"> 
+    <pre class="code-area">$ kubectl port-forward services/sensor-gateway 8080 #1
+
+$ http :8080/metrics                                #2</pre> 
+    <div class="code-annotations-overlay-container" data-annotations="IzEgUG9ydCBmb3J3YXJkaW5nIGluIG9uZSB0ZXJtaW5hbC4KIzIgQ2hlY2sgdGhlIG1ldHJpY3Mgb3V0cHV0Lg=="></div> 
+   </div> 
+  </div> 
+  <div class="readable-text scrambled" refid="197" id="197" data-hash="adaaf8e2d5de348d9c01c3816f0be216"> 
+   <p>Prometheus metrics are exposed in a simple text format. As you can see when running the commands above that by default lots of interesting metrics are being reported like response times, open connections and more. You can also define your own metrics using the Vert.x Micrometer module APIs and have them being exposed just like the default ones.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="198" id="198" data-hash="232973ff991352bb1f1f8129e08112fe"> 
+   <p>You will find instructions and Kubernetes descriptors for configuring the Prometheus operator to consume metrics from the sensor gateway in the chapter13/k8s-metrics folder of the Git repository. You will also find a pointer to make a dashboard with Grafana that looks like the one in figure 13.4.</p> 
+  </div> 
+  <div class="browsable-container figure-container" refid="199" id="199" data-hash="7e9b3c3097816a13b54e72f20b7b1e1b"> 
+   <h5 id="grafana">Figure&nbsp;13.4.&nbsp;Metrics dashboard using Grafana</h5> 
+   <img alt="grafana" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/grafana.png" width="1150" loading="lazy" height="807" onerror="fallbackToImageSrcPlaceholder(this)"> 
+  </div> 
+  <div class="readable-text scrambled" refid="200" id="200" data-hash="ec18e1659b76d792b1f3a83d72c05760"> 
+   <p>Grafana is a popular dashboard tool that can consume data from many sources, including Prometheus databases [Grafana]. All you need is connecting visualizations and queries. Fortunately dashboards can be shared as JSON documents, please check the pointers in the Git repository if you want to reproduce the dashboard of figure 13.4.</p> 
+  </div> 
+  <div class="readable-text" refid="201" id="201" data-hash="0bb8522737fcdbb0d05ae962e4cb26b1"> 
+   <h2 class="calibre17" id="heading_id_15"><a class="pcalibre pcalibre1" id="the-end-of-the-beginning" shape="rect"></a>13.4 &nbsp;The end of the beginning</h2> 
+  </div> 
+  <div class="readable-text scrambled" refid="202" id="202" data-hash="6e5152a86434eb1e46576b74690624e8"> 
+   <p>All good things come to an end: this chapter concludes our journey towards reactive applications with Vert.x. We started this book with the fundamentals of asynchronous programming and Vert.x. Asynchronous programming is key to building scalable services, but it comes with challenges and we saw how Vert.x helped in making this programming style simple and enjoyable. In the second part of this book we used a realistic application scenario to study the key Vert.x modules for databases, web, security, messaging and event streaming. This allowed us to build an end-to-end reactive application made of several micro-services. By the end of the book we saw a methodology based on a combination of load and chaos testing to ensure service resilience and responsiveness. This is important as reactive is not just about scalability, it is also about writing services that can cope with failures. We concluded the book with notes on deploying Vert.x services in a Kubernetes cluster, something Vert.x is a natural fit for.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="203" id="203" data-hash="465258d9e095d186fcad6bdf54e486f5"> 
+   <p>Of course we did not cover all that’s in Vert.x, but you will easily find out your way through the project website and documentation. The Vert.x community is welcoming and you can get in touch over mailing-lists and chat. Last but not least: most of the skills that you have learned by reading this book translate to other technologies than Vert.x. Reactive is not a technology that you pick off-the-shelve. A technology like Vert.x will only get you through half of the way to reactive: there is a craft and mindset in systems design to achieve solid scalability, fault resiliency, and ultimately responsiveness.</p> 
+  </div> 
+  <div class="readable-text scrambled" refid="204" id="204" data-hash="3d0b6e02883fadb3d6cf638767a71c51"> 
+   <p>On a more personal note I hope that you enjoyed reading this book as much as I enjoyed the experience of writing it. I’m looking forward to hearing from you over online discussions, and if we happen to attend an event together I will be more than happy to meet you in-person!</p> 
+  </div> 
+  <div class="readable-text" refid="205" id="205" data-hash="e14762f6cce3039b2325a8b4095d6fb5"> 
+   <p>Have fun, and take care!</p> 
+  </div> 
+  <div class="readable-text" refid="206" id="206" data-hash="2a4b228fbd6c39c44ad37229e8ce370e"> 
+   <h2 class="calibre17" id="heading_id_16"><a class="pcalibre pcalibre1" id="summary" shape="rect"></a>13.5 &nbsp;Summary</h2> 
+  </div> 
+  <ul class="itemizedlist"> 
+   <li class="listitem readable-text" refid="207" id="207" data-hash="f9ee052684d20fe869e9bdac34e6511d"> Vert.x applications can easily be deployed to Kubernetes clusters with no need for Kubernetes-specific modules.<br> </li> 
+   <li class="listitem readable-text" refid="208" id="208" data-hash="bd8ebdc8acd5944418d2b2a88d17cd5e"> The Vert.x distributed event bus works in Kubernetes by configuring the cluster manager discovery mode.<br> </li> 
+   <li class="listitem readable-text" refid="209" id="209" data-hash="0f92931a56c1c84996a2f44e6c32a3af"> It is possible to have a fast, local Kubernetes development experience using tools like Minikube, Skaffold and Jib.<br> </li> 
+   <li class="listitem readable-text" refid="210" id="210" data-hash="67ff18b19d68f26890855463802ca59d"> Exposing health checks and metrics is a good practice for operating services in a cluster.<br> </li> 
+  </ul> 
+  <div class="readable-text" refid="211" id="211" data-hash="edcbd73da28ac6fd4a41c02eaa08362a"> 
+   <h2 class="calibre17" id="heading_id_17"><a class="pcalibre pcalibre1" id="references" shape="rect"></a>13.6 &nbsp;References</h2> 
+  </div> 
+  <div class="bibliodiv"> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e1627" shape="rect"></a> 
+    <div class="readable-text" refid="212" id="212" data-hash="7db31e4daf822554f1dd9e6962ddc7b4"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="OCIIF" shape="rect"></a>[OCIIF] Open Container Initiative. Image Format Specification. Retrieved May 2020. <a class="pcalibre3 pcalibre" href="https://github.com/opencontainers/image-spec" shape="rect">github.com/opencontainers/image-spec</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e1631" shape="rect"></a> 
+    <div class="readable-text" refid="213" id="213" data-hash="a3cff5a5b6d26e78ee7669a2b685f033"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="Jib" shape="rect"></a>[Jib] Google. Jib project. Retrieved May 2020. <a class="pcalibre3 pcalibre" href="https://github.com/GoogleContainerTools/jib" shape="rect">github.com/GoogleContainerTools/jib</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e1635" shape="rect"></a> 
+    <div class="readable-text" refid="214" id="214" data-hash="4c0548bbe7d9b68c2eeaf2090e0b6c54"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="RHTUBI" shape="rect"></a>[RHTUBI] Red Hat. Red Hat Universal Base Images. Retrieved May 2020. <a class="pcalibre3 pcalibre" href="https://developers.redhat.com/products/rhel/ubi/" shape="rect">developers.redhat.com/products/rhel/ubi/</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e1639" shape="rect"></a> 
+    <div class="readable-text" refid="215" id="215" data-hash="ede87aaad5d8ec16cedd330f4e251db0"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="Dive" shape="rect"></a>[Dive] Dive project. Dive. Retrieved May 2020. <a class="pcalibre3 pcalibre" href="https://github.com/wagoodman/dive" shape="rect">github.com/wagoodman/dive</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e1643" shape="rect"></a> 
+    <div class="readable-text" refid="216" id="216" data-hash="5c6332c40c798e38cd45cda2b018372f"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="MK" shape="rect"></a>[MK] Kubernetes project. Minikube. Retrieved May 2020. <a class="pcalibre3 pcalibre" href="https://minikube.sigs.k8s.io/docs/" shape="rect">minikube.sigs.k8s.io/docs/</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e1647" shape="rect"></a> 
+    <div class="readable-text" refid="217" id="217" data-hash="e8081408a4b0a97ac12393c71b7b8a69"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="K9S" shape="rect"></a>[K9S] K9S project. K9S. Retrieved May 2020. <a class="pcalibre3 pcalibre" href="https://k9scli.io" shape="rect">k9scli.io</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e1651" shape="rect"></a> 
+    <div class="readable-text" refid="218" id="218" data-hash="c84e854659cec13be2f0167fa30ab2b9"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="Skaffold" shape="rect"></a>[Skaffold] Skaffold project. Skaffold. Retrieved May 2020. <a class="pcalibre3 pcalibre" href="https://skaffold.dev" shape="rect">skaffold.dev</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e1655" shape="rect"></a> 
+    <div class="readable-text" refid="219" id="219" data-hash="eb329b497647f0ad4eee7dcc7fafb9a4"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="KubernetesInAction" shape="rect"></a>[KubernetesInAction] Marko LukÅ¡a. Kubernetes in Action, Second Edition. July 2020. Manning Publications. ISBN 9781617297618.</span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e1658" shape="rect"></a> 
+    <div class="readable-text" refid="220" id="220" data-hash="3cf422ecffcccb7368f08758543ea05c"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="DockerInAction" shape="rect"></a>[DockerInAction] Jeff Nickoloff and Stephen Kuenzli. Docker in Action, Second Edition. October 2019. Manning Publications. ISBN 9781617294761</span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e1661" shape="rect"></a> 
+    <div class="readable-text" refid="221" id="221" data-hash="4ef70217cad2705081cccb3d416bb6ff"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="Prometheus" shape="rect"></a>[Prometheus] Prometheus project. Prometheus. Retrieved May 2020. <a class="pcalibre3 pcalibre" href="https://prometheus.io/" shape="rect">prometheus.io/</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e1665" shape="rect"></a> 
+    <div class="readable-text" refid="222" id="222" data-hash="93b6ab77a7dc88d057196ca95d127389"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="Micrometer" shape="rect"></a>[Micrometer] Pivotal Software. Micrometer. Retrieved May 2020. <a class="pcalibre3 pcalibre" href="https://micrometer.io/" shape="rect">micrometer.io/</a></span></p> 
+    </div> 
+   </div> 
+   <div class="bibliomixed"> <a class="pcalibre" id="d5e1669" shape="rect"></a> 
+    <div class="readable-text" refid="223" id="223" data-hash="0f49f453c9cdcd0da5f62fba99e09b3e"> 
+     <p><span class="bibliomisc"><a class="pcalibre" id="Grafana" shape="rect"></a>[Grafana] Grafana Labs. Grafana. Retrieved May 2020. <a class="pcalibre3 pcalibre" href="https://grafana.com/" shape="rect">grafana.com/</a></span></p> 
+    </div> 
+   </div> 
+  </div>
+ </body>
+</html>
