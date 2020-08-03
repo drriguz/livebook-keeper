@@ -1,8 +1,6 @@
 package com.riguz.livebook;
 
 import com.riguz.livebook.client.LiveBookApiClient;
-import com.riguz.livebook.client.dto.Chapter;
-import com.riguz.livebook.client.dto.TocMeta;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -11,42 +9,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 
 public class Keeper {
     private final LiveBookApiClient client = new LiveBookApiClient("ponge", 10);
-
-    public void saveEncrypted() throws IOException {
-        TocMeta toc = client.getTocAndIndex();
-        System.out.println(toc.getChapters().size());
-
-        List<CompletableFuture<Boolean>> futures = new ArrayList<>();
-        for (Chapter chapter : toc.getChapters()) {
-            CompletableFuture<Boolean> contentFuture = CompletableFuture.supplyAsync(() -> {
-                String contentUrl = null;
-                try {
-                    contentUrl = client.getChapterContentUrl(chapter.getShortName());
-                    System.out.println(chapter.getShortName() + " " + contentUrl);
-                    String content = HttpClient.get(contentUrl);
-                    Path outPath = Paths.get("chapters/" + chapter.getShortName() + ".html");
-                    Files.write(outPath, content.getBytes());
-                    return true;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return false;
-                }
-            });
-            futures.add(contentFuture);
-        }
-        CompletableFuture<Boolean>[] arr = futures.toArray(new CompletableFuture[0]);
-        CompletableFuture.allOf(arr).join();
-        System.out.println("Saved content to files");
-    }
 
     public void generate(int chapter) throws IOException {
         String contentPath = String.format("chapters/chapter-%d.html", chapter);
@@ -57,51 +22,32 @@ public class Keeper {
             int paragraphId = Integer.parseInt(element.attr("id"));
             Path unlockedPath = Paths.get("chapters/" + "chapter-" + chapter + "-" + paragraphId + ".html");
             String unlockedParagraph = new String(Files.readAllBytes(unlockedPath));
-            if(element.select("p").size() != 1)
+            if (element.select("p").size() != 1)
                 throw new RuntimeException("Why?");
             Document pDoc = Jsoup.parse(unlockedParagraph);
             element.selectFirst("p").text(pDoc.selectFirst("p").text());
         }
 
-        System.out.println("Decrypted chapter.");
-        Path outPath = Paths.get("chapters/" + "chapter-" + chapter + "-unlocked.html");
-        Files.write(outPath, doc.outerHtml().replaceAll("\\{\\{BOOK_ROOT_FOLDER\\}\\}", "https://dpzbhybb2pdcj.cloudfront.net").getBytes());
-    }
-    public void unlock(int chapter) throws IOException {
-        String contentPath = String.format("chapters/chapter-%d.html", chapter);
-        String chapterContent = new String(Files.readAllBytes(Paths.get(contentPath)));
-        Document doc = Jsoup.parse(chapterContent);
-        List<CompletableFuture<Boolean>> futures = new ArrayList<>();
-        for (Element element : doc.select("div.scrambled")) {
-            int paragraphId = Integer.parseInt(element.attr("id"));
-            CompletableFuture<Boolean> contentFuture = CompletableFuture.supplyAsync(() -> {
-                try {
-                    Path outPath = Paths.get("chapters/" + "chapter-" + chapter + "-" + paragraphId + ".html");
-                    if (Files.exists(outPath))
-                        return true;
-                    String unlockedParagraph = client.unlock("chapter-" + chapter, paragraphId);
-                    element.text(unlockedParagraph);
+        System.out.println("Decrypted chapter." + chapter);
+        applyStyles(doc);
 
-                    Files.write(outPath, unlockedParagraph.getBytes());
-                    System.out.println("Unlocked: chapter-" + chapter + " p:" + element.attr("id"));
-                    return true;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return false;
-                }
-            });
-            futures.add(contentFuture);
-        }
-        CompletableFuture<Boolean>[] arr = futures.toArray(new CompletableFuture[0]);
-        CompletableFuture.allOf(arr).join();
-        System.out.println("Decrypted chapter.");
-        Path outPath = Paths.get("chapters/" + "chapter-" + chapter + "-unlocked.html");
-        Files.write(outPath, doc.outerHtml().getBytes());
+        Path outPath = Paths.get("unlocked/" + "chapter-" + chapter + ".html");
+
+        Files.write(outPath, doc.outerHtml().replaceAll("\\{\\{BOOK_ROOT_FOLDER\\}\\}",
+                "https://dpzbhybb2pdcj.cloudfront.net").getBytes());
+    }
+
+    private void applyStyles(Document doc) {
+        doc.head().append("<link rel=\"stylesheet\" href=\"style.css\">");
+        doc.head().append("<link rel=\"stylesheet\"\n" +
+                "      href=\"//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/styles/default.min.css\">\n" +
+                "<script src=\"//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/highlight.min.js\"></script>");
+        doc.head().append("<script src=\"highlight.js\"></script>");
     }
 
     public static void main(String[] args) throws IOException {
         Keeper keeper = new Keeper();
-        for (int i = 2; i <= 13; i++)
+        for (int i = 1; i <= 13; i++)
             keeper.generate(i);
     }
 }

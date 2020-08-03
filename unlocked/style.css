@@ -1,0 +1,16 @@
+body {
+    width: 800px;
+    margin: 50px auto;
+    font-family: "Lato","Helvetica Neue",Helvetica,Roboto,Arial,sans-serif;
+    font-size: 18px;
+    line-height: 30px;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+.introduction-summary {
+    background: #eee;
+}
