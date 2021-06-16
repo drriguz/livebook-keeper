@@ -218,7 +218,7 @@ INFO [vert.x-eventloop-thread-0] HelloVerticle - tick</pre>
   </div> 
   <div class="browsable-container figure-container" refid="39" id="39" data-hash="833bf1d22115689c17708c3e3e4c8753"> 
    <h5 id="hello-seq">Figure&nbsp;2.1.&nbsp;Execution of listing <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-2/v-10/hello-verticle" shape="rect" title="Example 2.3. A sample verticle">2.3</a></h5> 
-   <img alt="hello" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/hello.png" width="875" loading="lazy" height="644" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="hello" class="calibre7" src="ponge/v-10/Figures/hello.png" width="875" loading="lazy" height="644" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="40" id="40" data-hash="a198a8be36942622dccc48a5f58e5b86"> 
    <p>Figure 2.1 shows the (simplified) interactions between the verticle, the handlers, Vert.x and the event sources. Each arrow represents a method call between the participants. For instance HelloVerticle creates a periodic task handler by calling setPeriodic on the Vertx object, which in turns creates a periodic task using a Vert.x-internal timer. In turn, the timer periodically calls back the timerHandler handler in HelloVerticle.</p> 
@@ -359,11 +359,11 @@ io.vertx.core.VertxException: Thread blocked
   </div> 
   <div class="browsable-container figure-container" refid="70" id="70" data-hash="b80239309ed310830e48af1d245f4120"> 
    <h5 id="async-without-future">Figure&nbsp;2.2.&nbsp;Sequence diagram when starting a HTTP server without a promise and a <code class="code1">listen</code> handler</h5> 
-   <img alt="async without future" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/async-without-future.png" width="774" loading="lazy" height="512" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="async without future" class="calibre7" src="ponge/v-10/Figures/async-without-future.png" width="774" loading="lazy" height="512" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="browsable-container figure-container" refid="71" id="71" data-hash="e29793f5fa5fde1d6bd020b6ad876297"> 
    <h5 id="async-with-future">Figure&nbsp;2.3.&nbsp;Sequence diagram when starting a HTTP server with a promise and a <code class="code1">listen</code> handler</h5> 
-   <img alt="async with future" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/async-with-future.png" width="864" loading="lazy" height="600" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="async with future" class="calibre7" src="ponge/v-10/Figures/async-with-future.png" width="864" loading="lazy" height="600" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="72" id="72" data-hash="bdd50fb4d3dc4d43f7ef864bd7f8968d"> 
    <p>To better understand what happens here, figure 2.3 illustrates the interactions between the verticle, the Vert.x object, and the internal Vert.x deployer object responsible for calling the start method. We can check that the deployer waits for the promise completion to know if the deployment was a success or not, even after the call to method start has returned. By contrast figure 2.2 shows the interactions when not using the variant of start that accepts a Promise object, and there is no way the deployer is being notified of an error.</p> 
@@ -656,7 +656,7 @@ INFO [vert.x-worker-thread-5] WorkerVerticle - Up!
   </div> 
   <div class="browsable-container figure-container" refid="119" id="119" data-hash="b40c964f65d1117c4cbfd208b03820b4"> 
    <h5 id="mm-executeblocking">Figure&nbsp;2.4.&nbsp;Interactions in an <code class="code1">executeBlocking</code> call</h5> 
-   <img alt="chapter2 executeblocking" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/chapter2-executeblocking.png" width="1234" loading="lazy" height="362" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="chapter2 executeblocking" class="calibre7" src="ponge/v-10/Figures/chapter2-executeblocking.png" width="1234" loading="lazy" height="362" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="120" id="120" data-hash="1a8ce69e787f6bafc532c5860119aa9e"> 
    <p>The other option for running blocking code is to use the executeBlocking method from the Vertx class. This method takes some blocking code to execute, offloads it to a worker thread, then puts the result back to the event-loop as a new event, as illustrated in figure 2.4.</p> 
@@ -747,7 +747,7 @@ INFO [vert.x-worker-thread-2] Offload - Blocking code running
   </div> 
   <div class="browsable-container figure-container" refid="132" id="132" data-hash="63df16fb09d23a03cdcb77d3e2c47921"> 
    <h5 id="mm-verticle">Figure&nbsp;2.5.&nbsp;An event-loop verticle and its environment</h5> 
-   <img alt="chapter2 verticle" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/chapter2-verticle.png" width="1105" loading="lazy" height="729" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="chapter2 verticle" class="calibre7" src="ponge/v-10/Figures/chapter2-verticle.png" width="1105" loading="lazy" height="729" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="133" id="133" data-hash="3675548d500ff853c12b2a7e3b585249"> 
    <p>Figure 2.5 gives an overview of the relationships between a verticle and its environment.</p> 
@@ -770,7 +770,7 @@ INFO [vert.x-worker-thread-2] Offload - Blocking code running
   </div> 
   <div class="browsable-container figure-container" refid="140" id="140" data-hash="ff4d8263a4766fa80fffa2575a7534af"> 
    <h5 id="mm-worker">Figure&nbsp;2.6.&nbsp;A worker verticle and its environment</h5> 
-   <img alt="chapter2 worker" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/chapter2-worker.png" width="1160" loading="lazy" height="481" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="chapter2 worker" class="calibre7" src="ponge/v-10/Figures/chapter2-worker.png" width="1160" loading="lazy" height="481" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="141" id="141" data-hash="7972d789476d4cc22a9839d66716fc62"> 
    <p>The case of worker verticles is not much different, except that handlers are being executed using one worker thread in a worker thread pool, as illustrated in figure 2.6. They are still verticles just like their event-loop counterparts and the code can assume single-threaded access. There is just no stability in which worker thread is going to be used for processing a worker verticle events.</p> 

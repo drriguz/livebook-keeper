@@ -105,7 +105,7 @@
   </div> 
   <div class="browsable-container figure-container" refid="39" id="39" data-hash="e2d24d5eb5e2aad41f6cf9404eed5dcc"> 
    <h5 id="amqp">Figure 9.1. Overview of an AMQP queue</h5> 
-   <img alt="amqp" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/amqp.png" width="1218" loading="lazy" height="322" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="amqp" class="calibre7" src="ponge/v-10/Figures/amqp.png" width="1218" loading="lazy" height="322" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="40" id="40" data-hash="e8c69e65a896e1b551f6ac2801825d02"> 
    <p>Messages can be made durable, so they are not lost in case the broker crashes. Producers and consumers can use acknowledgements to ensure that a message has been properly sent or retrieved then processed. Brokers also offer various quality-of-service features such as expiration date and advanced routing. Depending on the broker, messages can be transformed from one representation to the other such as converting from a binary format to JSON. Some brokers also support aggregating multiple messages into one, or conversely splitting one message to produce many.</p> 
@@ -131,7 +131,7 @@
   </div> 
   <div class="browsable-container figure-container" refid="46" id="46" data-hash="be5a686feefa75dfee9077a416fc59a5"> 
    <h5 id="kafka">Figure 9.2. Overview of a Kafka topic</h5> 
-   <img alt="kafka" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/kafka.png" width="1054" loading="lazy" height="494" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="kafka" class="calibre7" src="ponge/v-10/Figures/kafka.png" width="1054" loading="lazy" height="494" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="47" id="47" data-hash="8172d16c1460df945b633c90d9d1207f"> 
    <p>In a Kafka cluster, events are published and consumed from topics that group related events. Topics are split into replicated partitions which are ordered sequences of events. Each event is identified by its offset position in the event log that materializes its partition.</p> 
@@ -447,7 +447,7 @@ return vertx.createHttpServer()
   </div> 
   <div class="browsable-container figure-container" refid="108" id="108" data-hash="618bb0c9daef3730c23d286031dbef17"> 
    <h5 id="sendmail-pipeline">Figure 9.3. Pipeline from daily step counts to congratulation emails</h5> 
-   <img alt="sendmail pipeline" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/sendmail-pipeline.png" width="975" loading="lazy" height="273" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="sendmail pipeline" class="calibre7" src="ponge/v-10/Figures/sendmail-pipeline.png" width="975" loading="lazy" height="273" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text" refid="109" id="109" data-hash="448c315075b8288f4283f2b26fb2baa1"> 
    <p>Daily step updates flow from the <code class="code">daily.step.updates</code> Kafka topic, then:</p> 
@@ -559,7 +559,7 @@ return vertx.createHttpServer()
   </div> 
   <div class="browsable-container figure-container" refid="131" id="131" data-hash="234a0bdbfdfa9333056f9c960e9b8d6e"> 
    <h5 id="sendmail-get-info">Figure 9.4. Asynchronous operations to prepare then send a congratulation email.</h5> 
-   <img alt="sendmail get info" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/sendmail-get-info.png" width="648" loading="lazy" height="398" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="sendmail get info" class="calibre7" src="ponge/v-10/Figures/sendmail-get-info.png" width="648" loading="lazy" height="398" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="132" id="132" data-hash="d6ec5579e9e1ee9335d991d2096925af"> 
    <p>It starts by issuing a HTTP request to the user profile service and find the user name of the device owner, and prepares another request to fetch the user profile data to get the email address. Listing 9.16 provides the implementation of method getEmail.</p> 
@@ -614,7 +614,7 @@ return vertx.createHttpServer()
   </div> 
   <div class="browsable-container figure-container" refid="142" id="142" data-hash="86a59d9d281200329cabb4f63bea6399"> 
    <h5 id="ingester-test">Figure 9.5. Ingestion integration test overview</h5> 
-   <img alt="ingester test" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/ingester-test.png" width="839" loading="lazy" height="393" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="ingester test" class="calibre7" src="ponge/v-10/Figures/ingester-test.png" width="839" loading="lazy" height="393" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="143" id="143" data-hash="cf756c80448a2ef2e65ae4e2d2c77cd0"> 
    <p>The IntegrationTest class in the ingestion service source code is using JUnit 5 and Docker containers to start an AMQP broker, Apache Kafka and Apache ZooKeeper. Listing 9.18 shows the test preparation.</p> 
@@ -726,7 +726,7 @@ void amqIngestWrong(Vertx vertx, VertxTestContext testContext) {
   </div> 
   <div class="browsable-container figure-container" refid="155" id="155" data-hash="8abb7638f6ebdb983bcec702c3c4c5cf"> 
    <h5 id="congrats-test">Figure 9.6. Congratulation service integration test overview</h5> 
-   <img alt="congrats test" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/congrats-test.png" width="952" loading="lazy" height="604" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="congrats test" class="calibre7" src="ponge/v-10/Figures/congrats-test.png" width="952" loading="lazy" height="604" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="156" id="156" data-hash="6355aa733ab01179e36c7f2246e05313"> 
    <p>The goal is to send Kafka records, and then observe the emails that have been sent (or not!). Interestingly mailhog is not just a SMTP server: it also provides a web interface and a HTTP API to simulate an email inbox. This allows us to perform tests by sending Kafka records, and then check what emails have been received in the inbox.</p> 

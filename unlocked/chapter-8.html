@@ -40,7 +40,7 @@
   </div> 
   <div class="browsable-container figure-container" refid="12" id="12" data-hash="ab2121cb62122fdf132e0195671c1ba1"> 
    <h5 id="api-overview">Figure&nbsp;8.1.&nbsp;Public API overview</h5> 
-   <img alt="public api" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/public-api.png" width="752" loading="lazy" height="264" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="public api" class="calibre7" src="ponge/v-10/Figures/public-api.png" width="752" loading="lazy" height="264" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="13" id="13" data-hash="3213f030f3e777afb6627f3df9624360"> 
    <p>This service is a edge service (or service gateway depending on how you prefer to name it) as it exposes an HTTP API, but it essentially composes functionality found in other services. In this case the user profile and activity services are being used. These 2 services are internal to the application and not publicly exposed. They also lack any form of authentication and access-control, which is something the public API cannot afford for most operations.</p> 
@@ -70,7 +70,7 @@
   </div> 
   <div class="browsable-container figure-container" refid="23" id="23" data-hash="f8a478a68be828a7a9fcdc1029494842"> 
    <h5 id="routing">Figure&nbsp;8.2.&nbsp;Routing HTTP requests</h5> 
-   <img alt="routing" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/routing.png" width="932" loading="lazy" height="338" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="routing" class="calibre7" src="ponge/v-10/Figures/routing.png" width="932" loading="lazy" height="338" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="24" id="24" data-hash="42210e7e2ff3aac757c1a262ede42df5"> 
    <p>Listing 8.1 shows how to initialize then set up a router as a HTTP request handler:</p> 
@@ -119,7 +119,7 @@ router.get(prefix + "/:username/:year/:month")  #4
   </div> 
   <div class="browsable-container figure-container" refid="30" id="30" data-hash="dc09b861d7d2737d2f7e3f0289ca3193"> 
    <h5 id="routing-chain">Figure&nbsp;8.3.&nbsp;Routing chain for the monthly steps endpoint</h5> 
-   <img alt="routing chain" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/routing-chain.png" width="1204" loading="lazy" height="574" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="routing chain" class="calibre7" src="ponge/v-10/Figures/routing-chain.png" width="1204" loading="lazy" height="574" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="31" id="31" data-hash="1c51fd3d1d39f9dba0a14ea9f290386d"> 
    <p>Note that the both checkUser and jwtHandler will be detailed in the section about JWT tokens.</p> 
@@ -570,7 +570,7 @@ private void handleAuthError(RoutingContext ctx, Throwable err) {
   </div> 
   <div class="browsable-container figure-container" refid="106" id="106" data-hash="a12dc38ecc40466ff4184550f5c9fee0"> 
    <h5 id="cors-simple">Figure&nbsp;8.4.&nbsp;Example CORS interaction</h5> 
-   <img alt="cors simple" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/cors-simple.png" width="900" loading="lazy" height="375" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="cors simple" class="calibre7" src="ponge/v-10/Figures/cors-simple.png" width="900" loading="lazy" height="375" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="107" id="107" data-hash="d0b2f9802d74322ba7a4414dd9a7a5b0"> 
    <p>A value "*" means that any origin can access the resource, while a value like my.tld means that only cross-origin requests from my.tld are being allowed. In figure 8.4 the request succeeds with the JSON payload, but if the CORS policy forbids the call then the app.js code gets an error while attempting to do a cross-origin request.</p> 
@@ -795,7 +795,7 @@ val clean by tasks.named&lt;Delete&gt;("clean") { <a class="pcalibre pcalibre1" 
   </div> 
   <div class="browsable-container figure-container" refid="148" id="148" data-hash="df9a8ebae317b940a9914cca2f7aeb73"> 
    <h5 id="login-screen">Figure&nbsp;8.5.&nbsp;Screenshot of the login screen</h5> 
-   <img alt="user webapp login" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/user-webapp-login.png" width="825" loading="lazy" height="400" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="user webapp login" class="calibre7" src="ponge/v-10/Figures/user-webapp-login.png" width="825" loading="lazy" height="400" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="149" id="149" data-hash="e40858f20d17194543e997742cf6491e"> 
    <p>The file for this component is src/views/Login.vue. The component shows the login form, and when submitted must call the public API to get a JWT token. On success, it must store the JWT token locally, then switch the view to the home component. On error, it must stay on the login form and display an error message.</p> 
@@ -1118,7 +1118,7 @@ assertThat(jsonPath.getInt("count")).isNotNull().isEqualTo(6255); #2</pre>
   </div> 
   <div class="browsable-container figure-container" refid="195" id="195" data-hash="0682569b99bb16aeae3e3aa914b12cd8"> 
    <h5 id="run-tests">Figure&nbsp;8.6.&nbsp;Running the integration tests from IntelliJ IDEA</h5> 
-   <img alt="run tests" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/run-tests.png" width="936" loading="lazy" height="374" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="run tests" class="calibre7" src="ponge/v-10/Figures/run-tests.png" width="936" loading="lazy" height="374" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="196" id="196" data-hash="4649439318799e7763b5f19f70a7e234"> 
    <p>You now have a good understanding of using the Vert.x web stack both for exposing endpoints and consuming other services. The next chapter focuses on the messaging and event streaming stack of Vert.x.</p> 

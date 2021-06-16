@@ -58,7 +58,7 @@
   </div> 
   <div class="browsable-container figure-container" refid="19" id="19" data-hash="48859f4c10ee38e61bd00a6f1f5623e1"> 
    <h5 id="use-case">Figure&nbsp;7.1.&nbsp;10k steps challenge application and actors overview</h5> 
-   <img alt="use case" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/use-case.png" width="919" loading="lazy" height="630" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="use case" class="calibre7" src="ponge/v-10/Figures/use-case.png" width="919" loading="lazy" height="630" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text" refid="20" id="20" data-hash="a6653a79efd7173a77ad1393b76ab78c"> 
    <p>The application described in figure <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-7/v-10/use-case" shape="rect" title="Figure 7.1. 10k steps challenge application and actors overview">7.1</a> would work as follows.</p> 
@@ -75,21 +75,21 @@
   </div> 
   <div class="browsable-container figure-container" refid="27" id="27" data-hash="2912e73575240c1f3ec2f8dad01b601b"> 
    <h5 id="user-webapp-register">Figure&nbsp;7.2.&nbsp;Screenshot of the user web application registration form</h5> 
-   <img alt="user webapp register" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/user-webapp-register.png" width="825" loading="lazy" height="652" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="user webapp register" class="calibre7" src="ponge/v-10/Figures/user-webapp-register.png" width="825" loading="lazy" height="652" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="28" id="28" data-hash="f3e663d33107eec8ef7cca3b2aaac288"> 
    <p>Once connected, a user can update some basic details, and also get reminded on total steps, monthly steps and daily steps (figure 7.3).</p> 
   </div> 
   <div class="browsable-container figure-container" refid="29" id="29" data-hash="89d31ca96cc19d888352ccfd01079390"> 
    <h5 id="user-webapp-home">Figure&nbsp;7.3.&nbsp;Screenshot of the user web application user details page</h5> 
-   <img alt="user webapp home" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/user-webapp-home.png" width="825" loading="lazy" height="583" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="user webapp home" class="calibre7" src="ponge/v-10/Figures/user-webapp-home.png" width="825" loading="lazy" height="583" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="30" id="30" data-hash="63b507e566dfccd436037053fa51eaa8"> 
    <p>There is also a (separate) web application that offers a public dashboard (figure 7.4).</p> 
   </div> 
   <div class="browsable-container figure-container" refid="31" id="31" data-hash="1f5abb1e8b0ae1e02c0acba1473974bd"> 
    <h5 id="dashboard-webapp-clean">Figure&nbsp;7.4.&nbsp;Screenshot of the public dashboard web application</h5> 
-   <img alt="dashboard webapp clean" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/dashboard-webapp-clean.png" width="1055" loading="lazy" height="933" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="dashboard webapp clean" class="calibre7" src="ponge/v-10/Figures/dashboard-webapp-clean.png" width="1055" loading="lazy" height="933" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="32" id="32" data-hash="a49a505f1de0348706536454b0a404df"> 
    <p>The dashboard offers a ranking of public profiles over the last 24 hours, the current podometer device updates throughput, and trends by city. All the information displayed in the dashboard is being updated live.</p> 
@@ -102,7 +102,7 @@
   </div> 
   <div class="browsable-container figure-container" refid="35" id="35" data-hash="1f3ccc22adec4a6abd995b529b8f5425"> 
    <h5 id="big-picture">Figure&nbsp;7.5.&nbsp;Overview of the application architecture</h5> 
-   <img alt="big picture" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/big-picture.png" width="1098" loading="lazy" height="970" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="big picture" class="calibre7" src="ponge/v-10/Figures/big-picture.png" width="1098" loading="lazy" height="970" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="tip"> 
    <div class=" callout-container caution-container"> 
@@ -128,7 +128,7 @@
   </div> 
   <div class="browsable-container figure-container" refid="42" id="42" data-hash="ef418812f068cb49ee3abdb7b6226245"> 
    <h5 id="interaction-sample">Figure&nbsp;7.6.&nbsp;From a device update to a city trend update</h5> 
-   <img alt="interaction sample" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/interaction-sample.png" width="1463" loading="lazy" height="486" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="interaction sample" class="calibre7" src="ponge/v-10/Figures/interaction-sample.png" width="1463" loading="lazy" height="486" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="43" id="43" data-hash="ed4f90c784ebb58c5e1039420caf1b13"> 
    <p>It all starts with a podometer sending an update to the ingestion service, which verifies that the update contains all required data. The ingestion service then sends the update to a Kafka topic, and the podometer device is acknowledged so it knows that the update has been well-received and will be processed. The update will be handled by multiple consumers listening on that particular Kafka topic, and among them is the activity service. This service will record the data to the PostgreSQL database, then publish another record to a Kafka topic with the number of steps done by the podometer on that day. This record is being picked by the event stats service, which observes updates over windows of 5 seconds, splits by city, and aggregates the number of steps. It then posts an update with the increment in steps observed for a given city as another Kafka record. This record is then consumed by the dashboard web application, which finally sends an update to all connected web browsers that in turn update the display.</p> 
@@ -177,7 +177,7 @@
   </div> 
   <div class="browsable-container figure-container" refid="62" id="62" data-hash="44efde6ee9de34846b6710b80603407d"> 
    <h5 id="user-profile-service1">Figure&nbsp;7.7.&nbsp;User profile service</h5> 
-   <img alt="user profile service" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/user-profile-service.png" width="847" loading="lazy" height="154" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="user profile service" class="calibre7" src="ponge/v-10/Figures/user-profile-service.png" width="847" loading="lazy" height="154" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="63" id="63" data-hash="c7ab15c4af541a49437cd01713abac82"> 
    <p>The service falls into the category of CRUD (for create, read, update and delete) services that sit on top of a database. Table 7.1 gives the different elements of the HTTP API.</p> 
@@ -266,7 +266,7 @@
   </div> 
   <div class="browsable-container figure-container" refid="70" id="70" data-hash="71a7d8d69beafa43a36e71425d5e814e"> 
    <h5 id="ingestion-service1">Figure&nbsp;7.8.&nbsp;Ingestion service</h5> 
-   <img alt="ingestion service" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/ingestion-service.png" width="729" loading="lazy" height="256" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="ingestion service" class="calibre7" src="ponge/v-10/Figures/ingestion-service.png" width="729" loading="lazy" height="256" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="71" id="71" data-hash="95dd1732e59e7f3cb3ca0ebb87234e80"> 
    <p>The service is a form of protocol adapter or mediator, as it converts events from one protocol (HTTP or AMQP) to another protocol (Kafka record streams).</p> 
@@ -333,7 +333,7 @@
   </div> 
   <div class="browsable-container figure-container" refid="84" id="84" data-hash="42e35ba823187c4f3dee81f14447f759"> 
    <h5 id="activity-service1">Figure&nbsp;7.9.&nbsp;Activity service</h5> 
-   <img alt="activity service" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/activity-service.png" width="693" loading="lazy" height="460" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="activity service" class="calibre7" src="ponge/v-10/Figures/activity-service.png" width="693" loading="lazy" height="460" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="85" id="85" data-hash="40550029b0763f23a81df86f838e8687"> 
    <p>The activity service also publishes events with the number of steps for a device on the current day. This way other services can subscribe to the corresponding Kafka topic and be notified rather than having to regularly poll the activity service for updates.</p> 
@@ -429,7 +429,7 @@
   </div> 
   <div class="browsable-container figure-container" refid="101" id="101" data-hash="1ecbbd00308dd3936d67d2e7afdcd010"> 
    <h5 id="public-api1">Figure&nbsp;7.10.&nbsp;Public API</h5> 
-   <img alt="public api" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/public-api.png" width="752" loading="lazy" height="264" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="public api" class="calibre7" src="ponge/v-10/Figures/public-api.png" width="752" loading="lazy" height="264" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="102" id="102" data-hash="41188fade4c67d295eae1faccf277c10"> 
    <p>The service is a form of edge service or API gateway as it forwards and composes requests to other services. Since this is a public HTTP API, the service requires authentication for most of its operations. To do that we use JSON Web Token [JWT] which we will describe in another chapter along with the service implementation. Since we want the public API to be usable from any HTTP client including JavaScript code running in a web browser, we need to support cross-origin resource sharing [CORS]. Again we will dig into the details in due time.</p> 
@@ -530,7 +530,7 @@
   </div> 
   <div class="browsable-container figure-container" refid="109" id="109" data-hash="0d83b95b7b95091469ed422a76cca4dc"> 
    <h5 id="user-webapp">Figure&nbsp;7.11.&nbsp;User web application</h5> 
-   <img alt="user webapp" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/user-webapp.png" width="995" loading="lazy" height="382" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="user webapp" class="calibre7" src="ponge/v-10/Figures/user-webapp.png" width="995" loading="lazy" height="382" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="110" id="110" data-hash="07b8b0416d9bbcb49f76c9929df9af73"> 
    <p>The frontend is a single-page application written in JavaScript and the Vue.JS framework. The frontend is served by the user web application service, and all interactions with the application backend happen through calls to the public API service.</p> 
@@ -549,7 +549,7 @@
   </div> 
   <div class="browsable-container figure-container" refid="115" id="115" data-hash="25e23c57cf3bca745a3a30119fc14c51"> 
    <h5 id="event-stats-service1">Figure&nbsp;7.12.&nbsp;Event stats service</h5> 
-   <img alt="event stats service" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/event-stats-service.png" width="1075" loading="lazy" height="508" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="event stats service" class="calibre7" src="ponge/v-10/Figures/event-stats-service.png" width="1075" loading="lazy" height="508" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text" refid="116" id="116" data-hash="06d3ee25a1049d45bfcfe073c02add28"> 
    <p>The service performs the following computations.</p> 
@@ -573,7 +573,7 @@
   </div> 
   <div class="browsable-container figure-container" refid="124" id="124" data-hash="d226b5fa59b91f4b831ada9ec88e5b67"> 
    <h5 id="congrats-service1">Figure&nbsp;7.13.&nbsp;Congrats service</h5> 
-   <img alt="congrats service" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/congrats-service.png" width="973" loading="lazy" height="269" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="congrats service" class="calibre7" src="ponge/v-10/Figures/congrats-service.png" width="973" loading="lazy" height="269" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="125" id="125" data-hash="d2502b8db5563ed9d9ef5e145249d86c"> 
    <p>The service makes calls to the user profile service to get the email of the user associated with a device, then contacts a SMTP server to send an email.</p> 
@@ -592,7 +592,7 @@
   </div> 
   <div class="browsable-container figure-container" refid="130" id="130" data-hash="1b36ea1320162dd66d34ed93477c584b"> 
    <h5 id="dashboard-webapp">Figure&nbsp;7.14.&nbsp;Dashboard web application</h5> 
-   <img alt="dashboard webapp" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/dashboard-webapp.png" width="1228" loading="lazy" height="572" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="dashboard webapp" class="calibre7" src="ponge/v-10/Figures/dashboard-webapp.png" width="1228" loading="lazy" height="572" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="131" id="131" data-hash="82c9e3954381bfe51d05b5aa15add4c3"> 
    <p>The web application is written using the Vue.JS framework, just like the user web application described earlier. The frontend and the backend are connected using the Vert.x event-bus, so both the Vert.x and Vue.JS code bases can communicate with the same programming model.</p> 
@@ -667,7 +667,7 @@
   </div> 
   <div class="browsable-container figure-container" refid="154" id="154" data-hash="0285c6670592d17ccc4cf243fea303a0"> 
    <h5 id="run-services">Figure&nbsp;7.15.&nbsp;Running the micro-services and infrastructure services with Docker Compose and Foreman</h5> 
-   <img alt="run services" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/run-services.png" width="1060" loading="lazy" height="754" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="run services" class="calibre7" src="ponge/v-10/Figures/run-services.png" width="1060" loading="lazy" height="754" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="155" id="155" data-hash="90c779f0fd2e282227625ec42007a7b5"> 
    <p>Foreman can also generate various system service descriptors from a Procfile: initab, launchd, systemd and more. Finally, Foreman is written in Ruby, but there are also ports to other languages listed on the project page.</p> 

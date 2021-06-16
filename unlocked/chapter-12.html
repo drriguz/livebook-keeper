@@ -92,7 +92,7 @@
   </div> 
   <div class="browsable-container figure-container" refid="30" id="30" data-hash="f2a3a6d492238759aeeb33876da05ead"> 
    <h5 id="locust-user">Figure&nbsp;12.1.&nbsp;Activity of a simulated user in Locust</h5> 
-   <img alt="locust user" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/locust-user.png" width="383" loading="lazy" height="536" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="locust user" class="calibre7" src="ponge/v-10/Figures/locust-user.png" width="383" loading="lazy" height="536" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <ol class="orderedlist"> 
    <li class="listitem readable-text scrambled" refid="31" id="31" data-hash="1a5407d874a8c96f887b3bbd1919c2e5"> Labz wkn tkzh cj eedanrteg tlkm dnramo pcrc qns c orc vl dtv-dfieedn teiisc, onyr<br> </li> 
@@ -164,7 +164,7 @@ $ locust --no-web \                             #2
   </div> 
   <div class="browsable-container figure-container" refid="48" id="48" data-hash="fa9e09ae4e12244a5cf7040e791a4e0e"> 
    <h5 id="plot-locust-run-c150-h2-t5">Figure&nbsp;12.2.&nbsp;Latencies observed with Locust with 150 users over 5 minutes</h5> 
-   <img alt="plot locust run c150 h2 t5" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/plot-locust-run-c150-h2-t5.png" width="736" loading="lazy" height="547" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="plot locust run c150 h2 t5" class="calibre7" src="ponge/v-10/Figures/plot-locust-run-c150-h2-t5.png" width="736" loading="lazy" height="547" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="49" id="49" data-hash="cd9a5fea12c168ce0235c4bec751a58a"> 
    <p>The plot contains values at the 95th, 98th, 99th and 100th percentiles. The reported latencies are under 200ms at the 99th percentile for all requests, which sound reasonable for a run with imperfect conditions and no tuning. The 100th percentile values show us the worst response times that have been observed, and they are all under 500ms.</p> 
@@ -297,7 +297,7 @@ hey -z $2 \
   </div> 
   <div class="browsable-container figure-container" refid="76" id="76" data-hash="6407da067aac4d89d0e5931251534ee0"> 
    <h5 id="plot-hey-run-steps-nominal-z5m">Figure&nbsp;12.3.&nbsp;User total steps count load test report</h5> 
-   <img alt="plot hey run steps nominal z5m" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/plot-hey-run-steps-nominal-z5m.png" width="739" loading="lazy" height="492" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="plot hey run steps nominal z5m" class="calibre7" src="ponge/v-10/Figures/plot-hey-run-steps-nominal-z5m.png" width="739" loading="lazy" height="492" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text" refid="77" id="77" data-hash="d54606423186b697bd07b1570d71a013"> 
    <p>The figure contains 3 sub-plots:</p> 
@@ -324,7 +324,7 @@ hey -z $2 \
   </div> 
   <div class="browsable-container figure-container" refid="85" id="85" data-hash="3e39ef60daaaf18f2e5404392a62939b"> 
    <h5 id="plot-hey-run-token-nominal-z5m">Figure&nbsp;12.4.&nbsp;JWT token load test report</h5> 
-   <img alt="plot hey run token nominal z5m" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/plot-hey-run-token-nominal-z5m.png" width="739" loading="lazy" height="492" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="plot hey run token nominal z5m" class="calibre7" src="ponge/v-10/Figures/plot-hey-run-token-nominal-z5m.png" width="739" loading="lazy" height="492" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="86" id="86" data-hash="2c229110fdb7b90b871afcb658f7d90b"> 
    <p>Here the results show again a quite consistent behavior, albeit with a higher latency and lower throughput to what the steps count endpoint could achieve. This is easy to explain as there are 2 HTTP requests to the user profile service, then the token has to be generated and signed. The HTTP requests are mostly I/O-bound, while token signing requires CPU-bound work to be done on the event-loop. The results are consistent over the 5 minutes run.</p> 
@@ -352,7 +352,7 @@ hey -z $2 \
   </div> 
   <div class="browsable-container figure-container" refid="94" id="94" data-hash="62e8851bffd2143ce668a73c0bd930da"> 
    <h5 id="chaos-test-plan">Figure&nbsp;12.5.&nbsp;Test plan</h5> 
-   <img alt="chaos test plan" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/chaos-test-plan.png" width="884" loading="lazy" height="274" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="chaos test plan" class="calibre7" src="ponge/v-10/Figures/chaos-test-plan.png" width="884" loading="lazy" height="274" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="95" id="95" data-hash="dc86e592a07b8d51c269c5f709f4235d"> 
    <p>We are going to run the same load testing experiments as we did over periods of 5 minutes. What is going to change is that we are going to split into 5 phases of 1 minute each:</p> 
@@ -477,7 +477,7 @@ content-length: 528
   </div> 
   <div class="browsable-container figure-container" refid="125" id="125" data-hash="31ff78c821112dbe6e850b43df72c3be"> 
    <h5 id="plot-hey-run-steps-chaos-baseline-z5m">Figure&nbsp;12.6.&nbsp;Total steps count load test with failures</h5> 
-   <img alt="plot hey run steps chaos baseline z5m" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/plot-hey-run-steps-chaos-baseline-z5m.png" width="743" loading="lazy" height="491" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="plot hey run steps chaos baseline z5m" class="calibre7" src="ponge/v-10/Figures/plot-hey-run-steps-chaos-baseline-z5m.png" width="743" loading="lazy" height="491" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="126" id="126" data-hash="07bb67e590edee68c9f6dc7afed7ad87"> 
    <p>The results show a clear lack of responsiveness when Pumba runs. In the phase of network delays, we see a rapid latency increase spike to nearly 20 seconds, after which the throughput implodes. What happens here is that requests get enqueued waiting for a response in both the public api and user profile services, up to the point where the system is at a halt. The database delays are between 2.5s and 3.5s, which can temporarily happen in practice. Of course the issue is vastly amplified here due to load testing, but any service with some sustained traffic can show this kind of behavior even with smaller delays.</p> 
@@ -490,7 +490,7 @@ content-length: 528
   </div> 
   <div class="browsable-container figure-container" refid="129" id="129" data-hash="ce9c41793b120b8ff41bc9350452233d"> 
    <h5 id="plot-hey-run-token-chaos-baseline-z5m">Figure&nbsp;12.7.&nbsp;JWT token load test with failures</h5> 
-   <img alt="plot hey run token chaos baseline z5m" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/plot-hey-run-token-chaos-baseline-z5m.png" width="740" loading="lazy" height="546" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="plot hey run token chaos baseline z5m" class="calibre7" src="ponge/v-10/Figures/plot-hey-run-token-chaos-baseline-z5m.png" width="740" loading="lazy" height="546" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="130" id="130" data-hash="ac4565862eb6e64847de91cda970284c"> 
    <p>Network delays also cause the system to come to a halt, but we do not observe the same shape in the scatter plot. This is due to the inherently lower throughput of the service for this type of requests, and also the fact that 2 HTTP requests are needed. Requests pile up, waiting for responses to arrive, and once delays stop the system gets going again. More interestingly we do not observe errors in the phase where databases have been stopped, there are just no requests being served anymore as the system is waiting for databases.</p> 
@@ -545,7 +545,7 @@ content-length: 528
   </div> 
   <div class="browsable-container figure-container" refid="141" id="141" data-hash="41ad8331791a3887fb1bbbaf2f299cf6"> 
    <h5 id="plot-hey-run-steps-chaos-timeouts-z5m">Figure&nbsp;12.8.&nbsp;Total steps count load test with failures and timeouts</h5> 
-   <img alt="plot hey run steps chaos timeouts z5m" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/plot-hey-run-steps-chaos-timeouts-z5m.png" width="739" loading="lazy" height="493" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="plot hey run steps chaos timeouts z5m" class="calibre7" src="ponge/v-10/Figures/plot-hey-run-steps-chaos-timeouts-z5m.png" width="739" loading="lazy" height="493" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="142" id="142" data-hash="0acb0daa1c02b708dc2f0939f6c30655"> 
    <p>Compared to the experiment in figure 12.6 we still have drastically reduced throughputs during failures, but at least we see errors being reported thanks to the timeout enforcements. We also see that the maximum latency is below 6 seconds, which is in line with 5 seconds timeouts.</p> 
@@ -555,7 +555,7 @@ content-length: 528
   </div> 
   <div class="browsable-container figure-container" refid="144" id="144" data-hash="ce73b07103ae39c017f006dbc74ed531"> 
    <h5 id="plot-hey-run-token-chaos-timeouts-z5m">Figure&nbsp;12.9.&nbsp;JWT token load test with failures and timeouts</h5> 
-   <img alt="plot hey run token chaos timeouts z5m" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/plot-hey-run-token-chaos-timeouts-z5m.png" width="740" loading="lazy" height="493" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="plot hey run token chaos timeouts z5m" class="calibre7" src="ponge/v-10/Figures/plot-hey-run-token-chaos-timeouts-z5m.png" width="740" loading="lazy" height="493" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="145" id="145" data-hash="71a7a9e20e73066931f4b79844e04309"> 
    <p>This run confirms what we have observed: timeouts get enforced, ensuring that some requests still get served during the failures. However the worst case latencies are worse than without timeouts: network delays stretch the time for doing 2 HTTP requests to the user profile service, so the higher values correspond to those where the second request timed out.</p> 
@@ -581,7 +581,7 @@ content-length: 528
   </div> 
   <div class="browsable-container figure-container" refid="151" id="151" data-hash="70d4d4b6277756ea3ab99120271c82e3"> 
    <h5 id="circuit-breaker">Figure&nbsp;12.10.&nbsp;Circuit breaker state machine</h5> 
-   <img alt="circuit breaker" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/circuit-breaker.png" width="653" loading="lazy" height="358" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="circuit breaker" class="calibre7" src="ponge/v-10/Figures/circuit-breaker.png" width="653" loading="lazy" height="358" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="152" id="152" data-hash="22c5e2a22ced7a71d5efce9e4442cb7d"> 
    <p>The idea is quite simple. The circuit breaker starts in state closed, and for each request it observes if the request succeeded or not. Failing can be because an error has been reported (e.g., a TCP timeout, a TCP connection error), or because an operation took too long to complete.</p> 
@@ -686,7 +686,7 @@ tokenCircuitBreaker
   </div> 
   <div class="browsable-container figure-container" refid="166" id="166" data-hash="6b030ac8e95fb6ecbc43c90a7b16c78b"> 
    <h5 id="plot-hey-run-token-chaos-breaker-z5m">Figure&nbsp;12.11.&nbsp;JTW token load testing with failures and a circuit breaker</h5> 
-   <img alt="plot hey run token chaos breaker z5m" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/plot-hey-run-token-chaos-breaker-z5m.png" width="740" loading="lazy" height="492" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="plot hey run token chaos breaker z5m" class="calibre7" src="ponge/v-10/Figures/plot-hey-run-token-chaos-breaker-z5m.png" width="740" loading="lazy" height="492" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="167" id="167" data-hash="b1f4ce46a70d43b3f55379345aa640d1"> 
    <p>The impact of the circuit breaker is striking: the service is now highly responsive during failure periods! We get a high throughput during failures as the service now fails fast when the circuit breaker is open. Interestingly we can spot when the circuit breaker tries making requests when in half-open state: these are the high-latency error points at regular intervals. We can also see that the 99.99th percentile is back to a lower latency compared to the previous runs.</p> 
@@ -799,21 +799,21 @@ tokenCircuitBreaker
   </div> 
   <div class="browsable-container figure-container" refid="184" id="184" data-hash="b3154a89b888278f7159eeef900a8bbd"> 
    <h5 id="plot-hey-run-steps-chaos-breaker-cold-start-z2m">Figure&nbsp;12.12.&nbsp;Total steps count load test with failures, a circuit breaker and a cold start</h5> 
-   <img alt="plot hey run steps chaos breaker cold start z2m" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/plot-hey-run-steps-chaos-breaker-cold-start-z2m.png" width="740" loading="lazy" height="504" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="plot hey run steps chaos breaker cold start z2m" class="calibre7" src="ponge/v-10/Figures/plot-hey-run-steps-chaos-breaker-cold-start-z2m.png" width="740" loading="lazy" height="504" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="185" id="185" data-hash="27b6771696eb4f8321c4075cada44f54"> 
    <p>The service immediately starts with a few errors then the circuit breaker opens, at which point the service consistently provides errors with a very low latency. Remember that the service hasn’t cached any data yet. When the database starts we can see a latency spike as errors turn into successes, then the service is able to respond nominally. Note that in the first success seconds the JVM will start optimizing the code that talks to the database, hence an improving throughput. Figure 12.13 shows the service behavior on our full 5 minutes test plan.</p> 
   </div> 
   <div class="browsable-container figure-container" refid="186" id="186" data-hash="91cddd17b8efe448198855322d119e1f"> 
    <h5 id="plot-hey-run-steps-chaos-breaker-z5m">Figure&nbsp;12.13.&nbsp;Total steps count load test with failures and a circuit breaker</h5> 
-   <img alt="plot hey run steps chaos breaker z5m" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/plot-hey-run-steps-chaos-breaker-z5m.png" width="741" loading="lazy" height="491" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="plot hey run steps chaos breaker z5m" class="calibre7" src="ponge/v-10/Figures/plot-hey-run-steps-chaos-breaker-z5m.png" width="741" loading="lazy" height="491" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="187" id="187" data-hash="14cac9a579497ca98528e4d4ee30e111"> 
    <p>Since the test plan starts with databases running nominally, the service manages to cache data for the test user. This is why we get no error across the whole run. We see a few successes with higher latency when the network delays appear, which actually impact the last few percentiles above 9.999th. These are due to the circuit breaker reporting timeouts on making HTTP requests, but note that the circuit breaker cannot cancel the HTTP requests. Hence we have a few HTTP requests waiting for an unresponsive activity service, while the circuit breaker meanwhile completes the corresponding HTTP responses with some cached data. Figure 12.14 shows the effect of combining the circuit breaker with a 5 seconds timeout on the web client HTTP requests (see the chapter12/public-api-with-circuit-breaker-and-timeouts branch of the Git repository).</p> 
   </div> 
   <div class="browsable-container figure-container" refid="188" id="188" data-hash="bcc1e1a61a928bbc07ae7ec64c3b5817"> 
    <h5 id="plot-hey-run-steps-chaos-breaker-timeout-z5m">Figure&nbsp;12.14.&nbsp;Total steps count load test with failures, timeouts and a circuit breaker</h5> 
-   <img alt="plot hey run steps chaos breaker timeout z5m" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/plot-hey-run-steps-chaos-breaker-timeout-z5m.png" width="745" loading="lazy" height="494" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="plot hey run steps chaos breaker timeout z5m" class="calibre7" src="ponge/v-10/Figures/plot-hey-run-steps-chaos-breaker-timeout-z5m.png" width="745" loading="lazy" height="494" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="189" id="189" data-hash="2db6b3197361ae4aff0652f7b7fe8b62"> 
    <p>This clearly improves the result, as we don’t have any worst-case latency around 20 seconds anymore. Other than that the latency and throughputs are consistent over the rest of the run, and barely impacted by the databases being stopped around minute 4.</p> 

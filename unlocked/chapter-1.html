@@ -43,7 +43,7 @@
   </div> 
   <div class="browsable-container figure-container" refid="15" id="15" data-hash="ed227d0a0a0ccc143a4eb0a69b740425"> 
    <h5 id="networked-service">Figure&nbsp;1.1.&nbsp;A networked application / service</h5> 
-   <img alt="chapter1 networked service" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/chapter1-networked-service.png" width="1108" loading="lazy" height="792" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="chapter1 networked service" class="calibre7" src="ponge/v-10/Figures/chapter1-networked-service.png" width="1108" loading="lazy" height="792" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text" refid="16" id="16" data-hash="dc784a5a18b667d078c7868fc589ec4f"> 
    <p>Figure <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/networked-service" shape="rect" title="Figure 1.1. A networked application / service">1.1</a> is a fictional depiction of what a modern application is: a set of networked services interacting with each other. Here are some of these networked services:</p> 
@@ -178,7 +178,7 @@ $</pre>
   </div> 
   <div class="browsable-container figure-container" refid="44" id="44" data-hash="3439c569c860a17b5aef740cc32bfd72"> 
    <h5 id="blocking-threads">Figure&nbsp;1.2.&nbsp;Threads and blocking I/O operations</h5> 
-   <img alt="chapter1 blocking threads" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/chapter1-blocking-threads.png" width="860" loading="lazy" height="616" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="chapter1 blocking threads" class="calibre7" src="ponge/v-10/Figures/chapter1-blocking-threads.png" width="860" loading="lazy" height="616" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text" refid="45" id="45" data-hash="53421bd5d249040f911d8ab899b0b848"> 
    <p>This is illustrated in figure <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/blocking-threads" shape="rect" title="Figure 1.2. Threads and blocking I/O operations">1.2</a> where we show the CPU usage over time of 3 threads for 3 concurrent network connections. Input / output operations such as <code class="code">readLine</code> and <code class="code">write</code> may <em class="calibre10">block</em> the thread, meaning that it is being parked by the operating system. This happens for 2 reasons:</p> 
@@ -192,7 +192,7 @@ $</pre>
   </div> 
   <div class="browsable-container figure-container" refid="49" id="49" data-hash="7f13812b840edebb4f65fdc86136d2cf"> 
    <h5 id="gateway">Figure&nbsp;1.3.&nbsp;Request processing in a edge service</h5> 
-   <img alt="chapter1 gateway" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/chapter1-gateway.png" width="1093" loading="lazy" height="599" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="chapter1 gateway" class="calibre7" src="ponge/v-10/Figures/chapter1-gateway.png" width="1093" loading="lazy" height="599" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text" refid="50" id="50" data-hash="e2f067cd6510bc7fff657dba6b5dd437"> 
    <p>It is also important to recall that we often need more threads than incoming network connections. To take a concrete example, suppose that we are exposing a HTTP service that offers the best price for a given product reference, and to do that that service needs to request prices to 4 other HTTP services, as illustrated in figure <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/gateway" shape="rect" title="Figure 1.3. Request processing in a edge service">1.3</a>. Note that this type of service is often called a <em class="calibre10">edge service</em> or an <em class="calibre10">API gateway</em>. Requesting each service in sequence and then selecting the lowest price would render our service very slow, as each request adds to our own service latency. The efficient way is to start 4 concurrent requests from our service, and then wait and gather their responses. This translates to starting 4 threads, hence for 1000 concurrent network requests we may be using up to 5000 threads in the worst naive case where all requests need to be processed at the same time and we donât use thread pooling or maintain persistent connections from the edge service to the requested services.</p> 
@@ -370,7 +370,7 @@ $</pre>
   </div> 
   <div class="browsable-container figure-container" refid="70" id="70" data-hash="797d620db6bb09b3a1fa6a04ddbe0218"> 
    <h5 id="async-event-loop">Figure&nbsp;1.4.&nbsp;Processing events using an event-loop</h5> 
-   <img alt="chapter1 async event loop" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/chapter1-async-event-loop.png" width="1104" loading="lazy" height="463" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="chapter1 async event loop" class="calibre7" src="ponge/v-10/Figures/chapter1-async-event-loop.png" width="1104" loading="lazy" height="463" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text" refid="71" id="71" data-hash="281cb611a4df34c45b2d915e7d231613"> 
    <p>As we can see in figure <a class="calibre8 pcalibre" href="/book/vertx-in-action/chapter-1/v-10/async-event-loop" shape="rect" title="Figure 1.4. Processing events using an event-loop">1.4</a>, events are being queued as they arrive. They can be I/O events, such as data being ready for consumption, or a buffer having been fully written to a socket. They can also be any <em class="calibre10">other</em> event, such as a timer firing. A single thread is being assigned to an event-loop, and processing events shall not perform any blocking or long-running operation. Otherwise the thread blocks, defeating the purpose of using an event-loop. Event-loops are quite popular: JavaScript code running in web browsers runs on top of an event-loop. Many graphical interface toolkits such as <em class="calibre10">Java Swing</em> also have an event-loop.</p> 

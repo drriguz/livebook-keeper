@@ -81,7 +81,7 @@
   </div> 
   <div class="browsable-container figure-container" refid="21" id="21" data-hash="9371ba0b4e47b311dbac2967cf715986"> 
    <h5 id="service-proxies">Figure&nbsp;6.1.&nbsp;How service proxies work</h5> 
-   <img alt="beb service proxy" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/beb-service-proxy.png" width="775" loading="lazy" height="600" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="beb service proxy" class="calibre7" src="ponge/v-10/Figures/beb-service-proxy.png" width="775" loading="lazy" height="600" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="22" id="22" data-hash="3a11d6dff0b9930c536b4fc0b26bca9c"> 
    <p>The client code invokes method average on a service proxy. This is an object that implements the SensorDataService interface, and then sends a message on the event-bus to destination sensor.data-service (this can be configured). The message body contains the method call parameter values, so since average only takes a callback, the body is empty. The message also has a action header that indicates which method is being called.</p> 
@@ -417,7 +417,7 @@ tasks.named&lt;Test&gt;("test") {
   </div> 
   <div class="browsable-container figure-container" refid="88" id="88" data-hash="b7dbb31efb7cff0108274edd3267ef5f"> 
    <h5 id="test-isolation">Figure&nbsp;6.2.&nbsp;Isolating SensorDataService</h5> 
-   <img alt="beb test isolation" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/beb-test-isolation.png" width="856" loading="lazy" height="433" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="beb test isolation" class="calibre7" src="ponge/v-10/Figures/beb-test-isolation.png" width="856" loading="lazy" height="433" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="89" id="89" data-hash="f7f3aacd1d46e0f89c138f64552c927e"> 
    <p>The test case has a proxy reference to make calls to SensorDataService. The actual DataVerticle verticle is being deployed at destination sensor.data-service. It can issue valueFor and average method calls from tests. Since DataVerticle receives messages from sensors on the event-bus, we can send arbitrary messages rather than deploying actual HeatSensor verticles over which we have no control. Mocking a verticle is often as simple as sending the type of messages it would send.</p> 
@@ -556,7 +556,7 @@ void withSensors(Vertx vertx, VertxTestContext ctx) {
   </div> 
   <div class="browsable-container figure-container" refid="112" id="112" data-hash="a12fcd8416c5b083b908d94686a18148"> 
    <h5 id="test-report">Figure&nbsp;6.3.&nbsp;Test report</h5> 
-   <img alt="gradle run" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/gradle-run.png" width="692" loading="lazy" height="511" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="gradle run" class="calibre7" src="ponge/v-10/Figures/gradle-run.png" width="692" loading="lazy" height="511" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="113" id="113" data-hash="6c791560c09359a189719f1405e87d27"> 
    <p>Note that the Gradle test task is a dependency of build, so the tests are always executed when the project is being fully built.</p> 

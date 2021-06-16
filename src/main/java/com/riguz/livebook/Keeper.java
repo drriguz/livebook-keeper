@@ -5,6 +5,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,14 +29,26 @@ public class Keeper {
             element.selectFirst("p").text(pDoc.selectFirst("p").text());
         }
 
+
+        for (Element element : doc.select("img")) {
+            String url = element.attr("src");
+            String localPath = url.substring("{{BOOK_ROOT_FOLDER}}".length() + 1);
+            String realImageUrl = "https://drek4537l1klr.cloudfront.net/" + localPath;
+            File localFile = new File(localPath);
+            localFile.getParentFile().mkdirs();
+            element.attr("src", localPath);
+            if (!localFile.exists())
+                HttpClient.download(realImageUrl, localFile);
+        }
+
         System.out.println("Decrypted chapter." + chapter);
         applyStyles(doc);
 
         Path outPath = Paths.get("unlocked/" + "chapter-" + chapter + ".html");
 
-        Files.write(outPath, doc.outerHtml().replaceAll("\\{\\{BOOK_ROOT_FOLDER\\}\\}",
-                "https://dpzbhybb2pdcj.cloudfront.net").getBytes());
+        Files.write(outPath, doc.outerHtml().getBytes());
     }
+
 
     private void applyStyles(Document doc) {
         doc.head().append("<link rel=\"stylesheet\" href=\"style.css\">");

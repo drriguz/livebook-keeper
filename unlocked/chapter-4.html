@@ -265,7 +265,7 @@
   </ol> 
   <div class="browsable-container figure-container" refid="38" id="38" data-hash="e68ce1c67e2ae6e4fb1c9529397c4189"> 
    <h5 id="read-then-write">Figure&nbsp;4.1.&nbsp;Reading then writing data between streams without any back-pressure signaling</h5> 
-   <img alt="streams read then write" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/streams-read-then-write.png" width="1273" loading="lazy" height="486" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="streams read then write" class="calibre7" src="ponge/v-10/Figures/streams-read-then-write.png" width="1273" loading="lazy" height="486" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="39" id="39" data-hash="023a9457b188b1ba750c5d93c821fe31"> 
    <p>Figure 4.1 provides an illustration of how this would work with Vert.x, although this directly generalizes to any non-blocking I/O API. Data buffers are read from the file stream, then passed to a handler. The handler is not likely to do anything else but directly writing each buffer back to the HTTP response stream. Each buffer is eventually written to the underlying TCP buffer, either directly or as smaller chunks. Since the TCP buffer may be full (either because of the network or because the client is busy) it is necessary to maintain a buffer of pending buffers to be written (the write queue in figure 4.1). Remember: a write operation is non-blocking, so buffering is needed.</p> 
@@ -405,7 +405,7 @@
   </div> 
   <div class="browsable-container figure-container" refid="67" id="67" data-hash="32297c61e0a697453dddaa0bb0e2f546"> 
    <h5 id="jukebox">Figure&nbsp;4.2.&nbsp;Jukebox application overview</h5> 
-   <img alt="streams jukebox" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/streams-jukebox.png" width="1059" loading="lazy" height="682" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="streams jukebox" class="calibre7" src="ponge/v-10/Figures/streams-jukebox.png" width="1059" loading="lazy" height="682" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="68" id="68" data-hash="f3215e3b138a72bf36d258815ee3d26d"> 
    <p>The idea is that the jukebox has a few MP3 files stored locally, and clients can connect over HTTP to listen to the stream. Individual files may also be downloaded over HTTP. In turn, controlling when to play, pause, and schedule a song to be played happens over a simple, text-based TCP protocol. All connected players shall be listening to the same audio at the same time, modulo minor delays due to the buffering put in place in the players.</p> 
@@ -452,7 +452,7 @@
   </div> 
   <div class="browsable-container figure-container" refid="79" id="79" data-hash="33c5907be4ae63e7b0f6ac9bf35dbcab"> 
    <h5 id="vlc">Figure&nbsp;4.3.&nbsp;VLC connected to the jukebox</h5> 
-   <img alt="streams vlc" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/streams-vlc.png" width="984" loading="lazy" height="602" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="streams vlc" class="calibre7" src="ponge/v-10/Figures/streams-vlc.png" width="984" loading="lazy" height="602" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="80" id="80" data-hash="fbdb88e39ddcea3b0e174f94364981c1"> 
    <p>On the other hand, the player can be controlled using plain text commands using a tool like netcat with commands to list all files, schedule a track to be played and pause / restart the stream. Listing 4.4 shows an interactive session using netcat.</p> 
@@ -504,7 +504,7 @@ SQL-Surrender-(Original-Mix).mp3
   </div> 
   <div class="browsable-container figure-container" refid="89" id="89" data-hash="e7e780f91fd7be0d7f6f4507ad2e0cdd"> 
    <h5 id="http-bigpicture">Figure&nbsp;4.4.&nbsp;Big picture of the HTTP server processing</h5> 
-   <img alt="streams httpbigpicture" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/streams-httpbigpicture.png" width="1237" loading="lazy" height="899" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="streams httpbigpicture" class="calibre7" src="ponge/v-10/Figures/streams-httpbigpicture.png" width="1237" loading="lazy" height="899" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="90" id="90" data-hash="2c10baa709074ceb4c0f6851c9132088"> 
    <p>There are 2 types of incoming HTTP requests: either a client wants to directly download a file by name, or it want to join the audio stream. The processing strategies are then very different.</p> 
@@ -777,7 +777,7 @@ file.pipeTo(response); #1</pre>
   </div> 
   <div class="browsable-container figure-container" refid="129" id="129" data-hash="aa6accc78b832f61640896e44031d545"> 
    <h5 id="stream-buffers">Figure&nbsp;4.5.&nbsp;Streaming without and with rate control</h5> 
-   <img alt="streams stream buffers" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/streams-stream-buffers.png" width="1124" loading="lazy" height="848" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="streams stream buffers" class="calibre7" src="ponge/v-10/Figures/streams-stream-buffers.png" width="1124" loading="lazy" height="848" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="130" id="130" data-hash="7680e8ab8d5940f33114b85c1a4048ca"> 
    <p>In both cases, suppose that Player A joined the stream at the beginning, while Player B joined, say, 10 seconds later. Without read rate control we find ourselves back to a similar case as that of downloading a MP3 file. We may of course have back-pressure in place to ensure efficient resource usage while copying MP3 data chunks to the connected clients, yet the streaming experience will be very bad.</p> 

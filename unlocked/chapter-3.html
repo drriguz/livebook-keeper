@@ -89,7 +89,7 @@
   </div> 
   <div class="browsable-container figure-container" refid="31" id="31" data-hash="ed568e7389f831276fddeb8fcc0bbbf0"> 
    <h5 id="eb-ptop">Figure&nbsp;3.1.&nbsp;Point-to-point messaging over the event-bus</h5> 
-   <img alt="event bus ptop" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/event-bus-ptop.png" width="1036" loading="lazy" height="346" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="event bus ptop" class="calibre7" src="ponge/v-10/Figures/event-bus-ptop.png" width="1036" loading="lazy" height="346" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="32" id="32" data-hash="12d8293544e71000d750fba9c1c05be5"> 
    <p>Messages are being sent by producers to some destinations such as a.b.c in figure 3.1. Destination names are free-form strings, but the convention in the Vert.x community is to use separating dots. For example we could use datastore.new-purchase-orders to send new purchase orders for being stored in a database.</p> 
@@ -105,7 +105,7 @@
   </div> 
   <div class="browsable-container figure-container" refid="36" id="36" data-hash="9969785e1f72dc6ee365de06b49eeee4"> 
    <h5 id="eb-reqresp">Figure&nbsp;3.2.&nbsp;Request-reply messaging over the event-bus</h5> 
-   <img alt="event bus reqresp" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/event-bus-reqresp.png" width="1055" loading="lazy" height="255" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="event bus reqresp" class="calibre7" src="ponge/v-10/Figures/event-bus-reqresp.png" width="1055" loading="lazy" height="255" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="37" id="37" data-hash="15cfaa0f47cb17b8634143b71f3ec114"> 
    <p>In Vert.x this communication pattern is a variation of point-to-point messaging. When a message is being sent in point-to-point messaging, it is possible to register a reply handler. In this case the event-bus generates a temporary destination name dedicated solely to the communications between the request message producer expecting a reply, and the consumer that will eventually receive and process the message.</p> 
@@ -121,7 +121,7 @@
   </div> 
   <div class="browsable-container figure-container" refid="41" id="41" data-hash="5b23f7f4faf27567f2acb2b812307700"> 
    <h5 id="eb-pubsub">Figure&nbsp;3.3.&nbsp;Publish / subscribe messaging over the event-bus</h5> 
-   <img alt="event bus pubsub" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/event-bus-pubsub.png" width="1036" loading="lazy" height="341" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="event bus pubsub" class="calibre7" src="ponge/v-10/Figures/event-bus-pubsub.png" width="1036" loading="lazy" height="341" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="42" id="42" data-hash="b0f9ed0b0e70d67f3077a1862a596641"> 
    <p>In publish / subscribe communications there is even more decoupling between producers and consumers. When a message is being sent to a destination, all subscribers receive it, as illustrated per figure 3.3. Messages M1, M2 and M3 are each sent by a different producer, and all subscribers receive the messages unlike in the case of point-to-point messaging (see figure 3.1). It is not possible to specify reply handlers for publish / subscribe communications on the event-bus.</p> 
@@ -140,14 +140,14 @@
   </div> 
   <div class="browsable-container figure-container" refid="47" id="47" data-hash="1b9fb32fb961b426fbf134220782236c"> 
    <h5 id="webapp">Figure&nbsp;3.4.&nbsp;Screenshot of the web interface</h5> 
-   <img alt="webapp" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/webapp.png" width="1052" loading="lazy" height="608" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="webapp" class="calibre7" src="ponge/v-10/Figures/webapp.png" width="1052" loading="lazy" height="608" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="48" id="48" data-hash="080fe092bde4274659235eeeb2e40221"> 
    <p>A screenshot of the web interface is in figure 3.4. Here it follows the temperatures of 4 sensors, and keeps their average up-to-date. The communications between the web interface and the server will happen using server-sent events, a simple yet effective protocol supported by most web browsers [SSE].</p> 
   </div> 
   <div class="browsable-container figure-container" refid="49" id="49" data-hash="2a7dbe822d79b8c17c1a12495bb99996"> 
    <h5 id="usecase">Figure&nbsp;3.5.&nbsp;Overview of the example architecture</h5> 
-   <img alt="event bus usecase" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/event-bus-usecase.png" width="1048" loading="lazy" height="752" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="event bus usecase" class="calibre7" src="ponge/v-10/Figures/event-bus-usecase.png" width="1048" loading="lazy" height="752" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="50" id="50" data-hash="c765ac35c5c8226815dac4fd54ff501b"> 
    <p>Figure 3.5 gives an overview of the application architecture. The figure has 2 concurrent event communications annotated with ordering sequences [1, 2, 3] (a temperature update is being sent) and [a, b, c, d] (a temperature average computation is being requested).</p> 
@@ -532,7 +532,7 @@ data: {"average":21.123126848463464}</pre>
   </div> 
   <div class="browsable-container figure-container" refid="110" id="110" data-hash="1c99363ce75efb0361723ab154e09a8d"> 
    <h5 id="clustering">Figure&nbsp;3.6.&nbsp;Overview of the Vert.x clustering</h5> 
-   <img alt="clustering" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/clustering.png" width="1182" loading="lazy" height="742" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="clustering" class="calibre7" src="ponge/v-10/Figures/clustering.png" width="1182" loading="lazy" height="742" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="111" id="111" data-hash="d0b8e63c9f3d4fadb857597b81034835"> 
    <p>Vert.x applications can run in clustering mode where a set of Vert.x application nodes can work together over the network. They may be node instances of the same application and have the same set of deployed verticles, but this is not a requirement. Some nodes can have a set of verticles A, while others have a set of verticles B.</p> 
@@ -578,7 +578,7 @@ data: {"average":21.123126848463464}</pre>
   </div> 
   <div class="browsable-container figure-container" refid="125" id="125" data-hash="df46714401ff67b6302a7f4e37811cd1"> 
    <h5 id="clustered-app">Figure&nbsp;3.7.&nbsp;Clustered application overview</h5> 
-   <img alt="clustered app" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/clustered-app.png" width="1012" loading="lazy" height="546" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="clustered app" class="calibre7" src="ponge/v-10/Figures/clustered-app.png" width="1012" loading="lazy" height="546" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="126" id="126" data-hash="031d2558f878a233e96643a37c8802da"> 
    <p>We are going to prepare 2 main classes with different verticle deployments, as illustrated in figure 3.7:</p> 
@@ -667,7 +667,7 @@ data: {"average":21.123126848463464}</pre>
   </div> 
   <div class="browsable-container figure-container" refid="139" id="139" data-hash="42454e0806995a479604567f7960320f"> 
    <h5 id="clustered-app-run">Figure&nbsp;3.8.&nbsp;Screenshot of the application running in clustered mode</h5> 
-   <img alt="clustered app run" class="calibre7" src="https://dpzbhybb2pdcj.cloudfront.net/ponge/v-10/Figures/clustered-app-run.png" width="1053" loading="lazy" height="640" onerror="fallbackToImageSrcPlaceholder(this)"> 
+   <img alt="clustered app run" class="calibre7" src="ponge/v-10/Figures/clustered-app-run.png" width="1053" loading="lazy" height="640" onerror="fallbackToImageSrcPlaceholder(this)"> 
   </div> 
   <div class="readable-text scrambled" refid="140" id="140" data-hash="99416709589e5a255cd23b1a0d8b24de"> 
    <p>Figure 3.8 shows the application running with 1 browser connected to the instance with port 8080, another browser connected to the second instance with port 8081, and we see logs from the Listener verticle in the background. As we can see, both instances display events from the 8 sensors, and the first instance has its average temperature updated so it can interact with the SensorData verticle on the second instance.</p> 
